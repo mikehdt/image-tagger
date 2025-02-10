@@ -5,14 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const dataPath = './public/assets';
-
-export type ImageAsset = {
-  fileId: string;
-  file: string;
-  width?: number;
-  height?: number;
-  tags: string[];
-};
+import type { ImageAsset } from '../types/image-asset';
 
 export const getImageFiles = async () => {
   const dir = path.resolve(dataPath);

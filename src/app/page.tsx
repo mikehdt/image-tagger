@@ -1,17 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { getImageFiles } from './asset-actions';
+import { LoadState } from './types/load-state';
+import type { ImageAsset } from './types/image-asset';
+import { getImageFiles } from './utils/asset-actions';
 import { AssetList } from './asset-list';
-
-import type { ImageAsset } from './asset-actions';
-
-export enum LoadState {
-  Uninitialized,
-  InitialLoad,
-  Reload,
-  Loaded,
-}
 
 export default function Home() {
   const initialLoad = useRef<boolean>(true);
@@ -62,11 +55,13 @@ export default function Home() {
   }, [initialLoad, loadImageAssets]);
 
   return (
-    <AssetList
-      imageAssets={imageAssets}
-      reloadAssets={loadImageAssets}
-      loadState={loadState}
-      patchAssetTags={patchImageAssetTags}
-    />
+    <div className="min-h-screen items-center justify-items-center px-8 py-20 font-[family-name:var(--font-geist-sans)]">
+      <AssetList
+        imageAssets={imageAssets}
+        reloadAssets={loadImageAssets}
+        loadState={loadState}
+        patchAssetTags={patchImageAssetTags}
+      />
+    </div>
   );
 }

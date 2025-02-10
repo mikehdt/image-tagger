@@ -1,6 +1,6 @@
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import type { ImageAsset } from './asset-actions';
+import type { ImageAsset } from './types/image-asset';
 import type { TagList } from './asset-list';
 import { SyntheticEvent, useState } from 'react';
 
