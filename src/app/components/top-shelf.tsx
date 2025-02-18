@@ -1,6 +1,7 @@
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { Loader } from './loader';
 import type { SyntheticEvent } from 'react';
+
+import { Loader } from './loader';
 
 export const TopShelf = ({
   showLoader,
