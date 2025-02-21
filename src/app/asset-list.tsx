@@ -3,12 +3,12 @@
 import { SyntheticEvent, useState } from 'react';
 
 import { Asset } from './asset';
-import { writeTagsToDisk } from './utils/asset-actions';
-import { type ImageAsset } from './types/image-asset';
-import { LoadState } from './types/load-state';
 import { InitialLoad } from './components/loader';
 import { TopShelf } from './components/top-shelf';
-import { NoContent } from './components/no-content';
+import { NoContent } from './no-content';
+import { type ImageAsset } from './types/image-asset';
+import { LoadState } from './types/load-state';
+import { writeTagsToDisk } from './utils/asset-actions';
 
 type AssetListProps = {
   imageAssets: ImageAsset[];

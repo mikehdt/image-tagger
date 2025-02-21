@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { LoadState } from './types/load-state';
-import type { ImageAsset } from './types/image-asset';
-import { getImageFiles } from './utils/asset-actions';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { AssetList } from './asset-list';
+import type { ImageAsset } from './types/image-asset';
+import { LoadState } from './types/load-state';
+import { getImageFiles } from './utils/asset-actions';
 
 export default function Home() {
   const initialLoad = useRef<boolean>(true);

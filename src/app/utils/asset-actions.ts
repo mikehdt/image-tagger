@@ -1,8 +1,9 @@
 'use server';
-import { imageDimensionsFromStream } from 'image-dimensions';
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs';
 import path from 'node:path';
+
+import { imageDimensionsFromStream } from 'image-dimensions';
 
 const dataPath = './public/assets';
 import type { ImageAsset } from '../types/image-asset';

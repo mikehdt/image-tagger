@@ -1,6 +1,7 @@
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 
+import { getImageSizes } from '../utils/image-sizes';
 import { Loader } from './loader';
 
 export const TopShelf = ({

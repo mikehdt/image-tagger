@@ -1,4 +1,4 @@
-import { DndContext, useDroppable } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import Image from 'next/image';
 import { SyntheticEvent, useState } from 'react';
 
@@ -72,6 +72,17 @@ export const Asset = ({
     if (success) clearChanges();
   };
 
+  const { setNodeRef } = useDroppable({
+    id: 'droppy',
+  });
+
+  const { listeners } = useDraggable({
+    id: 'draggable',
+    data: {
+      supports: ['type1', 'type2'],
+    },
+  });
+
   return (
     <div className="mb-4 flex w-full flex-wrap border border-slate-300">
       <div
@@ -88,11 +99,15 @@ export const Asset = ({
           />
         </div>
       </div>
-      <div className={`${imageSize ? 'w-1/4' : 'w-3/4'} p-4`}>
-        <DndContext>
+      <DndContext>
+        <div
+          className={`${imageSize ? 'w-1/4' : 'w-3/4'} p-4`}
+          ref={setNodeRef}
+        >
           {img.tags.map((tag: string, idx: number) => (
             <Tag
               key={`${idx}-${tag}`}
+              {...listeners}
               tag={tag}
               deleteTags={deleteTags}
               onToggleDelete={(e) => toggleDeleteTag(e, tag)}
@@ -116,14 +131,14 @@ export const Asset = ({
               onCancelNewTag={(e) => removeNewTag(e, tag)}
             />
           ))}
-        </DndContext>
 
-        <NewTagInput
-          inputValue={newTagInput}
-          onInputChange={(e) => setNewTagInput(e.currentTarget.value)}
-          onAddTag={(e) => addNewTag(e, newTagInput)}
-        />
-      </div>
+          <NewTagInput
+            inputValue={newTagInput}
+            onInputChange={(e) => setNewTagInput(e.currentTarget.value)}
+            onAddTag={(e) => addNewTag(e, newTagInput)}
+          />
+        </div>
+      </DndContext>
       <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">
         <span className="inline-flex h-8 items-center tabular-nums">
           {img.width}&times;{img.height} &ndash; {img.fileId}
