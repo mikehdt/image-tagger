@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: 'Taggy tag',
 };
 
-export default function RootLayout({
+export default function Root({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -28,7 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-screen items-center justify-items-center px-8 py-20 font-[family-name:var(--font-geist-sans)]">
+          {children}
+        </div>
       </body>
     </html>
   );

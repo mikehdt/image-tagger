@@ -6,7 +6,7 @@ import path from 'node:path';
 import { imageDimensionsFromStream } from 'image-dimensions';
 
 const dataPath = './public/assets';
-import type { ImageAsset } from '../types/image-asset';
+import type { ImageAsset, ImageTag } from '../store/slice-assets';
 
 export const getImageFiles = async () => {
   const dir = path.resolve(dataPath);
@@ -30,9 +30,23 @@ export const getImageFiles = async () => {
     const tags = await fs
       .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
       .split(', ')
-      .map((tag) => tag.trim());
+      .map(
+        (tag) =>
+          ({
+            name: tag.trim(),
+            state: 'Active',
+          }) as ImageTag,
+      );
 
-    imageAssets.push({ fileId, file, ...dimensions, tags });
+    imageAssets.push({
+      fileId,
+      file,
+      dimensions: {
+        ...(dimensions as { width: number; height: number }),
+        composed: `${dimensions?.width}x${dimensions?.height}`,
+      },
+      tags,
+    });
   }
 
   return imageAssets || [];
