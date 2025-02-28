@@ -39,6 +39,7 @@ export const getImageFiles = async () => {
       );
 
     imageAssets.push({
+      ioState: 'Complete',
       fileId,
       file,
       dimensions: {
@@ -60,7 +61,7 @@ export const writeTagsToDisk = async (
     fs.writeFileSync(`${dataPath}/${fileId}.txt`, composedTags);
     return true;
   } catch (err) {
-    console.error(err);
+    console.error('Disk IO error:', err);
     return false;
   }
 };

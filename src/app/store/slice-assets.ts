@@ -5,9 +5,14 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import { getImageFiles } from '../utils/asset-actions';
+import { getImageFiles, writeTagsToDisk } from '../utils/asset-actions';
 
-export type LoadState = 'Uninitialized' | 'Loading' | 'Loaded' | 'LoadError';
+export type IoState =
+  | 'Uninitialized'
+  | 'Loading'
+  | 'Saving'
+  | 'Complete'
+  | 'IoError';
 
 export type TagState = 'Active' | 'ToDelete' | 'ToAdd';
 
@@ -17,6 +22,7 @@ export type ImageTag = {
 };
 
 export type ImageAsset = {
+  ioState: 'Saving' | 'Complete'; // For individual items?
   fileId: string;
   file: string;
   dimensions: {
@@ -27,22 +33,52 @@ export type ImageAsset = {
   tags: ImageTag[];
 };
 
-export const loadImages = createAsyncThunk(
-  'assets/loadImages',
+export const loadAssets = createAsyncThunk(
+  'assets/loadAssets',
   async () => await getImageFiles(),
 );
 
+export const saveAssets = createAsyncThunk(
+  'assets/saveImages',
+  async (fileId: string, { getState /*, dispatch*/ }) => {
+    // dispatch save state for image
+
+    const {
+      assets: { images },
+    } = getState() as { assets: ImageAssets };
+
+    const assetIndex = images.findIndex((element) => element.fileId === fileId);
+
+    const updateTags = images[assetIndex].tags
+      .filter((tag) => tag.state !== 'ToDelete')
+      .map((tag) => ({
+        ...tag,
+        state: 'Active',
+      }));
+
+    const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
+
+    const success = await writeTagsToDisk(fileId, flattenedTags);
+
+    if (success) {
+      return { assetIndex, tags: updateTags /* ioState? */ };
+    }
+
+    throw new Error(`Unable to save the asset ${assetIndex}`);
+  },
+);
+
 type ImageAssets = {
-  loadState: LoadState;
-  loadMessage: undefined | string;
+  ioState: IoState;
+  ioMessage: undefined | string;
   images: ImageAsset[];
 };
 
 type KeyedCountList = { [key: string]: number };
 
 const initialState = {
-  loadState: 'Uninitialized',
-  loadMessage: undefined,
+  ioState: 'Uninitialized',
+  ioMessage: undefined,
   images: [],
 } as ImageAssets;
 
@@ -109,27 +145,51 @@ const imagesSlice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(loadImages.pending, (state) => {
-      state.loadState = 'Loading';
-      state.loadMessage = undefined;
+    // Loading
+    builder.addCase(loadAssets.pending, (state) => {
+      state.ioState = 'Loading';
+      state.ioMessage = undefined;
     });
 
-    builder.addCase(loadImages.fulfilled, (state, action) => {
-      state.loadState = 'Loaded';
-      state.loadMessage = undefined;
+    builder.addCase(loadAssets.fulfilled, (state, action) => {
+      state.ioState = 'Complete';
+      state.ioMessage = undefined;
       state.images = action.payload as ImageAsset[];
     });
 
-    builder.addCase(loadImages.rejected, (state, action) => {
-      state.loadState = 'LoadError';
-      state.loadMessage = action.error.message;
+    builder.addCase(loadAssets.rejected, (state, action) => {
+      state.ioState = 'IoError';
+      state.ioMessage = action.error.message;
       state.images = [];
+    });
+
+    // Saving
+    builder.addCase(saveAssets.pending, (state) => {
+      state.ioState = 'Saving';
+      state.ioMessage = undefined;
+    });
+
+    builder.addCase(saveAssets.fulfilled, (state, action) => {
+      state.ioState = 'Complete';
+      state.ioMessage = undefined;
+
+      const { assetIndex, tags } = action.payload as {
+        assetIndex: number;
+        tags: ImageTag[];
+      };
+
+      state.images[assetIndex].tags = tags;
+    });
+
+    builder.addCase(saveAssets.rejected, (state, action) => {
+      state.ioState = 'IoError';
+      state.ioMessage = action.error.message;
     });
   },
 
   selectors: {
-    selectLoadState: (state) => {
-      return state.loadState;
+    selectIoState: (state) => {
+      return state.ioState;
     },
 
     selectImages: (state) => {
@@ -173,5 +233,5 @@ const imagesSlice = createSlice({
 
 export const { reducer: assetsReducer } = imagesSlice;
 export const { addTag, deleteTag, resetTags } = imagesSlice.actions;
-export const { selectLoadState, selectImages, selectImageSizes, selectTags } =
+export const { selectIoState, selectImages, selectImageSizes, selectTags } =
   imagesSlice.selectors;

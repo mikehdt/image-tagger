@@ -24,38 +24,6 @@ export const AssetList = () => {
     );
   });
 
-  // const saveTags = async (
-  //   imageId: string,
-  //   addTags: string[],
-  //   deleteTags: string[],
-  // ): Promise<boolean> => {
-  //   const imageAsset = imageAssets.find((asset) => asset.fileId === imageId);
-
-  //   if (!imageAsset) {
-  //     console.error("Couldn't find the image asset with ID", imageId);
-  //     return false;
-  //   }
-
-  //   const consolidatedTags = [...imageAsset.tags, ...addTags].filter(
-  //     (tag) => !deleteTags.includes(tag),
-  //   );
-
-  //   const consolidatedTagsString = consolidatedTags.join(', ');
-
-  //   // Optimistically update the assets in the UI ahead of disk I/O
-  //   patchAssetTags(imageId, consolidatedTags);
-
-  //   const success = await writeTagsToDisk(imageId, consolidatedTagsString);
-
-  //   if (success) {
-  //     reloadAssets();
-  //     return true;
-  //   } else {
-  //     alert('The tag file was unable to be saved');
-  //     return false;
-  //   }
-  // };
-
   return (
     <>
       <TopShelf />

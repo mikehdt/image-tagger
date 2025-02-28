@@ -8,6 +8,7 @@ import {
   type ImageAsset,
   type ImageTag,
   resetTags,
+  saveAssets,
   selectTags,
 } from '../store/slice-assets';
 import { selectFilterTags, toggleTagFilter } from '../store/slice-filters';
@@ -57,6 +58,11 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
     dispatch(deleteTag({ fileId, tag }));
   };
 
+  // Should probably consider how to queue these requests
+  const saveAction = () => {
+    dispatch(saveAssets(fileId));
+  };
+
   const cancelAction = () => {
     dispatch(resetTags(fileId));
   };
@@ -99,10 +105,16 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
 
       <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">
         <span className="inline-flex h-8 items-center tabular-nums">
-          {dimensions.width}&times;{dimensions.height} &ndash; {fileId}
+          <button
+            type="button"
+            className="mr-2 cursor-pointer rounded-sm border border-sky-300 bg-sky-100 px-2 py-0.5"
+          >
+            {dimensions.width}&times;{dimensions.height}
+          </button>
+          {fileId}
         </span>
         {showActions ? (
-          <AssetActions onSave={() => {}} onCancel={cancelAction} />
+          <AssetActions onSave={saveAction} onCancel={cancelAction} />
         ) : null}
       </div>
     </div>

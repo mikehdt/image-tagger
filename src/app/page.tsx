@@ -6,11 +6,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { InitialLoad } from './components/loader';
 import { type AppStore, makeStore } from './store';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import {
-  loadImages,
-  selectImages,
-  selectLoadState,
-} from './store/slice-assets';
+import { loadAssets, selectImages, selectIoState } from './store/slice-assets';
 import { AssetList } from './views/asset-list';
 import { NoContent } from './views/no-content';
 
@@ -18,12 +14,12 @@ const App = () => {
   const initialLoad = useRef<boolean>(true);
 
   const dispatch = useAppDispatch();
-  const loadState = useAppSelector(selectLoadState);
+  const ioState = useAppSelector(selectIoState);
   const imageAssets = useAppSelector(selectImages);
 
   // Could accept 'optimistic' assets and set them, then load?
   const loadImageAssets = useCallback(async () => {
-    dispatch(loadImages());
+    dispatch(loadAssets());
   }, [dispatch]);
 
   useEffect(() => {
@@ -35,13 +31,13 @@ const App = () => {
 
   // Non-valid states
   if (
-    loadState === 'Uninitialized' ||
-    (loadState === 'Loading' && imageAssets.length === 0)
+    ioState === 'Uninitialized' ||
+    (ioState === 'Loading' && imageAssets.length === 0)
   ) {
     return <InitialLoad />;
-  } else if (loadState === 'LoadError') {
+  } else if (ioState === 'IoError') {
     return <div>An error occurred</div>;
-  } else if (loadState === 'Loaded' && imageAssets.length === 0) {
+  } else if (ioState === 'Complete' && imageAssets.length === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
 

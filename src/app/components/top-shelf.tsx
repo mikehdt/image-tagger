@@ -6,7 +6,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loadImages, selectLoadState } from '../store/slice-assets';
+import { loadAssets, selectIoState } from '../store/slice-assets';
 import {
   clearTagFilters,
   selectFilterSizes,
@@ -18,12 +18,13 @@ import { Loader } from './loader';
 
 export const TopShelf = () => {
   const dispatch = useAppDispatch();
-  const showLoader = useAppSelector(selectLoadState) === 'Loading';
+  const ioState = useAppSelector(selectIoState);
+  const showLoader = ioState === 'Loading' || ioState === 'Saving';
   const filterTags = useAppSelector(selectFilterTags);
   const filterTagsMode = useAppSelector(selectFilterTagsMode);
   const filterSizes = useAppSelector(selectFilterSizes);
 
-  const doRefresh = () => dispatch(loadImages());
+  const doRefresh = () => dispatch(loadAssets());
   const onToggleTagFilterMode = () => dispatch(toggleTagFilterMode());
 
   return (
