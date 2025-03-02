@@ -1,56 +1,67 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 type Filters = {
+  filterMode: 'ShowAll' | 'FilterAny' | 'FilterAll';
   filterTags: string[];
-  filterTagsMode: 'ShowAll' | 'FilterAny' | 'FilterAll';
   filterSizes: string[];
 };
 
 const initialState = {
+  filterMode: 'ShowAll',
   filterTags: [],
-  filterTagsMode: 'ShowAll',
   filterSizes: [],
 } as Filters;
+
+const applyFilter = (haystack: string[], needle: string) =>
+  haystack.includes(needle)
+    ? haystack.filter((i) => i !== needle)
+    : [...haystack, needle];
 
 const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
-    toggleTagFilter: (state, { payload }: PayloadAction<string>) => {
-      state.filterTags = state.filterTags.includes(payload)
-        ? state.filterTags.filter((i) => i !== payload)
-        : [...state.filterTags, payload];
-    },
-
     toggleTagFilterMode: (state) => {
-      const currentFilterMode = state.filterTagsMode;
-      if (currentFilterMode === 'ShowAll') {
-        state.filterTagsMode = 'FilterAny';
-      } else if (currentFilterMode === 'FilterAny') {
-        state.filterTagsMode = 'FilterAll';
-      } else if (currentFilterMode === 'FilterAll') {
-        state.filterTagsMode = 'ShowAll';
+      const { filterMode } = state;
+
+      if (filterMode === 'ShowAll') {
+        state.filterMode = 'FilterAny';
+      } else if (filterMode === 'FilterAny') {
+        state.filterMode = 'FilterAll';
+      } else if (filterMode === 'FilterAll') {
+        state.filterMode = 'ShowAll';
       } else {
         console.error('Unknown filter tag mode');
       }
     },
 
-    clearTagFilters: (state) => {
+    toggleTagFilter: (state, { payload }: PayloadAction<string>) => {
+      state.filterTags = applyFilter(state.filterTags, payload);
+    },
+
+    toggleSizeFilter: (state, { payload }: PayloadAction<string>) => {
+      state.filterSizes = applyFilter(state.filterSizes, payload);
+    },
+
+    clearFilters: (state) => {
       state.filterTags = [];
+      state.filterSizes = [];
     },
   },
 
   selectors: {
+    selectFilterMode: (state) => state.filterMode,
     selectFilterTags: (state) => state.filterTags,
-
-    selectFilterTagsMode: (state) => state.filterTagsMode,
-
     selectFilterSizes: (state) => state.filterSizes,
   },
 });
 
 export const { reducer: filtersReducer } = filtersSlice;
-export const { toggleTagFilter, toggleTagFilterMode, clearTagFilters } =
-  filtersSlice.actions;
-export const { selectFilterTags, selectFilterTagsMode, selectFilterSizes } =
+export const {
+  toggleTagFilter,
+  toggleTagFilterMode,
+  clearFilters,
+  toggleSizeFilter,
+} = filtersSlice.actions;
+export const { selectFilterTags, selectFilterMode, selectFilterSizes } =
   filtersSlice.selectors;

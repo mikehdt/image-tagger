@@ -20,10 +20,3 @@ export const Loader = () => (
     ></path>
   </svg>
 );
-
-export const InitialLoad = () => (
-  <div className="relative mx-auto w-64" style={{ top: 'calc(50vh - 16rem)' }}>
-    <Loader />
-    <h2 className="m-4 text-center">Loading&hellip;</h2>
-  </div>
-);

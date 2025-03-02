@@ -4,25 +4,53 @@ import { Asset } from '../components/asset';
 import { TopShelf } from '../components/top-shelf';
 import { useAppSelector } from '../store/hooks';
 import { type ImageAsset, selectImages } from '../store/slice-assets';
-import { selectFilterTags, selectFilterTagsMode } from '../store/slice-filters';
+import {
+  selectFilterMode,
+  selectFilterSizes,
+  selectFilterTags,
+} from '../store/slice-filters';
 
 export const AssetList = () => {
   const imageAssets = useAppSelector(selectImages);
   const filterTags = useAppSelector(selectFilterTags);
-  const includeFilterMode = useAppSelector(selectFilterTagsMode);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const includeFilterMode = useAppSelector(selectFilterMode);
 
-  const filteredImageAssets = imageAssets.filter((img: ImageAsset) => {
-    const tagNames = img.tags.map((tag) => tag.name);
+  // I think this may be an _expensive_ operation
+  const filteredImageAssets =
+    (filterTags.length === 0 && filterSizes.length === 0) ||
+    includeFilterMode === 'ShowAll'
+      ? imageAssets
+      : imageAssets.filter((img: ImageAsset) => {
+          const tagNames = img.tags.map((tag) => tag.name);
 
-    return (
-      filterTags.length === 0 ||
-      includeFilterMode === 'ShowAll' ||
-      (includeFilterMode === 'FilterAll' &&
-        filterTags.every((r) => tagNames.includes(r))) ||
-      (includeFilterMode === 'FilterAny' &&
-        filterTags.some((r) => tagNames.includes(r)))
-    );
-  });
+          const filteredSizes = filterSizes.includes(img.dimensions.composed);
+
+          switch (includeFilterMode) {
+            case 'FilterAll':
+              const filteredTags = filterTags.every((r) =>
+                tagNames.includes(r),
+              );
+
+              if (filterTags.length && filterSizes.length) {
+                return filteredTags && filteredSizes;
+              } else if (filterTags.length) {
+                return filteredTags;
+              } else if (filterSizes.length) {
+                return filteredSizes;
+              }
+
+              return true;
+
+            case 'FilterAny':
+              return (
+                filterTags.some((r) => tagNames.includes(r)) || filteredSizes
+              );
+
+            default:
+              console.error('Unknown filter mode');
+          }
+        });
 
   return (
     <>

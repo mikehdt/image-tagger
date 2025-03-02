@@ -15,7 +15,7 @@ export const NoContent = ({ onReload }: NoContentProps) => {
       <p>
         <CubeTransparentIcon />
       </p>
-      <h1 className="mb-4 w-full text-xl">No assets were found</h1>
+      <h1 className="mt-4 mb-4 w-full text-xl">No assets were found</h1>
       <a
         href="#"
         onClick={doReload}

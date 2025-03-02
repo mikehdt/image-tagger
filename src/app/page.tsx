@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 
-import { InitialLoad } from './components/loader';
 import { type AppStore, makeStore } from './store';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { loadAssets, selectImages, selectIoState } from './store/slice-assets';
 import { AssetList } from './views/asset-list';
+import { Error } from './views/error';
+import { InitialLoad } from './views/initial-load';
 import { NoContent } from './views/no-content';
 
 const App = () => {
@@ -36,12 +37,11 @@ const App = () => {
   ) {
     return <InitialLoad />;
   } else if (ioState === 'IoError') {
-    return <div>An error occurred</div>;
+    return <Error />;
   } else if (ioState === 'Complete' && imageAssets.length === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
 
-  // Success
   return <AssetList />;
 };
 

@@ -164,7 +164,12 @@ const imagesSlice = createSlice({
     });
 
     // Saving
-    builder.addCase(saveAssets.pending, (state) => {
+    builder.addCase(saveAssets.pending, (state, action) => {
+      const { arg } = action.meta;
+
+      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+
+      state.images[imageIndex].ioState = 'Saving';
       state.ioState = 'Saving';
       state.ioMessage = undefined;
     });
@@ -173,12 +178,15 @@ const imagesSlice = createSlice({
       state.ioState = 'Complete';
       state.ioMessage = undefined;
 
-      const { assetIndex, tags } = action.payload as {
-        assetIndex: number;
+      const { arg } = action.meta;
+      const { tags } = action.payload as {
         tags: ImageTag[];
       };
 
-      state.images[assetIndex].tags = tags;
+      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+
+      state.images[imageIndex].ioState = 'Complete';
+      state.images[imageIndex].tags = tags;
     });
 
     builder.addCase(saveAssets.rejected, (state, action) => {
@@ -197,14 +205,29 @@ const imagesSlice = createSlice({
     },
 
     selectImageSizes: createSelector([(state) => state.images], (images) => {
-      return images.reduce((acc: KeyedCountList, item: ImageAsset) => {
-        const { composed } = item.dimensions;
-        if (typeof acc[composed] !== 'undefined') {
-          return { ...acc, [composed]: (acc[composed] += 1) };
-        } else {
-          return { ...acc, [composed]: 1 };
-        }
-      }, {});
+      // Could sort first but I'm lazy
+      return images.reduce(
+        (
+          acc: {
+            [key: string]: { width: number; height: number; count: number };
+          },
+          item: ImageAsset,
+        ) => {
+          const { composed, width, height } = item.dimensions;
+          if (typeof acc[composed] !== 'undefined') {
+            return {
+              ...acc,
+              [composed]: {
+                ...acc[composed],
+                count: (acc[composed].count += 1),
+              },
+            };
+          } else {
+            return { ...acc, [composed]: { width, height, count: 1 } };
+          }
+        },
+        {},
+      );
     }),
 
     selectTags: createSelector([(state) => state.images], (imageAssets) => {
