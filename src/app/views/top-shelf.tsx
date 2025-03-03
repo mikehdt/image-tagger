@@ -2,9 +2,13 @@ import {
   ArrowPathIcon,
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
+  FunnelIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { SyntheticEvent, useState } from 'react';
 
+import { Loader } from '../components/loader';
+import { NewInput } from '../components/new-input';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   loadAssets,
@@ -12,15 +16,16 @@ import {
   selectIoState,
 } from '../store/slice-assets';
 import {
+  addTagFilter,
   clearFilters,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
   toggleTagFilterMode,
 } from '../store/slice-filters';
-import { Loader } from './loader';
 
 export const TopShelf = () => {
+  const [newTagInput, setNewTagInput] = useState<string>('');
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const showLoader = ioState === 'Loading' || ioState === 'Saving';
@@ -30,6 +35,21 @@ export const TopShelf = () => {
 
   const doRefresh = () => dispatch(loadAssets());
   const onToggleTagFilterMode = () => dispatch(toggleTagFilterMode());
+
+  const addNewFilter = (e: SyntheticEvent, tag: string) => {
+    e.stopPropagation();
+
+    if (tag.trim() !== '') {
+      if (!filterTags.includes(tag)) {
+        dispatch(addTagFilter(tag));
+        setNewTagInput('');
+      } else {
+        console.log("Couldn't add filter, it's already is in the list", tag);
+      }
+    } else {
+      console.log("Couldn't add filter, it was empty.");
+    }
+  };
 
   const allSizes = useAppSelector(selectImageSizes);
 
@@ -52,7 +72,20 @@ export const TopShelf = () => {
         </div>
       </div>
       <div className="ml-auto flex items-center py-2 pr-8 pl-2 text-sm">
-        <input type="text" className="w-20 border border-slate-400" />
+        <span className="mr-2 inline-flex text-slate-500">
+          <FunnelIcon className="mr-1 w-4" />
+          Filter:
+        </span>
+
+        <NewInput
+          inputValue={newTagInput}
+          onInputChange={(e) =>
+            setNewTagInput(e.currentTarget.value.trimStart())
+          }
+          onAdd={(e) => addNewFilter(e, newTagInput)}
+          tone="secondary"
+        />
+
         {filterTags.length || filterSizes.length ? (
           <span className="ml-2 flex items-center rounded-full border border-slate-200 pl-2">
             {filterTags.map((item, idx) => (

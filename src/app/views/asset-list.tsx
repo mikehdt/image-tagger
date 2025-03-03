@@ -1,7 +1,8 @@
 'use client';
 
+import { CubeTransparentIcon } from '@heroicons/react/24/outline';
+
 import { Asset } from '../components/asset';
-import { TopShelf } from '../components/top-shelf';
 import { useAppSelector } from '../store/hooks';
 import { type ImageAsset, selectImages } from '../store/slice-assets';
 import {
@@ -9,6 +10,7 @@ import {
   selectFilterSizes,
   selectFilterTags,
 } from '../store/slice-filters';
+import { TopShelf } from '../views/top-shelf';
 
 export const AssetList = () => {
   const imageAssets = useAppSelector(selectImages);
@@ -57,11 +59,16 @@ export const AssetList = () => {
       <TopShelf />
 
       {filteredImageAssets.length ? (
-        filteredImageAssets.map((asset: ImageAsset) => (
-          <Asset key={asset.fileId} asset={asset} />
+        filteredImageAssets.map((asset: ImageAsset, idx) => (
+          <Asset key={`${idx}-${asset.fileId}`} asset={asset} index={idx} />
         ))
       ) : (
-        <div>No results</div>
+        <div>
+          <p>
+            <CubeTransparentIcon />
+          </p>
+          <h1 className="mt-4 mb-4 w-full text-xl">No results</h1>
+        </div>
       )}
     </>
   );

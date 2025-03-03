@@ -230,6 +230,8 @@ const imagesSlice = createSlice({
       );
     }),
 
+    // @TODO: Although this is a derived state, it may be more performant to
+    // consider keeping the global tag state in sync?
     selectTags: createSelector([(state) => state.images], (imageAssets) => {
       if (!imageAssets) return {};
 

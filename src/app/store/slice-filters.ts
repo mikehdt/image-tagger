@@ -12,7 +12,7 @@ const initialState = {
   filterSizes: [],
 } as Filters;
 
-const applyFilter = (haystack: string[], needle: string) =>
+const toggleFilter = (haystack: string[], needle: string) =>
   haystack.includes(needle)
     ? haystack.filter((i) => i !== needle)
     : [...haystack, needle];
@@ -35,12 +35,16 @@ const filtersSlice = createSlice({
       }
     },
 
+    addTagFilter: (state, { payload }: PayloadAction<string>) => {
+      state.filterTags.push(payload);
+    },
+
     toggleTagFilter: (state, { payload }: PayloadAction<string>) => {
-      state.filterTags = applyFilter(state.filterTags, payload);
+      state.filterTags = toggleFilter(state.filterTags, payload);
     },
 
     toggleSizeFilter: (state, { payload }: PayloadAction<string>) => {
-      state.filterSizes = applyFilter(state.filterSizes, payload);
+      state.filterSizes = toggleFilter(state.filterSizes, payload);
     },
 
     clearFilters: (state) => {
@@ -58,10 +62,11 @@ const filtersSlice = createSlice({
 
 export const { reducer: filtersReducer } = filtersSlice;
 export const {
-  toggleTagFilter,
   toggleTagFilterMode,
-  clearFilters,
+  addTagFilter,
+  toggleTagFilter,
   toggleSizeFilter,
+  clearFilters,
 } = filtersSlice.actions;
 export const { selectFilterTags, selectFilterMode, selectFilterSizes } =
   filtersSlice.selectors;

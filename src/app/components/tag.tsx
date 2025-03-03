@@ -1,4 +1,3 @@
-// import { useDraggable } from '@dnd-kit/core';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 
@@ -46,26 +45,6 @@ export const Tag = ({
       : 'hover:bg-teal-100';
     tagCountColor = 'border-emerald-300';
   }
-
-  // === DRAGGABLE ===
-  // const {
-  //   attributes,
-  //   listeners,
-  //   setNodeRef: setDragNodeRef,
-  //   transform,
-  // } = useDraggable({
-  //   id: `drag-${name}`,
-  // });
-  // const dragStyle = transform
-  //   ? {
-  //       transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  //     }
-  //   : undefined;
-
-  // ref={setDragNodeRef}
-  // style={dragStyle}
-  // {...listeners}
-  // {...attributes}
 
   return (
     <div

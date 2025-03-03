@@ -1,4 +1,3 @@
-// import { useDroppable } from '@dnd-kit/core';
 import Image from 'next/image';
 import { SyntheticEvent, useState } from 'react';
 
@@ -19,10 +18,16 @@ import {
   toggleTagFilter,
 } from '../store/slice-filters';
 import { AssetActions } from './asset-actions';
-import { NewTagInput } from './tags/new-tag-input';
-import { Tag } from './tags/tag';
+import { NewInput } from './new-input';
+import { Tag } from './tag';
 
-export const Asset = ({ asset }: { asset: ImageAsset }) => {
+export const Asset = ({
+  asset,
+  index,
+}: {
+  asset: ImageAsset;
+  index: number;
+}) => {
   const { ioState, fileId, file, dimensions, tags } = asset;
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
@@ -68,7 +73,6 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
     dispatch(deleteTag({ fileId, tag }));
   };
 
-  // Should probably consider how to queue these requests
   const saveAction = () => {
     dispatch(saveAssets(fileId));
   };
@@ -81,20 +85,15 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
     dispatch(toggleSizeFilter(composedSize));
   };
 
-  // === DROPPABLE ===
-  // const { isOver, setNodeRef: setDropNodeRef } = useDroppable({
-  //   id: `drop-${fileId}`,
-  // });
-  // const dropStyle = {
-  //   color: isOver ? 'green' : undefined,
-  // };
-
   return (
-    <div className="mb-4 flex w-full flex-wrap border border-slate-300">
+    <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
       <div
         className={`flex w-full items-center justify-center ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'} cursor-pointer self-stretch bg-slate-300 transition-all`}
       >
-        <div className="flex bg-slate-300" onClick={toggleImageZoom}>
+        <div
+          className="flex border-r border-r-slate-300 bg-slate-300"
+          onClick={toggleImageZoom}
+        >
           <Image
             className={`${!imageZoom ? 'max-h-64' : ''} h-auto w-auto object-contain`}
             src={`/assets/${file}`}
@@ -102,15 +101,13 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
             height={dimensions.height}
             alt=""
             title={file}
+            // This should probably be an intersection observer or something
+            priority={index < 4}
           />
         </div>
       </div>
 
-      <div
-        // ref={setDropNodeRef}
-        // style={dropStyle}
-        className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}
-      >
+      <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
         {tags.map((tag: ImageTag, idx: number) => (
           <Tag
             key={`${idx}-${tag.name}`}
@@ -123,12 +120,12 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
           />
         ))}
 
-        <NewTagInput
+        <NewInput
           inputValue={newTagInput}
           onInputChange={(e) =>
             setNewTagInput(e.currentTarget.value.trimStart())
           }
-          onAddTag={(e) => addNewTag(e, newTagInput)}
+          onAdd={(e) => addNewTag(e, newTagInput)}
         />
       </div>
 
@@ -142,7 +139,13 @@ export const Asset = ({ asset }: { asset: ImageAsset }) => {
             {dimensions.width}&times;{dimensions.height}
           </button>
 
-          {fileId}
+          <span
+            className="cursor-default text-slate-500"
+            style={{ textShadow: 'white 0 1px 0' }}
+            title={file}
+          >
+            {fileId}
+          </span>
         </span>
         {showActions ? (
           <AssetActions onSave={saveAction} onCancel={cancelAction} />

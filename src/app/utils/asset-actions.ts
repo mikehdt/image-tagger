@@ -50,7 +50,7 @@ export const getImageFiles = async () => {
     });
   }
 
-  return imageAssets || [];
+  return imageAssets;
 };
 
 export const writeTagsToDisk = async (
@@ -61,7 +61,7 @@ export const writeTagsToDisk = async (
     fs.writeFileSync(`${dataPath}/${fileId}.txt`, composedTags);
     return true;
   } catch (err) {
-    console.error('Disk IO error:', err);
+    console.error('Disk I/O error:', err);
     return false;
   }
 };
