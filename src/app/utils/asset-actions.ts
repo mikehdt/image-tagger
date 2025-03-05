@@ -21,6 +21,7 @@ export const getImageFiles = async () => {
 
   for (const file of imageFiles) {
     const fileId = file.substring(0, file.lastIndexOf('.'));
+    const fileExtension = file.substring(file.lastIndexOf('.') + 1);
 
     // @ts-expect-error ReadableStream.from being weird
     const stream = ReadableStream.from(createReadStream(`${dataPath}/${file}`));
@@ -41,12 +42,12 @@ export const getImageFiles = async () => {
     imageAssets.push({
       ioState: 'Complete',
       fileId,
-      file,
+      fileExtension,
       dimensions: {
         ...(dimensions as { width: number; height: number }),
         composed: `${dimensions?.width}x${dimensions?.height}`,
       },
-      tags,
+      tags, // -- TBC
     });
   }
 

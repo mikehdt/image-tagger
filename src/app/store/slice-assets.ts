@@ -24,7 +24,7 @@ export type ImageTag = {
 export type ImageAsset = {
   ioState: 'Saving' | 'Complete'; // For individual items?
   fileId: string;
-  file: string;
+  fileExtension: string;
   dimensions: {
     width: number;
     height: number;

@@ -4,7 +4,7 @@ type AssetActionsProps = {
 };
 
 export const AssetActions = ({ onSave, onCancel }: AssetActionsProps) => (
-  <span className="ml-auto">
+  <span className="ml-auto flex pl-2">
     <button
       className="cursor-pointer rounded-sm bg-slate-200 px-4 py-1 hover:bg-slate-400"
       onClick={onCancel}

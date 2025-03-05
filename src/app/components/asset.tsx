@@ -28,7 +28,7 @@ export const Asset = ({
   asset: ImageAsset;
   index: number;
 }) => {
-  const { ioState, fileId, file, dimensions, tags } = asset;
+  const { ioState, fileId, fileExtension, dimensions, tags } = asset;
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   const [newTagInput, setNewTagInput] = useState<string>('');
@@ -94,16 +94,16 @@ export const Asset = ({
           className="flex border-r border-r-slate-300 bg-slate-300"
           onClick={toggleImageZoom}
         >
-          <Image
+          {/* <Image
             className={`${!imageZoom ? 'max-h-64' : ''} h-auto w-auto object-contain`}
-            src={`/assets/${file}`}
+            src={`/assets/${fileId}.${fileExtension}`}
             width={dimensions.width}
             height={dimensions.height}
             alt=""
-            title={file}
             // This should probably be an intersection observer or something
             priority={index < 4}
-          />
+          /> */}
+          &nbsp;
         </div>
       </div>
 
@@ -130,7 +130,7 @@ export const Asset = ({
       </div>
 
       <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">
-        <span className="inline-flex h-8 items-center tabular-nums">
+        <span className="inline-flex h-8 min-w-0 items-center tabular-nums">
           <button
             type="button"
             className={`mr-2 cursor-pointer rounded-sm border border-sky-300 ${filterSizes.includes(dimensions.composed) ? 'bg-sky-300 text-sky-900' : 'bg-sky-100'} px-2 py-0.5`}
@@ -139,10 +139,13 @@ export const Asset = ({
             {dimensions.width}&times;{dimensions.height}
           </button>
 
+          <span className="mr-2 cursor-default rounded-sm border border-stone-300 bg-stone-100 px-2 py-0.5 max-sm:hidden">
+            {fileExtension}
+          </span>
+
           <span
-            className="cursor-default text-slate-500"
+            className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:hidden"
             style={{ textShadow: 'white 0 1px 0' }}
-            title={file}
           >
             {fileId}
           </span>
