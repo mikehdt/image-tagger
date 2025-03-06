@@ -9,7 +9,7 @@ export type ImageTag = {
 
 const initialState = {
   tagsById: {},
-  tagOrder: [],
+  tagSummary: [],
 };
 
 const tagsSlice = createSlice({
