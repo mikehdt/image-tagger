@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-type Filters = {
+export type Filters = {
   filterMode: 'ShowAll' | 'FilterAny' | 'FilterAll';
   filterTags: string[];
   filterSizes: string[];

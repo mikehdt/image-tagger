@@ -16,11 +16,6 @@ export type IoState =
 
 export type TagState = 'Active' | 'ToDelete' | 'ToAdd';
 
-export type ImageTag = {
-  name: string;
-  state: TagState;
-};
-
 export type ImageAsset = {
   ioState: 'Saving' | 'Complete'; // For individual items?
   fileId: string;
@@ -236,12 +231,12 @@ const imagesSlice = createSlice({
       if (!imageAssets) return {};
 
       return imageAssets.reduce((acc: KeyedCountList, asset: ImageAsset) => {
-        const { tags } = asset;
+        const { tagOrder } = asset;
 
         // This code is annoying me, I don't like the map mutating this array
         const newTagCounts: KeyedCountList = {};
 
-        tags.map((tag: ImageTag) => {
+        tagOrder.map((tag: ImageTag) => {
           newTagCounts[tag.name] = Object.keys(acc).includes(tag.name)
             ? acc[tag.name] + 1
             : 1;

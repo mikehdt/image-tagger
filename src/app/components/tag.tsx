@@ -1,10 +1,11 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 
-import { ImageTag } from '@/app/store/slice-assets';
+import type { TagState } from '@/app/store/slice-assets';
 
 type TagProps = {
-  tag: ImageTag;
+  tagName: string;
+  tagState: TagState;
   count: number;
   highlight: boolean;
   fade: boolean;
@@ -13,7 +14,8 @@ type TagProps = {
 };
 
 export const Tag = ({
-  tag,
+  tagName,
+  tagState,
   count,
   highlight,
   fade,
@@ -24,15 +26,13 @@ export const Tag = ({
     tagHighlightColor = '',
     tagCountColor = '';
 
-  const { state } = tag;
-
-  if (state === 'ToAdd') {
+  if (tagState === 'ToAdd') {
     tagColor = 'border-amber-500';
     tagHighlightColor = highlight
       ? 'bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
       : 'hover:bg-amber-100';
     tagCountColor = 'border-amber-300';
-  } else if (state === 'ToDelete') {
+  } else if (tagState === 'ToDelete') {
     tagColor = 'border-pink-500';
     tagHighlightColor = highlight
       ? 'bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
@@ -51,8 +51,8 @@ export const Tag = ({
       className={`mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all ${tagColor} ${tagHighlightColor} ${fade ? 'opacity-25' : ''}`}
       onClick={onToggleTag}
     >
-      <span className={tag.state === 'ToDelete' ? 'line-through' : ''}>
-        {tag.name}
+      <span className={tagState === 'ToDelete' ? 'line-through' : ''}>
+        {tagName}
       </span>
       <span
         className={`ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs ${tagCountColor}`}

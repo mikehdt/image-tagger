@@ -6,7 +6,6 @@ import {
 
 import { assetsReducer } from './slice-assets';
 import { filtersReducer } from './slice-filters';
-import { tagsReducer } from './slice-tags';
 
 export const makeStore = () => {
   return configureStore({
@@ -14,7 +13,6 @@ export const makeStore = () => {
     reducer: {
       assets: assetsReducer,
       filters: filtersReducer,
-      tags: tagsReducer,
     },
   });
 };

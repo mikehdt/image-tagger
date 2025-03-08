@@ -28,7 +28,8 @@ export const Asset = ({
   asset: ImageAsset;
   index: number;
 }) => {
-  const { ioState, fileId, fileExtension, dimensions, tags } = asset;
+  const { ioState, fileId, fileExtension, dimensions, tagsByName, tagOrder } =
+    asset;
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   const [newTagInput, setNewTagInput] = useState<string>('');
@@ -47,17 +48,15 @@ export const Asset = ({
   };
 
   const showActions =
-    tags.length &&
-    tags.find((tag) => tag.state !== 'Active') &&
+    tagOrder.length &&
+    tagOrder.find((tagName) => tagsByName[tagName].state !== 'Active') &&
     ioState !== 'Saving';
 
   const addNewTag = (e: SyntheticEvent, tag: string) => {
     e.stopPropagation();
 
     if (tag.trim() !== '') {
-      const tagList = tags.map((tag) => tag.name);
-
-      if (!tagList.includes(tag)) {
+      if (!tagOrder.includes(tag)) {
         dispatch(addTag({ fileId, tag }));
         setNewTagInput('');
       } else {
@@ -108,15 +107,16 @@ export const Asset = ({
       </div>
 
       <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
-        {tags.map((tag: ImageTag, idx: number) => (
+        {tagOrder.slice(0, 3).map((tagName: string, idx: number) => (
           <Tag
-            key={`${idx}-${tag.name}`}
-            fade={newTagInput !== '' && newTagInput !== tag.name}
-            tag={tag}
-            count={globalTagList[tag.name]}
-            onToggleTag={(e) => toggleTag(e, tag.name)}
-            onDeleteTag={(e) => toggleDeleteTag(e, tag.name)}
-            highlight={filterTags.includes(tag.name)}
+            key={`${idx}-${tagName}`}
+            fade={newTagInput !== '' && newTagInput !== tagName}
+            tagName={tagName}
+            tagState={tagsByName[tagName]}
+            count={globalTagList[tagName]}
+            onToggleTag={(e) => toggleTag(e, tagName)}
+            onDeleteTag={(e) => toggleDeleteTag(e, tagName)}
+            highlight={filterTags.includes(tagName)}
           />
         ))}
 

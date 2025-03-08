@@ -28,16 +28,19 @@ export const getImageFiles = async () => {
 
     const dimensions = await imageDimensionsFromStream(stream);
 
-    const tags = await fs
+    const tagsByName = await fs
       .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
       .split(', ')
-      .map(
-        (tag) =>
+      .reduce(
+        (acc, tag) =>
           ({
-            name: tag.trim(),
-            state: 'Active',
+            ...acc,
+            [tag.trim()]: 'Active',
           }) as ImageTag,
+        {},
       );
+
+    const tagOrder = Object.keys(tagsByName);
 
     imageAssets.push({
       ioState: 'Complete',
@@ -47,7 +50,8 @@ export const getImageFiles = async () => {
         ...(dimensions as { width: number; height: number }),
         composed: `${dimensions?.width}x${dimensions?.height}`,
       },
-      tags, // -- TBC
+      tagsByName,
+      tagOrder,
     });
   }
 
