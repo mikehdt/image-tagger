@@ -116,14 +116,14 @@ const imagesSlice = createSlice({
 
       // const tagState = state.images[assetIndex].tagStatus[tagIndex].state;
 
-      // // Active and ToDelete toggle states; ToAdd gets removed
-      // if (tagState === TagState.SAVED) {
-      //   state.images[assetIndex].tagList[tagIndex] = TagState.TO_DELETE;
-      // } else if (tagState === TagState.TO_DELETE) {
-      //   state.images[assetIndex].tagList[tagIndex] = TagState.SAVED;
-      // } else if (tagState === TagState.TO_ADD) {
-      //   state.images[assetIndex].tagList.splice(tagIndex);
-      // }
+      // Active and ToDelete toggle states; ToAdd gets removed
+      if (tagState === TagState.SAVED) {
+        state.images[assetIndex].tagList[tagIndex] = TagState.TO_DELETE;
+      } else if (tagState === TagState.TO_DELETE) {
+        state.images[assetIndex].tagList[tagIndex] = TagState.SAVED;
+      } else if (tagState === TagState.TO_ADD) {
+        state.images[assetIndex].tagList.splice(tagIndex);
+      }
     },
 
     resetTags: (state, { payload }: PayloadAction<string>) => {
@@ -132,14 +132,14 @@ const imagesSlice = createSlice({
       );
 
       // Could add an `originalIndex` or similar if resetting re-ordering...
-      // state.images[assetIndex].tags = state.images[assetIndex].tags
-      //   // Clear delete marks
-      //   .map<ImageTag>((tag) => {
-      //     if (tag.state === 'ToDelete') tag.state = 'Active';
-      //     return tag;
-      //   })
-      //   // Clear new items
-      //   .filter((item) => item.state !== 'ToAdd');
+      state.images[assetIndex].tags = state.images[assetIndex].tags
+        // Clear delete marks
+        .map((tag) => {
+          if (tag.state === TagState.TO_DELETE) tag.state = TagState.VALID;
+          return tag;
+        })
+        // Clear new items
+        .filter((item) => item.state !== TagState.TO_ADD);
     },
   },
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useAppDispatch, useAppSelector } from './store/hooks';
+import { IoState, selectAllImages } from './store/slice-assets';
 import {
   loadAssets,
   selectImageCount,
@@ -13,6 +14,7 @@ import { AssetList } from './views/asset-list';
 import { Error } from './views/error';
 import { InitialLoad } from './views/initial-load';
 import { NoContent } from './views/no-content';
+import { TopShelf } from './views/top-shelf';
 
 const App = () => {
   const initialLoad = useRef<boolean>(true);
@@ -20,6 +22,7 @@ const App = () => {
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
+  const assets = useAppSelector(selectAllImages);
 
   // Could accept 'optimistic' assets and set them, then load?
   const loadImageAssets = useCallback(async () => {
@@ -35,17 +38,22 @@ const App = () => {
 
   // Non-valid states
   if (
-    ioState === 'Uninitialized' ||
-    (ioState === 'Loading' && imageCount === 0)
+    ioState === IoState.UNINITIALIZED ||
+    (ioState === IoState.LOADING && imageCount === 0)
   ) {
     return <InitialLoad />;
-  } else if (ioState === 'IoError') {
+  } else if (ioState === IoState.ERROR) {
     return <Error />;
-  } else if (ioState === 'Complete' && imageCount === 0) {
+  } else if (ioState === IoState.COMPLETE && imageCount === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
 
-  return <AssetList />;
+  return (
+    <>
+      <TopShelf />
+      <AssetList assets={assets} />
+    </>
+  );
 };
 
 // This is to avoid separating layouts into two files for such a small

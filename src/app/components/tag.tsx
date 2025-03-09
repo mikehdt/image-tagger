@@ -1,7 +1,7 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import type { SyntheticEvent } from 'react';
+import { memo, type SyntheticEvent } from 'react';
 
-import type { TagState } from '@/app/store/slice-assets';
+import { TagState } from '@/app/store/slice-assets';
 
 import { useAppDispatch } from '../store/hooks';
 import { deleteTag } from '../store/slice-assets';
@@ -15,13 +15,7 @@ type TagProps = {
   fade: boolean;
 };
 
-export const Tag = ({
-  tagName,
-  tagState,
-  count,
-  highlight,
-  fade,
-}: TagProps) => {
+const Tag = ({ tagName, tagState, count, highlight, fade }: TagProps) => {
   const dispatch = useAppDispatch();
 
   const toggleTag = (e: SyntheticEvent) => {
@@ -38,13 +32,13 @@ export const Tag = ({
     tagHighlightColor = '',
     tagCountColor = '';
 
-  if (tagState === 'ToAdd') {
+  if (tagState === TagState.TO_ADD) {
     tagColor = 'border-amber-500';
     tagHighlightColor = highlight
       ? 'bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
       : 'hover:bg-amber-100';
     tagCountColor = 'border-amber-300';
-  } else if (tagState === 'ToDelete') {
+  } else if (tagState === TagState.TO_DELETE) {
     tagColor = 'border-pink-500';
     tagHighlightColor = highlight
       ? 'bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
@@ -63,7 +57,7 @@ export const Tag = ({
       className={`mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all ${tagColor} ${tagHighlightColor} ${fade ? 'opacity-25' : ''}`}
       onClick={toggleTag}
     >
-      <span className={tagState === 'ToDelete' ? 'line-through' : ''}>
+      <span className={tagState === TagState.TO_DELETE ? 'line-through' : ''}>
         {tagName}
       </span>
       <span
@@ -80,3 +74,7 @@ export const Tag = ({
     </div>
   );
 };
+
+const CachedTag = memo(Tag);
+
+export { CachedTag as Tag };

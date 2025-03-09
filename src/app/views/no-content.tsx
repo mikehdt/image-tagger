@@ -6,7 +6,6 @@ type NoContentProps = { onReload: () => void };
 export const NoContent = ({ onReload }: NoContentProps) => {
   const doReload = (e: SyntheticEvent) => {
     e.preventDefault();
-
     onReload();
   };
 
