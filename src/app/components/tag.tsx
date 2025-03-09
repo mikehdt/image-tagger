@@ -3,6 +3,7 @@ import type { SyntheticEvent } from 'react';
 
 import type { TagState } from '@/app/store/slice-assets';
 
+import { useAppDispatch } from '../store/hooks';
 import { deleteTag } from '../store/slice-assets';
 import { toggleTagFilter } from '../store/slice-filters';
 
@@ -12,8 +13,6 @@ type TagProps = {
   count: number;
   highlight: boolean;
   fade: boolean;
-  onToggleTag: (e: SyntheticEvent) => void;
-  onDeleteTag: (e: SyntheticEvent) => void;
 };
 
 export const Tag = ({
@@ -22,15 +21,15 @@ export const Tag = ({
   count,
   highlight,
   fade,
-  onToggleTag,
-  onDeleteTag,
 }: TagProps) => {
-  const toggleTag = (e: SyntheticEvent, tagName: string) => {
+  const dispatch = useAppDispatch();
+
+  const toggleTag = (e: SyntheticEvent) => {
     e.preventDefault();
     dispatch(toggleTagFilter(tagName));
   };
 
-  const toggleDeleteTag = (e: SyntheticEvent, tagName: string) => {
+  const toggleDeleteTag = (e: SyntheticEvent) => {
     e.stopPropagation();
     dispatch(deleteTag({ assetId, tagName }));
   };
@@ -62,7 +61,7 @@ export const Tag = ({
   return (
     <div
       className={`mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all ${tagColor} ${tagHighlightColor} ${fade ? 'opacity-25' : ''}`}
-      onClick={onToggleTag}
+      onClick={toggleTag}
     >
       <span className={tagState === 'ToDelete' ? 'line-through' : ''}>
         {tagName}
@@ -74,7 +73,7 @@ export const Tag = ({
       </span>
       <span
         className="ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white"
-        onClick={onDeleteTag}
+        onClick={toggleDeleteTag}
       >
         <XMarkIcon />
       </span>
