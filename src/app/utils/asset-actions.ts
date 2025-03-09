@@ -6,7 +6,12 @@ import path from 'node:path';
 import { imageDimensionsFromStream } from 'image-dimensions';
 
 const dataPath = './public/assets';
-import type { ImageAsset, ImageTag } from '../store/slice-assets';
+import {
+  type ImageAsset,
+  ImageDimensions,
+  IoState,
+  TagState,
+} from '../store/slice-assets';
 
 export const getImageFiles = async () => {
   const dir = path.resolve(dataPath);
@@ -26,32 +31,30 @@ export const getImageFiles = async () => {
     // @ts-expect-error ReadableStream.from being weird
     const stream = ReadableStream.from(createReadStream(`${dataPath}/${file}`));
 
-    const dimensions = await imageDimensionsFromStream(stream);
+    const dimensions = (await imageDimensionsFromStream(
+      stream,
+    )) as ImageDimensions;
 
-    const tagsByName = await fs
+    const tagStatus = await fs
       .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
       .split(', ')
       .reduce(
-        (acc, tag) =>
-          ({
-            ...acc,
-            [tag.trim()]: 'Active',
-          }) as ImageTag,
+        (acc, tag) => ({
+          ...acc,
+          [tag.trim()]: TagState.SAVED,
+        }),
         {},
       );
 
-    const tagOrder = Object.keys(tagsByName);
+    const tagList = Object.keys(tagStatus);
 
     imageAssets.push({
-      ioState: 'Complete',
+      ioState: IoState.COMPLETE,
       fileId,
       fileExtension,
-      dimensions: {
-        ...(dimensions as { width: number; height: number }),
-        composed: `${dimensions?.width}x${dimensions?.height}`,
-      },
-      tagsByName,
-      tagOrder,
+      dimensions,
+      tagStatus,
+      tagList,
     });
   }
 

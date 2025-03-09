@@ -10,25 +10,23 @@ import { SyntheticEvent, useState } from 'react';
 import { Loader } from '../components/loader';
 import { NewInput } from '../components/new-input';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  loadAssets,
-  selectImageSizes,
-  selectIoState,
-} from '../store/slice-assets';
+import { IoState, loadAssets, selectIoState } from '../store/slice-assets';
 import {
   addTagFilter,
   clearFilters,
+  FilterMode,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
   toggleTagFilterMode,
 } from '../store/slice-filters';
+import { decomposeDimensions } from '../utils/helpers';
 
 export const TopShelf = () => {
   const [newTagInput, setNewTagInput] = useState<string>('');
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
-  const showLoader = ioState === 'Loading' || ioState === 'Saving';
+  const showLoader = ioState === IoState.LOADING || ioState === IoState.SAVING;
   const filterTagsMode = useAppSelector(selectFilterMode);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
@@ -50,8 +48,6 @@ export const TopShelf = () => {
       console.log("Couldn't add filter, it was empty.");
     }
   };
-
-  const allSizes = useAppSelector(selectImageSizes);
 
   return (
     <div className="fixed top-0 left-0 z-10 flex h-12 w-full items-center bg-white/80 shadow-md backdrop-blur-md">
@@ -102,7 +98,8 @@ export const TopShelf = () => {
                 key={`${idx}-${item}`}
                 className={`${idx > 0 ? 'border-l border-l-sky-300' : ''} px-2 text-sky-700`}
               >
-                {allSizes[item].width}&times;{allSizes[item].height}
+                {decomposeDimensions(item).width}&times;
+                {decomposeDimensions(item).height}
               </span>
             ))}
 
@@ -121,7 +118,7 @@ export const TopShelf = () => {
           onClick={onToggleTagFilterMode}
           className="ml-2 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
         >
-          {filterTagsMode === 'ShowAll' && (
+          {filterTagsMode === FilterMode.SHOW_ALL && (
             <>
               <span className="mr-1 w-6">
                 <DocumentCheckIcon />
@@ -129,7 +126,7 @@ export const TopShelf = () => {
               Show All
             </>
           )}
-          {filterTagsMode === 'FilterAll' && (
+          {filterTagsMode === FilterMode.MATCH_ALL && (
             <>
               <span className="mr-1 w-6">
                 <DocumentMagnifyingGlassIcon />
@@ -137,7 +134,7 @@ export const TopShelf = () => {
               Match All
             </>
           )}
-          {filterTagsMode === 'FilterAny' && (
+          {filterTagsMode === FilterMode.MATCH_ANY && (
             <>
               <span className="mr-1 w-6">
                 <DocumentMagnifyingGlassIcon />

@@ -1,13 +1,19 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+export enum FilterMode {
+  SHOW_ALL = 'ShowAll',
+  MATCH_ANY = 'MatchAny',
+  MATCH_ALL = 'MatchAll',
+}
+
 export type Filters = {
-  filterMode: 'ShowAll' | 'FilterAny' | 'FilterAll';
+  filterMode: FilterMode;
   filterTags: string[];
   filterSizes: string[];
 };
 
 const initialState = {
-  filterMode: 'ShowAll',
+  filterMode: FilterMode.SHOW_ALL,
   filterTags: [],
   filterSizes: [],
 } as Filters;
@@ -24,12 +30,12 @@ const filtersSlice = createSlice({
     toggleTagFilterMode: (state) => {
       const { filterMode } = state;
 
-      if (filterMode === 'ShowAll') {
-        state.filterMode = 'FilterAny';
-      } else if (filterMode === 'FilterAny') {
-        state.filterMode = 'FilterAll';
-      } else if (filterMode === 'FilterAll') {
-        state.filterMode = 'ShowAll';
+      if (filterMode === FilterMode.SHOW_ALL) {
+        state.filterMode = FilterMode.MATCH_ANY;
+      } else if (filterMode === FilterMode.MATCH_ANY) {
+        state.filterMode = FilterMode.MATCH_ALL;
+      } else if (filterMode === FilterMode.MATCH_ALL) {
+        state.filterMode = FilterMode.SHOW_ALL;
       } else {
         console.error('Unknown filter tag mode');
       }

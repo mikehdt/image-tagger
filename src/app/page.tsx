@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 
-import { type AppStore, makeStore } from './store';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { loadAssets, selectImages, selectIoState } from './store/slice-assets';
+import {
+  loadAssets,
+  selectImageCount,
+  selectIoState,
+} from './store/slice-assets';
+import StoreProvider from './utils/store-provider';
 import { AssetList } from './views/asset-list';
 import { Error } from './views/error';
 import { InitialLoad } from './views/initial-load';
@@ -16,7 +19,7 @@ const App = () => {
 
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
-  const imageAssets = useAppSelector(selectImages);
+  const imageCount = useAppSelector(selectImageCount);
 
   // Could accept 'optimistic' assets and set them, then load?
   const loadImageAssets = useCallback(async () => {
@@ -33,12 +36,12 @@ const App = () => {
   // Non-valid states
   if (
     ioState === 'Uninitialized' ||
-    (ioState === 'Loading' && imageAssets.length === 0)
+    (ioState === 'Loading' && imageCount === 0)
   ) {
     return <InitialLoad />;
   } else if (ioState === 'IoError') {
     return <Error />;
-  } else if (ioState === 'Complete' && imageAssets.length === 0) {
+  } else if (ioState === 'Complete' && imageCount === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
 
@@ -49,16 +52,9 @@ const App = () => {
 // difference, because of ReduxProvider not being allowed in layout.tsx due to
 // its use of meta setting requiring server components
 export default function Page() {
-  const storeRef = useRef<AppStore | null>(null);
-
-  if (!storeRef.current) {
-    // Create the store instance the first time this renders
-    storeRef.current = makeStore();
-  }
-
   return (
-    <ReduxProvider store={storeRef.current}>
+    <StoreProvider>
       <App />
-    </ReduxProvider>
+    </StoreProvider>
   );
 }

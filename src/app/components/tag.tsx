@@ -3,6 +3,9 @@ import type { SyntheticEvent } from 'react';
 
 import type { TagState } from '@/app/store/slice-assets';
 
+import { deleteTag } from '../store/slice-assets';
+import { toggleTagFilter } from '../store/slice-filters';
+
 type TagProps = {
   tagName: string;
   tagState: TagState;
@@ -22,6 +25,16 @@ export const Tag = ({
   onToggleTag,
   onDeleteTag,
 }: TagProps) => {
+  const toggleTag = (e: SyntheticEvent, tagName: string) => {
+    e.preventDefault();
+    dispatch(toggleTagFilter(tagName));
+  };
+
+  const toggleDeleteTag = (e: SyntheticEvent, tagName: string) => {
+    e.stopPropagation();
+    dispatch(deleteTag({ assetId, tagName }));
+  };
+
   let tagColor = '',
     tagHighlightColor = '',
     tagCountColor = '';

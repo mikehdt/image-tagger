@@ -6,26 +6,34 @@ import {
 } from '@reduxjs/toolkit';
 
 import { getImageFiles, writeTagsToDisk } from '../utils/asset-actions';
+import { composeDimensions } from '../utils/helpers';
 
-export type IoState =
-  | 'Uninitialized'
-  | 'Loading'
-  | 'Saving'
-  | 'Complete'
-  | 'IoError';
+export enum IoState {
+  UNINITIALIZED = 'Uninitialized',
+  LOADING = 'Loading',
+  SAVING = 'Saving',
+  COMPLETE = 'Complete',
+  ERROR = 'IoError',
+}
 
-export type TagState = 'Active' | 'ToDelete' | 'ToAdd';
+export enum TagState {
+  SAVED = 'Saved',
+  TO_DELETE = 'ToDelete',
+  TO_ADD = 'ToAdd',
+}
+
+export type ImageDimensions = {
+  width: number;
+  height: number;
+};
 
 export type ImageAsset = {
-  ioState: 'Saving' | 'Complete'; // For individual items?
+  ioState: Extract<IoState, IoState.SAVING | IoState.COMPLETE>;
   fileId: string;
   fileExtension: string;
-  dimensions: {
-    width: number;
-    height: number;
-    composed: string;
-  };
-  tags: ImageTag[];
+  dimensions: ImageDimensions;
+  tagStatus: { [key: string]: TagState };
+  tagList: string[];
 };
 
 export const loadAssets = createAsyncThunk(
@@ -44,22 +52,22 @@ export const saveAssets = createAsyncThunk(
 
     const assetIndex = images.findIndex((element) => element.fileId === fileId);
 
-    const updateTags = images[assetIndex].tags
-      .filter((tag) => tag.state !== 'ToDelete')
-      .map((tag) => ({
-        ...tag,
-        state: 'Active',
-      }));
+    // const updateTags = images[assetIndex].tags
+    //   .filter((tag) => tag.state !== 'ToDelete')
+    //   .map((tag) => ({
+    //     ...tag,
+    //     state: 'Active',
+    //   }));
 
-    const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
+    // const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
 
-    const success = await writeTagsToDisk(fileId, flattenedTags);
+    // const success = await writeTagsToDisk(fileId, flattenedTags);
 
-    if (success) {
-      return { assetIndex, tags: updateTags /* ioState? */ };
-    }
+    // if (success) {
+    //   return { assetIndex, tags: updateTags /* ioState? */ };
+    // }
 
-    throw new Error(`Unable to save the asset ${assetIndex}`);
+    // throw new Error(`Unable to save the asset ${assetIndex}`);
   },
 );
 
@@ -87,39 +95,35 @@ const imagesSlice = createSlice({
     ) => {
       if (payload.tag.trim() === '') return;
 
-      state.images
-        .find((element) => element.fileId === payload.fileId)
-        ?.tags.push({
-          name: payload.tag,
-          state: 'ToAdd',
-        });
+      // state.images
+      //   .find((element) => element.fileId === payload.fileId)
+      //   ?.tags.push({
+      //     name: payload.tag,
+      //     state: 'ToAdd',
+      //   });
     },
 
     deleteTag: (
       state,
-      { payload }: PayloadAction<{ fileId: string; tag: string }>,
+      { payload }: PayloadAction<{ assetId: string; tag: string }>,
     ) => {
       const assetIndex = state.images.findIndex(
-        (element) => element.fileId === payload.fileId,
+        (element) => element.fileId === payload.assetId,
       );
 
       // Stop if no tags to operate on
-      if (!state.images[assetIndex]?.tags.length) return;
+      if (!state.images[assetIndex]?.tagStatus) return;
 
-      const tagIndex = state.images[assetIndex].tags.findIndex(
-        (tag) => tag.name === payload.tag,
-      );
+      // const tagState = state.images[assetIndex].tagStatus[tagIndex].state;
 
-      const tagState = state.images[assetIndex].tags[tagIndex].state;
-
-      // Active and ToDelele toggle states; ToAdd gets removed
-      if (tagState === 'Active') {
-        state.images[assetIndex].tags[tagIndex].state = 'ToDelete';
-      } else if (tagState === 'ToDelete') {
-        state.images[assetIndex].tags[tagIndex].state = 'Active';
-      } else if (tagState === 'ToAdd') {
-        state.images[assetIndex].tags.splice(tagIndex);
-      }
+      // // Active and ToDelete toggle states; ToAdd gets removed
+      // if (tagState === TagState.SAVED) {
+      //   state.images[assetIndex].tagList[tagIndex] = TagState.TO_DELETE;
+      // } else if (tagState === TagState.TO_DELETE) {
+      //   state.images[assetIndex].tagList[tagIndex] = TagState.SAVED;
+      // } else if (tagState === TagState.TO_ADD) {
+      //   state.images[assetIndex].tagList.splice(tagIndex);
+      // }
     },
 
     resetTags: (state, { payload }: PayloadAction<string>) => {
@@ -128,64 +132,64 @@ const imagesSlice = createSlice({
       );
 
       // Could add an `originalIndex` or similar if resetting re-ordering...
-      state.images[assetIndex].tags = state.images[assetIndex].tags
-        // Clear delete marks
-        .map<ImageTag>((tag) => {
-          if (tag.state === 'ToDelete') tag.state = 'Active';
-          return tag;
-        })
-        // Clear new items
-        .filter((item) => item.state !== 'ToAdd');
+      // state.images[assetIndex].tags = state.images[assetIndex].tags
+      //   // Clear delete marks
+      //   .map<ImageTag>((tag) => {
+      //     if (tag.state === 'ToDelete') tag.state = 'Active';
+      //     return tag;
+      //   })
+      //   // Clear new items
+      //   .filter((item) => item.state !== 'ToAdd');
     },
   },
 
   extraReducers: (builder) => {
     // Loading
     builder.addCase(loadAssets.pending, (state) => {
-      state.ioState = 'Loading';
+      state.ioState = IoState.LOADING;
       state.ioMessage = undefined;
     });
 
     builder.addCase(loadAssets.fulfilled, (state, action) => {
-      state.ioState = 'Complete';
+      state.ioState = IoState.COMPLETE;
       state.ioMessage = undefined;
       state.images = action.payload as ImageAsset[];
     });
 
     builder.addCase(loadAssets.rejected, (state, action) => {
-      state.ioState = 'IoError';
+      state.ioState = IoState.ERROR;
       state.ioMessage = action.error.message;
       state.images = [];
     });
 
     // Saving
-    builder.addCase(saveAssets.pending, (state, action) => {
-      const { arg } = action.meta;
+    // builder.addCase(saveAssets.pending, (state, action) => {
+    //   const { arg } = action.meta;
 
-      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+    //   const imageIndex = state.images.findIndex((item) => item.fileId === arg);
 
-      state.images[imageIndex].ioState = 'Saving';
-      state.ioState = 'Saving';
-      state.ioMessage = undefined;
-    });
+    //   state.images[imageIndex].ioState = 'Saving';
+    //   state.ioState = 'Saving';
+    //   state.ioMessage = undefined;
+    // });
 
-    builder.addCase(saveAssets.fulfilled, (state, action) => {
-      state.ioState = 'Complete';
-      state.ioMessage = undefined;
+    // builder.addCase(saveAssets.fulfilled, (state, action) => {
+    //   state.ioState = 'Complete';
+    //   state.ioMessage = undefined;
 
-      const { arg } = action.meta;
-      const { tags } = action.payload as {
-        tags: ImageTag[];
-      };
+    //   const { arg } = action.meta;
+    //   const { tags } = action.payload as {
+    //     tags: ImageTag[];
+    //   };
 
-      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+    //   const imageIndex = state.images.findIndex((item) => item.fileId === arg);
 
-      state.images[imageIndex].ioState = 'Complete';
-      state.images[imageIndex].tags = tags;
-    });
+    //   state.images[imageIndex].ioState = 'Complete';
+    //   state.images[imageIndex].tags = tags;
+    // });
 
     builder.addCase(saveAssets.rejected, (state, action) => {
-      state.ioState = 'IoError';
+      state.ioState = IoState.ERROR;
       state.ioMessage = action.error.message;
     });
   },
@@ -195,51 +199,59 @@ const imagesSlice = createSlice({
       return state.ioState;
     },
 
-    selectImages: (state) => {
+    selectAllImages: (state) => {
       return state.images;
     },
 
+    selectImageCount: (state) => {
+      return state.images.length;
+    },
+
     selectImageSizes: createSelector([(state) => state.images], (images) => {
-      // Could sort first but I'm lazy
+      // Could sort but I'm lazy
+      // Probably should move this logic to a helper instead of a selector?
       return images.reduce(
         (
           acc: {
-            [key: string]: { width: number; height: number; count: number };
+            [key: string]: number;
           },
           item: ImageAsset,
         ) => {
-          const { composed, width, height } = item.dimensions;
-          if (typeof acc[composed] !== 'undefined') {
-            return {
-              ...acc,
-              [composed]: {
-                ...acc[composed],
-                count: (acc[composed].count += 1),
-              },
-            };
-          } else {
-            return { ...acc, [composed]: { width, height, count: 1 } };
-          }
+          const composedDimensions = composeDimensions(item.dimensions);
+
+          return typeof acc[composedDimensions] !== 'undefined'
+            ? {
+                ...acc,
+                [composedDimensions]: acc[composedDimensions] + 1,
+              }
+            : {
+                ...acc,
+                [composedDimensions]: 1,
+              };
         },
         {},
       );
     }),
 
+    selectTagsByStatus: (state, fileId) => {
+      const selectedImage = state.images.find((item) => item.fileId === fileId);
+
+      return selectedImage?.tagStatus || {};
+    },
+
     // @TODO: Although this is a derived state, it may be more performant to
     // consider keeping the global tag state in sync?
-    selectTags: createSelector([(state) => state.images], (imageAssets) => {
+    selectAllTags: createSelector([(state) => state.images], (imageAssets) => {
       if (!imageAssets) return {};
 
       return imageAssets.reduce((acc: KeyedCountList, asset: ImageAsset) => {
-        const { tagOrder } = asset;
+        const { tagList } = asset;
 
         // This code is annoying me, I don't like the map mutating this array
         const newTagCounts: KeyedCountList = {};
 
-        tagOrder.map((tag: ImageTag) => {
-          newTagCounts[tag.name] = Object.keys(acc).includes(tag.name)
-            ? acc[tag.name] + 1
-            : 1;
+        tagList.map((tag) => {
+          newTagCounts[tag] = acc[tag] ? acc[tag] + 1 : 1;
         });
 
         return {
@@ -253,5 +265,11 @@ const imagesSlice = createSlice({
 
 export const { reducer: assetsReducer } = imagesSlice;
 export const { addTag, deleteTag, resetTags } = imagesSlice.actions;
-export const { selectIoState, selectImages, selectImageSizes, selectTags } =
-  imagesSlice.selectors;
+export const {
+  selectIoState,
+  selectAllImages,
+  selectImageCount,
+  selectImageSizes,
+  selectAllTags,
+  selectTagsByStatus,
+} = imagesSlice.selectors;
