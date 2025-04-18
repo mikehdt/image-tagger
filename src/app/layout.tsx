@@ -28,7 +28,7 @@ export default function Root({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen items-center justify-items-center px-8 py-20 font-[family-name:var(--font-geist-sans)]">
+        <div className="mx-auto min-h-screen max-w-7xl items-center justify-items-center px-4 py-20 font-[family-name:var(--font-geist-sans)]">
           {children}
         </div>
       </body>

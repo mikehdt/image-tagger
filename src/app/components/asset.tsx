@@ -3,6 +3,8 @@ import { SyntheticEvent, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
+  addTag,
+  deleteTag,
   ImageDimensions,
   IoState,
   resetTags,
@@ -10,9 +12,14 @@ import {
   selectAllTags,
   selectTagsByStatus,
   TagState,
-} from '../store/slice-assets';
-import { selectFilterTags, toggleSizeFilter } from '../store/slice-filters';
+} from '../store/slice-assets';0
+import {
+  selectFilterTags,
+  toggleSizeFilter,
+  toggleTagFilter,
+} from '../store/slice-filters';
 import { composeDimensions } from '../utils/helpers';
+import { AssetActions } from './asset-actions';
 import { NewInput } from './new-input';
 import { Tag } from './tag';
 
@@ -21,6 +28,7 @@ type AssetProps = {
   fileExtension: string;
   dimensions: ImageDimensions;
   dimensionsActive: boolean;
+  ioState: IoState;
 };
 
 export const Asset = ({
@@ -28,6 +36,7 @@ export const Asset = ({
   fileExtension,
   dimensions,
   dimensionsActive,
+  ioState,
 }: AssetProps) => {
   const dimensionsComposed = composeDimensions(dimensions);
 
@@ -51,19 +60,29 @@ export const Asset = ({
     tagList.find((tagName) => tagsByStatus[tagName] !== TagState.SAVED) &&
     ioState !== IoState.SAVING;
 
-  const addNewTag = (e: SyntheticEvent, tag: string) => {
+  const addNewTag = (e: SyntheticEvent, tagName: string) => {
     e.stopPropagation();
 
-    if (tag.trim() !== '') {
-      if (!tagList.includes(tag)) {
-        dispatch(addTag({ fileId, tag }));
+    if (tagName.trim() !== '') {
+      if (!tagList.includes(tagName)) {
+        dispatch(addTag({ assetId, tagName }));
         setNewTagInput('');
       } else {
-        console.log("Couldn't add tag, it's already is in the list", tag);
+        console.log("Couldn't add tag, it's already is in the list", tagName);
       }
     } else {
       console.log("Couldn't add tag, it was empty.");
     }
+  };
+
+  const toggleTag = (e: SyntheticEvent, tagName: string) => {
+    e.preventDefault();
+    dispatch(toggleTagFilter(tagName));
+  };
+
+  const toggleDeleteTag = (e: SyntheticEvent, tagName: string) => {
+    e.stopPropagation();
+    dispatch(deleteTag({ assetId, tagName }));
   };
 
   const saveAction = () => {
@@ -85,14 +104,13 @@ export const Asset = ({
         onClick={toggleImageZoom}
       >
         <div className="flex border-r border-r-slate-300 bg-slate-300">
-          {/* <Image
+          <Image
             className={`${!imageZoom && 'max-h-64'} h-auto w-auto object-contain`}
             src={`/assets/${assetId}.${fileExtension}`}
             width={dimensions.width}
             height={dimensions.height}
             alt=""
-          /> */}
-          &nbsp;
+          />
         </div>
       </div>
 
@@ -104,8 +122,8 @@ export const Asset = ({
             tagName={tagName}
             tagState={tagsByStatus[tagName]}
             count={globalTagList[tagName]}
-            // onToggleTag={(e) => toggleTag(e, tagName)}
-            // onDeleteTag={(e) => toggleDeleteTag(e, tagName)}
+            onToggleTag={toggleTag}
+            onDeleteTag={toggleDeleteTag}
             highlight={filterTags.includes(tagName)}
           />
         ))}
@@ -140,9 +158,9 @@ export const Asset = ({
             {assetId}
           </span>
         </span>
-        {/* {showActions ? (
+        {showActions ? (
           <AssetActions onSave={saveAction} onCancel={cancelAction} />
-        ) : null} */}
+        ) : null}
       </div>
     </div>
   );

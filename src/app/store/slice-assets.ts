@@ -52,22 +52,22 @@ export const saveAssets = createAsyncThunk(
 
     const assetIndex = images.findIndex((element) => element.fileId === fileId);
 
-    // const updateTags = images[assetIndex].tags
-    //   .filter((tag) => tag.state !== 'ToDelete')
-    //   .map((tag) => ({
-    //     ...tag,
-    //     state: 'Active',
-    //   }));
+    const updateTags = images[assetIndex].tags
+      .filter((tag) => tag.state !== 'ToDelete')
+      .map((tag) => ({
+        ...tag,
+        state: 'Active',
+      }));
 
-    // const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
+    const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
 
-    // const success = await writeTagsToDisk(fileId, flattenedTags);
+    const success = await writeTagsToDisk(fileId, flattenedTags);
 
-    // if (success) {
-    //   return { assetIndex, tags: updateTags /* ioState? */ };
-    // }
+    if (success) {
+      return { assetIndex, tags: updateTags /* ioState? */ };
+    }
 
-    // throw new Error(`Unable to save the asset ${assetIndex}`);
+    throw new Error(`Unable to save the asset ${assetIndex}`);
   },
 );
 
@@ -91,38 +91,48 @@ const imagesSlice = createSlice({
   reducers: {
     addTag: (
       state,
-      { payload }: PayloadAction<{ fileId: string; tag: string }>,
+      { payload }: PayloadAction<{ assetId: string; tagName: string }>,
     ) => {
-      if (payload.tag.trim() === '') return;
+      const { assetId, tagName } = payload;
 
-      // state.images
-      //   .find((element) => element.fileId === payload.fileId)
-      //   ?.tags.push({
-      //     name: payload.tag,
-      //     state: 'ToAdd',
-      //   });
+      if (tagName.trim() === '') return;
+
+      const imageIndex = state.images.findIndex(
+        (element) => element.fileId === assetId,
+      );
+
+      state.images[imageIndex].tagList.push(tagName);
+      state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
     },
 
     deleteTag: (
       state,
-      { payload }: PayloadAction<{ assetId: string; tag: string }>,
+      { payload }: PayloadAction<{ assetId: string; tagName: string }>,
     ) => {
+      const { assetId, tagName } = payload;
+
       const assetIndex = state.images.findIndex(
-        (element) => element.fileId === payload.assetId,
+        (element) => element.fileId === assetId,
       );
 
       // Stop if no tags to operate on
       if (!state.images[assetIndex]?.tagStatus) return;
 
-      // const tagState = state.images[assetIndex].tagStatus[tagIndex].state;
+      const tagState = state.images[assetIndex].tagStatus[tagName];
 
       // Active and ToDelete toggle states; ToAdd gets removed
       if (tagState === TagState.SAVED) {
-        state.images[assetIndex].tagList[tagIndex] = TagState.TO_DELETE;
+        state.images[assetIndex].tagStatus[tagName] = TagState.TO_DELETE;
       } else if (tagState === TagState.TO_DELETE) {
-        state.images[assetIndex].tagList[tagIndex] = TagState.SAVED;
+        state.images[assetIndex].tagStatus[tagName] = TagState.SAVED;
       } else if (tagState === TagState.TO_ADD) {
-        state.images[assetIndex].tagList.splice(tagIndex);
+        delete state.images[assetIndex].tagStatus[tagName];
+        state.images[assetIndex].tagList.splice(
+          state.images[assetIndex].tagList.findIndex(
+            (item) => item === tagName,
+          ),
+          1,
+        );
       }
     },
 
@@ -131,15 +141,23 @@ const imagesSlice = createSlice({
         (element) => element.fileId === payload,
       );
 
-      // Could add an `originalIndex` or similar if resetting re-ordering...
-      state.images[assetIndex].tags = state.images[assetIndex].tags
-        // Clear delete marks
-        .map((tag) => {
-          if (tag.state === TagState.TO_DELETE) tag.state = TagState.VALID;
-          return tag;
-        })
+      state.images[assetIndex].tagList
         // Clear new items
-        .filter((item) => item.state !== TagState.TO_ADD);
+        .filter((tagName) => {
+          if (state.images[assetIndex].tagStatus[tagName] === TagState.TO_ADD) {
+            delete state.images[assetIndex].tagStatus[tagName];
+            return false;
+          }
+
+          return true;
+        })
+        // Clear delete marks
+        .map((tagName) => {
+          if (
+            state.images[assetIndex].tagStatus[tagName] === TagState.TO_DELETE
+          )
+            state.images[assetIndex].tagStatus[tagName] = TagState.SAVED;
+        });
     },
   },
 
@@ -163,30 +181,29 @@ const imagesSlice = createSlice({
     });
 
     // Saving
-    // builder.addCase(saveAssets.pending, (state, action) => {
-    //   const { arg } = action.meta;
+    builder.addCase(saveAssets.pending, (state, action) => {
+      const { arg } = action.meta;
 
-    //   const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
 
-    //   state.images[imageIndex].ioState = 'Saving';
-    //   state.ioState = 'Saving';
-    //   state.ioMessage = undefined;
-    // });
+      state.images[imageIndex].ioState = IoState.SAVING;
+      state.ioState = IoState.SAVING;
+      state.ioMessage = undefined;
+    });
 
-    // builder.addCase(saveAssets.fulfilled, (state, action) => {
-    //   state.ioState = 'Complete';
-    //   state.ioMessage = undefined;
+    builder.addCase(saveAssets.fulfilled, (state, action) => {
+      state.ioState = IoState.COMPLETE;
+      state.ioMessage = undefined;
 
-    //   const { arg } = action.meta;
-    //   const { tags } = action.payload as {
-    //     tags: ImageTag[];
-    //   };
+      const { arg } = action.meta;
+      const { tagList, tagStatus } = action.payload;
 
-    //   const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
 
-    //   state.images[imageIndex].ioState = 'Complete';
-    //   state.images[imageIndex].tags = tags;
-    // });
+      state.images[imageIndex].ioState = IoState.COMPLETE;
+      state.images[imageIndex].tagList = tagList;
+      state.images[imageIndex].tagStatus = tagStatus;
+    });
 
     builder.addCase(saveAssets.rejected, (state, action) => {
       state.ioState = IoState.ERROR;

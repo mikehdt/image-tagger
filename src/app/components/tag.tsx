@@ -3,31 +3,25 @@ import { memo, type SyntheticEvent } from 'react';
 
 import { TagState } from '@/app/store/slice-assets';
 
-import { useAppDispatch } from '../store/hooks';
-import { deleteTag } from '../store/slice-assets';
-import { toggleTagFilter } from '../store/slice-filters';
-
 type TagProps = {
   tagName: string;
   tagState: TagState;
   count: number;
   highlight: boolean;
   fade: boolean;
+  onToggleTag: (e: SyntheticEvent, tagName: string) => void;
+  onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
 };
 
-const Tag = ({ tagName, tagState, count, highlight, fade }: TagProps) => {
-  const dispatch = useAppDispatch();
-
-  const toggleTag = (e: SyntheticEvent) => {
-    e.preventDefault();
-    dispatch(toggleTagFilter(tagName));
-  };
-
-  const toggleDeleteTag = (e: SyntheticEvent) => {
-    e.stopPropagation();
-    dispatch(deleteTag({ assetId, tagName }));
-  };
-
+const Tag = ({
+  tagName,
+  tagState,
+  count,
+  highlight,
+  fade,
+  onToggleTag,
+  onDeleteTag,
+}: TagProps) => {
   let tagColor = '',
     tagHighlightColor = '',
     tagCountColor = '';
@@ -55,7 +49,7 @@ const Tag = ({ tagName, tagState, count, highlight, fade }: TagProps) => {
   return (
     <div
       className={`mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all ${tagColor} ${tagHighlightColor} ${fade ? 'opacity-25' : ''}`}
-      onClick={toggleTag}
+      onClick={(e) => onToggleTag(e, tagName)}
     >
       <span className={tagState === TagState.TO_DELETE ? 'line-through' : ''}>
         {tagName}
@@ -67,7 +61,7 @@ const Tag = ({ tagName, tagState, count, highlight, fade }: TagProps) => {
       </span>
       <span
         className="ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white"
-        onClick={toggleDeleteTag}
+        onClick={(e) => onDeleteTag(e, tagName)}
       >
         <XMarkIcon />
       </span>
