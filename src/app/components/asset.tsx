@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useMemo, useState, useCallback } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -12,7 +12,7 @@ import {
   selectAllTags,
   selectTagsByStatus,
   TagState,
-} from '../store/slice-assets';0
+} from '../store/slice-assets';
 import {
   selectFilterTags,
   toggleSizeFilter,
@@ -38,7 +38,10 @@ export const Asset = ({
   dimensionsActive,
   ioState,
 }: AssetProps) => {
-  const dimensionsComposed = composeDimensions(dimensions);
+  // Memoize the composed dimensions so it's not recreated on every render
+  const dimensionsComposed = useMemo(() =>
+    composeDimensions(dimensions)
+  , [dimensions]);
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   const [newTagInput, setNewTagInput] = useState<string>('');
@@ -49,18 +52,24 @@ export const Asset = ({
     selectTagsByStatus(state, assetId),
   );
 
-  const toggleImageZoom = () => {
-    setImageZoom(!imageZoom);
-  };
+  // Memoize the tag list derived from tagsByStatus
+  const tagList = useMemo(() =>
+    Object.keys(tagsByStatus)
+  , [tagsByStatus]);
 
-  const tagList = Object.keys(tagsByStatus);
-
-  const showActions =
+  // Memoize this calculation to prevent unnecessary re-renders
+  const showActions = useMemo(() =>
     tagList.length &&
-    tagList.find((tagName) => tagsByStatus[tagName] !== TagState.SAVED) &&
-    ioState !== IoState.SAVING;
+    tagList.some((tagName) => tagsByStatus[tagName] !== TagState.SAVED) &&
+    ioState !== IoState.SAVING
+  , [tagList, tagsByStatus, ioState]);
 
-  const addNewTag = (e: SyntheticEvent, tagName: string) => {
+  // Convert event handlers to useCallback to prevent new function creation on each render
+  const toggleImageZoom = useCallback(() => {
+    setImageZoom(prev => !prev);
+  }, []);
+
+  const addNewTag = useCallback((e: SyntheticEvent, tagName: string) => {
     e.stopPropagation();
 
     if (tagName.trim() !== '') {
@@ -73,29 +82,33 @@ export const Asset = ({
     } else {
       console.log("Couldn't add tag, it was empty.");
     }
-  };
+  }, [dispatch, tagList, assetId]);
 
-  const toggleTag = (e: SyntheticEvent, tagName: string) => {
+  const toggleTag = useCallback((e: SyntheticEvent, tagName: string) => {
     e.preventDefault();
     dispatch(toggleTagFilter(tagName));
-  };
+  }, [dispatch]);
 
-  const toggleDeleteTag = (e: SyntheticEvent, tagName: string) => {
+  const toggleDeleteTag = useCallback((e: SyntheticEvent, tagName: string) => {
     e.stopPropagation();
     dispatch(deleteTag({ assetId, tagName }));
-  };
+  }, [dispatch, assetId]);
 
-  const saveAction = () => {
+  const saveAction = useCallback(() => {
     dispatch(saveAssets(assetId));
-  };
+  }, [dispatch, assetId]);
 
-  const cancelAction = () => {
+  const cancelAction = useCallback(() => {
     dispatch(resetTags(assetId));
-  };
+  }, [dispatch, assetId]);
 
-  const toggleSize = (composedSize: string) => {
+  const toggleSize = useCallback((composedSize: string) => {
     dispatch(toggleSizeFilter(composedSize));
-  };
+  }, [dispatch]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTagInput(e.currentTarget.value.trimStart());
+  }, []);
 
   return (
     <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
@@ -130,9 +143,7 @@ export const Asset = ({
 
         <NewInput
           inputValue={newTagInput}
-          onInputChange={(e) =>
-            setNewTagInput(e.currentTarget.value.trimStart())
-          }
+          onInputChange={handleInputChange}
           onAdd={(e) => addNewTag(e, newTagInput)}
         />
       </div>

@@ -1,11 +1,11 @@
 'use client';
 
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, memo } from 'react';
 
 import { Asset } from '../components/asset';
 import { useAppSelector } from '../store/hooks';
-import { ImageAsset } from '../store/slice-assets';
+import { ImageAsset, selectAllImages } from '../store/slice-assets';
 import {
   selectFilterMode,
   selectFilterSizes,
@@ -14,44 +14,50 @@ import {
 import { applyFilters } from '../utils/filter-actions';
 import { composeDimensions } from '../utils/helpers';
 
-export const AssetList = ({ assets }: { assets: ImageAsset[] }) => {
+// Create a memoized Asset component to prevent unnecessary re-renders
+const MemoizedAsset = memo(Asset);
+
+export const AssetList = () => {
+  // Get all data from selectors rather than props
+  const assets = useAppSelector(selectAllImages);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterMode = useAppSelector(selectFilterMode);
 
-  const filteredAssets = applyFilters({
-    assets,
-    filterTags,
-    filterSizes,
-    filterMode,
-  });
+  // Memoize filtered assets so they only recalculate when dependencies change
+  const filteredAssets = useMemo(() =>
+    applyFilters({
+      assets,
+      filterTags,
+      filterSizes,
+      filterMode,
+    })
+  , [assets, filterTags, filterSizes, filterMode]);
 
-  const cachedAssets = useMemo(
-    () =>
-      filteredAssets.map(({ fileId, fileExtension, dimensions }) => (
-        <Asset
-          key={fileId}
-          assetId={fileId}
-          fileExtension={fileExtension}
-          dimensionsActive={filterSizes.includes(composeDimensions(dimensions))}
-          dimensions={dimensions}
-        />
-      )),
-    [filteredAssets, filterSizes],
-  );
+  // Memoize rendered assets to prevent unnecessary re-renders
+  const renderedAssets = useMemo(() =>
+    filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => (
+      <MemoizedAsset
+        key={fileId}
+        assetId={fileId}
+        fileExtension={fileExtension}
+        dimensionsActive={filterSizes.includes(composeDimensions(dimensions))}
+        dimensions={dimensions}
+        ioState={ioState}
+      />
+    ))
+  , [filteredAssets, filterSizes]);
 
-  return (
-    <>
-      {cachedAssets.length ? (
-        cachedAssets.map((asset, idx) => <Fragment key={idx}>{asset}</Fragment>)
-      ) : (
-        <div>
-          <p>
-            <CubeTransparentIcon />
-          </p>
-          <h1 className="mt-4 mb-4 w-full text-xl">No results</h1>
-        </div>
-      )}
-    </>
-  );
+  // Render a message when no assets match the filters
+  if (renderedAssets.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <CubeTransparentIcon className="h-12 w-12 text-slate-400" />
+        <h1 className="mt-4 mb-4 w-full text-xl">No results match your filters</h1>
+      </div>
+    );
+  }
+
+  // Directly return the assets without extra mapping
+  return <>{renderedAssets}</>;
 };

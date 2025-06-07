@@ -18,31 +18,35 @@ const initialState = {
   filterSizes: [],
 } as Filters;
 
-const toggleFilter = (haystack: string[], needle: string) =>
-  haystack.includes(needle)
+const toggleFilter = (haystack: string[], needle: string) => {
+  if (!needle || needle.trim() === '') return haystack;
+
+  return haystack.includes(needle)
     ? haystack.filter((i) => i !== needle)
     : [...haystack, needle];
+};
 
 const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
     toggleTagFilterMode: (state) => {
-      const { filterMode } = state;
+      const modes = [
+        FilterMode.SHOW_ALL,
+        FilterMode.MATCH_ANY,
+        FilterMode.MATCH_ALL,
+      ];
 
-      if (filterMode === FilterMode.SHOW_ALL) {
-        state.filterMode = FilterMode.MATCH_ANY;
-      } else if (filterMode === FilterMode.MATCH_ANY) {
-        state.filterMode = FilterMode.MATCH_ALL;
-      } else if (filterMode === FilterMode.MATCH_ALL) {
-        state.filterMode = FilterMode.SHOW_ALL;
-      } else {
-        console.error('Unknown filter tag mode');
-      }
+      const currentIndex = modes.indexOf(state.filterMode);
+      const nextIndex = (currentIndex + 1) % modes.length;
+
+      state.filterMode = modes[nextIndex];
     },
 
     addTagFilter: (state, { payload }: PayloadAction<string>) => {
-      state.filterTags.push(payload);
+      if (payload && !state.filterTags.includes(payload)) {
+        state.filterTags.push(payload);
+      }
     },
 
     toggleTagFilter: (state, { payload }: PayloadAction<string>) => {
@@ -51,6 +55,14 @@ const filtersSlice = createSlice({
 
     toggleSizeFilter: (state, { payload }: PayloadAction<string>) => {
       state.filterSizes = toggleFilter(state.filterSizes, payload);
+    },
+
+    clearTagFilters: (state) => {
+      state.filterTags = [];
+    },
+
+    clearSizeFilters: (state) => {
+      state.filterSizes = [];
     },
 
     clearFilters: (state) => {
@@ -63,6 +75,13 @@ const filtersSlice = createSlice({
     selectFilterMode: (state) => state.filterMode,
     selectFilterTags: (state) => state.filterTags,
     selectFilterSizes: (state) => state.filterSizes,
+    selectHasActiveFilters: (state) =>
+      state.filterTags.length > 0 || state.filterSizes.length > 0,
+    selectFilterCount: (state) => ({
+      tags: state.filterTags.length,
+      sizes: state.filterSizes.length,
+      total: state.filterTags.length + state.filterSizes.length
+    })
   },
 });
 
@@ -72,7 +91,14 @@ export const {
   addTagFilter,
   toggleTagFilter,
   toggleSizeFilter,
+  clearTagFilters,
+  clearSizeFilters,
   clearFilters,
 } = filtersSlice.actions;
-export const { selectFilterTags, selectFilterMode, selectFilterSizes } =
-  filtersSlice.selectors;
+export const {
+  selectFilterTags,
+  selectFilterMode,
+  selectFilterSizes,
+  selectHasActiveFilters,
+  selectFilterCount
+} = filtersSlice.selectors;

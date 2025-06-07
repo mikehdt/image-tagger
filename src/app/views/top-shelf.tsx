@@ -51,7 +51,7 @@ export const TopShelf = () => {
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-7xl items-center">
+      <div className="mx-auto flex h-12 max-w-400 items-center">
         <div className="py-2 pl-4">
           <div className="w-6">
             {showLoader ? (

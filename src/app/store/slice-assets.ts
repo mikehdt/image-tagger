@@ -43,31 +43,34 @@ export const loadAssets = createAsyncThunk(
 
 export const saveAssets = createAsyncThunk(
   'assets/saveImages',
-  async (fileId: string, { getState /*, dispatch*/ }) => {
-    // dispatch save state for image
-
+  async (fileId: string, { getState }) => {
     const {
       assets: { images },
     } = getState() as { assets: ImageAssets };
 
-    const assetIndex = images.findIndex((element) => element.fileId === fileId);
+    const asset = images.find((element) => element.fileId === fileId);
 
-    const updateTags = images[assetIndex].tags
-      .filter((tag) => tag.state !== 'ToDelete')
-      .map((tag) => ({
-        ...tag,
-        state: 'Active',
-      }));
+    if (!asset) {
+      throw new Error(`Asset with ID ${fileId} not found`);
+    }
 
-    const flattenedTags = updateTags.map((tag) => tag.name).join(', ');
+    const updateTags = asset.tagList.filter((tag) => asset.tagStatus[tag] !== 'ToDelete');
+
+    const flattenedTags = updateTags.join(', ');
 
     const success = await writeTagsToDisk(fileId, flattenedTags);
 
     if (success) {
-      return { assetIndex, tags: updateTags /* ioState? */ };
+      // Create a new clean tagStatus object with only saved tags
+      const newTagStatus = updateTags.reduce((acc, tag) => {
+        acc[tag] = TagState.SAVED;
+        return acc;
+      }, {} as {[key: string]: TagState});
+
+      return { assetIndex: images.findIndex((element) => element.fileId === fileId), tagList: updateTags, tagStatus: newTagStatus };
     }
 
-    throw new Error(`Unable to save the asset ${assetIndex}`);
+    throw new Error(`Unable to save the asset ${fileId}`);
   },
 );
 
@@ -137,27 +140,30 @@ const imagesSlice = createSlice({
     },
 
     resetTags: (state, { payload }: PayloadAction<string>) => {
-      const assetIndex = state.images.findIndex(
+      const asset = state.images.find(
         (element) => element.fileId === payload,
       );
 
-      state.images[assetIndex].tagList
-        // Clear new items
-        .filter((tagName) => {
-          if (state.images[assetIndex].tagStatus[tagName] === TagState.TO_ADD) {
-            delete state.images[assetIndex].tagStatus[tagName];
-            return false;
-          }
+      // More straightforward implementation
+      if (!asset) return;
 
-          return true;
-        })
-        // Clear delete marks
-        .map((tagName) => {
-          if (
-            state.images[assetIndex].tagStatus[tagName] === TagState.TO_DELETE
-          )
-            state.images[assetIndex].tagStatus[tagName] = TagState.SAVED;
-        });
+      // Create new filtered tagList
+      const newTagList = asset.tagList.filter(tag => {
+        // Remove TO_ADD tags completely
+        if (asset.tagStatus[tag] === TagState.TO_ADD) {
+          delete asset.tagStatus[tag];
+          return false;
+        }
+
+        // Reset TO_DELETE tags to SAVED
+        if (asset.tagStatus[tag] === TagState.TO_DELETE) {
+          asset.tagStatus[tag] = TagState.SAVED;
+        }
+
+        return true;
+      });
+
+      asset.tagList = newTagList;
     },
   },
 
@@ -195,14 +201,12 @@ const imagesSlice = createSlice({
       state.ioState = IoState.COMPLETE;
       state.ioMessage = undefined;
 
-      const { arg } = action.meta;
-      const { tagList, tagStatus } = action.payload;
+      // Use the index from the payload directly
+      const { assetIndex, tagList, tagStatus } = action.payload;
 
-      const imageIndex = state.images.findIndex((item) => item.fileId === arg);
-
-      state.images[imageIndex].ioState = IoState.COMPLETE;
-      state.images[imageIndex].tagList = tagList;
-      state.images[imageIndex].tagStatus = tagStatus;
+      state.images[assetIndex].ioState = IoState.COMPLETE;
+      state.images[assetIndex].tagList = tagList;
+      state.images[assetIndex].tagStatus = tagStatus;
     });
 
     builder.addCase(saveAssets.rejected, (state, action) => {
@@ -225,29 +229,22 @@ const imagesSlice = createSlice({
     },
 
     selectImageSizes: createSelector([(state) => state.images], (images) => {
-      // Could sort but I'm lazy
-      // Probably should move this logic to a helper instead of a selector?
-      return images.reduce(
-        (
-          acc: {
-            [key: string]: number;
-          },
-          item: ImageAsset,
-        ) => {
-          const composedDimensions = composeDimensions(item.dimensions);
+  if (!images.length) return {};
 
-          return typeof acc[composedDimensions] !== 'undefined'
-            ? {
-                ...acc,
-                [composedDimensions]: acc[composedDimensions] + 1,
-              }
-            : {
-                ...acc,
-                [composedDimensions]: 1,
-              };
-        },
-        {},
-      );
+  // Group by dimension
+  const dimensionGroups: Record<string, ImageAsset[]> = {};
+  for (const item of images) {
+    const dimension = composeDimensions(item.dimensions);
+    dimensionGroups[dimension] = dimensionGroups[dimension] || [];
+    dimensionGroups[dimension].push(item);
+  }
+
+  // Create count map
+  return Object.fromEntries(
+    Object.entries(dimensionGroups).map(([dim, assets]) =>
+      [dim, assets.length]
+    )
+  );
     }),
 
     selectTagsByStatus: (state, fileId) => {
@@ -256,26 +253,22 @@ const imagesSlice = createSlice({
       return selectedImage?.tagStatus || {};
     },
 
-    // @TODO: Although this is a derived state, it may be more performant to
-    // consider keeping the global tag state in sync?
     selectAllTags: createSelector([(state) => state.images], (imageAssets) => {
-      if (!imageAssets) return {};
+      if (!imageAssets?.length) return {};
 
-      return imageAssets.reduce((acc: KeyedCountList, asset: ImageAsset) => {
-        const { tagList } = asset;
+      const tagCounts: KeyedCountList = {};
 
-        // This code is annoying me, I don't like the map mutating this array
-        const newTagCounts: KeyedCountList = {};
+      // Process all images and count tags
+      for (const asset of imageAssets) {
+        for (const tag of asset.tagList) {
+          // Only count tags that aren't marked for deletion
+          if (asset.tagStatus[tag] !== TagState.TO_DELETE) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          }
+        }
+      }
 
-        tagList.map((tag) => {
-          newTagCounts[tag] = acc[tag] ? acc[tag] + 1 : 1;
-        });
-
-        return {
-          ...acc,
-          ...newTagCounts,
-        };
-      }, {});
+      return tagCounts;
     }),
   },
 });

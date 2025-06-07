@@ -1,4 +1,4 @@
-import { type ImageAsset } from '../store/slice-assets';
+import { type ImageAsset, TagState } from '../store/slice-assets';
 import { FilterMode } from '../store/slice-filters';
 import { composeDimensions } from './helpers';
 
@@ -8,12 +8,12 @@ export const applyFilters = ({
   filterSizes,
   filterMode,
 }: {
-  // Revisit this typing
   assets: ImageAsset[];
   filterTags: string[];
   filterSizes: string[];
   filterMode: FilterMode;
 }) => {
+  // Quick return if no filters are active or show all mode is selected
   if (
     (filterTags.length === 0 && filterSizes.length === 0) ||
     filterMode === FilterMode.SHOW_ALL
@@ -21,33 +21,45 @@ export const applyFilters = ({
     return assets;
   }
 
+  // Create a Set for faster lookups when checking dimensions
+  const filterSizesSet = new Set(filterSizes);
+
   return assets.filter((img: ImageAsset) => {
-    const { tagList, dimensions } = img;
-    const dimensionsComposed = composeDimensions(dimensions);
-    const filteredSizes = filterSizes.includes(dimensionsComposed);
+    // Check dimensions first as it's faster than checking tags
+    const dimensionsComposed = composeDimensions(img.dimensions);
+    const sizeMatches = filterSizesSet.has(dimensionsComposed);
 
-    switch (filterMode) {
-      case FilterMode.MATCH_ALL: {
-        const filteredTags = filterTags.every((r) => tagList.includes(r));
-
-        if (filterTags.length && filterSizes.length) {
-          return filteredTags && filteredSizes;
-        } else if (filterTags.length) {
-          return filteredTags;
-        } else if (filterSizes.length) {
-          return filteredSizes;
-        }
-
-        return false;
-      }
-
-      case FilterMode.MATCH_ANY: {
-        return filterTags.some((r) => tagList.includes(r)) || filteredSizes;
-      }
-
-      default: {
-        console.error('Unknown filter mode');
-      }
+    // If no tag filters, just check size
+    if (filterTags.length === 0) {
+      return sizeMatches;
     }
+
+    // Get active tags (exclude TO_DELETE tags)
+    const activeTags = img.tagList.filter(
+      tag => img.tagStatus[tag] !== TagState.TO_DELETE
+    );
+
+    // Match based on filter mode
+    if (filterMode === FilterMode.MATCH_ALL) {
+      const allTagsMatch = filterTags.every(tag => activeTags.includes(tag));
+
+      // If we have both size and tag filters, both must match
+      if (filterSizes.length > 0) {
+        return allTagsMatch && sizeMatches;
+      }
+
+      // Otherwise just check if all tags match
+      return allTagsMatch;
+    }
+
+    if (filterMode === FilterMode.MATCH_ANY) {
+      // For MATCH_ANY, either tags or size can match
+      const anyTagMatches = filterTags.some(tag => activeTags.includes(tag));
+      return anyTagMatches || sizeMatches;
+    }
+
+    // This should never happen if using enum correctly
+    console.error('Unknown filter mode:', filterMode);
+    return false;
   });
 };
