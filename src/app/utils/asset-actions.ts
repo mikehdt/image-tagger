@@ -33,20 +33,32 @@ export const getImageFiles = async () => {
 
     const dimensions = (await imageDimensionsFromStream(
       stream,
-    )) as ImageDimensions;
+    )) as ImageDimensions;    // Handle missing or empty tag files
+    let tagStatus: { [key: string]: TagState } = {};
+    let tagList: string[] = [];
 
-    const tagStatus = await fs
-      .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
-      .split(', ')
-      .reduce(
-        (acc, tag) => ({
-          ...acc,
-          [tag.trim()]: TagState.SAVED,
-        }),
-        {},
-      );
+    try {
+      const tagContent = fs.readFileSync(`${dataPath}/${fileId}.txt`, 'utf8').trim();
 
-    const tagList = Object.keys(tagStatus);
+      // Only process if the file has actual content
+      if (tagContent) {
+        tagStatus = tagContent
+          .split(', ')
+          .filter(tag => tag.trim() !== '') // Filter out empty tags
+          .reduce(
+            (acc, tag) => ({
+              ...acc,
+              [tag.trim()]: TagState.SAVED,
+            }),
+            {} as { [key: string]: TagState },
+          );
+
+        tagList = Object.keys(tagStatus);
+      }
+    } catch (err) {
+      // File doesn't exist or other error - just use empty tags
+      console.log(`No tags found for ${fileId}, using empty tags`);
+    }
 
     imageAssets.push({
       ioState: IoState.COMPLETE,

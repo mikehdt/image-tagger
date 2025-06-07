@@ -24,34 +24,37 @@ const Tag = ({
 }: TagProps) => {
   // Memoize style calculations to prevent recalculating on every render
   const styles = useMemo(() => {
-    let tagColor = '';
-    let tagHighlightColor = '';
-    let tagCountColor = '';
+    // Common base classes
+    const baseTagClass = 'mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
+    const baseCountClass = 'ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs';
 
+    // State-specific classes
+    let tagStateClasses = '';
+    let tagCountClasses = '';
+
+    // Apply appropriate classes based on tag state
     if (tagState === TagState.TO_ADD) {
-      tagColor = 'border-amber-500';
-      tagHighlightColor = highlight
-        ? 'bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
-        : 'hover:bg-amber-100';
-      tagCountColor = 'border-amber-300';
+      tagStateClasses = highlight
+        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
+        : 'border-amber-500 hover:bg-amber-100';
+      tagCountClasses = 'border-amber-300';
     } else if (tagState === TagState.TO_DELETE) {
-      tagColor = 'border-pink-500';
-      tagHighlightColor = highlight
-        ? 'bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
-        : 'hover:bg-pink-100';
-      tagCountColor = 'border-pink-300';
+      tagStateClasses = highlight
+        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
+        : 'border-pink-500 hover:bg-pink-100';
+      tagCountClasses = 'border-pink-300';
     } else {
-      tagColor = 'border-teal-500';
-      tagHighlightColor = highlight
-        ? 'bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
-        : 'hover:bg-teal-100';
-      tagCountColor = 'border-emerald-300';
+      // SAVED state
+      tagStateClasses = highlight
+        ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
+        : 'border-teal-500 hover:bg-teal-100';
+      tagCountClasses = 'border-emerald-300';
     }
 
     return {
-      tagClass: `mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all ${tagColor} ${tagHighlightColor} ${fade ? 'opacity-25' : ''}`,
+      tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''}`,
       tagTextClass: tagState === TagState.TO_DELETE ? 'line-through' : '',
-      countClass: `ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs ${tagCountColor}`,
+      countClass: `${baseCountClass} ${tagCountClasses}`,
     };
   }, [tagState, highlight, fade]);
 

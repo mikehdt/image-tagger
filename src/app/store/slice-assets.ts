@@ -104,8 +104,12 @@ const imagesSlice = createSlice({
         (element) => element.fileId === assetId,
       );
 
-      state.images[imageIndex].tagList.push(tagName);
-      state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
+      // Even if duplicate tags might exist, we'll only allow adding if not already in the list
+      // This prevents inadvertently adding more duplicates
+      if (!state.images[imageIndex].tagList.includes(tagName)) {
+        state.images[imageIndex].tagList.push(tagName);
+        state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
+      }
     },
 
     deleteTag: (

@@ -134,9 +134,9 @@ export const Asset = ({
 
       <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
         {/* Rely on individual Tag memoization instead of memoizing the whole array */}
-        {tagList.map((tagName: string) => (
+        {tagList.map((tagName: string, index: number) => (
           <Tag
-            key={tagName}
+            key={`${assetId}-${tagName}-${index}`}
             fade={newTagInput !== '' && newTagInput !== tagName}
             tagName={tagName}
             tagState={tagsByStatus[tagName]}
