@@ -57,6 +57,11 @@ export const Asset = ({
     Object.keys(tagsByStatus)
   , [tagsByStatus]);
 
+  // Create a Set from filterTags for efficient lookups
+  const filterTagsSet = useMemo(() =>
+    new Set(filterTags)
+  , [filterTags]);
+
   // Memoize this calculation to prevent unnecessary re-renders
   const showActions = useMemo(() =>
     tagList.length &&
@@ -128,16 +133,17 @@ export const Asset = ({
       </div>
 
       <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
-        {tagList.map((tagName: string, idx: number) => (
+        {/* Rely on individual Tag memoization instead of memoizing the whole array */}
+        {tagList.map((tagName: string) => (
           <Tag
-            key={`${idx}-${tagName}`}
+            key={tagName}
             fade={newTagInput !== '' && newTagInput !== tagName}
             tagName={tagName}
             tagState={tagsByStatus[tagName]}
-            count={globalTagList[tagName]}
+            count={globalTagList[tagName] || 0}
             onToggleTag={toggleTag}
             onDeleteTag={toggleDeleteTag}
-            highlight={filterTags.includes(tagName)}
+            highlight={filterTagsSet.has(tagName)}
           />
         ))}
 

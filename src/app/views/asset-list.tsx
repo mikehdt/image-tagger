@@ -24,6 +24,9 @@ export const AssetList = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterMode = useAppSelector(selectFilterMode);
 
+  // Create a Set from filterSizes for O(1) lookups instead of O(n)
+  const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
+
   // Memoize filtered assets so they only recalculate when dependencies change
   const filteredAssets = useMemo(() =>
     applyFilters({
@@ -34,19 +37,35 @@ export const AssetList = () => {
     })
   , [assets, filterTags, filterSizes, filterMode]);
 
+  // Pre-calculate dimensions for each asset to avoid recalculating in the render
+  const assetDimensions = useMemo(() => {
+    const dimensions = new Map();
+    filteredAssets.forEach(({ fileId, dimensions: dims }) => {
+      dimensions.set(fileId, composeDimensions(dims));
+    });
+    return dimensions;
+  }, [filteredAssets]);
+
   // Memoize rendered assets to prevent unnecessary re-renders
   const renderedAssets = useMemo(() =>
-    filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => (
-      <MemoizedAsset
-        key={fileId}
-        assetId={fileId}
-        fileExtension={fileExtension}
-        dimensionsActive={filterSizes.includes(composeDimensions(dimensions))}
-        dimensions={dimensions}
-        ioState={ioState}
-      />
-    ))
-  , [filteredAssets, filterSizes]);
+    filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => {
+      // Get the pre-calculated dimension string
+      const dimensionString = assetDimensions.get(fileId);
+      // Check if it's in our filter set
+      const isActive = filterSizesSet.has(dimensionString);
+
+      return (
+        <MemoizedAsset
+          key={fileId}
+          assetId={fileId}
+          fileExtension={fileExtension}
+          dimensionsActive={isActive}
+          dimensions={dimensions}
+          ioState={ioState}
+        />
+      );
+    })
+  , [filteredAssets, filterSizesSet, assetDimensions]);
 
   // Render a message when no assets match the filters
   if (renderedAssets.length === 0) {
