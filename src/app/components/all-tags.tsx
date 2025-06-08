@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectAllTags } from '../store/slice-assets';
@@ -34,7 +34,7 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
   };
 
   // Calculate and update panel position
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (isOpen && containerRef?.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const panelWidth = 256; // w-64 = 16rem = 256px
@@ -58,12 +58,12 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
         left: leftPos
       });
     }
-  };
+  }, [isOpen, containerRef]);
 
   // Update position when the panel opens or container reference changes
   useEffect(() => {
     updatePosition();
-  }, [isOpen, containerRef]);
+  }, [isOpen, containerRef, updatePosition]);
 
   // Handle window resize to keep panel in view
   useEffect(() => {
@@ -77,7 +77,7 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   // Handle click outside to close panel
   useEffect(() => {
