@@ -75,7 +75,7 @@ const NewInputComponent = ({
   }, [inputWidth]); // Re-run when width changes
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex mr-2">
       <input
         ref={inputRef}
         value={inputValue}

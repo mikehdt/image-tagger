@@ -3,10 +3,12 @@ import {
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
   FunnelIcon,
+  TagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useRef, useState } from 'react';
 
+import { AllTags } from '../components/all-tags';
 import { Loader } from '../components/loader';
 import { NewInput } from '../components/new-input';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -24,6 +26,8 @@ import { decomposeDimensions } from '../utils/helpers';
 
 export const TopShelf = () => {
   const [newTagInput, setNewTagInput] = useState<string>('');
+  const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
+  const tagButtonRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const showLoader = ioState === IoState.LOADING || ioState === IoState.SAVING;
@@ -84,7 +88,7 @@ export const TopShelf = () => {
           />
 
           {filterTags.length || filterSizes.length ? (
-            <span className="ml-2 flex items-center rounded-full border border-slate-200 pl-2">
+            <span className="ml-2 mr-4 flex items-center rounded-full border border-slate-200 pl-2">
               {filterTags.map((item, idx) => (
                 <span
                   key={`${idx}-${item}`}
@@ -113,6 +117,24 @@ export const TopShelf = () => {
               </button>
             </span>
           ) : null}
+
+          {/* Tag summary list button */}
+          <div className="relative" ref={tagButtonRef}>
+            <span
+              onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
+              className="mr-4 p-2 border inline-flex items-center border-slate-300 cursor-pointer rounded-sm hover:bg-slate-50"
+              title="Show tag summary"
+            >
+              <TagIcon className="w-4 mr-2" /> Tag List
+            </span>
+
+            {/* Tag panel component */}
+            <AllTags
+              isOpen={isTagPanelOpen}
+              onClose={() => setIsTagPanelOpen(false)}
+              containerRef={tagButtonRef}
+            />
+          </div>
 
           <button
             type="button"
