@@ -118,28 +118,10 @@ export const TopShelf = () => {
             </span>
           ) : null}
 
-          {/* Tag summary list button */}
-          <div className="relative" ref={tagButtonRef}>
-            <span
-              onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className="mr-4 p-2 border inline-flex items-center border-slate-300 cursor-pointer rounded-sm hover:bg-slate-50"
-              title="Show tag summary"
-            >
-              <TagIcon className="w-4 mr-2" /> Tag List
-            </span>
-
-            {/* Tag panel component */}
-            <AllTags
-              isOpen={isTagPanelOpen}
-              onClose={() => setIsTagPanelOpen(false)}
-              containerRef={tagButtonRef}
-            />
-          </div>
-
           <button
             type="button"
             onClick={onToggleTagFilterMode}
-            className="ml-2 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
+            className="ml-2 mr-4 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
           >
             {filterTagsMode === FilterMode.SHOW_ALL && (
               <>
@@ -166,6 +148,24 @@ export const TopShelf = () => {
               </>
             )}
           </button>
+
+          {/* Tag summary list button */}
+          <div className="relative" ref={tagButtonRef}>
+            <span
+              onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
+              className="p-2 border inline-flex items-center border-slate-300 cursor-pointer rounded-sm hover:bg-slate-50"
+              title="Show tag summary"
+            >
+              <TagIcon className="w-4 mr-2" /> Tag List
+            </span>
+
+            {/* Tag panel component */}
+            <AllTags
+              isOpen={isTagPanelOpen}
+              onClose={() => setIsTagPanelOpen(false)}
+              containerRef={tagButtonRef}
+            />
+          </div>
         </div>
       </div>
     </div>

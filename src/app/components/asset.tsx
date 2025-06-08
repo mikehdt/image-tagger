@@ -158,7 +158,7 @@ export const Asset = ({
         <span className="inline-flex h-8 min-w-0 items-center tabular-nums">
           <button
             type="button"
-            className={`mr-2 cursor-pointer rounded-sm border border-sky-300 ${dimensionsActive ? 'bg-sky-300 text-sky-900' : 'bg-sky-100'} px-2 py-0.5`}
+            className={`mr-2 cursor-pointer rounded-sm border border-sky-300 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'} px-2 py-0.5`}
             onClick={() => toggleSize(dimensionsComposed)}
           >
             {dimensions.width}&times;{dimensions.height}
