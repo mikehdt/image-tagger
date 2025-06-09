@@ -1,4 +1,4 @@
-import { type ImageAsset, TagState } from '../store/slice-assets';
+import { type ImageAsset } from '../store/slice-assets';
 import { FilterMode } from '../store/slice-filters';
 import { composeDimensions } from './helpers';
 
@@ -34,14 +34,9 @@ export const applyFilters = ({
       return sizeMatches;
     }
 
-    // Get active tags (exclude TO_DELETE tags)
-    const activeTags = img.tagList.filter(
-      tag => img.tagStatus[tag] !== TagState.TO_DELETE
-    );
-
     // Match based on filter mode
     if (filterMode === FilterMode.MATCH_ALL) {
-      const allTagsMatch = filterTags.every(tag => activeTags.includes(tag));
+      const allTagsMatch = filterTags.every((tag) => img.tagList.includes(tag));
 
       // If we have both size and tag filters, both must match
       if (filterSizes.length > 0) {
@@ -54,7 +49,7 @@ export const applyFilters = ({
 
     if (filterMode === FilterMode.MATCH_ANY) {
       // For MATCH_ANY, either tags or size can match
-      const anyTagMatches = filterTags.some(tag => activeTags.includes(tag));
+      const anyTagMatches = filterTags.some((tag) => img.tagList.includes(tag));
       return anyTagMatches || sizeMatches;
     }
 

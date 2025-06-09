@@ -57,6 +57,7 @@ export type ImageAsset = {
   dimensions: ImageDimensions;
   tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
   tagList: string[];
+  savedTagList: string[]; // Original tag order from last save
 };
 
 export const loadAssets = createAsyncThunk(
@@ -100,6 +101,7 @@ export const saveAssets = createAsyncThunk(
         assetIndex: images.findIndex((element) => element.fileId === fileId),
         tagList: updateTags,
         tagStatus: newTagStatus,
+        savedTagList: [...updateTags], // Store the current order as the saved order
       };
     }
 
@@ -245,18 +247,25 @@ const imagesSlice = createSlice({
       const asset = { ...state.images[assetIndex] };
       const newTagStatus = { ...asset.tagStatus };
 
-      // Create new filtered tagList
-      const newTagList = asset.tagList.filter((tag) => {
-        // Remove TO_ADD tags completely
+      // Start with the saved order as our base
+      const savedList = [...(asset.savedTagList || [])];
+
+      // Create filter map of valid tags (those that are not TO_ADD)
+      const validTags = new Set();
+      asset.tagList.forEach((tag) => {
+        // Skip TO_ADD tags
         if (hasState(newTagStatus[tag], TagState.TO_ADD)) {
           delete newTagStatus[tag];
-          return false;
+        } else {
+          validTags.add(tag);
+          // Reset all flags to SAVED state
+          newTagStatus[tag] = TagState.SAVED;
         }
-
-        // Reset all flags to SAVED state
-        newTagStatus[tag] = TagState.SAVED;
-        return true;
       });
+
+      // Generate the restored tag list from the saved order
+      // Only include tags that still exist (weren't marked as TO_ADD)
+      const newTagList = savedList.filter((tag) => validTags.has(tag));
 
       // Replace the entire asset with a new object
       state.images = [
@@ -306,11 +315,12 @@ const imagesSlice = createSlice({
       state.ioMessage = undefined;
 
       // Use the index from the payload directly
-      const { assetIndex, tagList, tagStatus } = action.payload;
+      const { assetIndex, tagList, tagStatus, savedTagList } = action.payload;
 
       state.images[assetIndex].ioState = IoState.COMPLETE;
       state.images[assetIndex].tagList = tagList;
       state.images[assetIndex].tagStatus = tagStatus;
+      state.images[assetIndex].savedTagList = savedTagList;
     });
 
     builder.addCase(saveAssets.rejected, (state, action) => {

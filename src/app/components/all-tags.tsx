@@ -23,7 +23,7 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Add state for sort direction and type
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [sortType, setSortType] = useState<SortType>('count');
 
   // Handle tag click to toggle filters

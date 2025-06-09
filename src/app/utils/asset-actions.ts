@@ -33,18 +33,20 @@ export const getImageFiles = async () => {
 
     const dimensions = (await imageDimensionsFromStream(
       stream,
-    )) as ImageDimensions;    // Handle missing or empty tag files
+    )) as ImageDimensions; // Handle missing or empty tag files
     let tagStatus: { [key: string]: TagState } = {};
     let tagList: string[] = [];
 
     try {
-      const tagContent = fs.readFileSync(`${dataPath}/${fileId}.txt`, 'utf8').trim();
+      const tagContent = fs
+        .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
+        .trim();
 
       // Only process if the file has actual content
       if (tagContent) {
         tagStatus = tagContent
           .split(', ')
-          .filter(tag => tag.trim() !== '') // Filter out empty tags
+          .filter((tag) => tag.trim() !== '') // Filter out empty tags
           .reduce(
             (acc, tag) => ({
               ...acc,
@@ -67,6 +69,7 @@ export const getImageFiles = async () => {
       dimensions,
       tagStatus,
       tagList,
+      savedTagList: [...tagList], // Make a copy of the initial tag list
     });
   }
 
