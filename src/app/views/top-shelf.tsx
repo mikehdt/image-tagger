@@ -13,7 +13,6 @@ import { SyntheticEvent, useRef, useState } from 'react';
 import { AllTags } from '../components/all-tags';
 import { Loader } from '../components/loader';
 import { NewInput } from '../components/new-input';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   IoState,
   loadAssets,
@@ -21,7 +20,8 @@ import {
   saveAllAssets,
   selectHasModifiedAssets,
   selectIoState,
-} from '../store/slice-assets';
+} from '../store/assets';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   addTagFilter,
   clearFilters,

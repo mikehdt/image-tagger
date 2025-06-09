@@ -1,8 +1,8 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { selectAllTags } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectAllTags } from '../store/slice-assets';
 import { selectFilterTags, toggleTagFilter } from '../store/slice-filters';
 
 interface AllTagsProps {

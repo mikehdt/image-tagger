@@ -4,8 +4,8 @@ import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset';
+import { selectAllImages } from '../store/assets';
 import { useAppSelector } from '../store/hooks';
-import { selectAllImages } from '../store/slice-assets';
 import {
   selectFilterMode,
   selectFilterSizes,

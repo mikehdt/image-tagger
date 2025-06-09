@@ -11,7 +11,7 @@ import {
   ImageDimensions,
   IoState,
   TagState,
-} from '../store/slice-assets';
+} from '../store/assets';
 
 export const getImageFiles = async () => {
   const dir = path.resolve(dataPath);

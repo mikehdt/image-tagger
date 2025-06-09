@@ -1,4 +1,4 @@
-import { ImageDimensions } from '../store/slice-assets';
+import { ImageDimensions } from '../store/assets';
 
 export const composeDimensions = (dimensions: ImageDimensions): string =>
   `${dimensions.width}x${dimensions.height}`;

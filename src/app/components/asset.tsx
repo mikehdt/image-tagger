@@ -22,7 +22,6 @@ import {
   useState,
 } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   addTag,
   deleteTag,
@@ -33,7 +32,8 @@ import {
   saveAssets,
   selectAllTags,
   selectOrderedTagsWithStatus,
-} from '../store/slice-assets';
+} from '../store/assets';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   selectFilterTags,
   toggleSizeFilter,

@@ -4,7 +4,7 @@ import {
   type ThunkAction,
 } from '@reduxjs/toolkit';
 
-import { assetsReducer } from './slice-assets';
+import { assetsReducer } from './assets';
 import { filtersReducer } from './slice-filters';
 
 export const makeStore = () => {

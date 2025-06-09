@@ -1,7 +1,7 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { memo, type SyntheticEvent, useMemo } from 'react';
 
-import { hasState, TagState } from '@/app/store/slice-assets';
+import { hasState, TagState } from '@/app/store/assets';
 
 type TagProps = {
   tagName: string;
@@ -27,8 +27,10 @@ const Tag = ({
   // Memoize style calculations to prevent recalculating on every render
   const styles = useMemo(() => {
     // Common base classes
-    const baseTagClass = 'mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
-    const baseCountClass = 'ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs';
+    const baseTagClass =
+      'mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
+    const baseCountClass =
+      'ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs';
 
     // State-specific classes
     let tagStateClasses = '';
@@ -66,7 +68,9 @@ const Tag = ({
 
     return {
       tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
-      tagTextClass: hasState(tagState, TagState.TO_DELETE) ? 'line-through' : '',
+      tagTextClass: hasState(tagState, TagState.TO_DELETE)
+        ? 'line-through'
+        : '',
       countClass: `${baseCountClass} ${tagCountClasses}`,
     };
   }, [tagState, highlight, fade, isDraggable]);
@@ -81,18 +85,9 @@ const Tag = ({
   };
 
   return (
-    <div
-      className={styles.tagClass}
-      onClick={handleToggleTag}
-    >
-      <span className={styles.tagTextClass}>
-        {tagName}
-      </span>
-      <span
-        className={styles.countClass}
-      >
-        {count}
-      </span>
+    <div className={styles.tagClass} onClick={handleToggleTag}>
+      <span className={styles.tagTextClass}>{tagName}</span>
+      <span className={styles.countClass}>{count}</span>
       <span
         className="ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white"
         onClick={handleDeleteTag}

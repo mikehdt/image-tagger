@@ -1,4 +1,4 @@
-import { type ImageAsset } from '../store/slice-assets';
+import { type ImageAsset } from '../store/assets';
 import { FilterMode } from '../store/slice-filters';
 import { composeDimensions } from './helpers';
 
