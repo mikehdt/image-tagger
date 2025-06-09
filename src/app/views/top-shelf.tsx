@@ -1,5 +1,7 @@
 import {
+  ArchiveBoxArrowDownIcon,
   ArrowPathIcon,
+  BackspaceIcon,
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
   FunnelIcon,
@@ -12,7 +14,14 @@ import { AllTags } from '../components/all-tags';
 import { Loader } from '../components/loader';
 import { NewInput } from '../components/new-input';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { IoState, loadAssets, selectIoState } from '../store/slice-assets';
+import {
+  IoState,
+  loadAssets,
+  resetAllTags,
+  saveAllAssets,
+  selectHasModifiedAssets,
+  selectIoState,
+} from '../store/slice-assets';
 import {
   addTagFilter,
   clearFilters,
@@ -34,9 +43,12 @@ export const TopShelf = () => {
   const filterTagsMode = useAppSelector(selectFilterMode);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
+  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
   const doRefresh = () => dispatch(loadAssets());
   const onToggleTagFilterMode = () => dispatch(toggleTagFilterMode());
+  const saveAllChanges = () => dispatch(saveAllAssets());
+  const cancelAllChanges = () => dispatch(resetAllTags());
 
   const addNewFilter = (e: SyntheticEvent, tag: string) => {
     e.stopPropagation();
@@ -56,8 +68,8 @@ export const TopShelf = () => {
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center">
-        <div className="py-2 pl-4">
-          <div className="w-6">
+        <div className="flex py-2 pl-4">
+          <div className="mr-2 w-6">
             {showLoader ? (
               <Loader />
             ) : (
@@ -71,6 +83,40 @@ export const TopShelf = () => {
               </button>
             )}
           </div>
+          {!showLoader && (
+            <>
+              <div className="mr-2 w-6">
+                <button
+                  type="button"
+                  onClick={saveAllChanges}
+                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
+                  title={
+                    hasModifiedAssets
+                      ? 'Save all tag changes'
+                      : 'No changes to save'
+                  }
+                  disabled={!hasModifiedAssets}
+                >
+                  <ArchiveBoxArrowDownIcon />
+                </button>
+              </div>
+              <div className="w-6">
+                <button
+                  type="button"
+                  onClick={cancelAllChanges}
+                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
+                  title={
+                    hasModifiedAssets
+                      ? 'Cancel all tag changes'
+                      : 'No changes to cancel'
+                  }
+                  disabled={!hasModifiedAssets}
+                >
+                  <BackspaceIcon />
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
           <span className="mr-2 inline-flex text-slate-500">
@@ -88,7 +134,7 @@ export const TopShelf = () => {
           />
 
           {filterTags.length || filterSizes.length ? (
-            <span className="ml-2 mr-4 flex items-center rounded-full border border-slate-200 pl-2">
+            <span className="mr-4 ml-2 flex items-center rounded-full border border-slate-200 pl-2">
               {filterTags.map((item, idx) => (
                 <span
                   key={`${idx}-${item}`}
@@ -121,7 +167,7 @@ export const TopShelf = () => {
           <button
             type="button"
             onClick={onToggleTagFilterMode}
-            className="ml-2 mr-4 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
+            className="mr-4 ml-2 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
           >
             {filterTagsMode === FilterMode.SHOW_ALL && (
               <>
@@ -153,10 +199,10 @@ export const TopShelf = () => {
           <div className="relative" ref={tagButtonRef}>
             <span
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className="p-2 border inline-flex items-center border-slate-300 cursor-pointer rounded-sm hover:bg-slate-50"
+              className="inline-flex cursor-pointer items-center rounded-sm border border-slate-300 p-2 hover:bg-slate-50"
               title="Show tag summary"
             >
-              <TagIcon className="w-4 mr-2" /> Tag List
+              <TagIcon className="mr-2 w-4" /> Tag List
             </span>
 
             {/* Tag panel component */}

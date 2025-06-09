@@ -109,6 +109,78 @@ export const saveAssets = createAsyncThunk(
   },
 );
 
+// Save all assets with modified tags
+export const saveAllAssets = createAsyncThunk(
+  'assets/saveAllAssets',
+  async (_, { getState, dispatch }) => {
+    const {
+      assets: { images },
+    } = getState() as { assets: ImageAssets };
+
+    // Find all images with tag status that's not SAVED (0)
+    const modifiedAssets = images.filter((asset) =>
+      asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+    );
+
+    if (modifiedAssets.length === 0) {
+      return { savedCount: 0 };
+    }
+
+    const results: Array<{
+      assetIndex: number;
+      tagList: string[];
+      tagStatus: { [key: string]: number };
+      savedTagList: string[];
+    }> = [];
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Save each modified asset
+    for (const asset of modifiedAssets) {
+      try {
+        const result = await dispatch(saveAssets(asset.fileId)).unwrap();
+        results.push(result);
+        successCount++;
+      } catch (error) {
+        errorCount++;
+        console.error(`Failed to save asset ${asset.fileId}:`, error);
+      }
+    }
+
+    return {
+      savedCount: successCount,
+      errorCount: errorCount,
+      results,
+    };
+  },
+);
+
+// Cancel all tag changes
+export const resetAllTags = createAsyncThunk(
+  'assets/resetAllTags',
+  async (_, { getState, dispatch }) => {
+    const {
+      assets: { images },
+    } = getState() as { assets: ImageAssets };
+
+    // Find all images with tag status that's not SAVED (0)
+    const modifiedAssets = images.filter((asset) =>
+      asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+    );
+
+    if (modifiedAssets.length === 0) {
+      return { resetCount: 0 };
+    }
+
+    // Reset tags for each modified asset
+    for (const asset of modifiedAssets) {
+      dispatch(resetTags(asset.fileId));
+    }
+
+    return { resetCount: modifiedAssets.length };
+  },
+);
+
 type ImageAssets = {
   ioState: IoState;
   ioMessage: undefined | string;
@@ -327,6 +399,53 @@ const imagesSlice = createSlice({
       state.ioState = IoState.ERROR;
       state.ioMessage = action.error.message;
     });
+
+    // Save All Assets
+    builder.addCase(saveAllAssets.pending, (state) => {
+      state.ioState = IoState.SAVING;
+      state.ioMessage = 'Saving all modified assets...';
+    });
+
+    builder.addCase(saveAllAssets.fulfilled, (state, action) => {
+      state.ioState = IoState.COMPLETE;
+      // We don't need to update the state here as each individual saveAsset action
+      // has already updated each image's state
+      if (action.payload.savedCount > 0) {
+        state.ioMessage = `Successfully saved ${action.payload.savedCount} assets`;
+      } else {
+        state.ioMessage = 'No assets needed saving';
+      }
+
+      if (action.payload.errorCount) {
+        state.ioMessage += `, ${action.payload.errorCount} errors`;
+      }
+    });
+
+    builder.addCase(saveAllAssets.rejected, (state, action) => {
+      state.ioState = IoState.ERROR;
+      state.ioMessage = `Failed to save all assets: ${action.error.message}`;
+    });
+
+    // Reset All Tags
+    builder.addCase(resetAllTags.pending, (state) => {
+      state.ioState = IoState.LOADING;
+      state.ioMessage = 'Canceling all tag changes...';
+    });
+
+    builder.addCase(resetAllTags.fulfilled, (state, action) => {
+      state.ioState = IoState.COMPLETE;
+      // Individual resetTags actions have already updated the state
+      if (action.payload.resetCount > 0) {
+        state.ioMessage = `Changes canceled for ${action.payload.resetCount} assets`;
+      } else {
+        state.ioMessage = 'No changes to cancel';
+      }
+    });
+
+    builder.addCase(resetAllTags.rejected, (state, action) => {
+      state.ioState = IoState.ERROR;
+      state.ioMessage = `Failed to cancel all changes: ${action.error.message}`;
+    });
   },
 
   selectors: {
@@ -341,26 +460,6 @@ const imagesSlice = createSlice({
     selectImageCount: (state) => {
       return state.images.length;
     },
-
-    selectImageSizes: createSelector([(state) => state.images], (images) => {
-      if (!images.length) return {};
-
-      // Group by dimension
-      const dimensionGroups: Record<string, ImageAsset[]> = {};
-      for (const item of images) {
-        const dimension = composeDimensions(item.dimensions);
-        dimensionGroups[dimension] = dimensionGroups[dimension] || [];
-        dimensionGroups[dimension].push(item);
-      }
-
-      // Create count map
-      return Object.fromEntries(
-        Object.entries(dimensionGroups).map(([dim, assets]) => [
-          dim,
-          assets.length,
-        ]),
-      );
-    }),
 
     selectTagsByStatus: (state, fileId) => {
       const selectedImage = state.images.find((item) => item.fileId === fileId);
@@ -387,6 +486,26 @@ const imagesSlice = createSlice({
         }));
       },
     ),
+
+    selectImageSizes: createSelector([(state) => state.images], (images) => {
+      if (!images.length) return {};
+
+      // Group by dimension
+      const dimensionGroups: Record<string, ImageAsset[]> = {};
+      for (const item of images) {
+        const dimension = composeDimensions(item.dimensions);
+        dimensionGroups[dimension] = dimensionGroups[dimension] || [];
+        dimensionGroups[dimension].push(item);
+      }
+
+      // Create count map
+      return Object.fromEntries(
+        Object.entries(dimensionGroups).map(([dim, assets]) => [
+          dim,
+          assets.length,
+        ]),
+      );
+    }),
 
     selectTagsForAsset: (state, fileId) => {
       const selectedImage = state.images.find((item) => item.fileId === fileId);
@@ -419,6 +538,7 @@ const imagesSlice = createSlice({
 export const { reducer: assetsReducer } = imagesSlice;
 export const { addTag, deleteTag, reorderTags, resetTags } =
   imagesSlice.actions;
+// loadAssets, saveAssets, saveAllAssets, and resetAllTags are exported at the top of file
 export const {
   selectIoState,
   selectAllImages,
@@ -429,3 +549,11 @@ export const {
   selectOrderedTagsWithStatus,
   selectTagsForAsset,
 } = imagesSlice.selectors;
+
+// Custom selector to check if any assets have modified tags
+export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
+  // Check if any asset has tags that aren't in the SAVED state
+  return state.assets.images.some((asset) =>
+    asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+  );
+};
