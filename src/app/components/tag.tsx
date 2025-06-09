@@ -1,14 +1,15 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { memo, type SyntheticEvent, useMemo } from 'react';
 
-import { TagState } from '@/app/store/slice-assets';
+import { hasState, TagState } from '@/app/store/slice-assets';
 
 type TagProps = {
   tagName: string;
-  tagState: TagState;
+  tagState: number; // Changed to number to support bitwise flags
   count: number;
   highlight: boolean;
   fade: boolean;
+  isDraggable?: boolean;
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
 };
@@ -19,6 +20,7 @@ const Tag = ({
   count,
   highlight,
   fade,
+  isDraggable = false,
   onToggleTag,
   onDeleteTag,
 }: TagProps) => {
@@ -33,30 +35,41 @@ const Tag = ({
     let tagCountClasses = '';
 
     // Apply appropriate classes based on tag state
-    if (tagState === TagState.TO_ADD) {
-      tagStateClasses = highlight
-        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
-        : 'border-amber-500 hover:bg-amber-100';
-      tagCountClasses = 'border-amber-300';
-    } else if (tagState === TagState.TO_DELETE) {
-      tagStateClasses = highlight
-        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
-        : 'border-pink-500 hover:bg-pink-100';
-      tagCountClasses = 'border-pink-300';
-    } else {
-      // SAVED state
+    if (tagState === TagState.SAVED) {
+      // SAVED state (0)
       tagStateClasses = highlight
         ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
         : 'border-teal-500 hover:bg-teal-100';
       tagCountClasses = 'border-emerald-300';
+    } else {
+      // For combined states, prioritize certain visual styles
+      if (hasState(tagState, TagState.TO_DELETE)) {
+        // TO_DELETE is most important visual indicator
+        tagStateClasses = highlight
+          ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
+          : 'border-pink-500 hover:bg-pink-100';
+        tagCountClasses = 'border-pink-300';
+      } else if (hasState(tagState, TagState.TO_ADD)) {
+        // TO_ADD is second priority
+        tagStateClasses = highlight
+          ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
+          : 'border-amber-500 hover:bg-amber-100';
+        tagCountClasses = 'border-amber-300';
+      } else if (hasState(tagState, TagState.DIRTY)) {
+        // DIRTY is lowest priority
+        tagStateClasses = highlight
+          ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
+          : 'border-indigo-500 hover:bg-indigo-100';
+        tagCountClasses = 'border-indigo-300';
+      }
     }
 
     return {
-      tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''}`,
-      tagTextClass: tagState === TagState.TO_DELETE ? 'line-through' : '',
+      tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
+      tagTextClass: hasState(tagState, TagState.TO_DELETE) ? 'line-through' : '',
       countClass: `${baseCountClass} ${tagCountClasses}`,
     };
-  }, [tagState, highlight, fade]);
+  }, [tagState, highlight, fade, isDraggable]);
 
   const handleToggleTag = (e: SyntheticEvent) => {
     onToggleTag(e, tagName);
@@ -98,13 +111,11 @@ const areEqual = (prevProps: TagProps, nextProps: TagProps) => {
     prevProps.count === nextProps.count &&
     prevProps.highlight === nextProps.highlight &&
     prevProps.fade === nextProps.fade &&
+    prevProps.isDraggable === nextProps.isDraggable
     // Functions references should be stable from parent with useCallback
-    prevProps.onToggleTag === nextProps.onToggleTag &&
-    prevProps.onDeleteTag === nextProps.onDeleteTag
   );
 };
 
-// Use memo with the custom comparison function
-const CachedTag = memo(Tag, areEqual);
+const MemoizedTag = memo(Tag, areEqual);
 
-export { CachedTag as Tag };
+export { MemoizedTag as Tag };

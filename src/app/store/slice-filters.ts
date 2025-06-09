@@ -80,8 +80,8 @@ const filtersSlice = createSlice({
     selectFilterCount: (state) => ({
       tags: state.filterTags.length,
       sizes: state.filterSizes.length,
-      total: state.filterTags.length + state.filterSizes.length
-    })
+      total: state.filterTags.length + state.filterSizes.length,
+    }),
   },
 });
 
@@ -100,5 +100,5 @@ export const {
   selectFilterMode,
   selectFilterSizes,
   selectHasActiveFilters,
-  selectFilterCount
+  selectFilterCount,
 } = filtersSlice.selectors;

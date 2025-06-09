@@ -1,11 +1,11 @@
 'use client';
 
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { Fragment, useMemo, memo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset';
 import { useAppSelector } from '../store/hooks';
-import { ImageAsset, selectAllImages } from '../store/slice-assets';
+import { selectAllImages } from '../store/slice-assets';
 import {
   selectFilterMode,
   selectFilterSizes,
@@ -28,14 +28,16 @@ export const AssetList = () => {
   const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
 
   // Memoize filtered assets so they only recalculate when dependencies change
-  const filteredAssets = useMemo(() =>
-    applyFilters({
-      assets,
-      filterTags,
-      filterSizes,
-      filterMode,
-    })
-  , [assets, filterTags, filterSizes, filterMode]);
+  const filteredAssets = useMemo(
+    () =>
+      applyFilters({
+        assets,
+        filterTags,
+        filterSizes,
+        filterMode,
+      }),
+    [assets, filterTags, filterSizes, filterMode],
+  );
 
   // Pre-calculate dimensions for each asset to avoid recalculating in the render
   const assetDimensions = useMemo(() => {
@@ -47,36 +49,39 @@ export const AssetList = () => {
   }, [filteredAssets]);
 
   // Memoize rendered assets to prevent unnecessary re-renders
-  const renderedAssets = useMemo(() =>
-    filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => {
-      // Get the pre-calculated dimension string
-      const dimensionString = assetDimensions.get(fileId);
-      // Check if it's in our filter set
-      const isActive = filterSizesSet.has(dimensionString);
+  const renderedAssets = useMemo(
+    () =>
+      filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => {
+        // Get the pre-calculated dimension string
+        const dimensionString = assetDimensions.get(fileId);
+        // Check if it's in our filter set
+        const isActive = filterSizesSet.has(dimensionString);
 
-      return (
-        <MemoizedAsset
-          key={fileId}
-          assetId={fileId}
-          fileExtension={fileExtension}
-          dimensionsActive={isActive}
-          dimensions={dimensions}
-          ioState={ioState}
-        />
-      );
-    })
-  , [filteredAssets, filterSizesSet, assetDimensions]);
+        return (
+          <MemoizedAsset
+            key={fileId}
+            assetId={fileId}
+            fileExtension={fileExtension}
+            dimensionsActive={isActive}
+            dimensions={dimensions}
+            ioState={ioState}
+          />
+        );
+      }),
+    [filteredAssets, filterSizesSet, assetDimensions],
+  );
 
   // Render a message when no assets match the filters
   if (renderedAssets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <CubeTransparentIcon className="h-12 w-12 text-slate-400" />
-        <h1 className="mt-4 mb-4 w-full text-xl">No results match your filters</h1>
+        <h1 className="mt-4 mb-4 w-full text-xl">
+          No results match your filters
+        </h1>
       </div>
     );
   }
 
-  // Directly return the assets without extra mapping
-  return <>{renderedAssets}</>;
+  return renderedAssets;
 };

@@ -57,7 +57,7 @@ export const getImageFiles = async () => {
       }
     } catch (err) {
       // File doesn't exist or other error - just use empty tags
-      console.log(`No tags found for ${fileId}, using empty tags`);
+      console.log(`No tags found for ${fileId}, using empty tags`, err);
     }
 
     imageAssets.push({

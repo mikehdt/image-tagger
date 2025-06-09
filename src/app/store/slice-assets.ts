@@ -16,11 +16,34 @@ export enum IoState {
   ERROR = 'IoError',
 }
 
+// Using bitwise flags instead of string enum to allow combined states
 export enum TagState {
-  SAVED = 'Saved',
-  TO_DELETE = 'ToDelete',
-  TO_ADD = 'ToAdd',
+  SAVED = 0, // 0000 - Base state
+  TO_DELETE = 1, // 0001 - Marked for deletion
+  TO_ADD = 2, // 0010 - Newly added
+  DIRTY = 4, // 0100 - Position changed
 }
+
+// Helper functions to check and manipulate tag states
+export const hasState = (state: number, flag: TagState): boolean =>
+  (state & flag) !== 0;
+export const addState = (state: number, flag: TagState): number => state | flag;
+export const removeState = (state: number, flag: TagState): number =>
+  state & ~flag;
+export const toggleState = (state: number, flag: TagState): number =>
+  state ^ flag;
+
+// For debugging and display purposes
+export const getTagStateString = (state: number): string => {
+  if (state === TagState.SAVED) return 'Saved';
+
+  const states: string[] = [];
+  if (hasState(state, TagState.TO_DELETE)) states.push('ToDelete');
+  if (hasState(state, TagState.TO_ADD)) states.push('ToAdd');
+  if (hasState(state, TagState.DIRTY)) states.push('Dirty');
+
+  return states.join('+');
+};
 
 export type ImageDimensions = {
   width: number;
@@ -32,7 +55,7 @@ export type ImageAsset = {
   fileId: string;
   fileExtension: string;
   dimensions: ImageDimensions;
-  tagStatus: { [key: string]: TagState };
+  tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
   tagList: string[];
 };
 
@@ -54,7 +77,10 @@ export const saveAssets = createAsyncThunk(
       throw new Error(`Asset with ID ${fileId} not found`);
     }
 
-    const updateTags = asset.tagList.filter((tag) => asset.tagStatus[tag] !== 'ToDelete');
+    // Filter out tags that are marked for deletion, but keep SAVED, TO_ADD and DIRTY tags
+    const updateTags = asset.tagList.filter(
+      (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
+    );
 
     const flattenedTags = updateTags.join(', ');
 
@@ -62,12 +88,19 @@ export const saveAssets = createAsyncThunk(
 
     if (success) {
       // Create a new clean tagStatus object with only saved tags
-      const newTagStatus = updateTags.reduce((acc, tag) => {
-        acc[tag] = TagState.SAVED;
-        return acc;
-      }, {} as {[key: string]: TagState});
+      const newTagStatus = updateTags.reduce(
+        (acc, tag) => {
+          acc[tag] = TagState.SAVED;
+          return acc;
+        },
+        {} as { [key: string]: number },
+      );
 
-      return { assetIndex: images.findIndex((element) => element.fileId === fileId), tagList: updateTags, tagStatus: newTagStatus };
+      return {
+        assetIndex: images.findIndex((element) => element.fileId === fileId),
+        tagList: updateTags,
+        tagStatus: newTagStatus,
+      };
     }
 
     throw new Error(`Unable to save the asset ${fileId}`);
@@ -127,12 +160,9 @@ const imagesSlice = createSlice({
 
       const tagState = state.images[assetIndex].tagStatus[tagName];
 
-      // Active and ToDelete toggle states; ToAdd gets removed
-      if (tagState === TagState.SAVED) {
-        state.images[assetIndex].tagStatus[tagName] = TagState.TO_DELETE;
-      } else if (tagState === TagState.TO_DELETE) {
-        state.images[assetIndex].tagStatus[tagName] = TagState.SAVED;
-      } else if (tagState === TagState.TO_ADD) {
+      // Handle cases based on the current state
+      if (hasState(tagState, TagState.TO_ADD)) {
+        // For TO_ADD tags, we still want to remove them completely
         delete state.images[assetIndex].tagStatus[tagName];
         state.images[assetIndex].tagList.splice(
           state.images[assetIndex].tagList.findIndex(
@@ -140,34 +170,104 @@ const imagesSlice = createSlice({
           ),
           1,
         );
+      } else {
+        // Toggle TO_DELETE flag for all other tags
+        state.images[assetIndex].tagStatus[tagName] = toggleState(
+          tagState,
+          TagState.TO_DELETE,
+        );
       }
     },
 
+    reorderTags: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{ assetId: string; oldIndex: number; newIndex: number }>,
+    ) => {
+      const { assetId, oldIndex, newIndex } = payload;
+
+      // No need to reorder if indexes are the same
+      if (oldIndex === newIndex) return;
+
+      const assetIndex = state.images.findIndex(
+        (element) => element.fileId === assetId,
+      );
+
+      if (assetIndex === -1) return;
+
+      const asset = { ...state.images[assetIndex] };
+
+      // Get the tag being moved
+      const tagToMove = asset.tagList[oldIndex];
+
+      // Create a completely new tag list
+      const newTagList = [...asset.tagList];
+      newTagList.splice(oldIndex, 1);
+      newTagList.splice(newIndex, 0, tagToMove);
+
+      // Create a new tag status object
+      const newTagStatus = { ...asset.tagStatus };
+
+      // Mark tags affected by the reordering as DIRTY
+      // Only if they were previously SAVED
+      const minIndex = Math.min(oldIndex, newIndex);
+      const maxIndex = Math.max(oldIndex, newIndex);
+
+      // Mark all tags in the affected range as DIRTY if they don't already have TO_ADD state
+      for (let i = minIndex; i <= maxIndex; i++) {
+        const tag = i === newIndex ? tagToMove : newTagList[i];
+        if (tag && !hasState(newTagStatus[tag], TagState.TO_ADD)) {
+          // Add DIRTY flag without removing other flags
+          newTagStatus[tag] = addState(newTagStatus[tag], TagState.DIRTY);
+        }
+      }
+
+      // Replace the entire asset with a new object
+      state.images = [
+        ...state.images.slice(0, assetIndex),
+        {
+          ...asset,
+          tagList: newTagList,
+          tagStatus: newTagStatus,
+        },
+        ...state.images.slice(assetIndex + 1),
+      ];
+    },
+
     resetTags: (state, { payload }: PayloadAction<string>) => {
-      const asset = state.images.find(
+      const assetIndex = state.images.findIndex(
         (element) => element.fileId === payload,
       );
 
-      // More straightforward implementation
-      if (!asset) return;
+      if (assetIndex === -1) return;
+
+      const asset = { ...state.images[assetIndex] };
+      const newTagStatus = { ...asset.tagStatus };
 
       // Create new filtered tagList
-      const newTagList = asset.tagList.filter(tag => {
+      const newTagList = asset.tagList.filter((tag) => {
         // Remove TO_ADD tags completely
-        if (asset.tagStatus[tag] === TagState.TO_ADD) {
-          delete asset.tagStatus[tag];
+        if (hasState(newTagStatus[tag], TagState.TO_ADD)) {
+          delete newTagStatus[tag];
           return false;
         }
 
-        // Reset TO_DELETE tags to SAVED
-        if (asset.tagStatus[tag] === TagState.TO_DELETE) {
-          asset.tagStatus[tag] = TagState.SAVED;
-        }
-
+        // Reset all flags to SAVED state
+        newTagStatus[tag] = TagState.SAVED;
         return true;
       });
 
-      asset.tagList = newTagList;
+      // Replace the entire asset with a new object
+      state.images = [
+        ...state.images.slice(0, assetIndex),
+        {
+          ...asset,
+          tagList: newTagList,
+          tagStatus: newTagStatus,
+        },
+        ...state.images.slice(assetIndex + 1),
+      ];
     },
   },
 
@@ -233,28 +333,57 @@ const imagesSlice = createSlice({
     },
 
     selectImageSizes: createSelector([(state) => state.images], (images) => {
-  if (!images.length) return {};
+      if (!images.length) return {};
 
-  // Group by dimension
-  const dimensionGroups: Record<string, ImageAsset[]> = {};
-  for (const item of images) {
-    const dimension = composeDimensions(item.dimensions);
-    dimensionGroups[dimension] = dimensionGroups[dimension] || [];
-    dimensionGroups[dimension].push(item);
-  }
+      // Group by dimension
+      const dimensionGroups: Record<string, ImageAsset[]> = {};
+      for (const item of images) {
+        const dimension = composeDimensions(item.dimensions);
+        dimensionGroups[dimension] = dimensionGroups[dimension] || [];
+        dimensionGroups[dimension].push(item);
+      }
 
-  // Create count map
-  return Object.fromEntries(
-    Object.entries(dimensionGroups).map(([dim, assets]) =>
-      [dim, assets.length]
-    )
-  );
+      // Create count map
+      return Object.fromEntries(
+        Object.entries(dimensionGroups).map(([dim, assets]) => [
+          dim,
+          assets.length,
+        ]),
+      );
     }),
 
     selectTagsByStatus: (state, fileId) => {
       const selectedImage = state.images.find((item) => item.fileId === fileId);
 
       return selectedImage?.tagStatus || {};
+    },
+
+    selectOrderedTagsWithStatus: createSelector(
+      // Input selectors
+      [(state) => state.images, (state, fileId) => fileId],
+      // Result function
+      (images, fileId) => {
+        const selectedImage = images.find(
+          (item: { fileId: string }) => item.fileId === fileId,
+        );
+
+        if (!selectedImage) return [];
+
+        // Create an array of objects with tag name and status
+        // This preserves the order from tagList
+        return selectedImage.tagList.map((tagName: string | number) => ({
+          name: tagName,
+          status: selectedImage.tagStatus[tagName] || TagState.SAVED,
+        }));
+      },
+    ),
+
+    selectTagsForAsset: (state, fileId) => {
+      const selectedImage = state.images.find((item) => item.fileId === fileId);
+      return {
+        tagStatus: selectedImage?.tagStatus || {},
+        tagList: selectedImage?.tagList || [],
+      };
     },
 
     selectAllTags: createSelector([(state) => state.images], (imageAssets) => {
@@ -278,7 +407,8 @@ const imagesSlice = createSlice({
 });
 
 export const { reducer: assetsReducer } = imagesSlice;
-export const { addTag, deleteTag, resetTags } = imagesSlice.actions;
+export const { addTag, deleteTag, reorderTags, resetTags } =
+  imagesSlice.actions;
 export const {
   selectIoState,
   selectAllImages,
@@ -286,4 +416,6 @@ export const {
   selectImageSizes,
   selectAllTags,
   selectTagsByStatus,
+  selectOrderedTagsWithStatus,
+  selectTagsForAsset,
 } = imagesSlice.selectors;

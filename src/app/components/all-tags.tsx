@@ -55,7 +55,7 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
 
       setPosition({
         top: rect.bottom,
-        left: leftPos
+        left: leftPos,
       });
     }
   }, [isOpen, containerRef]);
@@ -101,19 +101,19 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
 
   // Sort tags based on current sort type and direction
   const sortedTags = useMemo(() => {
-    return Object.entries(allTags)
-      .sort(([tagA, countA], [tagB, countB]) => {
-        if (sortType === 'count') {
-          // Sort by count - for count, "asc" means highest first (reversed)
-          const comparison = sortDirection === 'asc' ? countB - countA : countA - countB;
-          // If counts are equal, sort alphabetically as a secondary sort
-          return comparison !== 0 ? comparison : tagA.localeCompare(tagB);
-        } else {
-          // Sort alphabetically - normal sort order
-          const comparison = tagA.localeCompare(tagB);
-          return sortDirection === 'desc' ? -comparison : comparison;
-        }
-      });
+    return Object.entries(allTags).sort(([tagA, countA], [tagB, countB]) => {
+      if (sortType === 'count') {
+        // Sort by count - for count, "asc" means highest first (reversed)
+        const comparison =
+          sortDirection === 'asc' ? countB - countA : countA - countB;
+        // If counts are equal, sort alphabetically as a secondary sort
+        return comparison !== 0 ? comparison : tagA.localeCompare(tagB);
+      } else {
+        // Sort alphabetically - normal sort order
+        const comparison = tagA.localeCompare(tagB);
+        return sortDirection === 'desc' ? -comparison : comparison;
+      }
+    });
   }, [allTags, sortType, sortDirection]);
 
   if (!isOpen) return null;
@@ -121,19 +121,21 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
   return (
     <div
       ref={panelRef}
-      className="fixed z-20 w-64 max-h-[80vh] bg-white shadow-lg rounded-md border border-slate-200 overflow-hidden"
+      className="fixed z-20 max-h-[80vh] w-64 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
-        transformOrigin: 'top left'
+        transformOrigin: 'top left',
       }}
     >
-      <div className="flex items-center justify-between p-3 bg-slate-50 border-b border-slate-200">
+      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-3">
         <h3 className="text-sm font-medium text-slate-700">Tags</h3>
         <div className="flex space-x-2">
           <button
-            onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-            className="px-2 py-1 text-xs bg-white border border-slate-200 rounded hover:bg-slate-100"
+            onClick={() =>
+              setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+            }
+            className="cursor-pointer rounded border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
             title="Toggle sort direction"
           >
             {sortType === 'count'
@@ -142,8 +144,12 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
           </button>
 
           <button
-            onClick={() => setSortType(prev => prev === 'count' ? 'alphabetical' : 'count')}
-            className="px-2 py-1 text-xs bg-white border border-slate-200 rounded hover:bg-slate-100"
+            onClick={() =>
+              setSortType((prev) =>
+                prev === 'count' ? 'alphabetical' : 'count',
+              )
+            }
+            className="cursor-pointer rounded border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
             title="Toggle sort type"
           >
             By: {sortType === 'count' ? 'Count' : 'Name'}
@@ -151,15 +157,15 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
 
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-200 rounded-full"
+            className="cursor-pointer rounded-full p-1 hover:bg-slate-200"
             title="Close tag list"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <XMarkIcon className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div className="overflow-y-auto max-h-[calc(80vh-76px)]">
+      <div className="max-h-[calc(80vh-51px)] overflow-y-auto">
         {sortedTags.length > 0 ? (
           <ul className="divide-y divide-slate-100">
             {sortedTags.map(([tag, count]) => {
@@ -168,17 +174,27 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
                 <li
                   key={tag}
                   onClick={() => handleTagClick(tag)}
-                  className={`flex justify-between py-2 px-3 hover:bg-slate-50 cursor-pointer ${
+                  className={`flex cursor-pointer justify-between px-3 py-2 hover:bg-slate-50 ${
                     isSelected ? 'bg-emerald-50' : ''
                   }`}
-                  title={isSelected ? "Click to remove from filters" : "Click to add to filters"}
+                  title={
+                    isSelected
+                      ? 'Click to remove from filters'
+                      : 'Click to add to filters'
+                  }
                 >
-                  <span className={`text-sm ${isSelected ? 'text-emerald-700 font-medium' : 'text-slate-800'}`}>
+                  <span
+                    className={`text-sm ${isSelected ? 'font-medium text-emerald-700' : 'text-slate-800'}`}
+                  >
                     {tag}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 ${
-                    isSelected ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                  } rounded-full`}>
+                  <span
+                    className={`px-2 py-0.5 text-xs ${
+                      isSelected
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-slate-100 text-slate-600'
+                    } rounded-full`}
+                  >
                     {count}
                   </span>
                 </li>
@@ -186,15 +202,10 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
             })}
           </ul>
         ) : (
-          <div className="p-4 text-sm text-slate-500 text-center">
+          <div className="p-4 text-center text-sm text-slate-500">
             No tags found
           </div>
         )}
-      </div>
-
-      {/* Help text */}
-      <div className="p-2 text-xs text-slate-500 bg-slate-50 border-t border-slate-200 text-center">
-        Click on a tag to toggle it in filters
       </div>
     </div>
   );

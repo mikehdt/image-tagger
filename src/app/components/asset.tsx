@@ -1,5 +1,26 @@
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSwappingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 import Image from 'next/image';
-import { SyntheticEvent, useMemo, useState, useCallback } from 'react';
+import {
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -7,11 +28,11 @@ import {
   deleteTag,
   ImageDimensions,
   IoState,
+  reorderTags,
   resetTags,
   saveAssets,
   selectAllTags,
-  selectTagsByStatus,
-  TagState,
+  selectOrderedTagsWithStatus,
 } from '../store/slice-assets';
 import {
   selectFilterTags,
@@ -21,7 +42,7 @@ import {
 import { composeDimensions } from '../utils/helpers';
 import { AssetActions } from './asset-actions';
 import { NewInput } from './new-input';
-import { Tag } from './tag';
+import { SortableTag } from './sortable-tag';
 
 type AssetProps = {
   assetId: string;
@@ -39,65 +60,118 @@ export const Asset = ({
   ioState,
 }: AssetProps) => {
   // Memoize the composed dimensions so it's not recreated on every render
-  const dimensionsComposed = useMemo(() =>
-    composeDimensions(dimensions)
-  , [dimensions]);
+  const dimensionsComposed = useMemo(
+    () => composeDimensions(dimensions),
+    [dimensions],
+  );
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   const [newTagInput, setNewTagInput] = useState<string>('');
   const dispatch = useAppDispatch();
   const globalTagList = useAppSelector(selectAllTags);
   const filterTags = useAppSelector(selectFilterTags);
-  const tagsByStatus = useAppSelector((state) =>
-    selectTagsByStatus(state, assetId),
+
+  // Memoize the selector to avoid unnecessary re-renders
+  const orderedTagsWithStatus = useAppSelector((state) =>
+    selectOrderedTagsWithStatus(state, assetId),
+  );
+  // Memoize the tag list and status object derived from orderedTagsWithStatus
+  const tagList = useMemo(
+    () =>
+      orderedTagsWithStatus.map(
+        (tag: { name: string; status: number }) => tag.name,
+      ),
+    [orderedTagsWithStatus],
   );
 
-  // Memoize the tag list derived from tagsByStatus
-  const tagList = useMemo(() =>
-    Object.keys(tagsByStatus)
-  , [tagsByStatus]);
+  // Keep the tagsByStatus object for compatibility with the rest of the code
+  const tagsByStatus = useMemo(
+    () =>
+      orderedTagsWithStatus.reduce(
+        (
+          acc: Record<string, number>,
+          tag: { name: string; status: number },
+        ) => {
+          acc[tag.name] = tag.status;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+    [orderedTagsWithStatus],
+  );
 
   // Create a Set from filterTags for efficient lookups
-  const filterTagsSet = useMemo(() =>
-    new Set(filterTags)
-  , [filterTags]);
+  const filterTagsSet = useMemo(() => new Set(filterTags), [filterTags]);
+
+  // Local state for drag handling - synced with Redux but used for rendering during drag operations
+  const [localTagList, setLocalTagList] = useState<string[]>(tagList);
+
+  // Keep local list in sync with Redux
+  useEffect(() => {
+    if (JSON.stringify(localTagList) !== JSON.stringify(tagList)) {
+      setLocalTagList(tagList);
+    }
+  }, [tagList, localTagList, assetId]);
 
   // Memoize this calculation to prevent unnecessary re-renders
-  const showActions = useMemo(() =>
-    tagList.length &&
-    tagList.some((tagName) => tagsByStatus[tagName] !== TagState.SAVED) &&
-    ioState !== IoState.SAVING
-  , [tagList, tagsByStatus, ioState]);
+  const showActions = useMemo(
+    () =>
+      tagList.length &&
+      tagList.some((tagName: string) => tagsByStatus[tagName] !== 0) && // TagState.SAVED is 0
+      ioState !== IoState.SAVING,
+    [tagList, tagsByStatus, ioState],
+  );
+
+  // Set up sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px minimum drag distance
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   // Convert event handlers to useCallback to prevent new function creation on each render
   const toggleImageZoom = useCallback(() => {
-    setImageZoom(prev => !prev);
+    setImageZoom((prev) => !prev);
   }, []);
 
-  const addNewTag = useCallback((e: SyntheticEvent, tagName: string) => {
-    e.stopPropagation();
+  const addNewTag = useCallback(
+    (e: SyntheticEvent, tagName: string) => {
+      e.stopPropagation();
 
-    if (tagName.trim() !== '') {
-      if (!tagList.includes(tagName)) {
-        dispatch(addTag({ assetId, tagName }));
-        setNewTagInput('');
+      if (tagName.trim() !== '') {
+        if (!tagList.includes(tagName)) {
+          dispatch(addTag({ assetId, tagName }));
+          setNewTagInput('');
+        } else {
+          console.log("Couldn't add tag, it's already is in the list", tagName);
+        }
       } else {
-        console.log("Couldn't add tag, it's already is in the list", tagName);
+        console.log("Couldn't add tag, it was empty.");
       }
-    } else {
-      console.log("Couldn't add tag, it was empty.");
-    }
-  }, [dispatch, tagList, assetId]);
+    },
+    [dispatch, tagList, assetId],
+  );
 
-  const toggleTag = useCallback((e: SyntheticEvent, tagName: string) => {
-    e.preventDefault();
-    dispatch(toggleTagFilter(tagName));
-  }, [dispatch]);
+  const toggleTag = useCallback(
+    (e: SyntheticEvent, tagName: string) => {
+      e.preventDefault();
+      dispatch(toggleTagFilter(tagName));
+    },
+    [dispatch],
+  );
 
-  const toggleDeleteTag = useCallback((e: SyntheticEvent, tagName: string) => {
-    e.stopPropagation();
-    dispatch(deleteTag({ assetId, tagName }));
-  }, [dispatch, assetId]);
+  const toggleDeleteTag = useCallback(
+    (e: SyntheticEvent, tagName: string) => {
+      e.stopPropagation();
+      dispatch(deleteTag({ assetId, tagName }));
+    },
+    [dispatch, assetId],
+  );
 
   const saveAction = useCallback(() => {
     dispatch(saveAssets(assetId));
@@ -107,13 +181,52 @@ export const Asset = ({
     dispatch(resetTags(assetId));
   }, [dispatch, assetId]);
 
-  const toggleSize = useCallback((composedSize: string) => {
-    dispatch(toggleSizeFilter(composedSize));
-  }, [dispatch]);
+  const toggleSize = useCallback(
+    (composedSize: string) => {
+      dispatch(toggleSizeFilter(composedSize));
+    },
+    [dispatch],
+  );
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTagInput(e.currentTarget.value.trimStart());
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setNewTagInput(e.currentTarget.value.trimStart());
+    },
+    [],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (over && active.id !== over.id) {
+        const oldIndex = localTagList.indexOf(String(active.id));
+        const newIndex = localTagList.indexOf(String(over.id));
+
+        // Only proceed if both indexes are valid and different
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+          // Use arrayMove utility from dnd-kit for consistency
+          const newList = arrayMove(localTagList, oldIndex, newIndex);
+
+          // Log what's happening
+          console.log(`Starting tag reorder in asset ${assetId}`);
+
+          // Update local state immediately for a smooth UI experience
+          setLocalTagList(newList);
+
+          // Dispatch action to update Redux store
+          dispatch(
+            reorderTags({
+              assetId,
+              oldIndex,
+              newIndex,
+            }),
+          );
+        }
+      }
+    },
+    [dispatch, localTagList, assetId],
+  );
 
   return (
     <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
@@ -133,19 +246,33 @@ export const Asset = ({
       </div>
 
       <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
-        {/* Rely on individual Tag memoization instead of memoizing the whole array */}
-        {tagList.map((tagName: string, index: number) => (
-          <Tag
-            key={`${assetId}-${tagName}-${index}`}
-            fade={newTagInput !== '' && newTagInput !== tagName}
-            tagName={tagName}
-            tagState={tagsByStatus[tagName]}
-            count={globalTagList[tagName] || 0}
-            onToggleTag={toggleTag}
-            onDeleteTag={toggleDeleteTag}
-            highlight={filterTagsSet.has(tagName)}
-          />
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex flex-wrap">
+            <SortableContext
+              items={localTagList}
+              strategy={rectSwappingStrategy}
+              id={`taglist-${assetId}`}
+            >
+              {localTagList.map((tagName: string, index: number) => (
+                <SortableTag
+                  key={`${assetId}-${tagName}-${index}`}
+                  id={tagName}
+                  fade={newTagInput !== '' && newTagInput !== tagName}
+                  tagName={tagName}
+                  tagState={tagsByStatus[tagName]}
+                  count={globalTagList[tagName] || 0}
+                  onToggleTag={toggleTag}
+                  onDeleteTag={toggleDeleteTag}
+                  highlight={filterTagsSet.has(tagName)}
+                />
+              ))}
+            </SortableContext>
+          </div>
+        </DndContext>
 
         <NewInput
           inputValue={newTagInput}

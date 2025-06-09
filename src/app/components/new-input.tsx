@@ -1,6 +1,6 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
 import type { ChangeEvent, SyntheticEvent } from 'react';
-import { memo, useCallback, KeyboardEvent, useMemo, useRef, useEffect } from 'react';
+import { KeyboardEvent, memo, useCallback, useEffect,useMemo, useRef } from 'react';
 
 type NewInputProps = {
   inputValue: string;
