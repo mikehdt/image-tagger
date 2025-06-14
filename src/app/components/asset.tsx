@@ -9,7 +9,7 @@ import {
 } from '@dnd-kit/core';
 import {
   arrayMove,
-  rectSwappingStrategy,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
@@ -39,6 +39,7 @@ import {
   toggleSizeFilter,
   toggleTagFilter,
 } from '../store/slice-filters';
+// import { flexWrapSortingStrategy } from '../utils/flex-wrap-sorting-strategy';
 import { composeDimensions } from '../utils/helpers';
 import { AssetActions } from './asset-actions';
 import { NewInput } from './new-input';
@@ -250,11 +251,32 @@ export const Asset = ({
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
+          onDragStart={(event) => {
+            // Debug logging for drag operations
+            console.log('Drag start:', {
+              id: event.active.id,
+              rect: event.active.rect,
+            });
+          }}
+          onDragOver={(event) => {
+            // Debug logging for drag over operations
+            console.log('Drag over:', {
+              activeId: event.active.id,
+              overId: event.over?.id,
+              activeRect: event.active.rect,
+              overRect: event.over?.rect,
+            });
+          }}
         >
-          <div className="flex flex-wrap">
+          <div className="relative flex flex-wrap">
+            {/* Debug overlay container */}
+            <div className="pointer-events-none absolute top-0 left-0">
+              {/* This will be populated by the debugging visualization */}
+            </div>
+
             <SortableContext
               items={localTagList}
-              strategy={rectSwappingStrategy}
+              strategy={rectSortingStrategy}
               id={`taglist-${assetId}`}
             >
               {localTagList.map((tagName: string, index: number) => (
