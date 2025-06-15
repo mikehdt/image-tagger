@@ -1,5 +1,5 @@
 import { type ImageAsset } from '../store/assets';
-import { FilterMode } from '../store/slice-filters';
+import { FilterMode } from '../store/filters';
 import { composeDimensions } from './helpers';
 
 export const applyFilters = ({

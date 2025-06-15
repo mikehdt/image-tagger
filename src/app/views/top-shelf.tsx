@@ -21,7 +21,6 @@ import {
   selectHasModifiedAssets,
   selectIoState,
 } from '../store/assets';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   addTagFilter,
   clearFilters,
@@ -30,7 +29,8 @@ import {
   selectFilterSizes,
   selectFilterTags,
   toggleTagFilterMode,
-} from '../store/slice-filters';
+} from '../store/filters';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { decomposeDimensions } from '../utils/helpers';
 
 export const TopShelf = () => {

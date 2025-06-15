@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 
 import { assetsReducer } from './assets';
-import { filtersReducer } from './slice-filters';
+import { filtersReducer } from './filters';
 
 export const makeStore = () => {
   return configureStore({

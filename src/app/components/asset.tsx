@@ -34,12 +34,12 @@ import {
   selectAllTags,
   selectOrderedTagsWithStatus,
 } from '../store/assets';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   selectFilterTags,
   toggleSizeFilter,
   toggleTagFilter,
-} from '../store/slice-filters';
+} from '../store/filters';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 // import { flexWrapSortingStrategy } from '../utils/flex-wrap-sorting-strategy';
 import { composeDimensions } from '../utils/helpers';
 import { AssetActions } from './asset-actions';

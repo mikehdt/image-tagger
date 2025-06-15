@@ -2,8 +2,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { selectAllTags } from '../store/assets';
+import { selectFilterTags, toggleTagFilter } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectFilterTags, toggleTagFilter } from '../store/slice-filters';
 
 interface AllTagsProps {
   isOpen: boolean;

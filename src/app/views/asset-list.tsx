@@ -5,12 +5,12 @@ import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset';
 import { selectAllImages } from '../store/assets';
-import { useAppSelector } from '../store/hooks';
 import {
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
-} from '../store/slice-filters';
+} from '../store/filters';
+import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
 import { composeDimensions } from '../utils/helpers';
 
