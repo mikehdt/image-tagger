@@ -12,7 +12,7 @@ import { SyntheticEvent, useRef, useState } from 'react';
 
 import { AllTags } from '../components/all-tags';
 import { Loader } from '../components/loader';
-import { NewInput } from '../components/new-input';
+import { TagInput } from '../components/tag-input';
 import {
   IoState,
   loadAssets,
@@ -124,12 +124,14 @@ export const TopShelf = () => {
             Filter:
           </span>
 
-          <NewInput
+          <TagInput
             inputValue={newTagInput}
             onInputChange={(e) =>
               setNewTagInput(e.currentTarget.value.trimStart())
             }
-            onAdd={(e) => addNewFilter(e, newTagInput)}
+            onSubmit={(e) => addNewFilter(e, newTagInput)}
+            mode="add"
+            placeholder="Filter by tag..."
             tone="secondary"
           />
 

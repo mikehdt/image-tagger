@@ -1,0 +1,176 @@
+import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import type { ChangeEvent, SyntheticEvent } from 'react';
+import {
+  KeyboardEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
+
+type TagInputProps = {
+  inputValue: string;
+  onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: SyntheticEvent) => void;
+  onCancel?: (e: SyntheticEvent) => void;
+  placeholder?: string;
+  mode: 'add' | 'edit';
+  tone?: 'primary' | 'secondary';
+};
+
+const TagInputComponent = ({
+  inputValue,
+  onInputChange,
+  onSubmit,
+  onCancel,
+  placeholder = 'Add tag...',
+  mode = 'add',
+  tone,
+}: TagInputProps) => {
+  // Reference to the input element to maintain focus
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Allow submitting via Enter key
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && inputValue.trim() !== '') {
+        onSubmit(e);
+      } else if (e.key === 'Escape' && mode === 'edit' && onCancel) {
+        onCancel(e);
+      }
+    },
+    [inputValue, onSubmit, onCancel, mode],
+  );
+
+  // Calculate the width based on input length (between min and max width)
+  const inputWidth = useMemo(() => {
+    // Set minimum width for empty or short inputs
+    const minWidth = 'w-36'; // Default width (9rem)
+    // Maximum width for longer inputs (up to 20 characters)
+    const maxWidth = 'w-64'; // 16rem
+
+    const length = inputValue.length;
+
+    if (length <= 10) {
+      return minWidth;
+    } else if (length >= 20) {
+      return maxWidth;
+    } else {
+      // Dynamic width between min and max based on character count
+      // Each character increment between 10-20 will increase width proportionally
+      const widthStep = (length - 10) / 10; // 0 to 1 scale for 10-20 characters
+      // Maps to tailwind w classes between w-36 and w-64
+      const widthClasses = [
+        'w-36',
+        'w-40',
+        'w-44',
+        'w-48',
+        'w-52',
+        'w-56',
+        'w-60',
+        'w-64',
+      ];
+      const index = Math.min(
+        Math.floor(widthStep * (widthClasses.length - 1)),
+        widthClasses.length - 1,
+      );
+      return widthClasses[index];
+    }
+  }, [inputValue]);
+
+  // Effect to maintain focus when the width changes
+  useEffect(() => {
+    // If input has value and should be focused but isn't, focus it
+    if (document.activeElement !== inputRef.current && inputRef.current) {
+      // Store cursor position
+      const cursorPosition = inputRef.current.selectionStart;
+
+      // Focus the input
+      inputRef.current.focus();
+
+      // Restore cursor position after a small delay to ensure it works after state updates
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.selectionStart = cursorPosition;
+          inputRef.current.selectionEnd = cursorPosition;
+        }
+      }, 0);
+    }
+  }, [inputWidth]); // Re-run when width changes
+
+  // Auto focus input when component mounts
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, []);
+
+  // Border colors based on mode
+  const borderColor =
+    mode === 'add'
+      ? tone !== 'secondary'
+        ? 'border-green-300'
+        : 'border-slate-300'
+      : 'border-blue-300';
+
+  return (
+    <div
+      className={`relative inline-flex ${mode === 'edit' ? 'z-10' : ''} mr-2`}
+    >
+      <input
+        ref={inputRef}
+        value={inputValue}
+        onChange={onInputChange}
+        onKeyUp={handleKeyPress}
+        type="text"
+        placeholder={placeholder}
+        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all`}
+        autoFocus
+      />
+
+      {/* Render action buttons based on mode */}
+      {mode === 'add' ? (
+        <span
+          className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
+            inputValue.trim() !== ''
+              ? 'text-green-600 hover:bg-green-500 hover:text-white'
+              : 'cursor-not-allowed text-gray-300'
+          }`}
+          onClick={inputValue.trim() !== '' ? onSubmit : undefined}
+        >
+          <PlusIcon />
+        </span>
+      ) : (
+        <>
+          <span
+            className="absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-green-600 hover:bg-green-500 hover:text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (inputValue.trim() !== '') onSubmit(e);
+            }}
+            title="Save tag"
+          >
+            <CheckIcon />
+          </span>
+          {onCancel && (
+            <span
+              className="absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-gray-600 hover:bg-gray-500 hover:text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancel(e);
+              }}
+              title="Cancel"
+            >
+              <XMarkIcon />
+            </span>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// Memoize the component to prevent unnecessary re-renders
+export const TagInput = memo(TagInputComponent);

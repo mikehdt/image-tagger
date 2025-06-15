@@ -43,8 +43,8 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 // import { flexWrapSortingStrategy } from '../utils/flex-wrap-sorting-strategy';
 import { composeDimensions } from '../utils/helpers';
 import { AssetActions } from './asset-actions';
-import { NewInput } from './new-input';
 import { SortableTag } from './sortable-tag';
+import { TagInput } from './tag-input';
 
 type AssetProps = {
   assetId: string;
@@ -312,10 +312,12 @@ export const Asset = ({
           </div>
         </DndContext>
 
-        <NewInput
+        <TagInput
           inputValue={newTagInput}
           onInputChange={handleInputChange}
-          onAdd={(e) => addNewTag(e, newTagInput)}
+          onSubmit={(e: SyntheticEvent) => addNewTag(e, newTagInput)}
+          mode="add"
+          placeholder="Add tag..."
         />
       </div>
 

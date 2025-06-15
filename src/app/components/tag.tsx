@@ -1,14 +1,8 @@
-import { CheckIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import {
-  KeyboardEvent,
-  memo,
-  type SyntheticEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import type { SyntheticEvent } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
+import { TagInput } from '@/app/components/tag-input';
 import { getTagStyles, tagButtonStyles } from '@/app/styles/tag-styles';
 
 type TagProps = {
@@ -39,7 +33,6 @@ const Tag = ({
   // State for managing edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(tagName);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Define edit-related functions with useCallback to avoid dependency issues
   const handleStartEdit = useCallback(
@@ -52,30 +45,27 @@ const Tag = ({
     [tagName, onEditStateChange],
   );
 
-  const handleSaveEdit = useCallback(() => {
-    const trimmedValue = editValue.trim();
-    if (trimmedValue && trimmedValue !== tagName && onEditTag) {
-      onEditTag(tagName, trimmedValue);
-    }
-    setIsEditing(false);
-    if (onEditStateChange) onEditStateChange(false);
-  }, [editValue, tagName, onEditTag, onEditStateChange]);
-
-  const handleCancelEdit = useCallback(() => {
-    setEditValue(tagName);
-    setIsEditing(false);
-    if (onEditStateChange) onEditStateChange(false);
-  }, [tagName, onEditStateChange]);
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        handleSaveEdit();
-      } else if (e.key === 'Escape') {
-        handleCancelEdit();
+  const handleSaveEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      const trimmedValue = editValue.trim();
+      if (trimmedValue && trimmedValue !== tagName && onEditTag) {
+        onEditTag(tagName, trimmedValue);
       }
+      setIsEditing(false);
+      if (onEditStateChange) onEditStateChange(false);
     },
-    [handleSaveEdit, handleCancelEdit],
+    [editValue, tagName, onEditTag, onEditStateChange],
+  );
+
+  const handleCancelEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setEditValue(tagName);
+      setIsEditing(false);
+      if (onEditStateChange) onEditStateChange(false);
+    },
+    [tagName, onEditStateChange],
   );
 
   // Update edit value when tagName changes (if not editing)
@@ -84,40 +74,6 @@ const Tag = ({
       setEditValue(tagName);
     }
   }, [tagName, isEditing]);
-
-  // Setup event listener for click outside when editing
-  useEffect(() => {
-    if (isEditing) {
-      // Create handler inside the effect to use the current handleCancelEdit
-      const handleClickOutside = (event: MouseEvent) => {
-        // Ignore the current tag (probably need a better way than two parents)
-        if (
-          inputRef.current &&
-          !inputRef.current.parentElement?.parentElement?.contains(
-            event.target as Node,
-          )
-        ) {
-          handleCancelEdit();
-        }
-      };
-
-      // Focus input element
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          inputRef.current.select();
-        }
-      }, 10);
-
-      // Add event listener
-      document.addEventListener('mousedown', handleClickOutside);
-
-      // Cleanup
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [isEditing, handleCancelEdit]);
 
   // Get styles from the extracted styling utility
   const styles = getTagStyles(tagState, highlight, fade, isDraggable);
@@ -136,62 +92,33 @@ const Tag = ({
     [onDeleteTag, tagName],
   );
 
-  return (
+  return isEditing ? (
+    <TagInput
+      inputValue={editValue}
+      onInputChange={(e) => setEditValue(e.target.value)}
+      onSubmit={handleSaveEdit}
+      onCancel={handleCancelEdit}
+      placeholder="Edit tag..."
+      mode="edit"
+    />
+  ) : (
     <div className={styles.tagClass} onClick={handleToggleTag}>
-      {isEditing ? (
-        <div className="z-10 flex items-center">
-          <input
-            ref={inputRef}
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={tagButtonStyles.inputField}
-            size={Math.max(tagName.length, 12)}
-            autoFocus
-          />
-          <span
-            className={tagButtonStyles.saveButton}
-            onClick={(e) => {
-              console.log('click save');
-              e.stopPropagation();
-              handleSaveEdit();
-            }}
-            title="Save tag"
-          >
-            <CheckIcon />
-          </span>
-          <span
-            className={tagButtonStyles.cancelButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCancelEdit();
-            }}
-            title="Cancel"
-          >
-            <XMarkIcon />
-          </span>
-        </div>
-      ) : (
-        <>
-          <span className={styles.countClass}>{count}</span>
-          <span className={styles.tagTextClass}>{tagName}</span>
-          <span
-            className={tagButtonStyles.editButton}
-            onClick={handleStartEdit}
-            title="Edit tag"
-          >
-            <PencilIcon />
-          </span>
-          <span
-            className={tagButtonStyles.deleteButton}
-            onClick={handleDeleteTag}
-            title="Delete tag"
-          >
-            <XMarkIcon />
-          </span>
-        </>
-      )}
+      <span className={styles.countClass}>{count}</span>
+      <span className={styles.tagTextClass}>{tagName}</span>
+      <span
+        className={tagButtonStyles.editButton}
+        onClick={handleStartEdit}
+        title="Edit tag"
+      >
+        <PencilIcon />
+      </span>
+      <span
+        className={tagButtonStyles.deleteButton}
+        onClick={handleDeleteTag}
+        title="Delete tag"
+      >
+        <XMarkIcon />
+      </span>
     </div>
   );
 };
