@@ -16,6 +16,7 @@ type TagProps = {
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   onEditTag?: (oldTagName: string, newTagName: string) => void;
   onEditStateChange?: (isEditing: boolean) => void;
+  onEditValueChange?: (value: string) => void;
 };
 
 const Tag = ({
@@ -29,6 +30,7 @@ const Tag = ({
   onDeleteTag,
   onEditTag,
   onEditStateChange,
+  onEditValueChange,
 }: TagProps) => {
   // State for managing edit mode
   const [isEditing, setIsEditing] = useState(false);
@@ -95,7 +97,13 @@ const Tag = ({
   return isEditing ? (
     <TagInput
       inputValue={editValue}
-      onInputChange={(e) => setEditValue(e.target.value)}
+      onInputChange={(e) => {
+        const newValue = e.target.value;
+        setEditValue(newValue);
+        if (onEditValueChange) {
+          onEditValueChange(newValue);
+        }
+      }}
       onSubmit={handleSaveEdit}
       onCancel={handleCancelEdit}
       placeholder="Edit tag..."

@@ -17,6 +17,7 @@ type SortableTagProps = {
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   onEditTag?: (oldTagName: string, newTagName: string) => void;
+  onEditValueChange?: (tagName: string, value: string) => void;
 };
 
 const SortableTag = ({
@@ -29,6 +30,7 @@ const SortableTag = ({
   onToggleTag,
   onDeleteTag,
   onEditTag,
+  onEditValueChange,
 }: SortableTagProps) => {
   // State to track debug info
   const [debugInfo, setDebugInfo] = useState({
@@ -147,6 +149,22 @@ const SortableTag = ({
     willChange: transition ? 'transform' : undefined,
   };
 
+  // Handler for when edit state changes
+  const handleEditStateChange = (editing: boolean) => {
+    setIsEditing(editing);
+    // Reset the edit value when editing is done
+    if (!editing && onEditValueChange) {
+      onEditValueChange(tagName, '');
+    }
+  };
+
+  // Handler for tracking edit input value
+  const handleEditValueChange = (value: string) => {
+    if (onEditValueChange) {
+      onEditValueChange(tagName, value);
+    }
+  };
+
   return (
     <div
       ref={setRefs}
@@ -166,7 +184,8 @@ const SortableTag = ({
         onDeleteTag={onDeleteTag}
         onEditTag={onEditTag}
         isDraggable={!isEditing}
-        onEditStateChange={setIsEditing}
+        onEditStateChange={handleEditStateChange}
+        onEditValueChange={handleEditValueChange}
       />
       {/* Debug overlay showing width and position */}
       {DEBUG_MODE && (

@@ -69,6 +69,8 @@ export const Asset = ({
 
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   const [newTagInput, setNewTagInput] = useState<string>('');
+  const [editTagValue, setEditTagValue] = useState<string>('');
+  const [editingTagName, setEditingTagName] = useState<string>('');
   const dispatch = useAppDispatch();
   const globalTagList = useAppSelector(selectAllTags);
   const filterTags = useAppSelector(selectFilterTags);
@@ -195,13 +197,23 @@ export const Asset = ({
       if (newTagName.trim() === '') return;
       if (oldTagName === newTagName) return;
 
+      // Check if the new tag name already exists in the list
+      if (tagList.includes(newTagName)) {
+        console.log(
+          "Couldn't edit tag, the new name already exists in the list",
+          newTagName,
+        );
+        return;
+      }
+
+      // Clear the edit state variables
+      setEditTagValue('');
+      setEditingTagName('');
+
+      // Dispatch the edit action
       dispatch(editTag({ assetId, oldTagName, newTagName }));
-      // Add the new tag first - this ensures tag is changed in-situ rather than deleted/created
-      // dispatch(addTag({ assetId, tagName: newTagName }));
-      // Then delete the old tag
-      // dispatch(deleteTag({ assetId, tagName: oldTagName }));
     },
-    [dispatch, assetId],
+    [dispatch, assetId, tagList, setEditTagValue, setEditingTagName],
   );
 
   const handleInputChange = useCallback(
@@ -242,6 +254,14 @@ export const Asset = ({
       }
     },
     [dispatch, localTagList, assetId],
+  );
+
+  const handleEditValueChange = useCallback(
+    (tagName: string, value: string) => {
+      setEditingTagName(tagName);
+      setEditTagValue(value);
+    },
+    [],
   );
 
   return (
@@ -298,7 +318,14 @@ export const Asset = ({
                 <SortableTag
                   key={`${assetId}-${tagName}-${index}`}
                   id={tagName}
-                  fade={newTagInput !== '' && newTagInput !== tagName}
+                  fade={
+                    // For add mode: fade tags except the one being typed (if it exists)
+                    (newTagInput !== '' && newTagInput !== tagName) ||
+                    // For edit mode: fade tags except the one being edited or one that matches current edit value
+                    (editTagValue !== '' &&
+                      tagName !== editingTagName &&
+                      tagName !== editTagValue)
+                  }
                   tagName={tagName}
                   tagState={tagsByStatus[tagName]}
                   count={globalTagList[tagName] || 0}
@@ -306,6 +333,7 @@ export const Asset = ({
                   onDeleteTag={toggleDeleteTag}
                   onEditTag={handleEditTag}
                   highlight={filterTagsSet.has(tagName)}
+                  onEditValueChange={handleEditValueChange}
                 />
               ))}
             </SortableContext>
