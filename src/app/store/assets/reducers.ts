@@ -173,8 +173,26 @@ export const coreReducers = {
     });
 
     // Generate the restored tag list from the saved order
-    // Only include tags that still exist (weren't marked as TO_ADD)
-    const newTagList = savedList.filter((tag) => validTags.has(tag));
+    // Include all tags from savedList, as they're part of the original state
+    const newTagList = [...savedList];
+
+    // Create a Set from savedList for efficient lookup
+    const savedTagsSet = new Set(savedList);
+
+    // Clean up tagStatus by removing any tags not in savedList
+    Object.keys(newTagStatus).forEach((tag) => {
+      if (!savedTagsSet.has(tag)) {
+        delete newTagStatus[tag];
+      }
+    });
+
+    // Ensure all tags in savedList have a status entry
+    savedList.forEach((tag) => {
+      if (!newTagStatus[tag]) {
+        // If a tag from savedList is missing (was likely renamed), recreate it
+        newTagStatus[tag] = TagState.SAVED;
+      }
+    });
 
     // Replace the entire asset with a new object
     state.images = [
