@@ -1,17 +1,27 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { memo, type SyntheticEvent, useMemo } from 'react';
+import { CheckIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  KeyboardEvent,
+  memo,
+  type SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { hasState, TagState } from '@/app/store/assets';
+import { getTagStyles, tagButtonStyles } from '@/app/styles/tag-styles';
 
 type TagProps = {
   tagName: string;
-  tagState: number; // Changed to number to support bitwise flags
+  tagState: number;
   count: number;
   highlight: boolean;
   fade: boolean;
   isDraggable?: boolean;
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+  onEditTag?: (oldTagName: string, newTagName: string) => void;
+  onEditStateChange?: (isEditing: boolean) => void;
 };
 
 const Tag = ({
@@ -23,94 +33,169 @@ const Tag = ({
   isDraggable = false,
   onToggleTag,
   onDeleteTag,
+  onEditTag,
+  onEditStateChange,
 }: TagProps) => {
-  // Memoize style calculations to prevent recalculating on every render
-  const styles = useMemo(() => {
-    // Common base classes
-    const baseTagClass =
-      'mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
-    const baseCountClass =
-      'ml-2 inline-flex rounded-full border bg-white px-2 py-0.5 text-xs';
+  // State for managing edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(tagName);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-    // State-specific classes
-    let tagStateClasses = '';
-    let tagCountClasses = '';
+  // Define edit-related functions with useCallback to avoid dependency issues
+  const handleStartEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setIsEditing(true);
+      setEditValue(tagName);
+      if (onEditStateChange) onEditStateChange(true);
+    },
+    [tagName, onEditStateChange],
+  );
 
-    // Apply appropriate classes based on tag state
-    if (tagState === TagState.SAVED) {
-      // SAVED state (0)
-      tagStateClasses = highlight
-        ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
-        : 'border-teal-500 hover:bg-teal-100';
-      tagCountClasses = 'border-emerald-300';
-    } else {
-      // For combined states, prioritize certain visual styles
-      if (hasState(tagState, TagState.TO_DELETE)) {
-        // TO_DELETE is most important visual indicator
-        tagStateClasses = highlight
-          ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
-          : 'border-pink-500 hover:bg-pink-100';
-        tagCountClasses = 'border-pink-300';
-      } else if (hasState(tagState, TagState.TO_ADD)) {
-        // TO_ADD is second priority
-        tagStateClasses = highlight
-          ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
-          : 'border-amber-500 hover:bg-amber-100';
-        tagCountClasses = 'border-amber-300';
-      } else if (hasState(tagState, TagState.DIRTY)) {
-        // DIRTY is lowest priority
-        tagStateClasses = highlight
-          ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
-          : 'border-indigo-500 hover:bg-indigo-100';
-        tagCountClasses = 'border-indigo-300';
-      }
+  const handleSaveEdit = useCallback(() => {
+    const trimmedValue = editValue.trim();
+    if (trimmedValue && trimmedValue !== tagName && onEditTag) {
+      onEditTag(tagName, trimmedValue);
     }
+    setIsEditing(false);
+    if (onEditStateChange) onEditStateChange(false);
+  }, [editValue, tagName, onEditTag, onEditStateChange]);
 
-    return {
-      tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
-      tagTextClass: hasState(tagState, TagState.TO_DELETE)
-        ? 'line-through'
-        : '',
-      countClass: `${baseCountClass} ${tagCountClasses}`,
-    };
-  }, [tagState, highlight, fade, isDraggable]);
+  const handleCancelEdit = useCallback(() => {
+    setEditValue(tagName);
+    setIsEditing(false);
+    if (onEditStateChange) onEditStateChange(false);
+  }, [tagName, onEditStateChange]);
 
-  const handleToggleTag = (e: SyntheticEvent) => {
-    onToggleTag(e, tagName);
-  };
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        handleSaveEdit();
+      } else if (e.key === 'Escape') {
+        handleCancelEdit();
+      }
+    },
+    [handleSaveEdit, handleCancelEdit],
+  );
 
-  const handleDeleteTag = (e: SyntheticEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent onClick
-    onDeleteTag(e, tagName);
-  };
+  // Update edit value when tagName changes (if not editing)
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(tagName);
+    }
+  }, [tagName, isEditing]);
+
+  // Setup event listener for click outside when editing
+  useEffect(() => {
+    if (isEditing) {
+      // Create handler inside the effect to use the current handleCancelEdit
+      const handleClickOutside = (event: MouseEvent) => {
+        // Ignore the current tag (probably need a better way than two parents)
+        if (
+          inputRef.current &&
+          !inputRef.current.parentElement?.parentElement?.contains(
+            event.target as Node,
+          )
+        ) {
+          handleCancelEdit();
+        }
+      };
+
+      // Focus input element
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 10);
+
+      // Add event listener
+      document.addEventListener('mousedown', handleClickOutside);
+
+      // Cleanup
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isEditing, handleCancelEdit]);
+
+  // Get styles from the extracted styling utility
+  const styles = getTagStyles(tagState, highlight, fade, isDraggable);
+  const handleToggleTag = useCallback(
+    (e: SyntheticEvent) => {
+      if (!isEditing) onToggleTag(e, tagName);
+    },
+    [isEditing, onToggleTag, tagName],
+  );
+
+  const handleDeleteTag = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation(); // Prevent triggering the parent onClick
+      onDeleteTag(e, tagName);
+    },
+    [onDeleteTag, tagName],
+  );
 
   return (
     <div className={styles.tagClass} onClick={handleToggleTag}>
-      <span className={styles.tagTextClass}>{tagName}</span>
-      <span className={styles.countClass}>{count}</span>
-      <span
-        className="ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white"
-        onClick={handleDeleteTag}
-      >
-        <XMarkIcon />
-      </span>
+      {isEditing ? (
+        <div className="z-10 flex items-center">
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className={tagButtonStyles.inputField}
+            size={Math.max(tagName.length, 12)}
+            autoFocus
+          />
+          <span
+            className={tagButtonStyles.saveButton}
+            onClick={(e) => {
+              console.log('click save');
+              e.stopPropagation();
+              handleSaveEdit();
+            }}
+            title="Save tag"
+          >
+            <CheckIcon />
+          </span>
+          <span
+            className={tagButtonStyles.cancelButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCancelEdit();
+            }}
+            title="Cancel"
+          >
+            <XMarkIcon />
+          </span>
+        </div>
+      ) : (
+        <>
+          <span className={styles.countClass}>{count}</span>
+          <span className={styles.tagTextClass}>{tagName}</span>
+          <span
+            className={tagButtonStyles.editButton}
+            onClick={handleStartEdit}
+            title="Edit tag"
+          >
+            <PencilIcon />
+          </span>
+          <span
+            className={tagButtonStyles.deleteButton}
+            onClick={handleDeleteTag}
+            title="Delete tag"
+          >
+            <XMarkIcon />
+          </span>
+        </>
+      )}
     </div>
   );
 };
 
-// Use an equality function that compares props deeply
-const areEqual = (prevProps: TagProps, nextProps: TagProps) => {
-  return (
-    prevProps.tagName === nextProps.tagName &&
-    prevProps.tagState === nextProps.tagState &&
-    prevProps.count === nextProps.count &&
-    prevProps.highlight === nextProps.highlight &&
-    prevProps.fade === nextProps.fade &&
-    prevProps.isDraggable === nextProps.isDraggable
-    // Functions references should be stable from parent with useCallback
-  );
-};
-
-const MemoizedTag = memo(Tag, areEqual);
+const MemoizedTag = memo(Tag);
 
 export { MemoizedTag as Tag };

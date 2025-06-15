@@ -25,6 +25,7 @@ import {
 import {
   addTag,
   deleteTag,
+  editTag,
   ImageDimensions,
   IoState,
   reorderTags,
@@ -189,6 +190,20 @@ export const Asset = ({
     [dispatch],
   );
 
+  const handleEditTag = useCallback(
+    (oldTagName: string, newTagName: string) => {
+      if (newTagName.trim() === '') return;
+      if (oldTagName === newTagName) return;
+
+      dispatch(editTag({ assetId, oldTagName, newTagName }));
+      // Add the new tag first - this ensures tag is changed in-situ rather than deleted/created
+      // dispatch(addTag({ assetId, tagName: newTagName }));
+      // Then delete the old tag
+      // dispatch(deleteTag({ assetId, tagName: oldTagName }));
+    },
+    [dispatch, assetId],
+  );
+
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setNewTagInput(e.currentTarget.value.trimStart());
@@ -289,6 +304,7 @@ export const Asset = ({
                   count={globalTagList[tagName] || 0}
                   onToggleTag={toggleTag}
                   onDeleteTag={toggleDeleteTag}
+                  onEditTag={handleEditTag}
                   highlight={filterTagsSet.has(tagName)}
                 />
               ))}

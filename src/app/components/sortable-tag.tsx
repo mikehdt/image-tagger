@@ -16,6 +16,7 @@ type SortableTagProps = {
   fade: boolean;
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+  onEditTag?: (oldTagName: string, newTagName: string) => void;
 };
 
 const SortableTag = ({
@@ -27,6 +28,7 @@ const SortableTag = ({
   fade,
   onToggleTag,
   onDeleteTag,
+  onEditTag,
 }: SortableTagProps) => {
   // State to track debug info
   const [debugInfo, setDebugInfo] = useState({
@@ -35,6 +37,11 @@ const SortableTag = ({
     x: 0,
     y: 0,
   });
+
+  // Track whether the tag is currently being edited
+  const [isEditing, setIsEditing] = useState(false);
+
+  // This will be used to disable drag when editing
 
   const {
     attributes,
@@ -144,8 +151,8 @@ const SortableTag = ({
     <div
       ref={setRefs}
       style={style}
-      {...attributes}
-      {...listeners}
+      {...(isEditing ? {} : attributes)} // Don't apply drag attributes when editing
+      {...(isEditing ? {} : listeners)} // Don't apply drag listeners when editing
       className={`touch-none ${getDebugClasses()}`}
       data-tag-name={tagName}
     >
@@ -157,9 +164,10 @@ const SortableTag = ({
         fade={fade}
         onToggleTag={onToggleTag}
         onDeleteTag={onDeleteTag}
-        isDraggable={true}
+        onEditTag={onEditTag}
+        isDraggable={!isEditing}
+        onEditStateChange={setIsEditing}
       />
-
       {/* Debug overlay showing width and position */}
       {DEBUG_MODE && (
         <div className="pointer-events-none absolute top-0 left-0 z-50 text-xs text-white">

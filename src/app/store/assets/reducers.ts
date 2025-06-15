@@ -25,6 +25,35 @@ export const coreReducers = {
     }
   },
 
+  editTag: (
+    state: ImageAssets,
+    {
+      payload,
+    }: PayloadAction<{
+      assetId: string;
+      oldTagName: string;
+      newTagName: string;
+    }>,
+  ) => {
+    // savedTagList contains the unmodified tags in case of reverting
+    const { assetId, oldTagName, newTagName } = payload;
+
+    const assetIndex = state.images.findIndex(
+      (element) => element.fileId === assetId,
+    );
+
+    console.log(
+      'EDIT',
+      assetId,
+      ':',
+      oldTagName,
+      '=>',
+      newTagName,
+      'assetIndex',
+      assetIndex,
+    );
+  },
+
   deleteTag: (
     state: ImageAssets,
     { payload }: PayloadAction<{ assetId: string; tagName: string }>,

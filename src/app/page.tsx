@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useAppDispatch, useAppSelector } from './store/hooks';
-import { IoState, selectAllImages } from './store/slice-assets';
 import {
+  IoState,
   loadAssets,
   selectImageCount,
   selectIoState,
-} from './store/slice-assets';
+} from './store/assets';
+import { useAppDispatch, useAppSelector } from './store/hooks';
 import StoreProvider from './utils/store-provider';
 import { AssetList } from './views/asset-list';
 import { Error } from './views/error';
@@ -22,7 +22,6 @@ const App = () => {
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
-  const assets = useAppSelector(selectAllImages);
 
   // Could accept 'optimistic' assets and set them, then load?
   const loadImageAssets = useCallback(async () => {
@@ -51,7 +50,7 @@ const App = () => {
   return (
     <>
       <TopShelf />
-      <AssetList assets={assets} />
+      <AssetList />
     </>
   );
 };
