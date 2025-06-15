@@ -42,16 +42,22 @@ export const coreReducers = {
       (element) => element.fileId === assetId,
     );
 
-    console.log(
-      'EDIT',
-      assetId,
-      ':',
-      oldTagName,
-      '=>',
-      newTagName,
-      'assetIndex',
-      assetIndex,
+    // Update the name in the tagList
+    const tagListIndex = state.images[assetIndex].tagList.findIndex(
+      (item) => item === oldTagName,
     );
+
+    state.images[assetIndex].tagList[tagListIndex] = newTagName;
+
+    // Need to update the tagStatus key, and the tagList
+    state.images[assetIndex].tagStatus[newTagName] = addState(
+      state.images[assetIndex].tagStatus[oldTagName],
+      TagState.DIRTY,
+    );
+
+    delete state.images[assetIndex].tagStatus[oldTagName];
+
+    // On cancel, need to also remove superfluous and reset any tag keys missing as a result!
   },
 
   deleteTag: (
@@ -146,8 +152,6 @@ export const coreReducers = {
     const assetIndex = state.images.findIndex(
       (element) => element.fileId === payload,
     );
-
-    if (assetIndex === -1) return;
 
     const asset = { ...state.images[assetIndex] };
     const newTagStatus = { ...asset.tagStatus };
