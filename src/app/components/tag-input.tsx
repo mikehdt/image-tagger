@@ -9,6 +9,10 @@ import {
   useRef,
 } from 'react';
 
+// Configuration constants
+const MIN_TAG_LENGTH = 6;
+const MAX_TAG_LENGTH = 20;
+
 type TagInputProps = {
   inputValue: string;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -47,19 +51,20 @@ const TagInputComponent = ({
   const inputWidth = useMemo(() => {
     // Set minimum width for empty or short inputs
     const minWidth = 'w-36'; // Default width (9rem)
-    // Maximum width for longer inputs (up to 20 characters)
+    // Maximum width for longer inputs (up to MAX_TAG_LENGTH characters)
     const maxWidth = 'w-64'; // 16rem
 
     const length = inputValue.length;
 
-    if (length <= 10) {
+    if (length <= MIN_TAG_LENGTH) {
       return minWidth;
-    } else if (length >= 20) {
+    } else if (length >= MAX_TAG_LENGTH) {
       return maxWidth;
     } else {
       // Dynamic width between min and max based on character count
-      // Each character increment between 10-20 will increase width proportionally
-      const widthStep = (length - 10) / 10; // 0 to 1 scale for 10-20 characters
+      // Each character increment between MIN-MAX will increase width proportionally
+      const widthStep =
+        (length - MIN_TAG_LENGTH) / (MAX_TAG_LENGTH - MIN_TAG_LENGTH); // 0 to 1 scale
       // Maps to tailwind w classes between w-36 and w-64
       const widthClasses = [
         'w-36',
