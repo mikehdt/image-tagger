@@ -62,7 +62,7 @@ export function getTagStyles(
   }
 
   return {
-    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
+    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25 pointer-events-none' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
     tagTextClass: hasState(tagState, TagState.TO_DELETE) ? 'line-through' : '',
     countClass: `${baseCountClass} ${tagCountClasses}`,
   };

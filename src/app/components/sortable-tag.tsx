@@ -176,9 +176,9 @@ const SortableTag = ({
     <div
       ref={setRefs}
       style={style}
-      {...(isEditing ? {} : attributes)} // Don't apply drag attributes when editing
-      {...(isEditing ? {} : listeners)} // Don't apply drag listeners when editing
-      className={`touch-none ${getDebugClasses()}`}
+      {...(isEditing || fade ? {} : attributes)} // Don't apply drag attributes when editing or faded
+      {...(isEditing || fade ? {} : listeners)} // Don't apply drag listeners when editing or faded
+      className={`touch-none ${fade ? 'pointer-events-none' : ''} ${getDebugClasses()}`}
       data-tag-name={tagName}
     >
       <Tag
