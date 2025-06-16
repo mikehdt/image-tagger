@@ -328,9 +328,7 @@ export const Asset = ({
         >
           <div className="relative flex flex-wrap">
             {/* Debug overlay container */}
-            <div className="pointer-events-none absolute top-0 left-0">
-              {/* This will be populated by the debugging visualization */}
-            </div>
+            <div className="pointer-events-none absolute top-0 left-0" />
 
             <SortableContext
               items={localTagList}
@@ -345,6 +343,7 @@ export const Asset = ({
                     // For add mode: fade tags except the one being typed (if it exists)
                     (newTagInput !== '' && newTagInput !== tagName) ||
                     // For edit mode: fade tags except the one being edited or one that matches current edit value
+                    // TODO: Need to disable controls but not fade when tag is not being edited but matches another tag that is being edited
                     (editTagValue !== '' &&
                       tagName !== editingTagName &&
                       tagName !== editTagValue)
@@ -364,13 +363,17 @@ export const Asset = ({
           </div>
         </DndContext>
 
-        <TagInput
-          inputValue={newTagInput}
-          onInputChange={handleInputChange}
-          onSubmit={(e: SyntheticEvent) => addNewTag(e, newTagInput)}
-          mode="add"
-          placeholder="Add tag..."
-        />
+        <div
+          className={`transition-all ${editTagValue !== '' ? 'pointer-events-none opacity-25' : ''}`}
+        >
+          <TagInput
+            inputValue={newTagInput}
+            onInputChange={handleInputChange}
+            onSubmit={(e: SyntheticEvent) => addNewTag(e, newTagInput)}
+            mode="add"
+            placeholder="Add tag..."
+          />
+        </div>
       </div>
 
       <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">

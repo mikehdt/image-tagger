@@ -5,6 +5,8 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import { TagInput } from '@/app/components/tag-input';
 import { getTagStyles, tagButtonStyles } from '@/app/styles/tag-styles';
 
+import { hasState, TagState } from '../store/assets';
+
 type TagProps = {
   tagName: string;
   tagState: number;
@@ -116,13 +118,19 @@ const Tag = ({
     <div className={styles.tagClass} onClick={handleToggleTag}>
       <span className={styles.countClass}>{count}</span>
       <span className={styles.tagTextClass}>{tagName}</span>
-      <span
-        className={tagButtonStyles.editButton}
-        onClick={handleStartEdit}
-        title="Edit tag"
-      >
-        <PencilIcon />
-      </span>
+      {hasState(tagState, TagState.TO_DELETE) ? (
+        <span className="ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-500 opacity-30">
+          <PencilIcon />
+        </span>
+      ) : (
+        <span
+          className={tagButtonStyles.editButton}
+          onClick={handleStartEdit}
+          title="Edit tag"
+        >
+          <PencilIcon />
+        </span>
+      )}
       <span
         className={tagButtonStyles.deleteButton}
         onClick={handleDeleteTag}
