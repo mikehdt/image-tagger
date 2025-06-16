@@ -140,7 +140,7 @@ export const TopShelf = () => {
               {filterTags.map((item, idx) => (
                 <span
                   key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-emerald-300' : ''} px-2 text-emerald-700`}
+                  className={`${idx > 0 ? 'border-l border-l-emerald-300' : ''} ${idx + 1 === filterTags.length && filterSizes.length ? 'border-r border-r-slate-300' : ''} px-2 text-emerald-700`}
                 >
                   {item}
                 </span>

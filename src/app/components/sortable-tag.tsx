@@ -18,6 +18,7 @@ type SortableTagProps = {
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   onEditTag?: (oldTagName: string, newTagName: string) => void;
   onEditValueChange?: (tagName: string, value: string) => void;
+  isDuplicate?: boolean;
 };
 
 const SortableTag = ({
@@ -31,6 +32,7 @@ const SortableTag = ({
   onDeleteTag,
   onEditTag,
   onEditValueChange,
+  isDuplicate = false,
 }: SortableTagProps) => {
   // State to track debug info
   const [debugInfo, setDebugInfo] = useState({
@@ -152,9 +154,14 @@ const SortableTag = ({
   // Handler for when edit state changes
   const handleEditStateChange = (editing: boolean) => {
     setIsEditing(editing);
-    // Reset the edit value when editing is done
-    if (!editing && onEditValueChange) {
-      onEditValueChange(tagName, '');
+    // When editing starts, set an empty value to trigger fading
+    // When editing ends, reset the edit value
+    if (onEditValueChange) {
+      if (editing) {
+        onEditValueChange(tagName, tagName); // Pass current tag name to start with
+      } else {
+        onEditValueChange(tagName, ''); // Clear on finish
+      }
     }
   };
 
@@ -186,6 +193,7 @@ const SortableTag = ({
         isDraggable={!isEditing}
         onEditStateChange={handleEditStateChange}
         onEditValueChange={handleEditValueChange}
+        isDuplicate={isDuplicate}
       />
       {/* Debug overlay showing width and position */}
       {DEBUG_MODE && (

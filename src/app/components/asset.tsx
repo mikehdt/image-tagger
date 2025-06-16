@@ -264,6 +264,19 @@ export const Asset = ({
     [],
   );
 
+  // Check if the current edit value is a duplicate of another tag
+  const isEditingDuplicate = useMemo(() => {
+    if (editTagValue && editingTagName) {
+      // Check if any tag except the one being edited matches the current edit value
+      return tagList.some(
+        (tag) =>
+          tag !== editingTagName &&
+          tag.toLowerCase() === editTagValue.toLowerCase().trim(),
+      );
+    }
+    return false;
+  }, [editTagValue, editingTagName, tagList]);
+
   return (
     <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
       <div
@@ -334,6 +347,7 @@ export const Asset = ({
                   onEditTag={handleEditTag}
                   highlight={filterTagsSet.has(tagName)}
                   onEditValueChange={handleEditValueChange}
+                  isDuplicate={editingTagName === tagName && isEditingDuplicate}
                 />
               ))}
             </SortableContext>

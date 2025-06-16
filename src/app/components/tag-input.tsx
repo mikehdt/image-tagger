@@ -21,6 +21,7 @@ type TagInputProps = {
   placeholder?: string;
   mode: 'add' | 'edit';
   tone?: 'primary' | 'secondary';
+  isDuplicate?: boolean;
 };
 
 const TagInputComponent = ({
@@ -31,6 +32,7 @@ const TagInputComponent = ({
   placeholder = 'Add tag...',
   mode = 'add',
   tone,
+  isDuplicate,
 }: TagInputProps) => {
   // Reference to the input element to maintain focus
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,13 +40,13 @@ const TagInputComponent = ({
   // Allow submitting via Enter key
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && inputValue.trim() !== '') {
+      if (e.key === 'Enter' && inputValue.trim() !== '' && !isDuplicate) {
         onSubmit(e);
       } else if (e.key === 'Escape' && mode === 'edit' && onCancel) {
         onCancel(e);
       }
     },
-    [inputValue, onSubmit, onCancel, mode],
+    [inputValue, onSubmit, onCancel, mode, isDuplicate],
   );
 
   // Calculate the width based on input length (between min and max width)
@@ -150,12 +152,16 @@ const TagInputComponent = ({
       ) : (
         <>
           <span
-            className="absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-green-600 hover:bg-green-500 hover:text-white"
+            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 ${
+              !isDuplicate && inputValue.trim() !== ''
+                ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
+                : 'cursor-not-allowed text-gray-300'
+            } rounded-full p-0.5`}
             onClick={(e) => {
               e.stopPropagation();
-              if (inputValue.trim() !== '') onSubmit(e);
+              if (inputValue.trim() !== '' && !isDuplicate) onSubmit(e);
             }}
-            title="Save tag"
+            title={isDuplicate ? 'Tag name already exists' : 'Save tag'}
           >
             <CheckIcon />
           </span>

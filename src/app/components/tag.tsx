@@ -17,6 +17,7 @@ type TagProps = {
   onEditTag?: (oldTagName: string, newTagName: string) => void;
   onEditStateChange?: (isEditing: boolean) => void;
   onEditValueChange?: (value: string) => void;
+  isDuplicate?: boolean; // Whether the current edit value already exists
 };
 
 const Tag = ({
@@ -31,6 +32,7 @@ const Tag = ({
   onEditTag,
   onEditStateChange,
   onEditValueChange,
+  isDuplicate = false,
 }: TagProps) => {
   // State for managing edit mode
   const [isEditing, setIsEditing] = useState(false);
@@ -108,6 +110,7 @@ const Tag = ({
       onCancel={handleCancelEdit}
       placeholder="Edit tag..."
       mode="edit"
+      isDuplicate={isDuplicate}
     />
   ) : (
     <div className={styles.tagClass} onClick={handleToggleTag}>

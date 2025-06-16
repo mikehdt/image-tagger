@@ -25,7 +25,7 @@ export function getTagStyles(
   const baseTagClass =
     'mr-2 mb-2 inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
   const baseCountClass =
-    'relative -ml-2 mr-1 inline-flex tabular-nums px-1 text-xs';
+    'relative -ml-2 mr-1 text-shadow-xs/100 text-shadow-white inline-flex tabular-nums px-1 text-xs';
 
   // State-specific classes
   let tagStateClasses = '';
@@ -71,7 +71,7 @@ export function getTagStyles(
 // Additional styled elements for the tag component
 export const tagButtonStyles = {
   editButton:
-    'ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-400 hover:bg-blue-500 hover:text-white',
+    'ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-500 hover:bg-blue-500 hover:text-white',
   deleteButton:
     'ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white',
   saveButton:
