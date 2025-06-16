@@ -25,6 +25,7 @@ import {
   addTagFilter,
   clearFilters,
   FilterMode,
+  selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
@@ -43,6 +44,7 @@ export const TopShelf = () => {
   const filterTagsMode = useAppSelector(selectFilterMode);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
   const doRefresh = () => dispatch(loadAssets());
@@ -135,12 +137,19 @@ export const TopShelf = () => {
             tone="secondary"
           />
 
-          {filterTags.length || filterSizes.length ? (
+          {filterTags.length ||
+          filterSizes.length ||
+          filterExtensions.length ? (
             <span className="mr-4 ml-2 flex items-center rounded-full border border-slate-200 pl-2">
               {filterTags.map((item, idx) => (
                 <span
                   key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-emerald-300' : ''} ${idx + 1 === filterTags.length && filterSizes.length ? 'border-r border-r-slate-300' : ''} px-2 text-emerald-700`}
+                  className={`${idx > 0 ? 'border-l border-l-emerald-300' : ''} ${
+                    idx + 1 === filterTags.length &&
+                    (filterSizes.length > 0 || filterExtensions.length > 0)
+                      ? 'border-r border-r-slate-300'
+                      : ''
+                  } px-2 text-emerald-700`}
                 >
                   {item}
                 </span>
@@ -149,10 +158,24 @@ export const TopShelf = () => {
               {filterSizes.map((item, idx) => (
                 <span
                   key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-sky-300' : ''} px-2 text-sky-700`}
+                  className={`${idx > 0 ? 'border-l border-l-sky-300' : ''} ${
+                    idx + 1 === filterSizes.length &&
+                    filterExtensions.length > 0
+                      ? 'border-r border-r-slate-300'
+                      : ''
+                  } px-2 text-sky-700`}
                 >
                   {decomposeDimensions(item).width}&times;
                   {decomposeDimensions(item).height}
+                </span>
+              ))}
+
+              {filterExtensions.map((item, idx) => (
+                <span
+                  key={`${idx}-${item}`}
+                  className={`${idx > 0 ? 'border-l border-l-stone-300' : ''} px-2 text-stone-700`}
+                >
+                  {item}
                 </span>
               ))}
 

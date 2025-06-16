@@ -6,6 +6,7 @@ import { memo, useMemo } from 'react';
 import { Asset } from '../components/asset';
 import { selectAllImages } from '../store/assets';
 import {
+  selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
@@ -22,10 +23,15 @@ export const AssetList = () => {
   const assets = useAppSelector(selectAllImages);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
 
-  // Create a Set from filterSizes for O(1) lookups instead of O(n)
+  // Create Sets from filters for O(1) lookups instead of O(n)
   const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
+  const filterExtensionsSet = useMemo(
+    () => new Set(filterExtensions),
+    [filterExtensions],
+  );
 
   // Memoize filtered assets so they only recalculate when dependencies change
   const filteredAssets = useMemo(
@@ -34,9 +40,10 @@ export const AssetList = () => {
         assets,
         filterTags,
         filterSizes,
+        filterExtensions,
         filterMode,
       }),
-    [assets, filterTags, filterSizes, filterMode],
+    [assets, filterTags, filterSizes, filterExtensions, filterMode],
   );
 
   // Pre-calculate dimensions for each asset to avoid recalculating in the render
@@ -54,21 +61,23 @@ export const AssetList = () => {
       filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => {
         // Get the pre-calculated dimension string
         const dimensionString = assetDimensions.get(fileId);
-        // Check if it's in our filter set
-        const isActive = filterSizesSet.has(dimensionString);
+        // Check if dimensions or extension are in our filter sets
+        const isDimensionActive = filterSizesSet.has(dimensionString);
+        const isExtensionActive = filterExtensionsSet.has(fileExtension);
 
         return (
           <MemoizedAsset
             key={fileId}
             assetId={fileId}
             fileExtension={fileExtension}
-            dimensionsActive={isActive}
+            dimensionsActive={isDimensionActive}
+            extensionActive={isExtensionActive}
             dimensions={dimensions}
             ioState={ioState}
           />
         );
       }),
-    [filteredAssets, filterSizesSet, assetDimensions],
+    [filteredAssets, filterSizesSet, filterExtensionsSet, assetDimensions],
   );
 
   // Render a message when no assets match the filters

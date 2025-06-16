@@ -8,6 +8,7 @@ const initialState: Filters = {
   filterMode: FilterMode.SHOW_ALL,
   filterTags: [],
   filterSizes: [],
+  filterExtensions: [],
 };
 
 const filtersSlice = createSlice({
@@ -20,12 +21,19 @@ const filtersSlice = createSlice({
     selectFilterMode: (state) => state.filterMode,
     selectFilterTags: (state) => state.filterTags,
     selectFilterSizes: (state) => state.filterSizes,
+    selectFilterExtensions: (state) => state.filterExtensions,
     selectHasActiveFilters: (state) =>
-      state.filterTags.length > 0 || state.filterSizes.length > 0,
+      state.filterTags.length > 0 ||
+      state.filterSizes.length > 0 ||
+      state.filterExtensions.length > 0,
     selectFilterCount: (state) => ({
       tags: state.filterTags.length,
       sizes: state.filterSizes.length,
-      total: state.filterTags.length + state.filterSizes.length,
+      extensions: state.filterExtensions.length,
+      total:
+        state.filterTags.length +
+        state.filterSizes.length +
+        state.filterExtensions.length,
     }),
   },
 });
@@ -37,8 +45,10 @@ export const {
   addTagFilter,
   toggleTagFilter,
   toggleSizeFilter,
+  toggleExtensionFilter,
   clearTagFilters,
   clearSizeFilters,
+  clearExtensionFilters,
   clearFilters,
 } = filtersSlice.actions;
 

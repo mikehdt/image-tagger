@@ -36,6 +36,7 @@ import {
 } from '../store/assets';
 import {
   selectFilterTags,
+  toggleExtensionFilter,
   toggleSizeFilter,
   toggleTagFilter,
 } from '../store/filters';
@@ -51,6 +52,7 @@ type AssetProps = {
   fileExtension: string;
   dimensions: ImageDimensions;
   dimensionsActive: boolean;
+  extensionActive: boolean;
   ioState: IoState;
 };
 
@@ -59,6 +61,7 @@ export const Asset = ({
   fileExtension,
   dimensions,
   dimensionsActive,
+  extensionActive,
   ioState,
 }: AssetProps) => {
   // Memoize the composed dimensions so it's not recreated on every render
@@ -188,6 +191,13 @@ export const Asset = ({
   const toggleSize = useCallback(
     (composedSize: string) => {
       dispatch(toggleSizeFilter(composedSize));
+    },
+    [dispatch],
+  );
+
+  const toggleExtension = useCallback(
+    (extension: string) => {
+      dispatch(toggleExtensionFilter(extension));
     },
     [dispatch],
   );
@@ -373,9 +383,13 @@ export const Asset = ({
             {dimensions.width}&times;{dimensions.height}
           </button>
 
-          <span className="mr-2 cursor-default rounded-sm border border-stone-300 bg-stone-100 px-2 py-0.5 max-sm:hidden">
+          <button
+            type="button"
+            className={`mr-2 cursor-pointer rounded-sm border border-stone-300 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'} px-2 py-0.5 max-sm:hidden`}
+            onClick={() => toggleExtension(fileExtension)}
+          >
             {fileExtension}
-          </span>
+          </button>
 
           <span
             className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:hidden"

@@ -9,10 +9,12 @@ export type Filters = {
   filterMode: FilterMode;
   filterTags: string[];
   filterSizes: string[];
+  filterExtensions: string[];
 };
 
 export type FilterCount = {
   tags: number;
   sizes: number;
+  extensions: number;
   total: number;
 };

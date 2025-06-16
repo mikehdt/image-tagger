@@ -10,13 +10,22 @@ export const selectFilterTags = (state: { filters: Filters }) =>
 export const selectFilterSizes = (state: { filters: Filters }) =>
   state.filters.filterSizes;
 
+export const selectFilterExtensions = (state: { filters: Filters }) =>
+  state.filters.filterExtensions;
+
 export const selectHasActiveFilters = (state: { filters: Filters }) =>
-  state.filters.filterTags.length > 0 || state.filters.filterSizes.length > 0;
+  state.filters.filterTags.length > 0 ||
+  state.filters.filterSizes.length > 0 ||
+  state.filters.filterExtensions.length > 0;
 
 export const selectFilterCount = (state: {
   filters: Filters;
 }): FilterCount => ({
   tags: state.filters.filterTags.length,
   sizes: state.filters.filterSizes.length,
-  total: state.filters.filterTags.length + state.filters.filterSizes.length,
+  extensions: state.filters.filterExtensions.length,
+  total:
+    state.filters.filterTags.length +
+    state.filters.filterSizes.length +
+    state.filters.filterExtensions.length,
 });

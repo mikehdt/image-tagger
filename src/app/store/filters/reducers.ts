@@ -32,6 +32,13 @@ export const coreReducers = {
     state.filterSizes = toggleFilter(state.filterSizes, payload);
   },
 
+  toggleExtensionFilter: (
+    state: Filters,
+    { payload }: PayloadAction<string>,
+  ) => {
+    state.filterExtensions = toggleFilter(state.filterExtensions, payload);
+  },
+
   clearTagFilters: (state: Filters) => {
     state.filterTags = [];
   },
@@ -40,8 +47,13 @@ export const coreReducers = {
     state.filterSizes = [];
   },
 
+  clearExtensionFilters: (state: Filters) => {
+    state.filterExtensions = [];
+  },
+
   clearFilters: (state: Filters) => {
     state.filterTags = [];
     state.filterSizes = [];
+    state.filterExtensions = [];
   },
 };
