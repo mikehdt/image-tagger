@@ -32,33 +32,32 @@ export function getTagStyles(
   let tagCountClasses = '';
 
   // Apply appropriate classes based on tag state
-  if (tagState === TagState.SAVED) {
+  if (hasState(tagState, TagState.SAVED)) {
     // SAVED state (0)
     tagStateClasses = highlight
       ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
       : 'border-teal-500 hover:bg-teal-100';
     tagCountClasses = 'text-emerald-500';
-  } else {
+
     // For combined states, prioritize certain visual styles
-    if (hasState(tagState, TagState.TO_DELETE)) {
-      // TO_DELETE is most important visual indicator
-      tagStateClasses = highlight
-        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
-        : 'border-pink-500 hover:bg-pink-100';
-      tagCountClasses = 'text-pink-500';
-    } else if (hasState(tagState, TagState.TO_ADD)) {
-      // TO_ADD is second priority
-      tagStateClasses = highlight
-        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
-        : 'border-amber-500 hover:bg-amber-100';
-      tagCountClasses = 'text-amber-500';
-    } else if (hasState(tagState, TagState.DIRTY)) {
-      // DIRTY is lowest priority
-      tagStateClasses = highlight
-        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
-        : 'border-indigo-500 hover:bg-indigo-100';
-      tagCountClasses = 'text-indigo-500';
-    }
+  } else if (hasState(tagState, TagState.TO_DELETE)) {
+    // TO_DELETE is most important visual indicator
+    tagStateClasses = highlight
+      ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
+      : 'border-pink-500 hover:bg-pink-100';
+    tagCountClasses = 'text-pink-500';
+  } else if (hasState(tagState, TagState.TO_ADD)) {
+    // TO_ADD is second priority
+    tagStateClasses = highlight
+      ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
+      : 'border-amber-500 hover:bg-amber-100';
+    tagCountClasses = 'text-amber-500';
+  } else if (hasState(tagState, TagState.DIRTY)) {
+    // DIRTY is lowest priority
+    tagStateClasses = highlight
+      ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
+      : 'border-indigo-500 hover:bg-indigo-100';
+    tagCountClasses = 'text-indigo-500';
   }
 
   return {

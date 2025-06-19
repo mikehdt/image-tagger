@@ -58,10 +58,12 @@ const App = () => {
 // This is to avoid separating layouts into two files for such a small
 // difference, because of ReduxProvider not being allowed in layout.tsx due to
 // its use of meta setting requiring server components
-export default function Page() {
+const Page = () => {
   return (
     <StoreProvider>
       <App />
     </StoreProvider>
   );
-}
+};
+
+export default Page;

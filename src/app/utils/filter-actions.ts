@@ -57,9 +57,18 @@ export const applyFilters = ({
     }
 
     if (filterMode === FilterMode.MATCH_ANY) {
-      // For MATCH_ANY, either tags, size, or extension can match
-      const anyTagMatches = filterTags.some((tag) => img.tagList.includes(tag));
-      return anyTagMatches || sizeMatches || extensionMatches;
+      // For MATCH_ANY mode, we want a union of matches from any filter class
+      // This means if any filter type matches, we show the asset
+
+      // Define whether each filter type is applied and matches
+      const tagsMatch =
+        filterTags.length > 0 &&
+        filterTags.some((tag) => img.tagList.includes(tag));
+      const sizesMatch = filterSizes.length > 0 && sizeMatches;
+      const extensionsMatch = filterExtensions.length > 0 && extensionMatches;
+
+      // Return true if ANY of the filter classes match
+      return tagsMatch || sizesMatch || extensionsMatch;
     }
 
     // This should never happen if using enum correctly

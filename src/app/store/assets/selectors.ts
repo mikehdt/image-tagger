@@ -3,6 +3,7 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { composeDimensions } from '../../utils/helpers';
 import { ImageAsset, ImageAssets, KeyedCountList, TagState } from './types';
+import { hasState } from './utils';
 
 // Basic selectors
 export const selectIoState = (state: { assets: ImageAssets }) => {
@@ -98,7 +99,7 @@ export const selectAllTags = createSelector(
     for (const asset of imageAssets) {
       for (const tag of asset.tagList) {
         // Only count tags that aren't marked for deletion
-        if (asset.tagStatus[tag] !== TagState.TO_DELETE) {
+        if (!hasState(asset.tagStatus[tag], TagState.TO_DELETE)) {
           tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         }
       }
@@ -112,6 +113,8 @@ export const selectAllTags = createSelector(
 export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
   // Check if any asset has tags that aren't in the SAVED state
   return state.assets.images.some((asset) =>
-    asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+    asset.tagList.some(
+      (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+    ),
   );
 };

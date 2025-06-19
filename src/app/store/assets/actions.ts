@@ -67,7 +67,9 @@ export const saveAllAssets = createAsyncThunk<
 
   // Find all images with tag status that's not SAVED (0)
   const modifiedAssets = images.filter((asset) =>
-    asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+    asset.tagList.some(
+      (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+    ),
   );
 
   if (modifiedAssets.length === 0) {
@@ -107,7 +109,9 @@ export const resetAllTags = createAsyncThunk(
 
     // Find all images with tag status that's not SAVED (0)
     const modifiedAssets = images.filter((asset) =>
-      asset.tagList.some((tag) => asset.tagStatus[tag] !== TagState.SAVED),
+      asset.tagList.some(
+        (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+      ),
     );
 
     if (modifiedAssets.length === 0) {
