@@ -113,6 +113,22 @@ export const TopShelf = () => {
         </div>
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
           {filterActive ? (
+            <div className="mr-4">
+              {filterTags.length ? (
+                <span className="text-emerald-500">{filterTags.length}</span>
+              ) : null}
+              {filterSizes.length ? (
+                <span className="text-sky-500">{filterSizes.length}</span>
+              ) : null}
+              {filterExtensions.length ? (
+                <span className="text-slate-500">
+                  {filterExtensions.length}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          {filterActive ? (
             <button
               className="mr-2 inline-flex cursor-pointer items-center p-2 text-slate-500"
               type="button"
