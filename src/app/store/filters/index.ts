@@ -41,7 +41,7 @@ const filtersSlice = createSlice({
 // Main exports from slice
 export const { reducer: filtersReducer } = filtersSlice;
 export const {
-  toggleTagFilterMode,
+  setTagFilterMode,
   addTagFilter,
   toggleTagFilter,
   toggleSizeFilter,

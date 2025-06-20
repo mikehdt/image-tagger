@@ -5,17 +5,11 @@ import { FilterMode, Filters } from './types';
 import { toggleFilter } from './utils';
 
 export const coreReducers = {
-  toggleTagFilterMode: (state: Filters) => {
-    const modes = [
-      FilterMode.SHOW_ALL,
-      FilterMode.MATCH_ANY,
-      FilterMode.MATCH_ALL,
-    ];
-
-    const currentIndex = modes.indexOf(state.filterMode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-
-    state.filterMode = modes[nextIndex];
+  setTagFilterMode: (
+    state: Filters,
+    { payload }: PayloadAction<FilterMode>,
+  ) => {
+    state.filterMode = payload;
   },
 
   addTagFilter: (state: Filters, { payload }: PayloadAction<string>) => {

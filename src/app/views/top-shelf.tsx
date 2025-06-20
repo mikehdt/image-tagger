@@ -30,7 +30,7 @@ import {
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
-  toggleTagFilterMode,
+  setTagFilterMode,
 } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { decomposeDimensions } from '../utils/helpers';
@@ -50,7 +50,6 @@ export const TopShelf = () => {
   const saveProgress = useAppSelector(selectSaveProgress);
 
   const doRefresh = () => dispatch(loadAssets());
-  const onToggleTagFilterMode = () => dispatch(toggleTagFilterMode());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
 
@@ -87,46 +86,46 @@ export const TopShelf = () => {
               </button>
             )}
           </div>
-          {saveProgress ? (
-            <div className="mr-2 text-xs text-slate-600">
-              Saving: {saveProgress.completed}/{saveProgress.total}
-              {saveProgress.failed > 0 && ` (${saveProgress.failed} errors)`}
+          {saveProgress && (
+            <div className="mr-2 align-middle text-slate-600 tabular-nums">
+              {saveProgress.completed} / {saveProgress.total}
+              {saveProgress.failed > 0 &&
+                ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
             </div>
-          ) : (
-            !showLoader && (
-              <>
-                <div className="mr-2 w-6">
-                  <button
-                    type="button"
-                    onClick={saveAllChanges}
-                    className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
-                    title={
-                      hasModifiedAssets
-                        ? 'Save all tag changes'
-                        : 'No changes to save'
-                    }
-                    disabled={!hasModifiedAssets}
-                  >
-                    <ArchiveBoxArrowDownIcon />
-                  </button>
-                </div>
-                <div className="w-6">
-                  <button
-                    type="button"
-                    onClick={cancelAllChanges}
-                    className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
-                    title={
-                      hasModifiedAssets
-                        ? 'Cancel all tag changes'
-                        : 'No changes to cancel'
-                    }
-                    disabled={!hasModifiedAssets}
-                  >
-                    <BackspaceIcon />
-                  </button>
-                </div>
-              </>
-            )
+          )}
+          {!showLoader && (
+            <>
+              <div className="mr-2 w-6">
+                <button
+                  type="button"
+                  onClick={saveAllChanges}
+                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
+                  title={
+                    hasModifiedAssets
+                      ? 'Save all tag changes'
+                      : 'No changes to save'
+                  }
+                  disabled={!hasModifiedAssets}
+                >
+                  <ArchiveBoxArrowDownIcon />
+                </button>
+              </div>
+              <div className="w-6">
+                <button
+                  type="button"
+                  onClick={cancelAllChanges}
+                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
+                  title={
+                    hasModifiedAssets
+                      ? 'Cancel all tag changes'
+                      : 'No changes to cancel'
+                  }
+                  disabled={!hasModifiedAssets}
+                >
+                  <BackspaceIcon />
+                </button>
+              </div>
+            </>
           )}
         </div>
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
@@ -198,42 +197,54 @@ export const TopShelf = () => {
             </span>
           ) : null}
 
-          <button
-            type="button"
-            onClick={onToggleTagFilterMode}
-            className="mr-4 ml-2 inline-flex cursor-pointer items-center rounded-sm bg-slate-200 px-2 py-1"
-          >
-            {filterTagsMode === FilterMode.SHOW_ALL && (
-              <>
-                <span className="mr-1 w-6">
-                  <DocumentCheckIcon />
-                </span>
-                Show All
-              </>
-            )}
-            {filterTagsMode === FilterMode.MATCH_ALL && (
-              <>
-                <span className="mr-1 w-6">
-                  <DocumentMagnifyingGlassIcon />
-                </span>
-                Match All
-              </>
-            )}
-            {filterTagsMode === FilterMode.MATCH_ANY && (
-              <>
-                <span className="mr-1 w-6">
-                  <DocumentMagnifyingGlassIcon />
-                </span>
-                Match Any
-              </>
-            )}
-          </button>
+          <div className="mr-4 ml-2 inline-flex items-center rounded-md bg-slate-100 p-1">
+            <span className="mr-1 w-4">
+              {filterTagsMode === FilterMode.SHOW_ALL ? (
+                <DocumentCheckIcon />
+              ) : (
+                <DocumentMagnifyingGlassIcon />
+              )}
+            </span>
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
+              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+                filterTagsMode === FilterMode.SHOW_ALL
+                  ? 'bg-white shadow-sm'
+                  : 'hover:bg-slate-300'
+              }`}
+            >
+              Show All
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
+              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+                filterTagsMode === FilterMode.MATCH_ANY
+                  ? 'bg-white shadow-sm'
+                  : 'hover:bg-slate-300'
+              }`}
+            >
+              Match Any
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
+              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+                filterTagsMode === FilterMode.MATCH_ALL
+                  ? 'bg-white shadow-sm'
+                  : 'hover:bg-slate-300'
+              }`}
+            >
+              Match All
+            </button>
+          </div>
 
           {/* Tag summary list button */}
           <div className="relative" ref={tagButtonRef}>
             <span
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className="inline-flex cursor-pointer items-center rounded-sm border border-slate-300 p-2 hover:bg-slate-50"
+              className="inline-flex cursor-pointer items-center rounded-md bg-slate-100 p-2 hover:bg-slate-300"
               title="Show tag summary"
             >
               <TagIcon className="mr-2 w-4" /> Tag List
