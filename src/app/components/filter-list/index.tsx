@@ -155,7 +155,8 @@ export const FilterList = ({
           <XMarkIcon className="h-4 w-4" />
         </button>
       </div>
-      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-3">
+
+      <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
         <button
           onClick={() =>
             setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
@@ -174,7 +175,27 @@ export const FilterList = ({
           By: {getSortOptions().typeLabel}
         </button>
       </div>
-      <div className="overflow-y-auto">
+
+      <div className="relative inline-flex bg-slate-50 px-2 pb-2">
+        <input
+          type="text"
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 transition-all"
+          autoFocus
+          placeholder="Search for tag"
+        />
+        <span
+          className={`absolute top-0 right-4 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
+            ``.trim() !== ''
+              ? 'text-slate-600 hover:bg-slate-500 hover:text-white'
+              : 'cursor-not-allowed text-gray-300'
+          }`}
+          onClick={``.trim() !== '' ? () => {} : undefined}
+        >
+          <XMarkIcon />
+        </span>
+      </div>
+
+      <div className="overflow-y-auto border-t border-slate-200">
         {activeView === 'tag' ? (
           <TagsView sortType={sortType} sortDirection={sortDirection} />
         ) : activeView === 'size' ? (

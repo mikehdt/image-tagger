@@ -20,7 +20,6 @@ type TagInputProps = {
   onCancel?: (e: SyntheticEvent) => void;
   placeholder?: string;
   mode: 'add' | 'edit';
-  tone?: 'primary' | 'secondary';
   isDuplicate?: boolean;
 };
 
@@ -31,7 +30,6 @@ const TagInputComponent = ({
   onCancel,
   placeholder = 'Add tag...',
   mode = 'add',
-  tone,
   isDuplicate,
 }: TagInputProps) => {
   // Reference to the input element to maintain focus
@@ -115,12 +113,7 @@ const TagInputComponent = ({
   }, []);
 
   // Border colors based on mode
-  const borderColor =
-    mode === 'add'
-      ? tone !== 'secondary'
-        ? 'border-green-300'
-        : 'border-slate-300'
-      : 'border-blue-300';
+  const borderColor = mode === 'add' ? 'border-amber-300' : 'border-blue-300';
 
   return (
     <div

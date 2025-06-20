@@ -8,11 +8,10 @@ import {
   TagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { SyntheticEvent, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { FilterList } from '../components/filter-list';
 import { Loader } from '../components/loader';
-import { TagInput } from '../components/tag-input';
 import {
   IoState,
   loadAssets,
@@ -23,7 +22,6 @@ import {
   selectSaveProgress,
 } from '../store/assets';
 import {
-  addTagFilter,
   clearFilters,
   FilterMode,
   selectFilterExtensions,
@@ -36,7 +34,6 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { decomposeDimensions } from '../utils/helpers';
 
 export const TopShelf = () => {
-  const [newTagInput, setNewTagInput] = useState<string>('');
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
   const tagButtonRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
@@ -52,21 +49,6 @@ export const TopShelf = () => {
   const doRefresh = () => dispatch(loadAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
-
-  const addNewFilter = (e: SyntheticEvent, tag: string) => {
-    e.stopPropagation();
-
-    if (tag.trim() !== '') {
-      if (!filterTags.includes(tag)) {
-        dispatch(addTagFilter(tag));
-        setNewTagInput('');
-      } else {
-        console.log("Couldn't add filter, it's already is in the list", tag);
-      }
-    } else {
-      console.log("Couldn't add filter, it was empty.");
-    }
-  };
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
@@ -133,17 +115,6 @@ export const TopShelf = () => {
             <FunnelIcon className="mr-1 w-4" />
             Filter:
           </span>
-
-          <TagInput
-            inputValue={newTagInput}
-            onInputChange={(e) =>
-              setNewTagInput(e.currentTarget.value.trimStart())
-            }
-            onSubmit={(e) => addNewFilter(e, newTagInput)}
-            mode="add"
-            placeholder="Filter by tag..."
-            tone="secondary"
-          />
 
           {filterTags.length ||
           filterSizes.length ||
