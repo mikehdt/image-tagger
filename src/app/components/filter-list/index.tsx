@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { FiletypesView, getFiletypeSortOptions } from './FiletypesView';
 import { getSizeSortOptions, SizesView } from './SizesView';
@@ -13,6 +13,7 @@ export const FilterList = ({
 }: FilterListProps) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Add state for active view
   const [activeView, setActiveView] = useState<FilterView>('tag');
@@ -20,6 +21,52 @@ export const FilterList = ({
   // Add state for sort direction and type
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [sortType, setSortType] = useState<SortType>('count');
+
+  // Add state for search term - used for filtering tags, sizes, or filetypes
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Add state for keyboard navigation
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [listLength, setListLength] = useState(0);
+
+  // Reset selected index when search term changes
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [searchTerm]);
+
+  // Update list length for proper keyboard navigation bounds
+  const updateListLength = useCallback((length: number) => {
+    setListLength(length);
+  }, []);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault(); // Prevent cursor movement in input
+        setSelectedIndex((prev) => (prev < listLength - 1 ? prev + 1 : prev));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault(); // Prevent cursor movement in input
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        // The actual tag selection will be handled in the TagsView component
+        e.preventDefault();
+        // We'll maintain the selected index and just focus back on the input
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      } else if (e.key === 'Escape') {
+        // Clear selection first, if another Escape is pressed, close the panel
+        if (selectedIndex >= 0) {
+          e.preventDefault();
+          setSelectedIndex(-1);
+        } else {
+          onClose();
+        }
+      }
+    },
+    [listLength, selectedIndex, onClose],
+  );
 
   // Calculate and update panel position
   const updatePosition = useCallback(() => {
@@ -120,7 +167,10 @@ export const FilterList = ({
       <div className="inline-flex w-full items-center bg-slate-100 p-2">
         <button
           type="button"
-          onClick={() => setActiveView('tag')}
+          onClick={() => {
+            setActiveView('tag');
+            setSearchTerm('');
+          }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
           }`}
@@ -129,7 +179,10 @@ export const FilterList = ({
         </button>
         <button
           type="button"
-          onClick={() => setActiveView('size')}
+          onClick={() => {
+            setActiveView('size');
+            setSearchTerm('');
+          }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
           }`}
@@ -138,7 +191,10 @@ export const FilterList = ({
         </button>
         <button
           type="button"
-          onClick={() => setActiveView('filetype')}
+          onClick={() => {
+            setActiveView('filetype');
+            setSearchTerm('');
+          }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'filetype'
               ? 'bg-white shadow-sm'
@@ -178,18 +234,24 @@ export const FilterList = ({
 
       <div className="relative inline-flex bg-slate-50 px-2 pb-2">
         <input
+          ref={inputRef}
           type="text"
           className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 transition-all"
           autoFocus
-          placeholder="Search for tag"
+          placeholder={`Search for ${activeView === 'tag' ? 'tag' : activeView === 'size' ? 'size' : 'filetype'}`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <span
-          className={`absolute top-0 right-4 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
-            ``.trim() !== ''
+          className={`absolute top-1.5 right-4 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
+            searchTerm.trim() !== ''
               ? 'text-slate-600 hover:bg-slate-500 hover:text-white'
               : 'cursor-not-allowed text-gray-300'
           }`}
-          onClick={``.trim() !== '' ? () => {} : undefined}
+          onClick={
+            searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
+          }
         >
           <XMarkIcon />
         </span>
@@ -197,11 +259,34 @@ export const FilterList = ({
 
       <div className="overflow-y-auto border-t border-slate-200">
         {activeView === 'tag' ? (
-          <TagsView sortType={sortType} sortDirection={sortDirection} />
+          <TagsView
+            sortType={sortType}
+            sortDirection={sortDirection}
+            searchTerm={searchTerm}
+            updateListLength={updateListLength}
+            selectedIndex={selectedIndex}
+            onItemSelect={() => {
+              // Keep the selection index after item is selected
+              // Just focus back on the input
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
+            }}
+          />
         ) : activeView === 'size' ? (
-          <SizesView sortType={sortType} sortDirection={sortDirection} />
+          <SizesView
+            sortType={sortType}
+            sortDirection={sortDirection}
+            updateListLength={updateListLength}
+            selectedIndex={selectedIndex}
+          />
         ) : (
-          <FiletypesView sortType={sortType} sortDirection={sortDirection} />
+          <FiletypesView
+            sortType={sortType}
+            sortDirection={sortDirection}
+            updateListLength={updateListLength}
+            selectedIndex={selectedIndex}
+          />
         )}
       </div>
     </div>

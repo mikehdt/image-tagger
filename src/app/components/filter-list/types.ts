@@ -14,6 +14,10 @@ export type FilterView = 'tag' | 'size' | 'filetype';
 export interface FilterViewProps {
   sortType: SortType;
   sortDirection: SortDirection;
+  searchTerm?: string;
+  selectedIndex?: number;
+  updateListLength?: (length: number) => void;
+  onItemSelect?: (index: number) => void;
 }
 
 // Base props for the filter list component

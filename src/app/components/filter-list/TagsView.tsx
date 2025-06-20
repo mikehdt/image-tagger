@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllTags } from '../../store/assets';
 import { selectFilterTags, toggleTagFilter } from '../../store/filters';
@@ -30,19 +30,45 @@ export const getTagSortOptions = (
   };
 };
 
-export const TagsView = ({ sortType, sortDirection }: FilterViewProps) => {
+export const TagsView = ({
+  sortType,
+  sortDirection,
+  searchTerm = '',
+  selectedIndex = -1,
+  updateListLength,
+  onItemSelect,
+}: FilterViewProps) => {
   const dispatch = useAppDispatch();
   const allTags = useAppSelector(selectAllTags);
   const filterTags = useAppSelector(selectFilterTags);
 
   // Handle tag click to toggle filters
-  const handleTagClick = (tag: string) => {
-    dispatch(toggleTagFilter(tag));
-  };
+  const handleTagClick = useCallback(
+    (tag: string, isKeyboardSelection = false) => {
+      dispatch(toggleTagFilter(tag));
 
-  // Sort tags based on current sort type and direction
+      // Notify parent of selection when keyboard navigation is used
+      // This will focus back on the input without changing the selected index
+      if (isKeyboardSelection && onItemSelect) {
+        onItemSelect(selectedIndex);
+      }
+    },
+    [dispatch, onItemSelect, selectedIndex],
+  ); // Filter and sort tags based on search term and current sort type and direction
   const sortedTags = useMemo(() => {
-    return Object.entries(allTags).sort(([tagA, countA], [tagB, countB]) => {
+    // Filter tags based on search term
+    const filteredTags = Object.entries(allTags).filter(([tag]) => {
+      if (!searchTerm || searchTerm.trim() === '') return true;
+      return tag.toLowerCase().includes(searchTerm.toLowerCase().trim());
+    });
+
+    // Update parent component with list length for keyboard navigation
+    if (updateListLength) {
+      updateListLength(filteredTags.length);
+    }
+
+    // Sort the filtered tags
+    return filteredTags.sort(([tagA, countA], [tagB, countB]) => {
       if (sortType === 'active') {
         // Sort by selected/active status first
         const isSelectedA = filterTags.includes(tagA);
@@ -68,26 +94,59 @@ export const TagsView = ({ sortType, sortDirection }: FilterViewProps) => {
         return sortDirection === 'desc' ? -comparison : comparison;
       }
     });
-  }, [allTags, sortType, sortDirection, filterTags]);
+  }, [
+    allTags,
+    sortType,
+    sortDirection,
+    filterTags,
+    searchTerm,
+    updateListLength,
+  ]);
+
+  // Handle enter key for keyboard navigation
+  useEffect(() => {
+    if (
+      selectedIndex >= 0 &&
+      sortedTags.length > 0 &&
+      selectedIndex < sortedTags.length
+    ) {
+      const [tag] = sortedTags[selectedIndex];
+      const handleKeyDownEnter = (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          handleTagClick(tag, true);
+        }
+      };
+      document.addEventListener('keydown', handleKeyDownEnter);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDownEnter);
+      };
+    }
+  }, [selectedIndex, sortedTags, handleTagClick]);
 
   if (sortedTags.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-slate-500">
-        No tags found
+        {searchTerm ? `No tags matching "${searchTerm}"` : 'No tags found'}
       </div>
     );
   }
 
   return (
     <ul className="divide-y divide-slate-100">
-      {sortedTags.map(([tag, count]) => {
+      {sortedTags.map(([tag, count], index) => {
         const isSelected = filterTags.includes(tag);
+        const isKeyboardSelected = index === selectedIndex;
+
         return (
           <li
             key={tag}
             onClick={() => handleTagClick(tag)}
-            className={`flex cursor-pointer justify-between px-3 py-2 hover:bg-slate-50 ${
-              isSelected ? 'bg-emerald-50' : ''
+            className={`flex cursor-pointer justify-between px-3 py-2 ${
+              isKeyboardSelected
+                ? 'bg-blue-100'
+                : isSelected
+                  ? 'bg-emerald-50'
+                  : 'hover:bg-slate-50'
             }`}
             title={
               isSelected
