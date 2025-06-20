@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { SyntheticEvent, useRef, useState } from 'react';
 
-import { AllTags } from '../components/all-tags';
+import { FilterList } from '../components/filter-list';
 import { Loader } from '../components/loader';
 import { TagInput } from '../components/tag-input';
 import {
@@ -247,11 +247,11 @@ export const TopShelf = () => {
               className="inline-flex cursor-pointer items-center rounded-md bg-slate-100 p-2 hover:bg-slate-300"
               title="Show tag summary"
             >
-              <TagIcon className="mr-2 w-4" /> Tag List
+              <TagIcon className="mr-2 w-4" /> Filter List
             </span>
 
             {/* Tag panel component */}
-            <AllTags
+            <FilterList
               isOpen={isTagPanelOpen}
               onClose={() => setIsTagPanelOpen(false)}
               containerRef={tagButtonRef}
