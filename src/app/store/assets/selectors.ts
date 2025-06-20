@@ -118,3 +118,7 @@ export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
     ),
   );
 };
+
+export const selectSaveProgress = (state: { assets: ImageAssets }) => {
+  return state.assets.saveProgress;
+};

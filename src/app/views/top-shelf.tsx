@@ -20,6 +20,7 @@ import {
   saveAllAssets,
   selectHasModifiedAssets,
   selectIoState,
+  selectSaveProgress,
 } from '../store/assets';
 import {
   addTagFilter,
@@ -46,6 +47,7 @@ export const TopShelf = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const saveProgress = useAppSelector(selectSaveProgress);
 
   const doRefresh = () => dispatch(loadAssets());
   const onToggleTagFilterMode = () => dispatch(toggleTagFilterMode());
@@ -85,39 +87,46 @@ export const TopShelf = () => {
               </button>
             )}
           </div>
-          {!showLoader && (
-            <>
-              <div className="mr-2 w-6">
-                <button
-                  type="button"
-                  onClick={saveAllChanges}
-                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
-                  title={
-                    hasModifiedAssets
-                      ? 'Save all tag changes'
-                      : 'No changes to save'
-                  }
-                  disabled={!hasModifiedAssets}
-                >
-                  <ArchiveBoxArrowDownIcon />
-                </button>
-              </div>
-              <div className="w-6">
-                <button
-                  type="button"
-                  onClick={cancelAllChanges}
-                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
-                  title={
-                    hasModifiedAssets
-                      ? 'Cancel all tag changes'
-                      : 'No changes to cancel'
-                  }
-                  disabled={!hasModifiedAssets}
-                >
-                  <BackspaceIcon />
-                </button>
-              </div>
-            </>
+          {saveProgress ? (
+            <div className="mr-2 text-xs text-slate-600">
+              Saving: {saveProgress.completed}/{saveProgress.total}
+              {saveProgress.failed > 0 && ` (${saveProgress.failed} errors)`}
+            </div>
+          ) : (
+            !showLoader && (
+              <>
+                <div className="mr-2 w-6">
+                  <button
+                    type="button"
+                    onClick={saveAllChanges}
+                    className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
+                    title={
+                      hasModifiedAssets
+                        ? 'Save all tag changes'
+                        : 'No changes to save'
+                    }
+                    disabled={!hasModifiedAssets}
+                  >
+                    <ArchiveBoxArrowDownIcon />
+                  </button>
+                </div>
+                <div className="w-6">
+                  <button
+                    type="button"
+                    onClick={cancelAllChanges}
+                    className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
+                    title={
+                      hasModifiedAssets
+                        ? 'Cancel all tag changes'
+                        : 'No changes to cancel'
+                    }
+                    disabled={!hasModifiedAssets}
+                  >
+                    <BackspaceIcon />
+                  </button>
+                </div>
+              </>
+            )
           )}
         </div>
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">

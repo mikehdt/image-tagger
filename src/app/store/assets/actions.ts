@@ -1,9 +1,14 @@
 // Async thunk actions
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { getImageFiles, writeTagsToDisk } from '../../utils/asset-actions';
-import { ImageAssets, SaveAssetResult, TagState } from './types';
+import { ImageAssets, SaveAssetResult, SaveProgress, TagState } from './types';
 import { hasState } from './utils';
+
+// Action to update save progress
+export const updateSaveProgress = createAction<SaveProgress>(
+  'assets/updateSaveProgress',
+);
 
 export const loadAssets = createAsyncThunk(
   'assets/loadAssets',
@@ -46,6 +51,7 @@ export const saveAssets = createAsyncThunk<
 
     return {
       assetIndex: images.findIndex((element) => element.fileId === fileId),
+      fileId,
       tagList: updateTags,
       tagStatus: newTagStatus,
       savedTagList: [...updateTags], // Store the current order as the saved order
@@ -76,20 +82,66 @@ export const saveAllAssets = createAsyncThunk<
     return { savedCount: 0 };
   }
 
+  // Initialize progress tracking
+  const totalAssets = modifiedAssets.length;
+  dispatch(updateSaveProgress({ total: totalAssets, completed: 0, failed: 0 }));
+
   const results: Array<SaveAssetResult> = [];
   let successCount = 0;
   let errorCount = 0;
 
-  // Save each modified asset
+  // First pass: save files to disk without updating Redux store
   for (const asset of modifiedAssets) {
     try {
-      const result = await dispatch(saveAssets(asset.fileId)).unwrap();
-      results.push(result);
-      successCount++;
+      // Extract the tags that need to be saved (same logic as in saveAssets)
+      const updateTags = asset.tagList.filter(
+        (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
+      );
+
+      const flattenedTags = updateTags.join(', ');
+
+      // Write to disk
+      const success = await writeTagsToDisk(asset.fileId, flattenedTags);
+
+      if (success) {
+        // Create new tag status object with only saved tags
+        const newTagStatus = updateTags.reduce(
+          (acc, tag) => {
+            acc[tag] = TagState.SAVED;
+            return acc;
+          },
+          {} as { [key: string]: number },
+        );
+
+        // Prepare result object for batch update
+        results.push({
+          assetIndex: images.findIndex(
+            (element) => element.fileId === asset.fileId,
+          ),
+          fileId: asset.fileId,
+          tagList: updateTags,
+          tagStatus: newTagStatus,
+          savedTagList: [...updateTags],
+        });
+
+        successCount++;
+      } else {
+        errorCount++;
+        console.error(`Failed to save asset ${asset.fileId} to disk`);
+      }
     } catch (error) {
       errorCount++;
       console.error(`Failed to save asset ${asset.fileId}:`, error);
     }
+
+    // Update progress after each asset is processed
+    dispatch(
+      updateSaveProgress({
+        total: totalAssets,
+        completed: successCount,
+        failed: errorCount,
+      }),
+    );
   }
 
   return {

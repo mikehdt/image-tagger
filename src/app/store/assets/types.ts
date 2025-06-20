@@ -30,16 +30,24 @@ export type ImageAsset = {
   savedTagList: string[]; // Original tag order from last save
 };
 
+export type SaveProgress = {
+  total: number;
+  completed: number;
+  failed: number;
+};
+
 export type ImageAssets = {
   ioState: IoState;
   ioMessage: undefined | string;
   images: ImageAsset[];
+  saveProgress?: SaveProgress;
 };
 
 export type KeyedCountList = { [key: string]: number };
 
 export type SaveAssetResult = {
   assetIndex: number;
+  fileId: string;
   tagList: string[];
   tagStatus: { [key: string]: number };
   savedTagList: string[];
