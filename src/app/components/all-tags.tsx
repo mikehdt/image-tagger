@@ -12,7 +12,7 @@ interface AllTagsProps {
 }
 
 // Define sort types and directions as constants
-type SortType = 'count' | 'alphabetical';
+type SortType = 'count' | 'alphabetical' | 'active';
 type SortDirection = 'asc' | 'desc';
 
 export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
@@ -102,7 +102,20 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
   // Sort tags based on current sort type and direction
   const sortedTags = useMemo(() => {
     return Object.entries(allTags).sort(([tagA, countA], [tagB, countB]) => {
-      if (sortType === 'count') {
+      if (sortType === 'active') {
+        // Sort by selected/active status first
+        const isSelectedA = filterTags.includes(tagA);
+        const isSelectedB = filterTags.includes(tagB);
+
+        if (isSelectedA !== isSelectedB) {
+          // If one is selected and the other isn't, the selected one goes first
+          return isSelectedA ? -1 : 1;
+        }
+
+        // If both have the same selection status, sort alphabetically
+        const comparison = tagA.localeCompare(tagB);
+        return sortDirection === 'desc' ? -comparison : comparison;
+      } else if (sortType === 'count') {
         // Sort by count - for count, "asc" means highest first (reversed)
         const comparison =
           sortDirection === 'asc' ? countB - countA : countA - countB;
@@ -114,7 +127,7 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
         return sortDirection === 'desc' ? -comparison : comparison;
       }
     });
-  }, [allTags, sortType, sortDirection]);
+  }, [allTags, sortType, sortDirection, filterTags]);
 
   if (!isOpen) return null;
 
@@ -145,14 +158,21 @@ export const AllTags = ({ isOpen, onClose, containerRef }: AllTagsProps) => {
 
           <button
             onClick={() =>
-              setSortType((prev) =>
-                prev === 'count' ? 'alphabetical' : 'count',
-              )
+              setSortType((prev) => {
+                if (prev === 'count') return 'alphabetical';
+                if (prev === 'alphabetical') return 'active';
+                return 'count';
+              })
             }
             className="cursor-pointer rounded border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
             title="Toggle sort type"
           >
-            By: {sortType === 'count' ? 'Count' : 'Name'}
+            By:{' '}
+            {sortType === 'count'
+              ? 'Count'
+              : sortType === 'alphabetical'
+                ? 'Name'
+                : 'Active'}
           </button>
 
           <button
