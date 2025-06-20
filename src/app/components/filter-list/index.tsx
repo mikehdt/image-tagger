@@ -110,7 +110,7 @@ export const FilterList = ({
   return (
     <div
       ref={panelRef}
-      className="fixed z-20 max-h-[80vh] w-64 overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+      className="fixed z-20 flex max-h-[80vh] w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
@@ -174,13 +174,13 @@ export const FilterList = ({
           By: {getSortOptions().typeLabel}
         </button>
       </div>
-      <div className="max-h-[calc(80vh-51px)] overflow-y-auto">
+      <div className="overflow-y-auto">
         {activeView === 'tag' ? (
           <TagsView sortType={sortType} sortDirection={sortDirection} />
         ) : activeView === 'size' ? (
           <SizesView sortType={sortType} sortDirection={sortDirection} />
         ) : (
-          <FiletypesView />
+          <FiletypesView sortType={sortType} sortDirection={sortDirection} />
         )}
       </div>
     </div>

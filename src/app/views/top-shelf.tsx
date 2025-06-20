@@ -244,7 +244,7 @@ export const TopShelf = () => {
           <div className="relative" ref={tagButtonRef}>
             <span
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className="inline-flex cursor-pointer items-center rounded-md bg-slate-100 p-2 hover:bg-slate-300"
+              className={`inline-flex cursor-pointer items-center rounded-md p-2 ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
               title="Show tag summary"
             >
               <TagIcon className="mr-2 w-4" /> Filter List

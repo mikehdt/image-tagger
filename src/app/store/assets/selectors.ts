@@ -122,3 +122,19 @@ export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
 export const selectSaveProgress = (state: { assets: ImageAssets }) => {
   return state.assets.saveProgress;
 };
+
+export const selectAllExtensions = createSelector(
+  [(state: { assets: ImageAssets }) => state.assets.images],
+  (images) => {
+    if (!images.length) return {};
+
+    // Group by file extension
+    const extensionCounts: KeyedCountList = {};
+    for (const item of images) {
+      const extension = item.fileExtension.toLowerCase();
+      extensionCounts[extension] = (extensionCounts[extension] || 0) + 1;
+    }
+
+    return extensionCounts;
+  },
+);
