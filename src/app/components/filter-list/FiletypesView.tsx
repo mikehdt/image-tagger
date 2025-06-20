@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllExtensions } from '../../store/assets';
 import {
@@ -16,7 +16,7 @@ export const getFiletypeSortOptions = (
   return {
     directionLabel:
       sortType === 'count'
-        ? `Sort: ${sortDirection === 'asc' ? '↑ 9-0' : '↓ 0-9'}`
+        ? `Sort: ${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
         : `Sort: ${sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A'}`,
     typeLabel:
       sortType === 'count'
@@ -33,15 +33,29 @@ export const getFiletypeSortOptions = (
   };
 };
 
-export const FiletypesView = ({ sortType, sortDirection }: FilterViewProps) => {
+export const FiletypesView = ({
+  sortType,
+  sortDirection,
+  selectedIndex = -1,
+  updateListLength,
+  onItemSelect,
+}: FilterViewProps) => {
   const dispatch = useAppDispatch();
   const allExtensions = useAppSelector(selectAllExtensions);
   const filterExtensions = useAppSelector(selectFilterExtensions);
 
   // Handle extension click to toggle filters
-  const handleExtensionClick = (extension: string) => {
-    dispatch(toggleExtensionFilter(extension));
-  };
+  const handleExtensionClick = useCallback(
+    (extension: string, isKeyboardSelection = false) => {
+      dispatch(toggleExtensionFilter(extension));
+
+      // Notify parent of selection when keyboard navigation is used
+      if (isKeyboardSelection && onItemSelect) {
+        onItemSelect(selectedIndex);
+      }
+    },
+    [dispatch, onItemSelect, selectedIndex],
+  );
 
   // Sort extensions based on current sort type and direction
   const sortedExtensions = useMemo(() => {
@@ -75,6 +89,38 @@ export const FiletypesView = ({ sortType, sortDirection }: FilterViewProps) => {
     );
   }, [allExtensions, sortType, sortDirection, filterExtensions]);
 
+  // Update list length for keyboard navigation when sorted extensions change
+  useEffect(() => {
+    if (updateListLength) {
+      updateListLength(sortedExtensions.length);
+    }
+  }, [sortedExtensions, updateListLength]);
+
+  // Handle enter key for keyboard navigation
+  useEffect(() => {
+    if (
+      selectedIndex >= 0 &&
+      sortedExtensions.length > 0 &&
+      selectedIndex < sortedExtensions.length
+    ) {
+      const [extension] = sortedExtensions[selectedIndex];
+      const handleKeyDownEnter = (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          handleExtensionClick(extension);
+
+          // Notify parent of selection when keyboard navigation is used
+          if (onItemSelect) {
+            onItemSelect(selectedIndex);
+          }
+        }
+      };
+      document.addEventListener('keydown', handleKeyDownEnter);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDownEnter);
+      };
+    }
+  }, [selectedIndex, sortedExtensions, handleExtensionClick, onItemSelect]);
+
   if (sortedExtensions.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-slate-500">
@@ -85,14 +131,21 @@ export const FiletypesView = ({ sortType, sortDirection }: FilterViewProps) => {
 
   return (
     <ul className="divide-y divide-slate-100">
-      {sortedExtensions.map(([extension, count]) => {
+      {sortedExtensions.map(([extension, count], index) => {
         const isSelected = filterExtensions.includes(extension);
+        const isKeyboardSelected = index === selectedIndex;
         return (
           <li
             key={extension}
             onClick={() => handleExtensionClick(extension)}
-            className={`flex cursor-pointer justify-between px-3 py-2 hover:bg-slate-50 ${
-              isSelected ? 'bg-emerald-50' : ''
+            className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+              isKeyboardSelected
+                ? isSelected
+                  ? 'bg-stone-100'
+                  : 'bg-blue-100'
+                : isSelected
+                  ? 'bg-stone-50'
+                  : 'hover:bg-slate-50'
             }`}
             title={
               isSelected
@@ -102,14 +155,14 @@ export const FiletypesView = ({ sortType, sortDirection }: FilterViewProps) => {
           >
             <span
               className={`text-sm ${
-                isSelected ? 'font-medium text-emerald-700' : 'text-slate-800'
+                isSelected ? 'font-medium text-stone-700' : 'text-slate-800'
               }`}
             >
               {extension}
             </span>
             <span
-              className={`text-xs ${
-                isSelected ? 'text-emerald-600' : 'text-slate-500'
+              className={`text-xs tabular-nums ${
+                isSelected ? 'text-stone-600' : 'text-slate-500'
               }`}
             >
               {count}

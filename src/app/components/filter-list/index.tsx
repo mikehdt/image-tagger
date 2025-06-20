@@ -146,10 +146,22 @@ export const FilterList = ({
     }
   };
 
-  // Reset sorting when switching views
+  // Reset sorting and keyboard navigation when switching views
   useEffect(() => {
     // Default to count sorting when switching views
     setSortType('count');
+    // Reset list length to ensure proper keyboard navigation
+    setListLength(0);
+    // Reset selected index (redundant with button click handlers, but adds safety)
+    setSelectedIndex(-1);
+
+    // Focus the input field when switching views (if it exists)
+    // Use a small timeout to ensure the DOM is ready
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 0);
   }, [activeView]);
 
   if (!isOpen) return null;
@@ -170,6 +182,7 @@ export const FilterList = ({
           onClick={() => {
             setActiveView('tag');
             setSearchTerm('');
+            setSelectedIndex(-1);
           }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
@@ -182,6 +195,7 @@ export const FilterList = ({
           onClick={() => {
             setActiveView('size');
             setSearchTerm('');
+            setSelectedIndex(-1);
           }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
@@ -194,6 +208,7 @@ export const FilterList = ({
           onClick={() => {
             setActiveView('filetype');
             setSearchTerm('');
+            setSelectedIndex(-1);
           }}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
             activeView === 'filetype'
@@ -232,30 +247,33 @@ export const FilterList = ({
         </button>
       </div>
 
-      <div className="relative inline-flex bg-slate-50 px-2 pb-2">
-        <input
-          ref={inputRef}
-          type="text"
-          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 transition-all"
-          autoFocus
-          placeholder={`Search for ${activeView === 'tag' ? 'tag' : activeView === 'size' ? 'size' : 'filetype'}`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <span
-          className={`absolute top-1.5 right-4 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
-            searchTerm.trim() !== ''
-              ? 'text-slate-600 hover:bg-slate-500 hover:text-white'
-              : 'cursor-not-allowed text-gray-300'
-          }`}
-          onClick={
-            searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
-          }
-        >
-          <XMarkIcon />
-        </span>
-      </div>
+      {/* Only show search box for tag and size views, not for filetype view */}
+      {activeView !== 'filetype' && (
+        <div className="relative inline-flex bg-slate-50 px-2 pb-2">
+          <input
+            ref={inputRef}
+            type="text"
+            className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 transition-all"
+            autoFocus
+            placeholder={`Search for ${activeView === 'tag' ? 'tag' : 'size'}`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <span
+            className={`absolute top-1.5 right-4 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
+              searchTerm.trim() !== ''
+                ? 'text-slate-600 hover:bg-slate-500 hover:text-white'
+                : 'cursor-not-allowed text-gray-300'
+            }`}
+            onClick={
+              searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
+            }
+          >
+            <XMarkIcon />
+          </span>
+        </div>
+      )}
 
       <div className="overflow-y-auto border-t border-slate-200">
         {activeView === 'tag' ? (
@@ -277,8 +295,16 @@ export const FilterList = ({
           <SizesView
             sortType={sortType}
             sortDirection={sortDirection}
+            searchTerm={searchTerm}
             updateListLength={updateListLength}
             selectedIndex={selectedIndex}
+            onItemSelect={() => {
+              // Keep the selection index after item is selected
+              // Just focus back on the input
+              if (inputRef.current) {
+                inputRef.current.focus();
+              }
+            }}
           />
         ) : (
           <FiletypesView

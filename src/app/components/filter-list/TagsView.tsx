@@ -1,9 +1,58 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { Fragment, useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllTags } from '../../store/assets';
 import { selectFilterTags, toggleTagFilter } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { FilterViewProps, SortDirection, SortType } from './types';
+
+/**
+ * Highlights all occurrences of a search term within text
+ * @param text The text to search within
+ * @param searchTerm The term to highlight
+ * @returns Array of React elements with highlighted matches
+ */
+const highlightMatches = (text: string, searchTerm: string) => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return text; // Return the original text if no search term
+  }
+
+  const termLower = searchTerm.toLowerCase();
+  const textLower = text.toLowerCase();
+  const segments = [];
+  let lastIndex = 0;
+  let index = textLower.indexOf(termLower);
+
+  // Find all occurrences of the search term
+  while (index !== -1) {
+    // Add the text before the match
+    if (index > lastIndex) {
+      segments.push(
+        <Fragment key={`${lastIndex}-regular`}>
+          {text.slice(lastIndex, index)}
+        </Fragment>,
+      );
+    }
+
+    // Add the bold match
+    segments.push(
+      <strong key={`${index}-highlight`} className="font-bold">
+        {text.slice(index, index + termLower.length)}
+      </strong>,
+    );
+
+    lastIndex = index + termLower.length;
+    index = textLower.indexOf(termLower, lastIndex);
+  }
+
+  // Add any remaining text after the last match
+  if (lastIndex < text.length) {
+    segments.push(
+      <Fragment key={`${lastIndex}-regular`}>{text.slice(lastIndex)}</Fragment>,
+    );
+  }
+
+  return segments.length > 0 ? segments : text;
+};
 
 // Get sort options for the tags view
 export const getTagSortOptions = (
@@ -13,7 +62,7 @@ export const getTagSortOptions = (
   return {
     directionLabel:
       sortType === 'count'
-        ? `Sort: ${sortDirection === 'asc' ? '↑ 9-0' : '↓ 0-9'}`
+        ? `Sort: ${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
         : `Sort: ${sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A'}`,
     typeLabel:
       sortType === 'count'
@@ -62,11 +111,6 @@ export const TagsView = ({
       return tag.toLowerCase().includes(searchTerm.toLowerCase().trim());
     });
 
-    // Update parent component with list length for keyboard navigation
-    if (updateListLength) {
-      updateListLength(filteredTags.length);
-    }
-
     // Sort the filtered tags
     return filteredTags.sort(([tagA, countA], [tagB, countB]) => {
       if (sortType === 'active') {
@@ -94,14 +138,7 @@ export const TagsView = ({
         return sortDirection === 'desc' ? -comparison : comparison;
       }
     });
-  }, [
-    allTags,
-    sortType,
-    sortDirection,
-    filterTags,
-    searchTerm,
-    updateListLength,
-  ]);
+  }, [allTags, sortType, sortDirection, filterTags, searchTerm]);
 
   // Handle enter key for keyboard navigation
   useEffect(() => {
@@ -123,6 +160,13 @@ export const TagsView = ({
     }
   }, [selectedIndex, sortedTags, handleTagClick]);
 
+  // Update list length for keyboard navigation when sorted tags change
+  useEffect(() => {
+    if (updateListLength) {
+      updateListLength(sortedTags.length);
+    }
+  }, [sortedTags, updateListLength]);
+
   if (sortedTags.length === 0) {
     return (
       <div className="p-4 text-center text-sm text-slate-500">
@@ -141,9 +185,11 @@ export const TagsView = ({
           <li
             key={tag}
             onClick={() => handleTagClick(tag)}
-            className={`flex cursor-pointer justify-between px-3 py-2 ${
+            className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
               isKeyboardSelected
-                ? 'bg-blue-100'
+                ? isSelected
+                  ? 'bg-emerald-100'
+                  : 'bg-blue-100'
                 : isSelected
                   ? 'bg-emerald-50'
                   : 'hover:bg-slate-50'
@@ -159,14 +205,13 @@ export const TagsView = ({
                 isSelected ? 'font-medium text-emerald-700' : 'text-slate-800'
               }`}
             >
-              {tag}
+              {/* Always highlight, even for selected tags - the strong tag will override the medium font weight */}
+              {highlightMatches(tag, searchTerm)}
             </span>
             <span
-              className={`px-2 py-0.5 text-xs ${
-                isSelected
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-slate-100 text-slate-600'
-              } rounded-full`}
+              className={`text-xs tabular-nums ${
+                isSelected ? 'text-emerald-600' : 'text-slate-500'
+              }`}
             >
               {count}
             </span>
