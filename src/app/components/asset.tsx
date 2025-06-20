@@ -402,7 +402,11 @@ export const Asset = ({
           </span>
         </span>
         {showActions ? (
-          <AssetActions onSave={saveAction} onCancel={cancelAction} />
+          <AssetActions
+            onSave={saveAction}
+            onCancel={cancelAction}
+            ioState={ioState}
+          />
         ) : null}
       </div>
     </div>

@@ -4,7 +4,6 @@ import {
   BackspaceIcon,
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
-  FunnelIcon,
   TagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -31,7 +30,6 @@ import {
   setTagFilterMode,
 } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { decomposeDimensions } from '../utils/helpers';
 
 export const TopShelf = () => {
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
@@ -49,6 +47,9 @@ export const TopShelf = () => {
   const doRefresh = () => dispatch(loadAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
+
+  const filterActive =
+    filterTags.length || filterSizes.length || filterExtensions.length;
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
@@ -111,61 +112,17 @@ export const TopShelf = () => {
           )}
         </div>
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
-          <span className="mr-2 inline-flex text-slate-500">
-            <FunnelIcon className="mr-1 w-4" />
-            Filter:
-          </span>
-
-          {filterTags.length ||
-          filterSizes.length ||
-          filterExtensions.length ? (
-            <span className="mr-4 ml-2 flex items-center rounded-full border border-slate-200 pl-2">
-              {filterTags.map((item, idx) => (
-                <span
-                  key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-emerald-300' : ''} ${
-                    idx + 1 === filterTags.length &&
-                    (filterSizes.length > 0 || filterExtensions.length > 0)
-                      ? 'border-r border-r-slate-300'
-                      : ''
-                  } px-2 text-emerald-700`}
-                >
-                  {item}
-                </span>
-              ))}
-
-              {filterSizes.map((item, idx) => (
-                <span
-                  key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-sky-300' : ''} ${
-                    idx + 1 === filterSizes.length &&
-                    filterExtensions.length > 0
-                      ? 'border-r border-r-slate-300'
-                      : ''
-                  } px-2 text-sky-700`}
-                >
-                  {decomposeDimensions(item).width}&times;
-                  {decomposeDimensions(item).height}
-                </span>
-              ))}
-
-              {filterExtensions.map((item, idx) => (
-                <span
-                  key={`${idx}-${item}`}
-                  className={`${idx > 0 ? 'border-l border-l-stone-300' : ''} px-2 text-stone-700`}
-                >
-                  {item}
-                </span>
-              ))}
-
-              <button
-                className="w-7 cursor-pointer rounded-r-full py-2 pr-2 pl-1 hover:bg-slate-200"
-                type="button"
-                onClick={() => dispatch(clearFilters())}
-              >
+          {filterActive ? (
+            <button
+              className="mr-2 inline-flex cursor-pointer items-center p-2 text-slate-500"
+              type="button"
+              onClick={() => dispatch(clearFilters())}
+            >
+              Clear Filters
+              <span className="ml-1 w-4">
                 <XMarkIcon />
-              </button>
-            </span>
+              </span>
+            </button>
           ) : null}
 
           <div className="mr-4 ml-2 inline-flex items-center rounded-md bg-slate-100 p-1">
