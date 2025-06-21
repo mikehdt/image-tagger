@@ -19,6 +19,7 @@ import {
   saveAllAssets,
   selectHasModifiedAssets,
   selectIoState,
+  selectLoadProgress,
   selectSaveProgress,
 } from '../store/assets';
 import {
@@ -44,6 +45,7 @@ export const TopShelf = () => {
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
   const saveProgress = useAppSelector(selectSaveProgress);
+  const loadProgress = useAppSelector(selectLoadProgress);
 
   const doRefresh = () => dispatch(loadAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
@@ -70,11 +72,22 @@ export const TopShelf = () => {
               </button>
             )}
           </div>
-          {saveProgress && (
+          {(saveProgress || loadProgress) && (
             <div className="mr-2 align-middle text-slate-600 tabular-nums">
-              {saveProgress.completed} / {saveProgress.total}
-              {saveProgress.failed > 0 &&
-                ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
+              {saveProgress && (
+                <>
+                  {saveProgress.completed} / {saveProgress.total}
+                  {saveProgress.failed > 0 &&
+                    ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
+                </>
+              )}
+              {!saveProgress && loadProgress && (
+                <>
+                  {loadProgress.total > 0
+                    ? `${loadProgress.completed} / ${loadProgress.total}`
+                    : 'Loading...'}
+                </>
+              )}
             </div>
           )}
           {!showLoader && (

@@ -1,8 +1,15 @@
 // Async thunk actions
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { getImageFiles, writeTagsToDisk } from '../../utils/asset-actions';
-import { ImageAssets, SaveAssetResult, SaveProgress, TagState } from './types';
+import { writeTagsToDisk } from '../../utils/asset-actions';
+import { AppDispatch } from '..';
+import {
+  ImageAssets,
+  LoadProgress,
+  SaveAssetResult,
+  SaveProgress,
+  TagState,
+} from './types';
 import { hasState } from './utils';
 
 // Action to update save progress
@@ -10,9 +17,30 @@ export const updateSaveProgress = createAction<SaveProgress>(
   'assets/updateSaveProgress',
 );
 
+export const updateLoadProgress = createAction<LoadProgress>(
+  'assets/updateLoadProgress',
+);
+
 export const loadAssets = createAsyncThunk(
   'assets/loadAssets',
-  async () => await getImageFiles(),
+  async (_, { dispatch }) => {
+    try {
+      // Import dynamically to avoid server/client issues
+      const { loadAssetsWithProgress } = await import(
+        '../../utils/load-assets-client'
+      );
+
+      // This will handle progress tracking internally
+      const assets = await loadAssetsWithProgress(dispatch as AppDispatch);
+      return assets;
+    } catch (error) {
+      // Provide better error messages to the user
+      console.error('Error loading assets:', error);
+      throw new Error(
+        error instanceof Error ? error.message : 'Failed to load assets',
+      );
+    }
+  },
 );
 
 export const saveAssets = createAsyncThunk<

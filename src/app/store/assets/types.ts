@@ -36,11 +36,17 @@ export type SaveProgress = {
   failed: number;
 };
 
+export type LoadProgress = {
+  total: number;
+  completed: number;
+};
+
 export type ImageAssets = {
   ioState: IoState;
   ioMessage: undefined | string;
   images: ImageAsset[];
   saveProgress?: SaveProgress;
+  loadProgress?: LoadProgress;
 };
 
 export type KeyedCountList = { [key: string]: number };

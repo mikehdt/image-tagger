@@ -1,3 +1,5 @@
+'use client';
+
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 

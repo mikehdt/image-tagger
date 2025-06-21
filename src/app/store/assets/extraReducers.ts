@@ -6,6 +6,7 @@ import {
   resetAllTags,
   saveAllAssets,
   saveAssets,
+  updateLoadProgress,
   updateSaveProgress,
 } from './actions';
 import { ImageAssets, IoState } from './types';
@@ -16,19 +17,29 @@ export const setupExtraReducers = (
   // Loading
   builder.addCase(loadAssets.pending, (state) => {
     state.ioState = IoState.LOADING;
-    state.ioMessage = undefined;
+    state.ioMessage = 'Loading assets...';
+    // Initialize the load progress
+    // (actual progress will be updated by the client-side code)
+    state.loadProgress = {
+      total: 0, // Start with 0 until we get the real count from the client
+      completed: 0,
+    };
   });
 
   builder.addCase(loadAssets.fulfilled, (state, action) => {
     state.ioState = IoState.COMPLETE;
     state.ioMessage = undefined;
     state.images = action.payload;
+    // Clear the load progress
+    state.loadProgress = undefined;
   });
 
   builder.addCase(loadAssets.rejected, (state, action) => {
     state.ioState = IoState.ERROR;
-    state.ioMessage = action.error.message;
+    state.ioMessage = action.error.message || 'Error loading assets';
     state.images = [];
+    // Keep the progress information for error reporting
+    // so users can see how far it got before failing
   });
 
   // Saving
@@ -132,5 +143,10 @@ export const setupExtraReducers = (
   // Add the updateSaveProgress handler
   builder.addCase(updateSaveProgress, (state, action) => {
     state.saveProgress = action.payload;
+  });
+
+  // Add the updateLoadProgress handler
+  builder.addCase(updateLoadProgress, (state, action) => {
+    state.loadProgress = action.payload;
   });
 };

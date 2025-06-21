@@ -10,6 +10,10 @@ export const selectIoState = (state: { assets: ImageAssets }) => {
   return state.assets.ioState;
 };
 
+export const selectIoMessage = (state: { assets: ImageAssets }) => {
+  return state.assets.ioMessage;
+};
+
 export const selectAllImages = (state: { assets: ImageAssets }) => {
   return state.assets.images;
 };
@@ -121,6 +125,10 @@ export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
 
 export const selectSaveProgress = (state: { assets: ImageAssets }) => {
   return state.assets.saveProgress;
+};
+
+export const selectLoadProgress = (state: { assets: ImageAssets }) => {
+  return state.assets.loadProgress;
 };
 
 export const selectAllExtensions = createSelector(
