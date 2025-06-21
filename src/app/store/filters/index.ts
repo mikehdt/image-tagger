@@ -2,13 +2,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { coreReducers } from './reducers';
-import { FilterMode, Filters } from './types';
+import { FilterMode, Filters, PaginationSize } from './types';
 
 const initialState: Filters = {
   filterMode: FilterMode.SHOW_ALL,
   filterTags: [],
   filterSizes: [],
   filterExtensions: [],
+  paginationSize: PaginationSize.HUNDRED,
 };
 
 const filtersSlice = createSlice({
@@ -22,6 +23,7 @@ const filtersSlice = createSlice({
     selectFilterTags: (state) => state.filterTags,
     selectFilterSizes: (state) => state.filterSizes,
     selectFilterExtensions: (state) => state.filterExtensions,
+    selectPaginationSize: (state) => state.paginationSize,
     selectHasActiveFilters: (state) =>
       state.filterTags.length > 0 ||
       state.filterSizes.length > 0 ||
@@ -42,6 +44,7 @@ const filtersSlice = createSlice({
 export const { reducer: filtersReducer } = filtersSlice;
 export const {
   setTagFilterMode,
+  setPaginationSize,
   addTagFilter,
   toggleTagFilter,
   toggleSizeFilter,

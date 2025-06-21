@@ -5,11 +5,19 @@ export enum FilterMode {
   MATCH_ALL = 'MatchAll',
 }
 
+export enum PaginationSize {
+  FIFTY = 50,
+  HUNDRED = 100,
+  TWO_FIFTY = 250,
+  ALL = -1,
+}
+
 export type Filters = {
   filterMode: FilterMode;
   filterTags: string[];
   filterSizes: string[];
   filterExtensions: string[];
+  paginationSize: PaginationSize;
 };
 
 export type FilterCount = {

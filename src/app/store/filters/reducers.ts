@@ -1,7 +1,7 @@
 // Core reducers for the filters slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { FilterMode, Filters } from './types';
+import { FilterMode, Filters, PaginationSize } from './types';
 import { toggleFilter } from './utils';
 
 export const coreReducers = {
@@ -10,6 +10,13 @@ export const coreReducers = {
     { payload }: PayloadAction<FilterMode>,
   ) => {
     state.filterMode = payload;
+  },
+
+  setPaginationSize: (
+    state: Filters,
+    { payload }: PayloadAction<PaginationSize>,
+  ) => {
+    state.paginationSize = payload;
   },
 
   addTagFilter: (state: Filters, { payload }: PayloadAction<string>) => {

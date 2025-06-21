@@ -10,6 +10,7 @@ import {
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectPaginationSize,
 } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
@@ -23,7 +24,8 @@ type AssetListProps = {
 };
 
 export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
-  const ITEMS_PER_PAGE = 100;
+  // Get pagination size from Redux
+  const paginationSize = useAppSelector(selectPaginationSize);
 
   // Get all data from selectors rather than props
   const assets = useAppSelector(selectAllImages);
@@ -54,10 +56,22 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
 
   // Apply pagination to the filtered assets
   const paginatedAssets = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return filteredAssets.slice(start, end);
-  }, [filteredAssets, currentPage, ITEMS_PER_PAGE]);
+    try {
+      // If paginationSize is ALL, return all filtered assets
+      if (paginationSize === -1) {
+        // -1 is PaginationSize.ALL
+        return filteredAssets;
+      }
+
+      const start = (currentPage - 1) * paginationSize;
+      const end = start + paginationSize;
+      return filteredAssets.slice(start, end);
+    } catch (error) {
+      console.error('Error in pagination calculation:', error);
+      // Fallback to showing first page of results
+      return filteredAssets.slice(0, 100);
+    }
+  }, [filteredAssets, currentPage, paginationSize]);
 
   // Pre-calculate dimensions for each asset to avoid recalculating in the render
   const assetDimensions = useMemo(() => {
@@ -81,7 +95,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
 
           // Calculate the global item number based on filtered assets
           const globalItemNumber =
-            (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+            (currentPage - 1) * paginationSize + index + 1;
 
           return (
             <MemoizedAsset
@@ -103,7 +117,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       filterExtensionsSet,
       assetDimensions,
       currentPage,
-      ITEMS_PER_PAGE,
+      paginationSize,
     ],
   );
 

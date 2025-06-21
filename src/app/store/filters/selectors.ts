@@ -13,6 +13,9 @@ export const selectFilterSizes = (state: { filters: Filters }) =>
 export const selectFilterExtensions = (state: { filters: Filters }) =>
   state.filters.filterExtensions;
 
+export const selectPaginationSize = (state: { filters: Filters }) =>
+  state.filters.paginationSize;
+
 export const selectHasActiveFilters = (state: { filters: Filters }) =>
   state.filters.filterTags.length > 0 ||
   state.filters.filterSizes.length > 0 ||

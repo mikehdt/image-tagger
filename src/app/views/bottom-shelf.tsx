@@ -1,15 +1,19 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { selectAllImages } from '../store/assets';
 import {
+  PaginationSize,
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectPaginationSize,
+  setPaginationSize,
 } from '../store/filters';
-import { useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
 
 type BottomShelfProps = {
@@ -21,7 +25,9 @@ export const BottomShelf = ({
   currentPage = 1,
   totalPages,
 }: BottomShelfProps) => {
-  const ITEMS_PER_PAGE = 100;
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const paginationSize = useAppSelector(selectPaginationSize);
   const allAssets = useAppSelector(selectAllImages);
 
   // Get filters
@@ -48,7 +54,38 @@ export const BottomShelf = ({
 
   // Use provided totalPages or calculate based on filtered count
   const calculatedTotalPages =
-    totalPages || Math.ceil(filteredCount / ITEMS_PER_PAGE);
+    totalPages ||
+    (paginationSize === PaginationSize.ALL
+      ? 1
+      : Math.ceil(filteredCount / paginationSize));
+
+  // When pagination size changes, we need to redirect to page 1 if the current page
+  // would be outside the new range
+  const handlePaginationSizeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const newSize = parseInt(e.target.value, 10) as PaginationSize;
+
+    // Store the new size in Redux
+    dispatch(setPaginationSize(newSize));
+
+    // Don't navigate away immediately, let the Redux store update first
+    setTimeout(() => {
+      // If we're switching to "All", always go to page 1
+      if (newSize === PaginationSize.ALL) {
+        router.push('/1');
+        return;
+      }
+
+      // Calculate new total pages
+      const newTotalPages = Math.ceil(filteredCount / newSize);
+
+      // If current page is beyond the new range, redirect to page 1
+      if (currentPage > newTotalPages) {
+        router.push('/1');
+      }
+    }, 0);
+  };
 
   const renderPaginationButtons = () => {
     const pages = [];
@@ -187,6 +224,25 @@ export const BottomShelf = ({
         </div>
         <div className="text-xs text-slate-500">
           Page {currentPage} of {calculatedTotalPages}
+        </div>
+        <div className="ml-4 flex items-center">
+          <label
+            htmlFor="pagination-size"
+            className="mr-2 text-xs text-slate-500"
+          >
+            Items per page:
+          </label>
+          <select
+            id="pagination-size"
+            value={paginationSize}
+            onChange={handlePaginationSizeChange}
+            className="rounded border px-3 py-1 text-sm"
+          >
+            <option value={PaginationSize.FIFTY}>50</option>
+            <option value={PaginationSize.HUNDRED}>100</option>
+            <option value={PaginationSize.TWO_FIFTY}>250</option>
+            <option value={PaginationSize.ALL}>All</option>
+          </select>
         </div>
       </div>
     </div>

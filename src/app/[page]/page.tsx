@@ -15,6 +15,7 @@ import {
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectPaginationSize,
 } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
@@ -28,12 +29,12 @@ const PaginatedPageContent = () => {
   const router = useRouter();
   const params = useParams();
   const currentPage = parseInt(params.page as string, 10) || 1;
-  const ITEMS_PER_PAGE = 100;
 
   const dispatch = useAppDispatch();
   const assets = useAppSelector(selectAllImages);
   const imageCount = useAppSelector(selectImageCount);
   const ioState = useAppSelector(selectIoState);
+  const paginationSize = useAppSelector(selectPaginationSize);
 
   // Get filters
   const filterTags = useAppSelector(selectFilterTags);
@@ -56,8 +57,17 @@ const PaginatedPageContent = () => {
 
   // Calculate total pages based on filtered results
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredAssets.length / ITEMS_PER_PAGE));
-  }, [filteredAssets, ITEMS_PER_PAGE]);
+    try {
+      if (paginationSize === -1) {
+        // -1 is PaginationSize.ALL
+        return 1; // When showing all, there's only one page
+      }
+      return Math.max(1, Math.ceil(filteredAssets.length / paginationSize));
+    } catch (error) {
+      console.error('Error calculating total pages:', error);
+      return 1; // Default to 1 page on error
+    }
+  }, [filteredAssets, paginationSize]);
 
   // Effect to redirect if current page is out of bounds after filter change
   useEffect(() => {
