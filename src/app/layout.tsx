@@ -33,7 +33,7 @@ export default function Root({
       >
         <StoreProvider>
           <DataProvider>
-            <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 py-20 font-[family-name:var(--font-geist-sans)]">
+            <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 font-[family-name:var(--font-geist-sans)]">
               {children}
             </div>
           </DataProvider>

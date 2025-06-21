@@ -1,11 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { memo, type SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { memo, type SyntheticEvent, useRef, useState } from 'react';
 
 import { Tag } from './tag';
-
-// Adding a debug mode flag - set to true to enable visual debugging
-const DEBUG_MODE = false;
 
 type SortableTagProps = {
   id: string;
@@ -34,14 +31,6 @@ const SortableTag = ({
   onEditValueChange,
   isDuplicate = false,
 }: SortableTagProps) => {
-  // State to track debug info
-  const [debugInfo, setDebugInfo] = useState({
-    width: 0,
-    height: 0,
-    x: 0,
-    y: 0,
-  });
-
   // Track whether the tag is currently being edited
   const [isEditing, setIsEditing] = useState(false);
 
@@ -54,8 +43,6 @@ const SortableTag = ({
     transform,
     transition,
     isDragging,
-    over,
-    active,
   } = useSortable({
     id,
     // Use custom animation settings optimized for flex-wrap layout
@@ -82,63 +69,10 @@ const SortableTag = ({
   // Create our own ref to measure the element
   const elementRef = useRef<HTMLDivElement | null>(null);
 
-  // Update measurements on mount and when transforms change
-  useEffect(() => {
-    // Function to update position and size information
-    const updateDebugInfo = () => {
-      if (DEBUG_MODE && elementRef.current) {
-        const rect = elementRef.current.getBoundingClientRect();
-        setDebugInfo({
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
-          x: Math.round(rect.left),
-          y: Math.round(rect.top),
-        });
-      }
-    };
-
-    // Set up a mutation observer to track size/position changes
-    if (DEBUG_MODE && elementRef.current) {
-      const observer = new MutationObserver(updateDebugInfo);
-      observer.observe(elementRef.current, {
-        attributes: true,
-        childList: false,
-        subtree: false,
-      });
-
-      // Also update periodically during drag
-      const interval = setInterval(updateDebugInfo, 100);
-
-      return () => {
-        observer.disconnect();
-        clearInterval(interval);
-      };
-    }
-  }, [transform, transition]);
-
   // Combined ref function that sets both our tracking ref and dnd-kit's ref
   const setRefs = (element: HTMLDivElement | null) => {
     elementRef.current = element;
     setNodeRef(element);
-  };
-
-  // Debug classes to show how elements are interacting
-  const getDebugClasses = () => {
-    if (!DEBUG_MODE) return '';
-
-    let classes = 'relative ';
-
-    // Item being dragged
-    if (isDragging) {
-      classes += 'outline outline-2 outline-red-500 ';
-    }
-
-    // Item being hovered over (potential drop target)
-    if (over && over.id === id && active && active.id !== id) {
-      classes += 'outline outline-2 outline-green-500 ';
-    }
-
-    return classes;
   };
 
   const style = {
@@ -179,7 +113,7 @@ const SortableTag = ({
       // Don't apply drag attributes or listeners when editing or faded
       {...(isEditing || fade ? {} : attributes)}
       {...(isEditing || fade ? {} : listeners)}
-      className={`touch-none ${fade ? 'pointer-events-none' : ''} ${getDebugClasses()}`}
+      className={`touch-none ${fade ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
       <Tag
@@ -196,17 +130,6 @@ const SortableTag = ({
         onEditValueChange={handleEditValueChange}
         isDuplicate={isDuplicate}
       />
-      {/* Debug overlay showing width and position */}
-      {DEBUG_MODE && (
-        <div className="pointer-events-none absolute top-0 left-0 z-50 text-xs text-white">
-          <div className="rounded bg-black/70 px-1">
-            {debugInfo.width}×{debugInfo.height}
-            <br />
-            {debugInfo.x},{debugInfo.y}
-            {active && active.id === id && ' 🔄'}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -227,10 +150,7 @@ const areSortableTagsEqual = (
   );
 };
 
-// Skip memoization when in debug mode to ensure updates are visible
-const MemoizedSortableTag = DEBUG_MODE
-  ? SortableTag
-  : memo(SortableTag, areSortableTagsEqual);
+const MemoizedSortableTag = memo(SortableTag, areSortableTagsEqual);
 
 // For backward compatibility
 export { MemoizedSortableTag as SortableTag };

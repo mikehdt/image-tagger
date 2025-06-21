@@ -77,9 +77,9 @@ const PaginatedPageContent = () => {
   }, [currentPage, totalPages, router]);
 
   // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [currentPage]);
+  // useEffect(() => {
+  //   window.scrollTo({ top: 0, behavior: 'instant' });
+  // }, [currentPage]);
 
   // Only used for the NoContent reload action
   const loadImageAssets = useCallback(async () => {
@@ -95,7 +95,7 @@ const PaginatedPageContent = () => {
   }
 
   return (
-    <main className="flex min-h-screen flex-col">
+    <main className="py-20">
       <TopShelf />
       <AssetList currentPage={currentPage} />
       <BottomShelf currentPage={currentPage} totalPages={totalPages} />

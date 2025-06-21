@@ -3,9 +3,9 @@ import type { SyntheticEvent } from 'react';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 import { TagInput } from '@/app/components/tag-input';
-import { getTagStyles, tagButtonStyles } from '@/app/styles/tag-styles';
 
 import { hasState, TagState } from '../store/assets';
+import { getTagStyles, tagButtonStyles } from './tag-styles';
 
 type TagProps = {
   tagName: string;

@@ -215,6 +215,7 @@ export const Asset = ({
           "Couldn't edit tag, the new name already exists in the list",
           newTagName,
         );
+
         return;
       }
 
@@ -314,27 +315,8 @@ export const Asset = ({
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
-          onDragStart={(event) => {
-            // Debug logging for drag operations
-            console.log('Drag start:', {
-              id: event.active.id,
-              rect: event.active.rect,
-            });
-          }}
-          onDragOver={(event) => {
-            // Debug logging for drag over operations
-            console.log('Drag over:', {
-              activeId: event.active.id,
-              overId: event.over?.id,
-              activeRect: event.active.rect,
-              overRect: event.over?.rect,
-            });
-          }}
         >
           <div className="relative flex flex-wrap">
-            {/* Debug overlay container */}
-            <div className="pointer-events-none absolute top-0 left-0" />
-
             <SortableContext
               items={localTagList}
               strategy={rectSortingStrategy}
