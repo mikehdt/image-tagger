@@ -213,10 +213,10 @@ export const BottomShelf = ({
 
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center justify-between px-3">
+      <div className="mx-auto flex h-12 max-w-400 items-center px-3">
         {isFiltered && (
           <div className="text-xs text-slate-500">
-            Showing {filteredCount} of {allAssets.length} items
+            Showing {filteredCount} out of {allAssets.length} items
           </div>
         )}
         <div className="flex-inline flex items-center px-4 py-2">

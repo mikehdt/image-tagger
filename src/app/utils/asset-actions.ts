@@ -6,6 +6,9 @@ import path from 'node:path';
 import { imageDimensionsFromStream } from 'image-dimensions';
 
 const dataPath = './public/assets';
+// Default batch size for tag writing operations - not exported to comply with 'use server' rules
+const DEFAULT_TAG_BATCH_SIZE = 20;
+
 import {
   type ImageAsset,
   ImageDimensions,
@@ -129,4 +132,66 @@ export const writeTagsToDisk = async (
     console.error('Disk I/O error:', err);
     return false;
   }
+};
+
+// Tag write operation interface (not exported directly due to 'use server' constraints)
+interface TagWriteOperation {
+  fileId: string;
+  composedTags: string;
+}
+
+/**
+ * Write multiple tag sets to disk in a single operation
+ * @param operations Array of tag write operations to perform
+ * @param maxBatchSize Maximum number of operations to process in a single batch (optional)
+ * @returns Result object with success flag and individual results
+ */
+export const writeMultipleTagsToDisk = async (
+  operations: TagWriteOperation[],
+  maxBatchSize = DEFAULT_TAG_BATCH_SIZE,
+): Promise<{
+  success: boolean;
+  results: { fileId: string; success: boolean }[];
+}> => {
+  // If operations exceed max batch size, split into smaller batches
+  if (maxBatchSize > 0 && operations.length > maxBatchSize) {
+    const allResults: { fileId: string; success: boolean }[] = [];
+    let allSuccess = true;
+
+    // Process in batches of maxBatchSize
+    for (let i = 0; i < operations.length; i += maxBatchSize) {
+      const batchOperations = operations.slice(i, i + maxBatchSize);
+      // Process this batch (recursively calls this function with a smaller batch)
+      const batchResult = await writeMultipleTagsToDisk(batchOperations, 0); // 0 disables further splitting
+
+      allResults.push(...batchResult.results);
+      allSuccess = allSuccess && batchResult.success;
+    }
+
+    return {
+      success: allSuccess,
+      results: allResults,
+    };
+  }
+
+  // Process the batch (or individual operations if under max size)
+  const results = await Promise.all(
+    operations.map(async ({ fileId, composedTags }) => {
+      try {
+        fs.writeFileSync(`${dataPath}/${fileId}.txt`, composedTags);
+        return { fileId, success: true };
+      } catch (err) {
+        console.error(`Disk I/O error for ${fileId}:`, err);
+        return { fileId, success: false };
+      }
+    }),
+  );
+
+  // Overall operation succeeds if all individual writes succeeded
+  const success = results.every((result) => result.success);
+
+  return {
+    success,
+    results,
+  };
 };
