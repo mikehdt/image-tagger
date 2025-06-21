@@ -1,13 +1,6 @@
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { ChangeEvent, SyntheticEvent } from 'react';
-import {
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import { KeyboardEvent, memo, useCallback, useMemo, useRef } from 'react';
 
 // Configuration constants
 const MIN_TAG_LENGTH = 6;
@@ -83,34 +76,6 @@ const TagInputComponent = ({
       return widthClasses[index];
     }
   }, [inputValue]);
-
-  // Effect to maintain focus when the width changes
-  useEffect(() => {
-    // If input has value and should be focused but isn't, focus it
-    if (document.activeElement !== inputRef.current && inputRef.current) {
-      // Store cursor position
-      const cursorPosition = inputRef.current.selectionStart;
-
-      // Focus the input
-      inputRef.current.focus();
-
-      // Restore cursor position after a small delay to ensure it works after state updates
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.selectionStart = cursorPosition;
-          inputRef.current.selectionEnd = cursorPosition;
-        }
-      }, 0);
-    }
-  }, [inputWidth]); // Re-run when width changes
-
-  // Auto focus input when component mounts
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, []);
 
   // Border colors based on mode
   const borderColor = mode === 'add' ? 'border-amber-300' : 'border-blue-300';

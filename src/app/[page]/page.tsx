@@ -66,9 +66,9 @@ const PaginatedPageContent = () => {
   }, [currentPage, totalPages, router]);
 
   // Scroll to top when page changes
-  // useEffect(() => {
-  //   window.scrollTo({ top: 0, behavior: 'instant' });
-  // }, [currentPage]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentPage]);
 
   // Error state is now handled at the DataProvider level
   // No need to check for IoState.ERROR here
