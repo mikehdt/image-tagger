@@ -1,15 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import {
-  IoState,
-  loadAssets,
-  selectAllImages,
-  selectImageCount,
-  selectIoState,
-} from '../store/assets';
+import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,
   selectFilterMode,
@@ -17,12 +11,10 @@ import {
   selectFilterTags,
   selectPaginationSize,
 } from '../store/filters';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
 import { AssetList } from '../views/asset-list';
 import { BottomShelf } from '../views/bottom-shelf';
-import { Error } from '../views/error';
-import { NoContent } from '../views/no-content';
 import { TopShelf } from '../views/top-shelf';
 
 const PaginatedPageContent = () => {
@@ -30,10 +22,7 @@ const PaginatedPageContent = () => {
   const params = useParams();
   const currentPage = parseInt(params.page as string, 10) || 1;
 
-  const dispatch = useAppDispatch();
   const assets = useAppSelector(selectAllImages);
-  const imageCount = useAppSelector(selectImageCount);
-  const ioState = useAppSelector(selectIoState);
   const paginationSize = useAppSelector(selectPaginationSize);
 
   // Get filters
@@ -81,18 +70,8 @@ const PaginatedPageContent = () => {
   //   window.scrollTo({ top: 0, behavior: 'instant' });
   // }, [currentPage]);
 
-  // Only used for the NoContent reload action
-  const loadImageAssets = useCallback(async () => {
-    dispatch(loadAssets());
-  }, [dispatch]);
-
-  if (ioState === IoState.ERROR) {
-    return <Error />;
-  }
-
-  if (imageCount === 0) {
-    return <NoContent onReload={loadImageAssets} />;
-  }
+  // Error state is now handled at the DataProvider level
+  // No need to check for IoState.ERROR here
 
   return (
     <main className="py-20">

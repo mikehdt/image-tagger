@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
+import { NoContent } from '../views/no-content';
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const initialLoad = useRef<boolean>(true);
@@ -38,6 +39,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   if (ioState === IoState.ERROR) {
     return <Error />;
+  }
+
+  // Handle empty state at the provider level instead of in page components
+  if (ioState !== IoState.LOADING && imageCount === 0) {
+    return <NoContent onReload={loadImageAssets} />;
   }
 
   return children;
