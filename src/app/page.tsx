@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
 
 import {
   IoState,
@@ -9,63 +10,43 @@ import {
   selectIoState,
 } from './store/assets';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import StoreProvider from './utils/store-provider';
 import { AssetList } from './views/asset-list';
 import { BottomShelf } from './views/bottom-shelf';
-import { Error } from './views/error';
-import { InitialLoad } from './views/initial-load';
 import { NoContent } from './views/no-content';
 import { TopShelf } from './views/top-shelf';
 
-const App = () => {
-  const initialLoad = useRef<boolean>(true);
-
-  const dispatch = useAppDispatch();
-  const ioState = useAppSelector(selectIoState);
+const AppContent = () => {
+  const router = useRouter();
   const imageCount = useAppSelector(selectImageCount);
+  const ioState = useAppSelector(selectIoState);
 
-  // Could accept 'optimistic' assets and set them, then load?
+  // For NoContent reload action
+  const dispatch = useAppDispatch();
   const loadImageAssets = useCallback(async () => {
     dispatch(loadAssets());
   }, [dispatch]);
 
   useEffect(() => {
-    // There's some weirdness here if this is done entirely in Redux as Next's
-    // router gets very upset at something triggering a re-render
-    if (initialLoad.current) loadImageAssets();
-    initialLoad.current = false;
-  }, [initialLoad, loadImageAssets]);
+    // Redirect to page 1 when assets are loaded
+    if (ioState === IoState.COMPLETE && imageCount > 0) {
+      router.push('/1');
+    }
+  }, [ioState, imageCount, router]);
 
-  // Non-valid states
-  if (
-    ioState === IoState.UNINITIALIZED ||
-    (ioState === IoState.LOADING && imageCount === 0)
-  ) {
-    return <InitialLoad />;
-  } else if (ioState === IoState.ERROR) {
-    return <Error />;
-  } else if (ioState === IoState.COMPLETE && imageCount === 0) {
+  // Handle the NoContent view case with the required onReload prop
+  if (imageCount === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
 
   return (
-    <>
+    <main className="flex min-h-screen flex-col">
       <TopShelf />
       <AssetList />
       <BottomShelf />
-    </>
+    </main>
   );
 };
 
-// This is to avoid separating layouts into two files for such a small
-// difference, because of ReduxProvider not being allowed in layout.tsx due to
-// its use of meta setting requiring server components
-const Page = () => {
-  return (
-    <StoreProvider>
-      <App />
-    </StoreProvider>
-  );
-};
-
-export default Page;
+export default function Page() {
+  return <AppContent />;
+}

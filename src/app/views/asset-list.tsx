@@ -18,7 +18,13 @@ import { composeDimensions } from '../utils/helpers';
 // Create a memoized Asset component to prevent unnecessary re-renders
 const MemoizedAsset = memo(Asset);
 
-export const AssetList = () => {
+type AssetListProps = {
+  currentPage?: number;
+};
+
+export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
+  const ITEMS_PER_PAGE = 100;
+
   // Get all data from selectors rather than props
   const assets = useAppSelector(selectAllImages);
   const filterTags = useAppSelector(selectFilterTags);
@@ -46,38 +52,59 @@ export const AssetList = () => {
     [assets, filterTags, filterSizes, filterExtensions, filterMode],
   );
 
+  // Apply pagination to the filtered assets
+  const paginatedAssets = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredAssets.slice(start, end);
+  }, [filteredAssets, currentPage, ITEMS_PER_PAGE]);
+
   // Pre-calculate dimensions for each asset to avoid recalculating in the render
   const assetDimensions = useMemo(() => {
     const dimensions = new Map();
-    filteredAssets.forEach(({ fileId, dimensions: dims }) => {
+    paginatedAssets.forEach(({ fileId, dimensions: dims }) => {
       dimensions.set(fileId, composeDimensions(dims));
     });
     return dimensions;
-  }, [filteredAssets]);
+  }, [paginatedAssets]);
 
   // Memoize rendered assets to prevent unnecessary re-renders
   const renderedAssets = useMemo(
     () =>
-      filteredAssets.map(({ fileId, fileExtension, dimensions, ioState }) => {
-        // Get the pre-calculated dimension string
-        const dimensionString = assetDimensions.get(fileId);
-        // Check if dimensions or extension are in our filter sets
-        const isDimensionActive = filterSizesSet.has(dimensionString);
-        const isExtensionActive = filterExtensionsSet.has(fileExtension);
+      paginatedAssets.map(
+        ({ fileId, fileExtension, dimensions, ioState }, index) => {
+          // Get the pre-calculated dimension string
+          const dimensionString = assetDimensions.get(fileId);
+          // Check if dimensions or extension are in our filter sets
+          const isDimensionActive = filterSizesSet.has(dimensionString);
+          const isExtensionActive = filterExtensionsSet.has(fileExtension);
 
-        return (
-          <MemoizedAsset
-            key={fileId}
-            assetId={fileId}
-            fileExtension={fileExtension}
-            dimensionsActive={isDimensionActive}
-            extensionActive={isExtensionActive}
-            dimensions={dimensions}
-            ioState={ioState}
-          />
-        );
-      }),
-    [filteredAssets, filterSizesSet, filterExtensionsSet, assetDimensions],
+          // Calculate the global item number (1-based for display)
+          const globalItemNumber =
+            (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+
+          return (
+            <MemoizedAsset
+              key={fileId}
+              assetId={fileId}
+              assetNumber={globalItemNumber}
+              fileExtension={fileExtension}
+              dimensionsActive={isDimensionActive}
+              extensionActive={isExtensionActive}
+              dimensions={dimensions}
+              ioState={ioState}
+            />
+          );
+        },
+      ),
+    [
+      paginatedAssets,
+      filterSizesSet,
+      filterExtensionsSet,
+      assetDimensions,
+      currentPage,
+      ITEMS_PER_PAGE,
+    ],
   );
 
   // Render a message when no assets match the filters

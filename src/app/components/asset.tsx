@@ -50,6 +50,7 @@ import { TagInput } from './tag-input';
 type AssetProps = {
   assetId: string;
   fileExtension: string;
+  assetNumber: number;
   dimensions: ImageDimensions;
   dimensionsActive: boolean;
   extensionActive: boolean;
@@ -59,6 +60,7 @@ type AssetProps = {
 export const Asset = ({
   assetId,
   fileExtension,
+  assetNumber,
   dimensions,
   dimensionsActive,
   extensionActive,
@@ -289,6 +291,9 @@ export const Asset = ({
 
   return (
     <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
+      <span className="pointer-events-none absolute mt-1 ml-1 rounded-full bg-white/50 px-2 text-sm font-medium text-slate-700/50 tabular-nums drop-shadow-sm text-shadow-sm text-shadow-white">
+        {assetNumber}
+      </span>
       <div
         className={`flex w-full items-center justify-center ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'} cursor-pointer self-stretch bg-slate-300 transition-all`}
         onClick={toggleImageZoom}
