@@ -1,8 +1,16 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
-import { selectImageCount } from '../store/assets';
+import { selectAllImages } from '../store/assets';
+import {
+  selectFilterExtensions,
+  selectFilterMode,
+  selectFilterSizes,
+  selectFilterTags,
+} from '../store/filters';
 import { useAppSelector } from '../store/hooks';
+import { applyFilters } from '../utils/filter-actions';
 
 type BottomShelfProps = {
   currentPage?: number;
@@ -13,8 +21,34 @@ export const BottomShelf = ({
   currentPage = 1,
   totalPages,
 }: BottomShelfProps) => {
-  const imageCount = useAppSelector(selectImageCount);
-  const calculatedTotalPages = totalPages || Math.ceil(imageCount / 100);
+  const ITEMS_PER_PAGE = 100;
+  const allAssets = useAppSelector(selectAllImages);
+
+  // Get filters
+  const filterTags = useAppSelector(selectFilterTags);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filterMode = useAppSelector(selectFilterMode);
+
+  // Calculate filtered assets count
+  const filteredAssets = useMemo(
+    () =>
+      applyFilters({
+        assets: allAssets,
+        filterTags,
+        filterSizes,
+        filterExtensions,
+        filterMode,
+      }),
+    [allAssets, filterTags, filterSizes, filterExtensions, filterMode],
+  );
+
+  const filteredCount = filteredAssets.length;
+  const isFiltered = filteredCount !== allAssets.length;
+
+  // Use provided totalPages or calculate based on filtered count
+  const calculatedTotalPages =
+    totalPages || Math.ceil(filteredCount / ITEMS_PER_PAGE);
 
   const renderPaginationButtons = () => {
     const pages = [];
@@ -55,7 +89,9 @@ export const BottomShelf = ({
           href="/1"
           prefetch={true}
           scroll={true}
-          className={`mx-1 rounded px-3 py-1 tabular-nums ${currentPage === 1 ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
+          className={`mx-1 rounded px-3 py-1 ${
+            currentPage === 1 ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
+          }`}
         >
           1
         </Link>,
@@ -65,7 +101,7 @@ export const BottomShelf = ({
       if (startPage > 2) {
         pages.push(
           <span key="ellipsis1" className="px-3 py-1">
-            &hellip;
+            ...
           </span>,
         );
       }
@@ -79,7 +115,7 @@ export const BottomShelf = ({
           href={`/${i}`}
           prefetch={true}
           scroll={true}
-          className={`mx-1 rounded px-3 py-1 tabular-nums ${
+          className={`mx-1 rounded px-3 py-1 ${
             currentPage === i ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
           }`}
         >
@@ -94,7 +130,7 @@ export const BottomShelf = ({
       if (endPage < calculatedTotalPages - 1) {
         pages.push(
           <span key="ellipsis2" className="px-3 py-1">
-            &hellip;
+            ...
           </span>,
         );
       }
@@ -140,9 +176,17 @@ export const BottomShelf = ({
 
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center justify-center">
+      <div className="mx-auto flex h-12 max-w-400 items-center justify-between px-3">
+        {isFiltered && (
+          <div className="text-xs text-slate-500">
+            Showing {filteredCount} of {allAssets.length} items
+          </div>
+        )}
         <div className="flex-inline flex items-center px-4 py-2">
           {renderPaginationButtons()}
+        </div>
+        <div className="text-xs text-slate-500">
+          Page {currentPage} of {calculatedTotalPages}
         </div>
       </div>
     </div>

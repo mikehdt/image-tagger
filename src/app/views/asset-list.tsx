@@ -79,7 +79,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           const isDimensionActive = filterSizesSet.has(dimensionString);
           const isExtensionActive = filterExtensionsSet.has(fileExtension);
 
-          // Calculate the global item number (1-based for display)
+          // Calculate the global item number based on filtered assets
           const globalItemNumber =
             (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
 
@@ -108,13 +108,28 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   );
 
   // Render a message when no assets match the filters
-  if (renderedAssets.length === 0) {
+  if (filteredAssets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <CubeTransparentIcon className="h-12 w-12 text-slate-400" />
         <h1 className="mt-4 mb-4 w-full text-xl">
           No results match your filters
         </h1>
+      </div>
+    );
+  }
+
+  // If we're on a page that no longer exists after filtering
+  if (paginatedAssets.length === 0 && currentPage > 1) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <CubeTransparentIcon className="h-12 w-12 text-slate-400" />
+        <h1 className="mt-4 mb-4 w-full text-xl">
+          This page no longer contains results
+        </h1>
+        <p className="text-gray-500">
+          The applied filters have reduced the number of available pages.
+        </p>
       </div>
     );
   }
