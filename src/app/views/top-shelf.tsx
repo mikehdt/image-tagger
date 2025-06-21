@@ -14,6 +14,7 @@ import { Loader } from '../components/loader';
 import {
   IoState,
   loadAssets,
+  markFilterTagsToDelete,
   resetAllTags,
   saveAllAssets,
   selectHasModifiedAssets,
@@ -111,6 +112,8 @@ export const TopShelf = () => {
             </>
           )}
         </div>
+
+        {/* TODO: Style these better */}
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
           {filterActive ? (
             <div className="mr-4">
@@ -128,17 +131,37 @@ export const TopShelf = () => {
             </div>
           ) : null}
 
+          {/* TODO: Mark all deleted, rename all? */}
+
           {filterActive ? (
-            <button
-              className="mr-2 inline-flex cursor-pointer items-center p-2 text-slate-500"
-              type="button"
-              onClick={() => dispatch(clearFilters())}
-            >
-              Clear Filters
-              <span className="ml-1 w-4">
-                <XMarkIcon />
-              </span>
-            </button>
+            <>
+              <button
+                className={`mr-2 inline-flex items-center p-2 ${
+                  filterTags.length
+                    ? 'cursor-pointer text-rose-500'
+                    : 'cursor-not-allowed text-slate-300'
+                }`}
+                type="button"
+                onClick={() => dispatch(markFilterTagsToDelete(filterTags))}
+                disabled={!filterTags.length}
+              >
+                Mark selected tags for deletion
+                <span className="ml-1 w-4">
+                  <XMarkIcon />
+                </span>
+              </button>
+
+              <button
+                className="mr-2 inline-flex cursor-pointer items-center p-2 text-slate-500"
+                type="button"
+                onClick={() => dispatch(clearFilters())}
+              >
+                Clear Filters
+                <span className="ml-1 w-4">
+                  <XMarkIcon />
+                </span>
+              </button>
+            </>
           ) : null}
 
           <div className="mr-4 ml-2 inline-flex items-center rounded-md bg-slate-100 p-1">

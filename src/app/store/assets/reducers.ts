@@ -5,6 +5,28 @@ import { ImageAssets, TagState } from './types';
 import { addState, hasState, toggleState } from './utils';
 
 export const coreReducers = {
+  markFilterTagsToDelete: (
+    state: ImageAssets,
+    { payload }: PayloadAction<string[]>,
+  ) => {
+    if (!payload || payload.length === 0) return;
+
+    // Iterate over all images and mark matching tags for deletion
+    state.images.forEach((image) => {
+      payload.forEach((filterTag) => {
+        if (image.tagList.includes(filterTag)) {
+          // Only toggle TO_DELETE for tags that are not marked as TO_ADD
+          if (!hasState(image.tagStatus[filterTag], TagState.TO_ADD)) {
+            image.tagStatus[filterTag] = toggleState(
+              image.tagStatus[filterTag],
+              TagState.TO_DELETE,
+            );
+          }
+        }
+      });
+    });
+  },
+
   addTag: (
     state: ImageAssets,
     { payload }: PayloadAction<{ assetId: string; tagName: string }>,

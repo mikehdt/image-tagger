@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import StoreProvider from './utils/store-provider';
 import { AssetList } from './views/asset-list';
+import { BottomShelf } from './views/bottom-shelf';
 import { Error } from './views/error';
 import { InitialLoad } from './views/initial-load';
 import { NoContent } from './views/no-content';
@@ -51,6 +52,7 @@ const App = () => {
     <>
       <TopShelf />
       <AssetList />
+      <BottomShelf />
     </>
   );
 };

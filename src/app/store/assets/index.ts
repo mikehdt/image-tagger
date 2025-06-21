@@ -27,8 +27,14 @@ const assetsSlice = createSlice({
 
 // Main exports for slice
 export const { reducer: assetsReducer } = assetsSlice;
-export const { addTag, editTag, deleteTag, reorderTags, resetTags } =
-  assetsSlice.actions;
+export const {
+  addTag,
+  editTag,
+  deleteTag,
+  reorderTags,
+  resetTags,
+  markFilterTagsToDelete,
+} = assetsSlice.actions;
 
 // Main exports for assets module
 export * from './actions';
