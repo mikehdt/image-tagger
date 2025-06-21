@@ -2,9 +2,13 @@
 
 import { AppDispatch } from '../store';
 import { ImageAsset, updateLoadProgress } from '../store/assets';
-import { getImageAssetDetails, getImageFileList } from './asset-actions';
+import {
+  getImageAssetDetails,
+  getImageFileList,
+  getMultipleImageAssetDetails,
+} from './asset-actions';
 
-// Function that loads assets with progress tracking
+// Function that loads assets with progress tracking using the batch API
 export const loadAssetsWithProgress = async (
   dispatch: AppDispatch,
 ): Promise<ImageAsset[]> => {
@@ -14,32 +18,55 @@ export const loadAssetsWithProgress = async (
 
     // Initialize progress tracking when we know the total
     const totalFiles = imageFiles.length;
-    if (totalFiles > 0) {
-      dispatch(updateLoadProgress({ total: totalFiles, completed: 0 }));
-    }
+    if (totalFiles === 0) return [];
+
+    dispatch(updateLoadProgress({ total: totalFiles, completed: 0 }));
 
     const imageAssets: ImageAsset[] = [];
+    let completedCount = 0;
 
-    // Process each file and update progress
-    for (let i = 0; i < imageFiles.length; i++) {
-      const file = imageFiles[i];
+    // Configure batch size - balance between network efficiency and progress granularity
+    const batchSize = 24;
+
+    // Process files in batches to reduce client-server round trips
+    for (let i = 0; i < imageFiles.length; i += batchSize) {
+      const batch = imageFiles.slice(i, i + batchSize);
 
       try {
-        // Get details for this specific image
-        const asset = await getImageAssetDetails(file);
-        imageAssets.push(asset);
-      } catch (error) {
-        console.error(`Error processing file ${file}:`, error);
-        // Continue with other files even if one fails
-      }
+        // Process an entire batch on the server with a single request
+        const batchResults = await getMultipleImageAssetDetails(batch);
 
-      // Update progress after each file is processed
-      dispatch(
-        updateLoadProgress({
-          total: totalFiles,
-          completed: i + 1,
-        }),
-      );
+        // Add all results to our asset collection
+        imageAssets.push(...batchResults);
+
+        // Update progress for the entire batch at once
+        completedCount += batchResults.length;
+        dispatch(
+          updateLoadProgress({
+            total: totalFiles,
+            completed: completedCount,
+          }),
+        );
+      } catch (error) {
+        console.error(`Error processing batch starting at index ${i}:`, error);
+        // If batch processing fails, fall back to processing individual files
+        for (const file of batch) {
+          try {
+            const asset = await getImageAssetDetails(file);
+            if (asset) imageAssets.push(asset);
+          } catch (fileError) {
+            console.error(`Error processing file ${file}:`, fileError);
+          } finally {
+            completedCount++;
+            dispatch(
+              updateLoadProgress({
+                total: totalFiles,
+                completed: completedCount,
+              }),
+            );
+          }
+        }
+      }
     }
 
     return imageAssets;

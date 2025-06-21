@@ -24,6 +24,16 @@ export const getImageFileList = async (): Promise<string[]> => {
   );
 };
 
+// Process multiple image files at once and return their asset data
+// This reduces the number of round-trips between client and server
+export const getMultipleImageAssetDetails = async (
+  files: string[],
+): Promise<ImageAsset[]> => {
+  // Process all files in parallel on the server side
+  const promises = files.map((file) => getImageAssetDetails(file));
+  return Promise.all(promises);
+};
+
 // Process a single image file and return its asset data
 export const getImageAssetDetails = async (
   file: string,
@@ -86,6 +96,23 @@ export const getImageFiles = async (): Promise<ImageAsset[]> => {
     const file = imageFiles[i];
     const asset = await getImageAssetDetails(file);
     imageAssets.push(asset);
+  }
+
+  return imageAssets;
+};
+
+// Batch-oriented version of getImageFiles
+export const getImageFilesBatched = async (
+  batchSize = 50,
+): Promise<ImageAsset[]> => {
+  const imageFiles = await getImageFileList();
+  const imageAssets: ImageAsset[] = [];
+
+  // Process in batches to avoid overwhelming the server
+  for (let i = 0; i < imageFiles.length; i += batchSize) {
+    const batch = imageFiles.slice(i, i + batchSize);
+    const batchResults = await getMultipleImageAssetDetails(batch);
+    imageAssets.push(...batchResults);
   }
 
   return imageAssets;
