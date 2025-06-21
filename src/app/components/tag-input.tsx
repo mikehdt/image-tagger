@@ -127,7 +127,6 @@ const TagInputComponent = ({
         type="text"
         placeholder={placeholder}
         className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all`}
-        autoFocus
       />
 
       {/* Render action buttons based on mode */}

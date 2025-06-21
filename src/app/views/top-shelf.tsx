@@ -1,9 +1,10 @@
 import {
-  ArchiveBoxArrowDownIcon,
   ArrowPathIcon,
-  BackspaceIcon,
+  BookmarkIcon,
+  BookmarkSlashIcon,
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
+  DocumentMinusIcon,
   TagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -58,126 +59,125 @@ export const TopShelf = () => {
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center">
         <div className="flex py-2 pl-4">
-          <div className="mr-2 w-6">
-            {showLoader ? (
-              <Loader />
-            ) : (
+          {showLoader ? (
+            <>
+              <div className="mr-2 w-6">
+                <Loader />
+              </div>
+
+              <div className="align-middle text-slate-600 tabular-nums">
+                {saveProgress && (
+                  <>
+                    {saveProgress.completed} / {saveProgress.total}
+                    {saveProgress.failed > 0 &&
+                      ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
+                  </>
+                )}
+                {loadProgress && (
+                  <>
+                    {loadProgress.total > 0
+                      ? `${loadProgress.completed} / ${loadProgress.total}`
+                      : ''}
+                  </>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
               <button
                 type="button"
                 onClick={doRefresh}
-                className="flex w-full cursor-pointer"
+                className="mr-4 inline-flex cursor-pointer"
                 title="Reload asset list"
               >
-                <ArrowPathIcon />
+                <ArrowPathIcon className="w-6" />
               </button>
-            )}
-          </div>
-          {(saveProgress || loadProgress) && (
-            <div className="mr-2 align-middle text-slate-600 tabular-nums">
-              {saveProgress && (
-                <>
-                  {saveProgress.completed} / {saveProgress.total}
-                  {saveProgress.failed > 0 &&
-                    ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
-                </>
-              )}
-              {!saveProgress && loadProgress && (
-                <>
-                  {loadProgress.total > 0
-                    ? `${loadProgress.completed} / ${loadProgress.total}`
-                    : 'Loading...'}
-                </>
-              )}
-            </div>
-          )}
-          {!showLoader && (
-            <>
-              <div className="mr-2 w-6">
-                <button
-                  type="button"
-                  onClick={saveAllChanges}
-                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
-                  title={
-                    hasModifiedAssets
-                      ? 'Save all tag changes'
-                      : 'No changes to save'
-                  }
-                  disabled={!hasModifiedAssets}
-                >
-                  <ArchiveBoxArrowDownIcon />
-                </button>
-              </div>
-              <div className="w-6">
-                <button
-                  type="button"
-                  onClick={cancelAllChanges}
-                  className={`flex w-full ${hasModifiedAssets ? 'cursor-pointer text-pink-600' : 'cursor-not-allowed text-slate-300'}`}
-                  title={
-                    hasModifiedAssets
-                      ? 'Cancel all tag changes'
-                      : 'No changes to cancel'
-                  }
-                  disabled={!hasModifiedAssets}
-                >
-                  <BackspaceIcon />
-                </button>
-              </div>
+
+              <button
+                type="button"
+                onClick={saveAllChanges}
+                className={`mr-4 inline-flex items-center text-sm ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
+                title={
+                  hasModifiedAssets
+                    ? 'Save all tag changes'
+                    : 'No changes to save'
+                }
+                disabled={!hasModifiedAssets}
+              >
+                <BookmarkIcon className="mr-1 w-4" />
+                Save All
+              </button>
+
+              <button
+                type="button"
+                onClick={cancelAllChanges}
+                className={`inline-flex items-center text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-600' : 'cursor-not-allowed text-slate-300'}`}
+                title={
+                  hasModifiedAssets
+                    ? 'Cancel all tag changes'
+                    : 'No changes to cancel'
+                }
+                disabled={!hasModifiedAssets}
+              >
+                <BookmarkSlashIcon className="mr-1 w-4" />
+                Cancel All
+              </button>
             </>
           )}
         </div>
 
-        {/* TODO: Style these better */}
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
-          {filterActive ? (
-            <div className="mr-4">
-              {filterTags.length ? (
-                <span className="text-emerald-500">{filterTags.length}</span>
-              ) : null}
-              {filterSizes.length ? (
-                <span className="text-sky-500">{filterSizes.length}</span>
-              ) : null}
-              {filterExtensions.length ? (
-                <span className="text-slate-500">
-                  {filterExtensions.length}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-
-          {/* TODO: Mark all deleted, rename all? */}
-
           {filterActive ? (
             <>
               <button
                 className={`mr-2 inline-flex items-center p-2 ${
                   filterTags.length
-                    ? 'cursor-pointer text-rose-500'
+                    ? 'cursor-pointer text-slate-500'
                     : 'cursor-not-allowed text-slate-300'
                 }`}
                 type="button"
                 onClick={() => dispatch(markFilterTagsToDelete(filterTags))}
                 disabled={!filterTags.length}
+                title="Toggle selected tags for deletion"
               >
-                Mark selected tags for deletion
-                <span className="ml-1 w-4">
-                  <XMarkIcon />
-                </span>
+                <DocumentMinusIcon className="mr-1 w-4" />
+                Toggle Delete
               </button>
 
               <button
-                className="mr-2 inline-flex cursor-pointer items-center p-2 text-slate-500"
+                className="mr-4 inline-flex cursor-pointer items-center p-2 text-slate-500"
                 type="button"
                 onClick={() => dispatch(clearFilters())}
               >
+                <XMarkIcon className="mr-1 w-4" />
                 Clear Filters
-                <span className="ml-1 w-4">
-                  <XMarkIcon />
-                </span>
               </button>
             </>
           ) : null}
 
-          <div className="mr-4 ml-2 inline-flex items-center rounded-md bg-slate-100 p-1">
+          <div className="mr-4">
+            {filterTags.length ? (
+              <span
+                className={`${filterSizes.length || filterExtensions.length ? 'mr-1' : ''} inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-500 tabular-nums`}
+              >
+                {filterTags.length}
+              </span>
+            ) : null}
+            {filterSizes.length ? (
+              <span
+                className={`${filterExtensions.length ? 'mr-1' : ''} inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-sky-500 tabular-nums`}
+              >
+                {filterSizes.length}
+              </span>
+            ) : null}
+            {filterExtensions.length ? (
+              <span className="inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-stone-500 tabular-nums">
+                {filterExtensions.length}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
             <span className="mr-1 w-4">
               {filterTagsMode === FilterMode.SHOW_ALL ? (
                 <DocumentCheckIcon />
