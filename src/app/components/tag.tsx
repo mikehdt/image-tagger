@@ -99,7 +99,7 @@ const Tag = ({
   );
 
   return isEditing ? (
-    <div className="mb-2">
+    <span className="mb-2 flex">
       <TagInput
         inputValue={editValue}
         onInputChange={(e) => {
@@ -115,7 +115,7 @@ const Tag = ({
         mode="edit"
         isDuplicate={isDuplicate}
       />
-    </div>
+    </span>
   ) : (
     <div className={styles.tagClass} onClick={handleToggleTag}>
       <span className={styles.countClass}>{count}</span>

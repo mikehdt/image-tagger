@@ -207,43 +207,46 @@ export const TopShelf = () => {
                 <DocumentMagnifyingGlassIcon className="w-4" />
               )}
             </span>
-            <button
-              type="button"
-              onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
-              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
-                filterTagsMode === FilterMode.SHOW_ALL
-                  ? 'bg-white shadow-sm'
-                  : 'hover:bg-slate-300'
-              }`}
-            >
-              Show All
-            </button>
-            <button
-              type="button"
-              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
-              className={`flex items-center rounded-sm px-2 py-1 ${
-                filterTagsMode === FilterMode.MATCH_ANY
-                  ? 'bg-white shadow-sm'
-                  : ''
-              } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-              disabled={!filterActive}
-            >
-              Match Any
-            </button>
-            <button
-              type="button"
-              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
-              className={`flex items-center rounded-sm px-2 py-1 ${
-                filterTagsMode === FilterMode.MATCH_ALL
-                  ? 'bg-white shadow-sm'
-                  : ''
-              } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-              disabled={!filterActive}
-            >
-              Match All
-            </button>
 
-            <span className="ml-2 flex items-center border-l border-slate-300 pl-2">
+            <span className="flex items-center border-r border-white pr-2">
+              <button
+                type="button"
+                onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
+                className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+                  filterTagsMode === FilterMode.SHOW_ALL
+                    ? 'bg-white shadow-sm'
+                    : 'hover:bg-slate-300'
+                }`}
+              >
+                Show All
+              </button>
+              <button
+                type="button"
+                onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
+                className={`flex items-center rounded-sm px-2 py-1 ${
+                  filterTagsMode === FilterMode.MATCH_ANY
+                    ? 'bg-white shadow-sm'
+                    : ''
+                } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+                disabled={!filterActive}
+              >
+                Match Any
+              </button>
+              <button
+                type="button"
+                onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
+                className={`flex items-center rounded-sm px-2 py-1 ${
+                  filterTagsMode === FilterMode.MATCH_ALL
+                    ? 'bg-white shadow-sm'
+                    : ''
+                } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+                disabled={!filterActive}
+              >
+                Match All
+              </button>
+            </span>
+
+            <span className="flex items-center border-l border-slate-300 pl-2">
               <button
                 type="button"
                 onClick={() => dispatch(toggleModifiedFilter())}

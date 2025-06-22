@@ -213,14 +213,12 @@ export const BottomShelf = ({
 
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center px-3">
+      <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="w-1/4 text-xs whitespace-nowrap text-slate-500">
           {isFiltered ? (
-            <>
-              Showing {filteredCount} out of {allAssets.length} items
-            </>
+            <>{filteredCount} filtered items selected</>
           ) : (
-            <>&nbsp;</>
+            <>{allAssets.length} items total</>
           )}
         </div>
 

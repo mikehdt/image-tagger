@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo } from 'react';
+import { Fragment, ReactNode, useCallback, useEffect, useMemo } from 'react';
 
 import { selectImageSizes } from '../../store/assets';
 import { selectFilterSizes, toggleSizeFilter } from '../../store/filters';
@@ -72,7 +72,7 @@ export const getSizeSortOptions = (
         : sortType === 'dimensions'
           ? `${sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0'}`
           : sortType === 'aspectRatio'
-            ? `${sortDirection === 'asc' ? '↑ Wide-Tall' : '↓ Tall-Wide'}`
+            ? `${sortDirection === 'asc' ? '↑ Tall-Wide' : '↓ Wide-Tall'}`
             : `${sortDirection === 'asc' ? '↑ Selected' : '↓ Selected'}`,
     typeLabel:
       sortType === 'count'
@@ -91,6 +91,12 @@ export const getSizeSortOptions = (
             ? ('active' as SortType)
             : ('count' as SortType),
   };
+};
+
+// Type for the formatted size display output
+type FormattedSizeDisplay = {
+  primary: string | ReactNode | (string | ReactNode)[];
+  secondary: string;
 };
 
 export const SizesView = ({
@@ -150,6 +156,43 @@ export const SizesView = ({
     return `${megapixels.toFixed(1)}MP`;
   }, []);
 
+  // Format size display based on current sort type
+  const formatSizeDisplay = useCallback(
+    (size: string): FormattedSizeDisplay => {
+      const dimensions = formatDimensions(size);
+      const aspectRatio = formatAspectRatio(size);
+      const megapixels = formatMegapixels(size);
+
+      // For searchTerm highlighting, we only highlight the primary display
+      switch (sortType) {
+        case 'dimensions':
+          return {
+            primary: highlightMatches(megapixels, searchTerm),
+            secondary: dimensions,
+          };
+        case 'aspectRatio':
+          return {
+            primary: highlightMatches(aspectRatio, searchTerm),
+            secondary: dimensions,
+          };
+        case 'count':
+        case 'active':
+        default:
+          return {
+            primary: highlightMatches(dimensions, searchTerm),
+            secondary: '',
+          };
+      }
+    },
+    [
+      sortType,
+      formatDimensions,
+      formatAspectRatio,
+      formatMegapixels,
+      searchTerm,
+    ],
+  );
+
   // Sort and filter sizes based on search term and current sort type and direction
   const sortedSizes = useMemo(() => {
     // Filter sizes based on search term - match against both x and × symbols
@@ -163,14 +206,30 @@ export const SizesView = ({
     const filteredSizes = Object.entries(allSizes).filter(([size]) => {
       if (!searchTerm || searchTerm.trim() === '') return true;
 
-      // Format the size with the × symbol for display
-      const displaySize = formatDimensions(size);
+      // Search based on the primary display value according to sort type
+      let searchableText = '';
 
-      // For matching, we need to handle both × and regular x
-      const normalizedSize = displaySize.replace('×', 'x');
+      switch (sortType) {
+        case 'dimensions':
+          // Search by megapixels
+          searchableText = formatMegapixels(size);
+          break;
+        case 'aspectRatio':
+          // Search by aspect ratio
+          searchableText = formatAspectRatio(size);
+          break;
+        case 'count':
+        case 'active':
+        default:
+          // Search by resolution dimensions
+          searchableText = formatDimensions(size);
+          // For dimensions, we need to handle both × and regular x for matching
+          searchableText = searchableText.replace('×', 'x');
+          break;
+      }
 
-      // Match against the normalized size
-      return searchRegex ? searchRegex.test(normalizedSize) : true;
+      // Match against the appropriate text based on sort type
+      return searchRegex ? searchRegex.test(searchableText) : true;
     });
 
     // Sort the filtered sizes
@@ -236,6 +295,8 @@ export const SizesView = ({
     filterSizes,
     searchTerm,
     formatDimensions,
+    formatAspectRatio,
+    formatMegapixels,
   ]);
 
   // Update list length for keyboard navigation when sorted sizes change
@@ -281,6 +342,9 @@ export const SizesView = ({
         const isSelected = filterSizes.includes(size);
         const isKeyboardSelected = index === selectedIndex;
 
+        // Get the formatted display for the size
+        const { primary, secondary } = formatSizeDisplay(size);
+
         return (
           <li
             key={size}
@@ -305,15 +369,10 @@ export const SizesView = ({
                 isSelected ? 'font-medium text-sky-700' : 'text-slate-800'
               }`}
             >
-              {highlightMatches(formatDimensions(size), searchTerm)}
-              {sortType === 'aspectRatio' && (
+              {primary}
+              {secondary && (
                 <span className="ml-1 text-xs text-slate-500">
-                  ({formatAspectRatio(size)})
-                </span>
-              )}
-              {sortType === 'dimensions' && (
-                <span className="ml-1 text-xs text-slate-500">
-                  ({formatMegapixels(size)})
+                  ({secondary})
                 </span>
               )}
             </span>
