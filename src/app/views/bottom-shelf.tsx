@@ -214,35 +214,43 @@ export const BottomShelf = ({
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-3">
-        {isFiltered && (
-          <div className="text-xs text-slate-500">
-            Showing {filteredCount} out of {allAssets.length} items
-          </div>
-        )}
-        <div className="flex-inline flex items-center px-4 py-2">
+        <div className="w-1/4 text-xs whitespace-nowrap text-slate-500">
+          {isFiltered ? (
+            <>
+              Showing {filteredCount} out of {allAssets.length} items
+            </>
+          ) : (
+            <>&nbsp;</>
+          )}
+        </div>
+
+        <div className="flex-inline flex w-1/2 items-center justify-center px-4 py-2">
           {renderPaginationButtons()}
         </div>
-        <div className="text-xs text-slate-500">
-          Page {currentPage} of {calculatedTotalPages}
-        </div>
-        <div className="ml-4 flex items-center">
-          <label
-            htmlFor="pagination-size"
-            className="mr-2 text-xs text-slate-500"
-          >
-            Items per page:
-          </label>
-          <select
-            id="pagination-size"
-            value={paginationSize}
-            onChange={handlePaginationSizeChange}
-            className="rounded border px-3 py-1 text-sm"
-          >
-            <option value={PaginationSize.FIFTY}>50</option>
-            <option value={PaginationSize.HUNDRED}>100</option>
-            <option value={PaginationSize.TWO_FIFTY}>250</option>
-            <option value={PaginationSize.ALL}>All</option>
-          </select>
+
+        <div className="flex w-1/4 items-center justify-end">
+          <span className="text-xs text-slate-500">
+            Page {currentPage} of {calculatedTotalPages}
+          </span>
+          <span className="ml-4 flex items-center">
+            <label
+              htmlFor="pagination-size"
+              className="mr-2 text-xs text-slate-500"
+            >
+              Items per page:
+            </label>
+            <select
+              id="pagination-size"
+              value={paginationSize}
+              onChange={handlePaginationSizeChange}
+              className="rounded border px-3 py-1 text-sm"
+            >
+              <option value={PaginationSize.FIFTY}>50</option>
+              <option value={PaginationSize.HUNDRED}>100</option>
+              <option value={PaginationSize.TWO_FIFTY}>250</option>
+              <option value={PaginationSize.ALL}>All</option>
+            </select>
+          </span>
         </div>
       </div>
     </div>

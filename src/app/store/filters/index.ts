@@ -10,6 +10,7 @@ const initialState: Filters = {
   filterSizes: [],
   filterExtensions: [],
   paginationSize: PaginationSize.HUNDRED,
+  showModified: false,
 };
 
 const filtersSlice = createSlice({
@@ -24,10 +25,12 @@ const filtersSlice = createSlice({
     selectFilterSizes: (state) => state.filterSizes,
     selectFilterExtensions: (state) => state.filterExtensions,
     selectPaginationSize: (state) => state.paginationSize,
+    selectShowModified: (state) => state.showModified,
     selectHasActiveFilters: (state) =>
       state.filterTags.length > 0 ||
       state.filterSizes.length > 0 ||
-      state.filterExtensions.length > 0,
+      state.filterExtensions.length > 0 ||
+      state.showModified,
     selectFilterCount: (state) => ({
       tags: state.filterTags.length,
       sizes: state.filterSizes.length,
@@ -49,6 +52,7 @@ export const {
   toggleTagFilter,
   toggleSizeFilter,
   toggleExtensionFilter,
+  toggleModifiedFilter,
   clearTagFilters,
   clearSizeFilters,
   clearExtensionFilters,

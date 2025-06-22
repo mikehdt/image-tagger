@@ -31,6 +31,7 @@ const shouldClearFilters = (state: RootState): boolean => {
     filterSizes: filters.filterSizes,
     filterExtensions: filters.filterExtensions,
     filterMode: filters.filterMode,
+    showModified: filters.showModified,
   });
 
   // If there are no filtered results, filters should be cleared

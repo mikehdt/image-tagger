@@ -16,10 +16,14 @@ export const selectFilterExtensions = (state: { filters: Filters }) =>
 export const selectPaginationSize = (state: { filters: Filters }) =>
   state.filters.paginationSize;
 
+export const selectShowModified = (state: { filters: Filters }) =>
+  state.filters.showModified;
+
 export const selectHasActiveFilters = (state: { filters: Filters }) =>
   state.filters.filterTags.length > 0 ||
   state.filters.filterSizes.length > 0 ||
-  state.filters.filterExtensions.length > 0;
+  state.filters.filterExtensions.length > 0 ||
+  state.filters.showModified;
 
 export const selectFilterCount = (state: {
   filters: Filters;

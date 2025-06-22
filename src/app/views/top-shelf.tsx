@@ -30,7 +30,9 @@ import {
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectShowModified,
   setTagFilterMode,
+  toggleModifiedFilter,
 } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
@@ -47,15 +49,17 @@ export const TopShelf = () => {
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
   const saveProgress = useAppSelector(selectSaveProgress);
   const loadProgress = useAppSelector(selectLoadProgress);
+  const filterModifiedActive = useAppSelector(selectShowModified);
 
   const doRefresh = () => dispatch(loadAllAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
 
   const filterActive =
-    filterTags.length || filterSizes.length || filterExtensions.length;
-
-  const filterModifiedActive = false; // TODO: Use this with the right selector
+    filterTags.length ||
+    filterSizes.length ||
+    filterExtensions.length ||
+    filterModifiedActive;
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
@@ -98,7 +102,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={saveAllChanges}
-                className={`mr-4 inline-flex items-center text-sm ${hasModifiedAssets ? 'cursor-pointer text-emerald-600' : 'cursor-not-allowed text-slate-300'}`}
+                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-emerald-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets
                     ? 'Save all tag changes'
@@ -110,10 +114,26 @@ export const TopShelf = () => {
                 Save All
               </button>
 
+              {/* TODO: Implement later */}
+              {/* <button
+                type="button"
+                onClick={() => {}}
+                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets && filterActive ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
+                title={
+                  hasModifiedAssets && filterActive
+                    ? 'Save only filtered tag changes'
+                    : 'No filtered tags to save'
+                }
+                disabled={!hasModifiedAssets && !filterActive}
+              >
+                <BookmarkIcon className="mr-1 w-4" />
+                Save Filtered
+              </button> */}
+
               <button
                 type="button"
                 onClick={cancelAllChanges}
-                className={`inline-flex items-center text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-600' : 'cursor-not-allowed text-slate-300'}`}
+                className={`inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets
                     ? 'Cancel all tag changes'
@@ -132,9 +152,9 @@ export const TopShelf = () => {
           {filterActive ? (
             <>
               <button
-                className={`mr-2 inline-flex items-center p-2 ${
+                className={`mr-2 inline-flex items-center py-2 ${
                   filterTags.length
-                    ? 'cursor-pointer text-slate-500'
+                    ? 'cursor-pointer text-slate-700'
                     : 'cursor-not-allowed text-slate-300'
                 }`}
                 type="button"
@@ -147,7 +167,7 @@ export const TopShelf = () => {
               </button>
 
               <button
-                className="mr-4 inline-flex cursor-pointer items-center p-2 text-slate-500"
+                className="mr-4 inline-flex cursor-pointer items-center py-2 text-slate-700"
                 type="button"
                 onClick={() => dispatch(clearFilters())}
               >
@@ -160,20 +180,20 @@ export const TopShelf = () => {
           <div className="mr-4">
             {filterTags.length ? (
               <span
-                className={`${filterSizes.length || filterExtensions.length ? 'mr-1' : ''} inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-500 tabular-nums`}
+                className={`${filterSizes.length || filterExtensions.length ? 'mr-1' : ''} inline-flex cursor-default rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-500 tabular-nums`}
               >
                 {filterTags.length}
               </span>
             ) : null}
             {filterSizes.length ? (
               <span
-                className={`${filterExtensions.length ? 'mr-1' : ''} inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-sky-500 tabular-nums`}
+                className={`${filterExtensions.length ? 'mr-1' : ''} inline-flex cursor-default rounded-full bg-sky-100 px-2 py-0.5 text-sky-500 tabular-nums`}
               >
                 {filterSizes.length}
               </span>
             ) : null}
             {filterExtensions.length ? (
-              <span className="inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-stone-500 tabular-nums">
+              <span className="inline-flex cursor-default rounded-full bg-stone-100 px-2 py-0.5 text-stone-500 tabular-nums">
                 {filterExtensions.length}
               </span>
             ) : null}
@@ -226,7 +246,7 @@ export const TopShelf = () => {
             <span className="ml-2 flex items-center border-l border-slate-300 pl-2">
               <button
                 type="button"
-                onClick={() => {}}
+                onClick={() => dispatch(toggleModifiedFilter())}
                 className={`rounded-sm p-1 px-2 ${
                   filterModifiedActive ? 'bg-white shadow-sm' : ''
                 } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}

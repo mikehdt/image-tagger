@@ -40,6 +40,10 @@ export const coreReducers = {
     state.filterExtensions = toggleFilter(state.filterExtensions, payload);
   },
 
+  toggleModifiedFilter: (state: Filters) => {
+    state.showModified = !state.showModified;
+  },
+
   clearTagFilters: (state: Filters) => {
     state.filterTags = [];
   },
@@ -56,5 +60,6 @@ export const coreReducers = {
     state.filterTags = [];
     state.filterSizes = [];
     state.filterExtensions = [];
+    state.showModified = false;
   },
 };

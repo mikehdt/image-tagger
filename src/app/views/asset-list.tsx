@@ -11,6 +11,7 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectPaginationSize,
+  selectShowModified,
 } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
@@ -33,6 +34,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
+  const showModified = useAppSelector(selectShowModified);
 
   // Create Sets from filters for O(1) lookups instead of O(n)
   const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
@@ -50,8 +52,16 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
         filterSizes,
         filterExtensions,
         filterMode,
+        showModified,
       }),
-    [assets, filterTags, filterSizes, filterExtensions, filterMode],
+    [
+      assets,
+      filterTags,
+      filterSizes,
+      filterExtensions,
+      filterMode,
+      showModified,
+    ],
   );
 
   // Apply pagination to the filtered assets

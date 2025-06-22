@@ -1,4 +1,5 @@
-import { type ImageAsset } from '../store/assets';
+import { type ImageAsset, TagState } from '../store/assets';
+import { hasState } from '../store/assets/utils';
 import { FilterMode } from '../store/filters';
 import { composeDimensions } from './helpers';
 
@@ -8,19 +9,22 @@ export const applyFilters = ({
   filterSizes,
   filterExtensions,
   filterMode,
+  showModified,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
   filterSizes: string[];
   filterExtensions: string[];
   filterMode: FilterMode;
+  showModified?: boolean;
 }) => {
-  // Quick return if no filters are active or show all mode is selected
+  // Quick return if no filters are active or show all mode is selected with no showModified filter
   if (
     (filterTags.length === 0 &&
       filterSizes.length === 0 &&
-      filterExtensions.length === 0) ||
-    filterMode === FilterMode.SHOW_ALL
+      filterExtensions.length === 0 &&
+      !showModified) ||
+    (filterMode === FilterMode.SHOW_ALL && !showModified)
   ) {
     return assets;
   }
@@ -30,6 +34,17 @@ export const applyFilters = ({
   const filterExtensionsSet = new Set(filterExtensions);
 
   return assets.filter((img: ImageAsset) => {
+    // Check if we need to filter by modified state first
+    if (showModified) {
+      // Check if any tag has a non-SAVED state
+      const hasModifiedTags = img.tagList.some(
+        (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
+      );
+      if (!hasModifiedTags) {
+        return false;
+      }
+    }
+
     // Check dimensions and extension
     const dimensionsComposed = composeDimensions(img.dimensions);
     const sizeMatches =

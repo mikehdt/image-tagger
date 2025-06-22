@@ -1,6 +1,13 @@
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { ChangeEvent, SyntheticEvent } from 'react';
-import { KeyboardEvent, memo, useCallback, useMemo, useRef } from 'react';
+import {
+  KeyboardEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
 // Configuration constants
 const MIN_TAG_LENGTH = 6;
@@ -79,6 +86,13 @@ const TagInputComponent = ({
 
   // Border colors based on mode
   const borderColor = mode === 'add' ? 'border-amber-300' : 'border-blue-300';
+
+  // Auto-focus when in edit mode on component mount
+  useEffect(() => {
+    if (mode === 'edit' && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [mode]);
 
   return (
     <div

@@ -99,21 +99,23 @@ const Tag = ({
   );
 
   return isEditing ? (
-    <TagInput
-      inputValue={editValue}
-      onInputChange={(e) => {
-        const newValue = e.target.value;
-        setEditValue(newValue);
-        if (onEditValueChange) {
-          onEditValueChange(newValue);
-        }
-      }}
-      onSubmit={handleSaveEdit}
-      onCancel={handleCancelEdit}
-      placeholder="Edit tag..."
-      mode="edit"
-      isDuplicate={isDuplicate}
-    />
+    <div className="mb-2">
+      <TagInput
+        inputValue={editValue}
+        onInputChange={(e) => {
+          const newValue = e.target.value;
+          setEditValue(newValue);
+          if (onEditValueChange) {
+            onEditValueChange(newValue);
+          }
+        }}
+        onSubmit={handleSaveEdit}
+        onCancel={handleCancelEdit}
+        placeholder="Edit tag..."
+        mode="edit"
+        isDuplicate={isDuplicate}
+      />
+    </div>
   ) : (
     <div className={styles.tagClass} onClick={handleToggleTag}>
       <span className={styles.countClass}>{count}</span>

@@ -18,6 +18,7 @@ export type Filters = {
   filterSizes: string[];
   filterExtensions: string[];
   paginationSize: PaginationSize;
+  showModified: boolean;
 };
 
 export type FilterCount = {
