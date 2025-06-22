@@ -1,6 +1,13 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 
+import {
+  clearExtensionFilters,
+  clearSizeFilters,
+  clearTagFilters,
+  selectFilterCount,
+} from '../../store/filters';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { FiletypesView, getFiletypeSortOptions } from './FiletypesView';
 import { getSizeSortOptions, SizesView } from './SizesView';
 import { getTagSortOptions, TagsView } from './TagsView';
@@ -14,6 +21,8 @@ export const FilterList = ({
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const filterCount = useAppSelector(selectFilterCount);
 
   // Add state for active view
   const [activeView, setActiveView] = useState<FilterView>('tag');
@@ -229,21 +238,52 @@ export const FilterList = ({
 
       <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
         <button
-          onClick={() =>
-            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-          }
-          className="cursor-pointer rounded border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
-          title="Toggle sort direction"
+          onClick={() => setSortType(getSortOptions().nextType)}
+          className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
+          title="Toggle sort type"
         >
-          {getSortOptions().directionLabel}
+          By {getSortOptions().typeLabel}
         </button>
 
         <button
-          onClick={() => setSortType(getSortOptions().nextType)}
-          className="cursor-pointer rounded border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
-          title="Toggle sort type"
+          onClick={() =>
+            setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+          }
+          className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
+          title="Toggle sort direction"
         >
-          By: {getSortOptions().typeLabel}
+          Sort {getSortOptions().directionLabel}
+        </button>
+
+        <button
+          onClick={() => {
+            // Dispatch clear filters action based on active view
+            if (activeView === 'tag') {
+              dispatch(clearTagFilters());
+            } else if (activeView === 'size') {
+              dispatch(clearSizeFilters());
+            } else {
+              dispatch(clearExtensionFilters());
+            }
+            // Clear search term and reset selected index
+            setSearchTerm('');
+            setSelectedIndex(-1);
+          }}
+          className={`ml-auto rounded border border-slate-200 px-2 py-1 text-xs ${
+            (activeView === 'tag' && filterCount.tags > 0) ||
+            (activeView === 'size' && filterCount.sizes > 0) ||
+            (activeView === 'filetype' && filterCount.extensions > 0)
+              ? 'cursor-pointer bg-white hover:bg-slate-100'
+              : 'cursor-not-allowed bg-slate-50 text-slate-400'
+          }`}
+          disabled={
+            (activeView === 'tag' && filterCount.tags === 0) ||
+            (activeView === 'size' && filterCount.sizes === 0) ||
+            (activeView === 'filetype' && filterCount.extensions === 0)
+          }
+          title={`Clear ${activeView} filters`}
+        >
+          Clear
         </button>
       </div>
 

@@ -16,8 +16,8 @@ export const getFiletypeSortOptions = (
   return {
     directionLabel:
       sortType === 'count'
-        ? `Sort: ${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
-        : `Sort: ${sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A'}`,
+        ? `${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
+        : `${sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A'}`,
     typeLabel:
       sortType === 'count'
         ? 'Count'

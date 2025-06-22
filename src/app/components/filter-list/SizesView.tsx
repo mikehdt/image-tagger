@@ -68,12 +68,12 @@ export const getSizeSortOptions = (
   return {
     directionLabel:
       sortType === 'count'
-        ? `Sort: ${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
+        ? `${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
         : sortType === 'dimensions'
-          ? `Sort: ${sortDirection === 'asc' ? '↑ Small-Large' : '↓ Large-Small'}`
+          ? `${sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0'}`
           : sortType === 'aspectRatio'
-            ? `Sort: ${sortDirection === 'asc' ? '↑ Wide-Tall' : '↓ Tall-Wide'}`
-            : `Sort: ${sortDirection === 'asc' ? '↑ Selected' : '↓ Selected'}`,
+            ? `${sortDirection === 'asc' ? '↑ Wide-Tall' : '↓ Tall-Wide'}`
+            : `${sortDirection === 'asc' ? '↑ Selected' : '↓ Selected'}`,
     typeLabel:
       sortType === 'count'
         ? 'Count'
@@ -127,8 +127,20 @@ export const SizesView = ({
   // Format aspect ratio for display
   const formatAspectRatio = useCallback((size: string) => {
     const { width, height } = decomposeDimensions(size);
-    // Simple version: display as width:height
-    return `${width}:${height}`;
+
+    // Calculate the greatest common divisor with Euclidean algorithm
+    const calculateGCD = (a: number, b: number): number => {
+      return b === 0 ? a : calculateGCD(b, a % b);
+    };
+
+    // Calculate the greatest common divisor
+    const divisor = calculateGCD(width, height);
+
+    // Simplify the ratio by dividing both width and height by their GCD
+    const simplifiedWidth = width / divisor;
+    const simplifiedHeight = height / divisor;
+
+    return `${simplifiedWidth}:${simplifiedHeight}`;
   }, []);
 
   // Format megapixels for display
