@@ -1,4 +1,6 @@
 // Selectors for filters slice
+import { createSelector } from '@reduxjs/toolkit';
+
 import { FilterCount, Filters } from './types';
 
 export const selectFilterMode = (state: { filters: Filters }) =>
@@ -19,20 +21,26 @@ export const selectPaginationSize = (state: { filters: Filters }) =>
 export const selectShowModified = (state: { filters: Filters }) =>
   state.filters.showModified;
 
-export const selectHasActiveFilters = (state: { filters: Filters }) =>
-  state.filters.filterTags.length > 0 ||
-  state.filters.filterSizes.length > 0 ||
-  state.filters.filterExtensions.length > 0 ||
-  state.filters.showModified;
+export const selectHasActiveFilters = createSelector(
+  selectFilterTags,
+  selectFilterSizes,
+  selectFilterExtensions,
+  selectShowModified,
+  (filterTags, filterSizes, filterExtensions, showModified) =>
+    filterTags.length > 0 ||
+    filterSizes.length > 0 ||
+    filterExtensions.length > 0 ||
+    showModified,
+);
 
-export const selectFilterCount = (state: {
-  filters: Filters;
-}): FilterCount => ({
-  tags: state.filters.filterTags.length,
-  sizes: state.filters.filterSizes.length,
-  extensions: state.filters.filterExtensions.length,
-  total:
-    state.filters.filterTags.length +
-    state.filters.filterSizes.length +
-    state.filters.filterExtensions.length,
-});
+export const selectFilterCount = createSelector(
+  selectFilterTags,
+  selectFilterSizes,
+  selectFilterExtensions,
+  (filterTags, filterSizes, filterExtensions): FilterCount => ({
+    tags: filterTags.length,
+    sizes: filterSizes.length,
+    extensions: filterExtensions.length,
+    total: filterTags.length + filterSizes.length + filterExtensions.length,
+  }),
+);

@@ -17,30 +17,7 @@ const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: coreReducers,
-  // Selectors are defined in selectors.ts file but included here
-  // to satisfy the createSlice API
-  selectors: {
-    selectFilterMode: (state) => state.filterMode,
-    selectFilterTags: (state) => state.filterTags,
-    selectFilterSizes: (state) => state.filterSizes,
-    selectFilterExtensions: (state) => state.filterExtensions,
-    selectPaginationSize: (state) => state.paginationSize,
-    selectShowModified: (state) => state.showModified,
-    selectHasActiveFilters: (state) =>
-      state.filterTags.length > 0 ||
-      state.filterSizes.length > 0 ||
-      state.filterExtensions.length > 0 ||
-      state.showModified,
-    selectFilterCount: (state) => ({
-      tags: state.filterTags.length,
-      sizes: state.filterSizes.length,
-      extensions: state.filterExtensions.length,
-      total:
-        state.filterTags.length +
-        state.filterSizes.length +
-        state.filterExtensions.length,
-    }),
-  },
+  // We're using the selectors from selectors.ts file instead of defining them here
 });
 
 // Main exports from slice

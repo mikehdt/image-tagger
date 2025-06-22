@@ -241,7 +241,7 @@ export const BottomShelf = ({
               id="pagination-size"
               value={paginationSize}
               onChange={handlePaginationSizeChange}
-              className="rounded border px-3 py-1 text-sm"
+              className="rounded border border-slate-300 px-3 py-1 text-sm"
             >
               <option value={PaginationSize.FIFTY}>50</option>
               <option value={PaginationSize.HUNDRED}>100</option>

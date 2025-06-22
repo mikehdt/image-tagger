@@ -16,13 +16,7 @@ const assetsSlice = createSlice({
   initialState,
   reducers: coreReducers,
   extraReducers: setupExtraReducers,
-  selectors: {
-    // Selectors are now imported from selectors.ts
-    // This is just to comply with the createSlice API
-    selectIoState: (state) => state.ioState,
-    selectAllImages: (state) => state.images,
-    selectImageCount: (state) => state.images.length,
-  },
+  // We're using the selectors from selectors.ts file instead of defining them here
 });
 
 // Main exports for slice
