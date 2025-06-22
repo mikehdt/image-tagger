@@ -2,7 +2,7 @@
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
 
 import {
-  loadAssets,
+  loadAllAssets,
   resetAllTags,
   saveAllAssets,
   saveAssets,
@@ -15,7 +15,7 @@ export const setupExtraReducers = (
   builder: ActionReducerMapBuilder<ImageAssets>,
 ) => {
   // Loading
-  builder.addCase(loadAssets.pending, (state) => {
+  builder.addCase(loadAllAssets.pending, (state) => {
     state.ioState = IoState.LOADING;
     state.ioMessage = 'Loading assets...';
     // Initialize the load progress
@@ -26,7 +26,7 @@ export const setupExtraReducers = (
     };
   });
 
-  builder.addCase(loadAssets.fulfilled, (state, action) => {
+  builder.addCase(loadAllAssets.fulfilled, (state, action) => {
     state.ioState = IoState.COMPLETE;
     state.ioMessage = undefined;
     state.images = action.payload;
@@ -34,7 +34,7 @@ export const setupExtraReducers = (
     state.loadProgress = undefined;
   });
 
-  builder.addCase(loadAssets.rejected, (state, action) => {
+  builder.addCase(loadAllAssets.rejected, (state, action) => {
     state.ioState = IoState.ERROR;
     state.ioMessage = action.error.message || 'Error loading assets';
     state.images = [];

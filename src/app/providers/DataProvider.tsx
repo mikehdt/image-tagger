@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import {
   IoState,
-  loadAssets,
+  loadAllAssets,
   selectImageCount,
   selectIoState,
 } from '../store/assets';
@@ -21,7 +21,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load assets only once on initial mount
   const loadImageAssets = useCallback(async () => {
-    dispatch(loadAssets());
+    dispatch(loadAllAssets());
   }, [dispatch]);
 
   useEffect(() => {

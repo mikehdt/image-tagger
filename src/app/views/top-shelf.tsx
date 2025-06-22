@@ -14,7 +14,7 @@ import { FilterList } from '../components/filter-list';
 import { Loader } from '../components/loader';
 import {
   IoState,
-  loadAssets,
+  loadAllAssets,
   markFilterTagsToDelete,
   resetAllTags,
   saveAllAssets,
@@ -48,7 +48,7 @@ export const TopShelf = () => {
   const saveProgress = useAppSelector(selectSaveProgress);
   const loadProgress = useAppSelector(selectLoadProgress);
 
-  const doRefresh = () => dispatch(loadAssets());
+  const doRefresh = () => dispatch(loadAllAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
 
