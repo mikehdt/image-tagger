@@ -55,6 +55,8 @@ export const TopShelf = () => {
   const filterActive =
     filterTags.length || filterSizes.length || filterExtensions.length;
 
+  const filterModifiedActive = false; // TODO: Use this with the right selector
+
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center">
@@ -178,11 +180,11 @@ export const TopShelf = () => {
           </div>
 
           <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
-            <span className="mr-1 w-4">
+            <span className="mr-1 py-1">
               {filterTagsMode === FilterMode.SHOW_ALL ? (
-                <DocumentCheckIcon />
+                <DocumentCheckIcon className="w-4" />
               ) : (
-                <DocumentMagnifyingGlassIcon />
+                <DocumentMagnifyingGlassIcon className="w-4" />
               )}
             </span>
             <button
@@ -199,25 +201,40 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
-              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+              className={`flex items-center rounded-sm px-2 py-1 ${
                 filterTagsMode === FilterMode.MATCH_ANY
                   ? 'bg-white shadow-sm'
-                  : 'hover:bg-slate-300'
-              }`}
+                  : ''
+              } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+              disabled={!filterActive}
             >
               Match Any
             </button>
             <button
               type="button"
               onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
-              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+              className={`flex items-center rounded-sm px-2 py-1 ${
                 filterTagsMode === FilterMode.MATCH_ALL
                   ? 'bg-white shadow-sm'
-                  : 'hover:bg-slate-300'
-              }`}
+                  : ''
+              } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+              disabled={!filterActive}
             >
               Match All
             </button>
+
+            <span className="ml-2 flex items-center border-l border-slate-300 pl-2">
+              <button
+                type="button"
+                onClick={() => {}}
+                className={`rounded-sm p-1 px-2 ${
+                  filterModifiedActive ? 'bg-white shadow-sm' : ''
+                } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}
+                disabled={!hasModifiedAssets}
+              >
+                Modified
+              </button>
+            </span>
           </div>
 
           {/* Tag summary list button */}
