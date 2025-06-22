@@ -13,8 +13,10 @@ export const removeState = (state: number, flag: TagState): number =>
 export const toggleState = (state: number, flag: TagState): number =>
   state ^ flag;
 
-// For debugging and display purposes
-export const getTagStateString = (state: number): string => {
+/**
+ * @public For debugging and display purposes
+ */
+export const debug_getTagStateString = (state: number): string => {
   if (hasState(state, TagState.SAVED)) return 'Saved';
 
   const states: string[] = [];

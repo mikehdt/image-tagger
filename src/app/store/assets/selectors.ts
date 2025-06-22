@@ -22,16 +22,6 @@ export const selectImageCount = (state: { assets: ImageAssets }) => {
   return state.assets.images.length;
 };
 
-export const selectTagsByStatus = (
-  state: { assets: ImageAssets },
-  fileId: string,
-) => {
-  const selectedImage = state.assets.images.find(
-    (item) => item.fileId === fileId,
-  );
-  return selectedImage?.tagStatus || {};
-};
-
 // Derived selectors
 export const selectOrderedTagsWithStatus = createSelector(
   // Input selectors
@@ -78,19 +68,6 @@ export const selectImageSizes = createSelector(
     );
   },
 );
-
-export const selectTagsForAsset = (
-  state: { assets: ImageAssets },
-  fileId: string,
-) => {
-  const selectedImage = state.assets.images.find(
-    (item) => item.fileId === fileId,
-  );
-  return {
-    tagStatus: selectedImage?.tagStatus || {},
-    tagList: selectedImage?.tagList || [],
-  };
-};
 
 export const selectAllTags = createSelector(
   [(state: { assets: ImageAssets }) => state.assets.images],

@@ -90,37 +90,6 @@ export const getImageAssetDetails = async (
   };
 };
 
-// Legacy function for backward compatibility
-export const getImageFiles = async (): Promise<ImageAsset[]> => {
-  const imageFiles = await getImageFileList();
-  const imageAssets: ImageAsset[] = [];
-
-  for (let i = 0; i < imageFiles.length; i++) {
-    const file = imageFiles[i];
-    const asset = await getImageAssetDetails(file);
-    imageAssets.push(asset);
-  }
-
-  return imageAssets;
-};
-
-// Batch-oriented version of getImageFiles
-export const getImageFilesBatched = async (
-  batchSize = 50,
-): Promise<ImageAsset[]> => {
-  const imageFiles = await getImageFileList();
-  const imageAssets: ImageAsset[] = [];
-
-  // Process in batches to avoid overwhelming the server
-  for (let i = 0; i < imageFiles.length; i += batchSize) {
-    const batch = imageFiles.slice(i, i + batchSize);
-    const batchResults = await getMultipleImageAssetDetails(batch);
-    imageAssets.push(...batchResults);
-  }
-
-  return imageAssets;
-};
-
 export const writeTagsToDisk = async (
   fileId: string,
   composedTags: string,
