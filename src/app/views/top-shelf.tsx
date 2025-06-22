@@ -133,7 +133,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={cancelAllChanges}
-                className={`inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
+                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets
                     ? 'Cancel all tag changes'
@@ -152,7 +152,7 @@ export const TopShelf = () => {
           {filterActive ? (
             <>
               <button
-                className={`mr-2 inline-flex items-center py-2 ${
+                className={`mr-4 inline-flex items-center py-2 ${
                   filterTags.length
                     ? 'cursor-pointer text-slate-700'
                     : 'cursor-not-allowed text-slate-300'
