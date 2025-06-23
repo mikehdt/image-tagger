@@ -46,9 +46,21 @@ export const loadAllAssets = createAsyncThunk(
       const totalFiles = imageFiles.length;
       if (totalFiles === 0) return [];
 
-      // Define the update progress function directly in this function
+      // Define the update progress function that includes error tracking
+      // Track failed loads
+      let failedCount = 0;
+      const failedFiles: string[] = [];
+
+      // Define the update progress function that includes error tracking
       const updateProgress = (completed: number, total: number) => {
-        dispatch(updateLoadProgress({ completed, total }));
+        dispatch(
+          updateLoadProgress({
+            completed,
+            total,
+            failed: failedCount,
+            errors: failedFiles.length > 0 ? failedFiles : undefined,
+          }),
+        );
       };
 
       // Process batches using the helper
@@ -59,13 +71,30 @@ export const loadAllAssets = createAsyncThunk(
       >(
         imageFiles,
         // Process a batch of files
-        (batch) => getMultipleImageAssetDetails(batch),
+        async (batch) => {
+          const { assets, errors } = await getMultipleImageAssetDetails(batch);
+          // Update error count and track failed files for this batch
+          if (errors.length > 0) {
+            failedCount += errors.length;
+            failedFiles.push(...errors);
+          }
+          return assets;
+        },
         // Update progress
         updateProgress,
         // Total items for progress tracking
         totalFiles,
         // Fallback for individual processing
-        async (file) => getImageAssetDetails(file),
+        async (file) => {
+          try {
+            return await getImageAssetDetails(file);
+          } catch (error) {
+            console.error(`Failed to process file ${file}:`, error);
+            failedCount++;
+            failedFiles.push(file);
+            return null;
+          }
+        },
       );
 
       return imageAssets;
@@ -148,10 +177,18 @@ export const saveAllAssets = createAsyncThunk<
   // Track success and error counts
   let successCount = 0;
   let errorCount = 0;
+  const failedFiles: string[] = [];
 
   // Define the update progress function directly in this function
   const updateProgress = (completed: number, total: number, failed = 0) => {
-    dispatch(updateSaveProgress({ completed, total, failed }));
+    dispatch(
+      updateSaveProgress({
+        completed,
+        total,
+        failed,
+        errors: failedFiles.length > 0 ? failedFiles : undefined,
+      }),
+    );
   };
 
   try {
@@ -163,7 +200,11 @@ export const saveAllAssets = createAsyncThunk<
       writeOperations,
       // Process a batch of operations
       async (batch) => {
-        const { results } = await saveMultipleAssetTags(batch);
+        const { results, errors } = await saveMultipleAssetTags(batch);
+        // Add any errors to our tracking
+        if (errors.length > 0) {
+          failedFiles.push(...errors);
+        }
         return results;
       },
       // Update progress
@@ -178,6 +219,9 @@ export const saveAllAssets = createAsyncThunk<
           operation.fileId,
           operation.composedTags,
         );
+        if (!success) {
+          failedFiles.push(operation.fileId);
+        }
         return { fileId: operation.fileId, success };
       },
     );

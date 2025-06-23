@@ -34,11 +34,14 @@ export type SaveProgress = {
   total: number;
   completed: number;
   failed: number;
+  errors?: string[]; // List of fileIds that failed to save
 };
 
 export type LoadProgress = {
   total: number;
   completed: number;
+  failed?: number;
+  errors?: string[]; // List of fileIds that failed to load
 };
 
 export type ImageAssets = {

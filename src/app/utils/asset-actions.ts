@@ -28,14 +28,29 @@ export const getImageFileList = async (): Promise<string[]> => {
 /**
  * Process multiple image files at once and return their asset data
  * @param files Array of files to process
- * @returns Array of image assets
+ * @returns Array of image assets and tracking of failed files
  */
 export const getMultipleImageAssetDetails = async (
   files: string[],
-): Promise<ImageAsset[]> => {
-  // Process all files in parallel on the server side
-  const promises = files.map((file) => getImageAssetDetails(file));
-  return Promise.all(promises);
+): Promise<{ assets: ImageAsset[]; errors: string[] }> => {
+  const results = await Promise.allSettled(
+    files.map((file) => getImageAssetDetails(file)),
+  );
+
+  const assets: ImageAsset[] = [];
+  const errors: string[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      assets.push(result.value);
+    } else {
+      // Store the filename for failed loads
+      errors.push(files[index]);
+      console.error(`Failed to load asset ${files[index]}:`, result.reason);
+    }
+  });
+
+  return { assets, errors };
 };
 
 // Process a single image file and return its asset data
@@ -113,13 +128,14 @@ export interface AssetTagOperation {
 /**
  * Write multiple tag sets to disk in a single operation
  * @param operations Array of tag write operations to perform
- * @returns Result object with success flag and individual results
+ * @returns Result object with success flag, individual results, and list of failed files
  */
 export const saveMultipleAssetTags = async (
   operations: AssetTagOperation[],
 ): Promise<{
   success: boolean;
   results: { fileId: string; success: boolean }[];
+  errors: string[]; // Add list of failed files
 }> => {
   // Process all operations in parallel
   const results = await Promise.all(
@@ -134,11 +150,17 @@ export const saveMultipleAssetTags = async (
     }),
   );
 
+  // Collect errors from results
+  const errors = results
+    .filter((result) => !result.success)
+    .map((result) => result.fileId);
+
   // Overall operation succeeds if all individual writes succeeded
   const success = results.every((result) => result.success);
 
   return {
     success,
     results,
+    errors,
   };
 };
