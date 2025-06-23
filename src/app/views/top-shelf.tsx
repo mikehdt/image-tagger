@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useRef, useState } from 'react';
 
-import { FilterList } from '../components/filter-list';
+import { FilterList } from '../components/filter-list/filter-list';
 import { Loader } from '../components/loader';
 import {
   IoState,

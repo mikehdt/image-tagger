@@ -8,9 +8,9 @@ import {
   selectFilterCount,
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { FiletypesView, getFiletypeSortOptions } from './FiletypesView';
-import { getSizeSortOptions, SizesView } from './SizesView';
-import { getTagSortOptions, TagsView } from './TagsView';
+import { FiletypesView, getFiletypeSortOptions } from './file-types';
+import { getSizeSortOptions, SizesView } from './sizes';
+import { getTagSortOptions, TagsView } from './tags';
 import { FilterListProps, FilterView, SortDirection, SortType } from './types';
 
 export const FilterList = ({
