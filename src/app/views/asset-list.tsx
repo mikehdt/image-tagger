@@ -17,6 +17,7 @@ import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
 import { composeDimensions } from '../utils/helpers';
 
+// TODO: Test if this double-memo'ing (see below) is necessary?
 // Create a memoized Asset component to prevent unnecessary re-renders
 const MemoizedAsset = memo(Asset);
 

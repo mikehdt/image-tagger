@@ -42,7 +42,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Only show the loading screen if we're loading AND we don't have any assets yet
   // This differentiates between initial load and refresh operations
-  if (ioState === IoState.LOADING && imageCount === 0) {
+  if (
+    ioState === IoState.INITIAL ||
+    (ioState === IoState.LOADING && imageCount === 0)
+  ) {
     return <InitialLoad />;
   }
 

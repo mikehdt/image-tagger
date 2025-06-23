@@ -1,6 +1,6 @@
 // Types for the assets slice
 export enum IoState {
-  UNINITIALIZED = 'Uninitialized',
+  INITIAL = 'Initial',
   LOADING = 'Loading',
   SAVING = 'Saving',
   COMPLETE = 'Complete',

@@ -6,7 +6,7 @@ import { coreReducers } from './reducers';
 import { ImageAssets, IoState } from './types';
 
 const initialState: ImageAssets = {
-  ioState: IoState.UNINITIALIZED,
+  ioState: IoState.INITIAL,
   ioMessage: undefined,
   images: [],
 };

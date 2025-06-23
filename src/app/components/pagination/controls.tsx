@@ -54,13 +54,13 @@ export const PaginationControls = ({
 
   return (
     <>
-      <span className="text-xs text-slate-500">
+      <span className="text-right text-xs text-slate-500">
         Page {currentPage} of {totalPages}
       </span>
       <span className="ml-4 flex items-center">
         <label
           htmlFor="pagination-size"
-          className="mr-2 text-xs text-slate-500"
+          className="mr-2 text-xs text-slate-500 max-lg:hidden"
         >
           Items per page:
         </label>
@@ -70,9 +70,13 @@ export const PaginationControls = ({
           onChange={handlePaginationSizeChange}
           className="rounded border border-slate-300 px-3 py-1 text-sm"
         >
-          <option value={PaginationSize.FIFTY}>50</option>
-          <option value={PaginationSize.HUNDRED}>100</option>
-          <option value={PaginationSize.TWO_FIFTY}>250</option>
+          <option value={PaginationSize.FIFTY}>{PaginationSize.FIFTY}</option>
+          <option value={PaginationSize.HUNDRED}>
+            {PaginationSize.HUNDRED}
+          </option>
+          <option value={PaginationSize.TWO_FIFTY}>
+            {PaginationSize.TWO_FIFTY}
+          </option>
           <option value={PaginationSize.ALL}>All</option>
         </select>
       </span>
