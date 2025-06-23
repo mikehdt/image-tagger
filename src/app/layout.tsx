@@ -3,7 +3,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
-import { DataProvider } from './providers/DataProvider';
+import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
 
 const geistSans = Geist({
@@ -32,11 +32,11 @@ export default function Root({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <StoreProvider>
-          <DataProvider>
+          <AppProvider>
             <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 font-[family-name:var(--font-geist-sans)]">
               {children}
             </div>
-          </DataProvider>
+          </AppProvider>
         </StoreProvider>
       </body>
     </html>

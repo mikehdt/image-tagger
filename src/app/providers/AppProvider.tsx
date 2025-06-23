@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
@@ -13,7 +14,8 @@ import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
 import { NoContent } from '../views/no-content';
 
-export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
   const initialLoad = useRef<boolean>(true);
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
@@ -30,6 +32,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       initialLoad.current = false;
     }
   }, [loadImageAssets]);
+
+  // Redirect to root on I/O error
+  useEffect(() => {
+    if (ioState === IoState.ERROR) {
+      router.push('/');
+    }
+  }, [ioState, router]);
 
   // Only show the loading screen if we're loading AND we don't have any assets yet
   // This differentiates between initial load and refresh operations
