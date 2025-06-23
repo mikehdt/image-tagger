@@ -17,7 +17,15 @@ const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: coreReducers,
-  // We're using the selectors from selectors.ts file instead of defining them here
+  // Simple property accessors defined inline, complex selectors still in selectors.ts
+  selectors: {
+    selectFilterMode: (state) => state.filterMode,
+    selectFilterTags: (state) => state.filterTags,
+    selectFilterSizes: (state) => state.filterSizes,
+    selectFilterExtensions: (state) => state.filterExtensions,
+    selectPaginationSize: (state) => state.paginationSize,
+    selectShowModified: (state) => state.showModified,
+  },
 });
 
 // Main exports from slice
@@ -35,6 +43,16 @@ export const {
   clearExtensionFilters,
   clearFilters,
 } = filtersSlice.actions;
+
+// Export the selectors from the slice
+export const {
+  selectFilterMode,
+  selectFilterTags,
+  selectFilterSizes,
+  selectFilterExtensions,
+  selectPaginationSize,
+  selectShowModified,
+} = filtersSlice.selectors;
 
 // Main exports for filters module
 export * from './selectors';

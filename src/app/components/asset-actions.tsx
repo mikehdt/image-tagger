@@ -1,4 +1,4 @@
-import { selectSaveProgress } from '../store/assets/selectors';
+import { selectSaveProgress } from '../store/assets';
 import { IoState } from '../store/assets/types';
 import { useAppSelector } from '../store/hooks';
 

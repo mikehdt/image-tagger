@@ -16,7 +16,15 @@ const assetsSlice = createSlice({
   initialState,
   reducers: coreReducers,
   extraReducers: setupExtraReducers,
-  // We're using the selectors from selectors.ts file instead of defining them here
+  // Simple property accessors defined inline, complex selectors still in selectors.ts
+  selectors: {
+    selectIoState: (state) => state.ioState,
+    selectIoMessage: (state) => state.ioMessage,
+    selectAllImages: (state) => state.images,
+    selectImageCount: (state) => state.images.length,
+    selectSaveProgress: (state) => state.saveProgress,
+    selectLoadProgress: (state) => state.loadProgress,
+  },
 });
 
 // Main exports for slice
@@ -29,6 +37,16 @@ export const {
   resetTags,
   markFilterTagsToDelete,
 } = assetsSlice.actions;
+
+// Export the selectors from the slice
+export const {
+  selectIoState,
+  selectIoMessage,
+  selectAllImages,
+  selectImageCount,
+  selectSaveProgress,
+  selectLoadProgress,
+} = assetsSlice.selectors;
 
 // Main exports for assets module
 export * from './actions';

@@ -1,25 +1,13 @@
-// Selectors for filters slice
+// Complex selectors for filters slice
 import { createSelector } from '@reduxjs/toolkit';
 
-import { FilterCount, Filters } from './types';
-
-export const selectFilterMode = (state: { filters: Filters }) =>
-  state.filters.filterMode;
-
-export const selectFilterTags = (state: { filters: Filters }) =>
-  state.filters.filterTags;
-
-export const selectFilterSizes = (state: { filters: Filters }) =>
-  state.filters.filterSizes;
-
-export const selectFilterExtensions = (state: { filters: Filters }) =>
-  state.filters.filterExtensions;
-
-export const selectPaginationSize = (state: { filters: Filters }) =>
-  state.filters.paginationSize;
-
-export const selectShowModified = (state: { filters: Filters }) =>
-  state.filters.showModified;
+import {
+  selectFilterExtensions,
+  selectFilterSizes,
+  selectFilterTags,
+  selectShowModified,
+} from '.';
+import { FilterCount } from './types';
 
 export const selectHasActiveFilters = createSelector(
   selectFilterTags,

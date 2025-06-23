@@ -1,34 +1,15 @@
-// Selectors for assets slice
+// Complex selectors for assets slice
 import { createSelector } from '@reduxjs/toolkit';
 
 import { composeDimensions } from '../../utils/helpers';
-import { ImageAsset, ImageAssets, KeyedCountList, TagState } from './types';
+import { selectAllImages } from '.';
+import { ImageAsset, KeyedCountList, TagState } from './types';
 import { hasState } from './utils';
-
-// Basic selectors
-export const selectIoState = (state: { assets: ImageAssets }) => {
-  return state.assets.ioState;
-};
-
-export const selectIoMessage = (state: { assets: ImageAssets }) => {
-  return state.assets.ioMessage;
-};
-
-export const selectAllImages = (state: { assets: ImageAssets }) => {
-  return state.assets.images;
-};
-
-export const selectImageCount = (state: { assets: ImageAssets }) => {
-  return state.assets.images.length;
-};
 
 // Derived selectors
 export const selectOrderedTagsWithStatus = createSelector(
   // Input selectors
-  [
-    (state: { assets: ImageAssets }) => state.assets.images,
-    (_, fileId: string) => fileId,
-  ],
+  [selectAllImages, (_, fileId: string) => fileId],
   // Result function
   (images, fileId) => {
     const selectedImage = images.find(
@@ -46,31 +27,28 @@ export const selectOrderedTagsWithStatus = createSelector(
   },
 );
 
-export const selectImageSizes = createSelector(
-  [(state: { assets: ImageAssets }) => state.assets.images],
-  (images) => {
-    if (!images.length) return {};
+export const selectImageSizes = createSelector([selectAllImages], (images) => {
+  if (!images.length) return {};
 
-    // Group by dimension
-    const dimensionGroups: Record<string, ImageAsset[]> = {};
-    for (const item of images) {
-      const dimension = composeDimensions(item.dimensions);
-      dimensionGroups[dimension] = dimensionGroups[dimension] || [];
-      dimensionGroups[dimension].push(item);
-    }
+  // Group by dimension
+  const dimensionGroups: Record<string, ImageAsset[]> = {};
+  for (const item of images) {
+    const dimension = composeDimensions(item.dimensions);
+    dimensionGroups[dimension] = dimensionGroups[dimension] || [];
+    dimensionGroups[dimension].push(item);
+  }
 
-    // Create count map
-    return Object.fromEntries(
-      Object.entries(dimensionGroups).map(([dim, assets]) => [
-        dim,
-        assets.length,
-      ]),
-    );
-  },
-);
+  // Create count map
+  return Object.fromEntries(
+    Object.entries(dimensionGroups).map(([dim, assets]) => [
+      dim,
+      assets.length,
+    ]),
+  );
+});
 
 export const selectAllTags = createSelector(
-  [(state: { assets: ImageAssets }) => state.assets.images],
+  [selectAllImages],
   (imageAssets) => {
     if (!imageAssets?.length) return {};
 
@@ -91,25 +69,22 @@ export const selectAllTags = createSelector(
 );
 
 // Custom selector to check if any assets have modified tags
-export const selectHasModifiedAssets = (state: { assets: ImageAssets }) => {
-  // Check if any asset has tags that aren't in the SAVED state
-  return state.assets.images.some((asset) =>
-    asset.tagList.some(
-      (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
-    ),
-  );
-};
+export const selectHasModifiedAssets = createSelector(
+  [selectAllImages],
+  (images) => {
+    // Check if any asset has tags that aren't in the SAVED state
+    return images.some((asset: ImageAsset) =>
+      asset.tagList.some(
+        (tag: string) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+      ),
+    );
+  },
+);
 
-export const selectSaveProgress = (state: { assets: ImageAssets }) => {
-  return state.assets.saveProgress;
-};
-
-export const selectLoadProgress = (state: { assets: ImageAssets }) => {
-  return state.assets.loadProgress;
-};
+// Using selectSaveProgress and selectLoadProgress from the slice
 
 export const selectAllExtensions = createSelector(
-  [(state: { assets: ImageAssets }) => state.assets.images],
+  [selectAllImages],
   (images) => {
     if (!images.length) return {};
 
