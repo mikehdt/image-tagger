@@ -1,6 +1,7 @@
 // Async thunk actions
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
+// Import removed since DEFAULT_BATCH_SIZE is now used through helpers
 import {
   AssetTagOperation,
   getImageAssetDetails,
@@ -10,16 +11,21 @@ import {
   saveMultipleAssetTags,
 } from '../../utils/asset-actions';
 import {
+  createCleanTagStatus,
+  createFlattenedTags,
+  createSaveAssetResult,
+  findModifiedAssets,
+  getUpdatedTags,
+  processBatchesWithProgress,
+  processSaveResults,
+} from './helpers';
+import {
   ImageAsset,
   ImageAssets,
   LoadProgress,
   SaveAssetResult,
   SaveProgress,
-  TagState,
 } from './types';
-import { hasState } from './utils';
-
-const DEFAULT_BATCH_SIZE = 48;
 
 export const updateSaveProgress = createAction<SaveProgress>(
   'assets/updateSaveProgress',
@@ -40,57 +46,27 @@ export const loadAllAssets = createAsyncThunk(
       const totalFiles = imageFiles.length;
       if (totalFiles === 0) return [];
 
-      dispatch(updateLoadProgress({ total: totalFiles, completed: 0 }));
+      // Define the update progress function directly in this function
+      const updateProgress = (completed: number, total: number) => {
+        dispatch(updateLoadProgress({ completed, total }));
+      };
 
-      const imageAssets: ImageAsset[] = [];
-      let completedCount = 0;
-
-      // Use the common batch size constant
-      const batchSize = DEFAULT_BATCH_SIZE;
-
-      // Process files in batches to reduce client-server round trips
-      for (let i = 0; i < imageFiles.length; i += batchSize) {
-        const batch = imageFiles.slice(i, i + batchSize);
-
-        try {
-          // Process an entire batch on the server with a single request
-          const batchResults = await getMultipleImageAssetDetails(batch);
-
-          // Add all results to our asset collection
-          imageAssets.push(...batchResults);
-
-          // Update progress for the entire batch at once
-          completedCount += batchResults.length;
-          dispatch(
-            updateLoadProgress({
-              total: totalFiles,
-              completed: completedCount,
-            }),
-          );
-        } catch (error) {
-          console.error(
-            `Error processing batch starting at index ${i}:`,
-            error,
-          );
-          // If batch processing fails, fall back to processing individual files
-          for (const file of batch) {
-            try {
-              const asset = await getImageAssetDetails(file);
-              if (asset) imageAssets.push(asset);
-            } catch (fileError) {
-              console.error(`Error processing file ${file}:`, fileError);
-            } finally {
-              completedCount++;
-              dispatch(
-                updateLoadProgress({
-                  total: totalFiles,
-                  completed: completedCount,
-                }),
-              );
-            }
-          }
-        }
-      }
+      // Process batches using the helper
+      const imageAssets = await processBatchesWithProgress<
+        string,
+        ImageAsset,
+        ImageAsset
+      >(
+        imageFiles,
+        // Process a batch of files
+        (batch) => getMultipleImageAssetDetails(batch),
+        // Update progress
+        updateProgress,
+        // Total items for progress tracking
+        totalFiles,
+        // Fallback for individual processing
+        async (file) => getImageAssetDetails(file),
+      );
 
       return imageAssets;
     } catch (error) {
@@ -118,32 +94,20 @@ export const saveAsset = createAsyncThunk<
     throw new Error(`Asset with ID ${fileId} not found`);
   }
 
-  // Filter out tags that are marked for deletion, but keep SAVED, TO_ADD and DIRTY tags
-  const updateTags = asset.tagList.filter(
-    (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
-  );
+  // Get updated tags using the helper function
+  const updateTags = getUpdatedTags(asset);
 
-  const flattenedTags = updateTags.join(', ');
+  // Create flattened tags for disk storage
+  const flattenedTags = createFlattenedTags(updateTags);
 
   const success = await saveAssetTags(fileId, flattenedTags);
 
   if (success) {
-    // Create a new clean tagStatus object with only saved tags
-    const newTagStatus = updateTags.reduce(
-      (acc, tag) => {
-        acc[tag] = TagState.SAVED;
-        return acc;
-      },
-      {} as { [key: string]: number },
-    );
+    // Create a clean tag status object with helper function
+    const newTagStatus = createCleanTagStatus(updateTags);
 
-    return {
-      assetIndex: images.findIndex((element) => element.fileId === fileId),
-      fileId,
-      tagList: updateTags,
-      tagStatus: newTagStatus,
-      savedTagList: [...updateTags], // Store the current order as the saved order
-    };
+    // Create and return the save result object
+    return createSaveAssetResult(asset, updateTags, newTagStatus, images);
   }
 
   throw new Error(`Unable to save the asset ${fileId}`);
@@ -159,12 +123,8 @@ export const saveAllAssets = createAsyncThunk<
     assets: { images },
   } = getState();
 
-  // Find all images with tag status that's not SAVED (0)
-  const modifiedAssets = images.filter((asset) =>
-    asset.tagList.some(
-      (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
-    ),
-  );
+  // Find all images with modified tags
+  const modifiedAssets = findModifiedAssets(images);
 
   if (modifiedAssets.length === 0) {
     return { savedCount: 0 };
@@ -174,17 +134,10 @@ export const saveAllAssets = createAsyncThunk<
   const totalAssets = modifiedAssets.length;
   dispatch(updateSaveProgress({ total: totalAssets, completed: 0, failed: 0 }));
 
-  const results: Array<SaveAssetResult> = [];
-  let successCount = 0;
-  let errorCount = 0;
-
-  // Prepare batch operations for disk writes
+  // Prepare batch operations for disk writes using helper functions
   const writeOperations: AssetTagOperation[] = modifiedAssets.map((asset) => {
-    const updateTags = asset.tagList.filter(
-      (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
-    );
-
-    const flattenedTags = updateTags.join(', ');
+    const updateTags = getUpdatedTags(asset);
+    const flattenedTags = createFlattenedTags(updateTags);
 
     return {
       fileId: asset.fileId,
@@ -192,142 +145,64 @@ export const saveAllAssets = createAsyncThunk<
     };
   });
 
-  // Use the common batch size constant
-  const batchSize = DEFAULT_BATCH_SIZE;
+  // Track success and error counts
+  let successCount = 0;
+  let errorCount = 0;
+
+  // Define the update progress function directly in this function
+  const updateProgress = (completed: number, total: number, failed = 0) => {
+    dispatch(updateSaveProgress({ completed, total, failed }));
+  };
 
   try {
-    // Process files in batches to reduce client-server round trips
-    for (let i = 0; i < writeOperations.length; i += batchSize) {
-      const batch = writeOperations.slice(i, i + batchSize);
-
-      try {
-        // Process an entire batch on the server with a single request
-        const { results: batchResults } = await saveMultipleAssetTags(batch);
-
-        // Add batch results to our collection
-        for (const writeResult of batchResults) {
-          const asset = modifiedAssets.find(
-            (a) => a.fileId === writeResult.fileId,
-          );
-
-          if (asset && writeResult.success) {
-            // Extract the successfully saved tags
-            const updateTags = asset.tagList.filter(
-              (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
-            );
-
-            // Create new tag status object with only saved tags
-            const newTagStatus = updateTags.reduce(
-              (acc, tag) => {
-                acc[tag] = TagState.SAVED;
-                return acc;
-              },
-              {} as { [key: string]: number },
-            );
-
-            // Prepare result object for batch update
-            results.push({
-              assetIndex: images.findIndex(
-                (element) => element.fileId === asset.fileId,
-              ),
-              fileId: asset.fileId,
-              tagList: updateTags,
-              tagStatus: newTagStatus,
-              savedTagList: [...updateTags],
-            });
-
-            successCount++;
-          } else {
-            errorCount++;
-            console.error(`Failed to save asset ${writeResult.fileId} to disk`);
-          }
-        }
-
-        // Update progress after each batch
-        dispatch(
-          updateSaveProgress({
-            total: totalAssets,
-            completed: successCount,
-            failed: errorCount,
-          }),
+    // Process batches using the helper
+    const writeResults = await processBatchesWithProgress<
+      AssetTagOperation,
+      { fileId: string; success: boolean }
+    >(
+      writeOperations,
+      // Process a batch of operations
+      async (batch) => {
+        const { results } = await saveMultipleAssetTags(batch);
+        return results;
+      },
+      // Update progress
+      (completed, total, failed = 0) => {
+        updateProgress(completed, total, failed);
+      },
+      // Total items for progress tracking
+      totalAssets,
+      // Fallback for individual processing
+      async (operation) => {
+        const success = await saveAssetTags(
+          operation.fileId,
+          operation.composedTags,
         );
-      } catch (error) {
-        console.error(`Error processing batch starting at index ${i}:`, error);
+        return { fileId: operation.fileId, success };
+      },
+    );
 
-        // If batch processing fails, fall back to processing individual files
-        for (const operation of batch) {
-          try {
-            const success = await saveAssetTags(
-              operation.fileId,
-              operation.composedTags,
-            );
+    // Process the results to create SaveAssetResult objects
+    const processedResults = processSaveResults(
+      writeResults,
+      modifiedAssets,
+      images,
+    );
 
-            const asset = modifiedAssets.find(
-              (a) => a.fileId === operation.fileId,
-            );
+    successCount = processedResults.successCount;
+    errorCount = processedResults.errorCount;
 
-            if (success && asset) {
-              // Extract the successfully saved tags
-              const updateTags = asset.tagList.filter(
-                (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
-              );
-
-              // Create new tag status object with only saved tags
-              const newTagStatus = updateTags.reduce(
-                (acc, tag) => {
-                  acc[tag] = TagState.SAVED;
-                  return acc;
-                },
-                {} as { [key: string]: number },
-              );
-
-              // Prepare result object for batch update
-              results.push({
-                assetIndex: images.findIndex(
-                  (element) => element.fileId === asset.fileId,
-                ),
-                fileId: asset.fileId,
-                tagList: updateTags,
-                tagStatus: newTagStatus,
-                savedTagList: [...updateTags],
-              });
-
-              successCount++;
-            } else {
-              errorCount++;
-              console.error(`Failed to save asset ${operation.fileId} to disk`);
-            }
-          } catch (fileError) {
-            errorCount++;
-            console.error(
-              `Error processing file ${operation.fileId}:`,
-              fileError,
-            );
-          }
-
-          // Update progress incrementally for fallback saves
-          dispatch(
-            updateSaveProgress({
-              total: totalAssets,
-              completed: successCount,
-              failed: errorCount,
-            }),
-          );
-        }
-      }
-    }
+    return {
+      savedCount: successCount,
+      errorCount: errorCount,
+      results: processedResults.results,
+    };
   } catch (error) {
     console.error('Error saving assets:', error);
     throw new Error(
       error instanceof Error ? error.message : 'Failed to save assets',
     );
   }
-
-  return {
-    savedCount: successCount,
-    errorCount: errorCount,
-    results,
-  };
 });
 
 // Cancel all tag changes
@@ -338,12 +213,8 @@ export const resetAllTags = createAsyncThunk(
       assets: { images },
     } = getState() as { assets: ImageAssets };
 
-    // Find all images with tag status that's not SAVED (0)
-    const modifiedAssets = images.filter((asset) =>
-      asset.tagList.some(
-        (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
-      ),
-    );
+    // Find all images with modified tags using helper function
+    const modifiedAssets = findModifiedAssets(images);
 
     if (modifiedAssets.length === 0) {
       return { resetCount: 0 };
