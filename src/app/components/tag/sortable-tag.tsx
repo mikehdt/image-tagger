@@ -34,8 +34,6 @@ const SortableTag = ({
   // Track whether the tag is currently being edited
   const [isEditing, setIsEditing] = useState(false);
 
-  // This will be used to disable drag when editing
-
   const {
     attributes,
     listeners,

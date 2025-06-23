@@ -3,7 +3,7 @@
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { memo, useMemo } from 'react';
 
-import { Asset } from '../components/asset';
+import { Asset } from '../components/asset/asset';
 import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,

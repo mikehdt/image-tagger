@@ -33,19 +33,19 @@ import {
   saveAsset,
   selectAllTags,
   selectOrderedTagsWithStatus,
-} from '../store/assets';
+} from '../../store/assets';
 import {
   selectFilterTags,
   toggleExtensionFilter,
   toggleSizeFilter,
   toggleTagFilter,
-} from '../store/filters';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-// import { flexWrapSortingStrategy } from '../utils/flex-wrap-sorting-strategy';
-import { composeDimensions } from '../utils/helpers';
+} from '../../store/filters';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+// import { flexWrapSortingStrategy } from '../../utils/flex-wrap-sorting-strategy';
+import { composeDimensions } from '../../utils/helpers';
+import { SortableTag } from '../tag/sortable-tag';
+import { TagInput } from '../tag/tag-input';
 import { AssetActions } from './asset-actions';
-import { SortableTag } from './tag/sortable-tag';
-import { TagInput } from './tag/tag-input';
 
 type AssetProps = {
   assetId: string;
