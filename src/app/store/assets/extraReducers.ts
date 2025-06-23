@@ -5,7 +5,7 @@ import {
   loadAllAssets,
   resetAllTags,
   saveAllAssets,
-  saveAssets,
+  saveAsset,
   updateLoadProgress,
   updateSaveProgress,
 } from './actions';
@@ -43,7 +43,7 @@ export const setupExtraReducers = (
   });
 
   // Saving
-  builder.addCase(saveAssets.pending, (state, action) => {
+  builder.addCase(saveAsset.pending, (state, action) => {
     const { arg } = action.meta;
 
     const imageIndex = state.images.findIndex((item) => item.fileId === arg);
@@ -53,7 +53,7 @@ export const setupExtraReducers = (
     state.ioMessage = undefined;
   });
 
-  builder.addCase(saveAssets.fulfilled, (state, action) => {
+  builder.addCase(saveAsset.fulfilled, (state, action) => {
     state.ioState = IoState.COMPLETE;
     state.ioMessage = undefined;
 
@@ -66,7 +66,7 @@ export const setupExtraReducers = (
     state.images[assetIndex].savedTagList = savedTagList;
   });
 
-  builder.addCase(saveAssets.rejected, (state, action) => {
+  builder.addCase(saveAsset.rejected, (state, action) => {
     state.ioState = IoState.ERROR;
     state.ioMessage = action.error.message;
   });

@@ -5,16 +5,15 @@ import path from 'node:path';
 
 import { imageDimensionsFromStream } from 'image-dimensions';
 
-const dataPath = './public/assets';
-// Default batch size for tag writing operations - not exported to comply with 'use server' rules
-const DEFAULT_TAG_BATCH_SIZE = 20;
-
+import { DEFAULT_BATCH_SIZE } from '../constants';
 import {
   type ImageAsset,
   ImageDimensions,
   IoState,
   TagState,
 } from '../store/assets';
+
+const dataPath = './public/assets';
 
 // Returns just a list of image files without processing them
 export const getImageFileList = async (): Promise<string[]> => {
@@ -90,7 +89,7 @@ export const getImageAssetDetails = async (
   };
 };
 
-export const writeTagsToDisk = async (
+export const saveAssetTags = async (
   fileId: string,
   composedTags: string,
 ): Promise<boolean> => {
@@ -103,8 +102,8 @@ export const writeTagsToDisk = async (
   }
 };
 
-// Tag write operation interface (not exported directly due to 'use server' constraints)
-interface TagWriteOperation {
+// Export interface for tag write operations
+export interface AssetTagOperation {
   fileId: string;
   composedTags: string;
 }
@@ -115,9 +114,9 @@ interface TagWriteOperation {
  * @param maxBatchSize Maximum number of operations to process in a single batch (optional)
  * @returns Result object with success flag and individual results
  */
-export const writeMultipleTagsToDisk = async (
-  operations: TagWriteOperation[],
-  maxBatchSize = DEFAULT_TAG_BATCH_SIZE,
+export const saveMultipleAssetTags = async (
+  operations: AssetTagOperation[],
+  maxBatchSize = DEFAULT_BATCH_SIZE,
 ): Promise<{
   success: boolean;
   results: { fileId: string; success: boolean }[];
@@ -131,7 +130,7 @@ export const writeMultipleTagsToDisk = async (
     for (let i = 0; i < operations.length; i += maxBatchSize) {
       const batchOperations = operations.slice(i, i + maxBatchSize);
       // Process this batch (recursively calls this function with a smaller batch)
-      const batchResult = await writeMultipleTagsToDisk(batchOperations, 0); // 0 disables further splitting
+      const batchResult = await saveMultipleAssetTags(batchOperations, 0); // 0 disables further splitting
 
       allResults.push(...batchResult.results);
       allSuccess = allSuccess && batchResult.success;

@@ -1,23 +1,15 @@
 // Async thunk actions
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
+import { DEFAULT_BATCH_SIZE } from '../../constants';
 import {
+  AssetTagOperation,
   getImageAssetDetails,
   getImageFileList,
   getMultipleImageAssetDetails,
-  writeMultipleTagsToDisk,
-  writeTagsToDisk,
+  saveAssetTags,
+  saveMultipleAssetTags,
 } from '../../utils/asset-actions';
-
-// Define our own interface and constants since we can't import them from server components
-interface TagWriteOperation {
-  fileId: string;
-  composedTags: string;
-}
-
-// Default batch size for asset operations (loading and saving)
-const DEFAULT_BATCH_SIZE = 48;
-
 import {
   ImageAsset,
   ImageAssets,
@@ -110,11 +102,11 @@ export const loadAllAssets = createAsyncThunk(
   },
 );
 
-export const saveAssets = createAsyncThunk<
+export const saveAsset = createAsyncThunk<
   SaveAssetResult,
   string,
   { state: { assets: ImageAssets } }
->('assets/saveImages', async (fileId: string, { getState }) => {
+>('assets/saveAsset', async (fileId: string, { getState }) => {
   const {
     assets: { images },
   } = getState();
@@ -132,7 +124,7 @@ export const saveAssets = createAsyncThunk<
 
   const flattenedTags = updateTags.join(', ');
 
-  const success = await writeTagsToDisk(fileId, flattenedTags);
+  const success = await saveAssetTags(fileId, flattenedTags);
 
   if (success) {
     // Create a new clean tagStatus object with only saved tags
@@ -186,7 +178,7 @@ export const saveAllAssets = createAsyncThunk<
   let errorCount = 0;
 
   // Prepare batch operations for disk writes
-  const writeOperations: TagWriteOperation[] = modifiedAssets.map((asset) => {
+  const writeOperations: AssetTagOperation[] = modifiedAssets.map((asset) => {
     const updateTags = asset.tagList.filter(
       (tag) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
     );
@@ -201,7 +193,7 @@ export const saveAllAssets = createAsyncThunk<
 
   // Batch write all tag files in controlled batches
   try {
-    const { results: writeResults } = await writeMultipleTagsToDisk(
+    const { results: writeResults } = await saveMultipleAssetTags(
       writeOperations,
       DEFAULT_BATCH_SIZE,
     );
@@ -270,7 +262,7 @@ export const saveAllAssets = createAsyncThunk<
         const flattenedTags = updateTags.join(', ');
 
         // Write to disk individually
-        const success = await writeTagsToDisk(asset.fileId, flattenedTags);
+        const success = await saveAssetTags(asset.fileId, flattenedTags);
 
         if (success) {
           // Create new tag status object with only saved tags

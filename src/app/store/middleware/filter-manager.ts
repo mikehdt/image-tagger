@@ -3,7 +3,7 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { saveAllAssets, saveAssets } from '../assets/actions';
+import { saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
   clearExtensionFilters,
@@ -138,7 +138,7 @@ export const filterManagerMiddleware = createListenerMiddleware();
 
 // Add a listener that checks after save operations if we need to clear filters
 filterManagerMiddleware.startListening({
-  matcher: isAnyOf(saveAllAssets.fulfilled, saveAssets.fulfilled),
+  matcher: isAnyOf(saveAllAssets.fulfilled, saveAsset.fulfilled),
   effect: async (_action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 

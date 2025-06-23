@@ -30,7 +30,7 @@ import {
   IoState,
   reorderTags,
   resetTags,
-  saveAssets,
+  saveAsset,
   selectAllTags,
   selectOrderedTagsWithStatus,
 } from '../store/assets';
@@ -183,7 +183,7 @@ export const Asset = ({
   );
 
   const saveAction = useCallback(() => {
-    dispatch(saveAssets(assetId));
+    dispatch(saveAsset(assetId));
   }, [dispatch, assetId]);
 
   const cancelAction = useCallback(() => {
