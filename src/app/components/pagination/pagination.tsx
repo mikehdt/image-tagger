@@ -1,13 +1,8 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
-import {
-  PaginationSize,
-  selectPaginationSize,
-  setPaginationSize,
-} from '../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { PaginationSize, selectPaginationSize } from '../../store/filters';
+import { useAppSelector } from '../../store/hooks';
 
 type PaginationProps = {
   currentPage: number;
@@ -20,8 +15,6 @@ export const Pagination = ({
   totalItems,
   basePath = '',
 }: PaginationProps) => {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
   const paginationSize = useAppSelector(selectPaginationSize);
 
   // Calculate total pages
@@ -29,34 +22,6 @@ export const Pagination = ({
     paginationSize === PaginationSize.ALL
       ? 1
       : Math.ceil(totalItems / paginationSize);
-
-  // When pagination size changes, we need to redirect to page 1 if the current page
-  // would be outside the new range
-  const handlePaginationSizeChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const newSize = parseInt(e.target.value, 10) as PaginationSize;
-
-    // Store the new size in Redux
-    dispatch(setPaginationSize(newSize));
-
-    // Don't navigate away immediately, let the Redux store update first
-    setTimeout(() => {
-      // If we're switching to "All", always go to page 1
-      if (newSize === PaginationSize.ALL) {
-        router.push(`${basePath}/1`);
-        return;
-      }
-
-      // Calculate new total pages
-      const newTotalPages = Math.ceil(totalItems / newSize);
-
-      // If current page is beyond the new range, redirect to page 1
-      if (currentPage > newTotalPages) {
-        router.push(`${basePath}/1`);
-      }
-    }, 0);
-  };
   const renderPaginationButtons = () => {
     const pages: React.ReactNode[] = [];
 
@@ -73,10 +38,10 @@ export const Pagination = ({
         href={`${basePath}/${prevPage}`}
         prefetch={true}
         scroll={true}
-        className={`mr-1 flex items-center rounded px-2 py-1 ${
+        className={`mr-1 flex items-center rounded p-1 ${
           currentPage <= 1
-            ? 'pointer-events-none cursor-not-allowed text-gray-400'
-            : 'hover:bg-gray-200'
+            ? 'pointer-events-none text-slate-300'
+            : 'text-slate-500 hover:bg-sky-100'
         }`}
         aria-disabled={currentPage <= 1}
       >
@@ -103,8 +68,8 @@ export const Pagination = ({
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
             currentPage === 1
-              ? 'bg-blue-500 text-white'
-              : 'text-slate-500 hover:bg-slate-300'
+              ? 'bg-sky-500 text-white'
+              : 'text-slate-500 hover:bg-sky-100'
           }`}
         >
           1
@@ -115,7 +80,7 @@ export const Pagination = ({
       if (startPage > 2) {
         pages.push(
           <span key="ellipsis-start" className="px-2 py-0.5 text-slate-300">
-            ...
+            &hellip;
           </span>,
         );
       }
@@ -130,7 +95,9 @@ export const Pagination = ({
           prefetch={true}
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
-            currentPage === i ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
+            currentPage === i
+              ? 'bg-sky-500 text-white'
+              : 'text-slate-500 hover:bg-sky-100'
           }`}
         >
           {i}
@@ -143,8 +110,8 @@ export const Pagination = ({
       // Ellipsis if needed
       if (endPage < totalPages - 1) {
         pages.push(
-          <span key="ellipsis-end" className="px-2 py-1">
-            ...
+          <span key="ellipsis-end" className="px-2 py-0.5 text-slate-300">
+            &hellip;
           </span>,
         );
       }
@@ -155,10 +122,10 @@ export const Pagination = ({
           href={`${basePath}/${totalPages}`}
           prefetch={true}
           scroll={true}
-          className={`mx-1 rounded px-3 py-1 ${
+          className={`mx-1 rounded px-2 py-0.5 ${
             currentPage === totalPages
-              ? 'bg-blue-500 text-white'
-              : 'hover:bg-gray-200'
+              ? 'bg-sky-500 text-white'
+              : 'text-slate-500 hover:bg-sky-100'
           }`}
         >
           {totalPages}
@@ -174,10 +141,10 @@ export const Pagination = ({
         href={`${basePath}/${nextPage}`}
         prefetch={true}
         scroll={true}
-        className={`ml-1 flex items-center rounded px-2 py-1 ${
+        className={`ml-1 flex items-center rounded p-1 ${
           currentPage >= totalPages
-            ? 'pointer-events-none cursor-not-allowed text-gray-400'
-            : 'hover:bg-gray-200'
+            ? 'pointer-events-none text-slate-300'
+            : 'text-slate-500 hover:bg-sky-100'
         }`}
         aria-disabled={currentPage >= totalPages}
       >
@@ -189,35 +156,8 @@ export const Pagination = ({
   };
 
   return (
-    <div className="flex w-full items-center justify-between">
-      <div className="flex-inline flex items-center justify-center tabular-nums">
-        {renderPaginationButtons()}
-      </div>
-
-      <div className="flex items-center">
-        <span className="text-xs text-slate-500">
-          Page {currentPage} of {totalPages}
-        </span>
-        <span className="ml-4 flex items-center">
-          <label
-            htmlFor="pagination-size"
-            className="mr-2 text-xs text-slate-500"
-          >
-            Items per page:
-          </label>
-          <select
-            id="pagination-size"
-            value={paginationSize}
-            onChange={handlePaginationSizeChange}
-            className="rounded border border-slate-300 px-3 py-1 text-sm"
-          >
-            <option value={PaginationSize.FIFTY}>50</option>
-            <option value={PaginationSize.HUNDRED}>100</option>
-            <option value={PaginationSize.TWO_FIFTY}>250</option>
-            <option value={PaginationSize.ALL}>All</option>
-          </select>
-        </span>
-      </div>
+    <div className="flex-inline flex items-center justify-center tabular-nums">
+      {renderPaginationButtons()}
     </div>
   );
 };

@@ -1,0 +1,81 @@
+import { useRouter } from 'next/navigation';
+
+import {
+  PaginationSize,
+  selectPaginationSize,
+  setPaginationSize,
+} from '../../store/filters';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+
+type PaginationControlsProps = {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  basePath?: string;
+};
+
+export const PaginationControls = ({
+  currentPage,
+  totalPages,
+  totalItems,
+  basePath = '',
+}: PaginationControlsProps) => {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const paginationSize = useAppSelector(selectPaginationSize);
+
+  // When pagination size changes, we need to redirect to page 1 if the current page
+  // would be outside the new range
+  const handlePaginationSizeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const newSize = parseInt(e.target.value, 10) as PaginationSize;
+
+    // Store the new size in Redux
+    dispatch(setPaginationSize(newSize));
+
+    // Don't navigate away immediately, let the Redux store update first
+    setTimeout(() => {
+      // If we're switching to "All", always go to page 1
+      if (newSize === PaginationSize.ALL) {
+        router.push(`${basePath}/1`);
+        return;
+      }
+
+      // Calculate new total pages
+      const newTotalPages = Math.ceil(totalItems / newSize);
+
+      // If current page is beyond the new range, redirect to page 1
+      if (currentPage > newTotalPages) {
+        router.push(`${basePath}/1`);
+      }
+    }, 0);
+  };
+
+  return (
+    <>
+      <span className="text-xs text-slate-500">
+        Page {currentPage} of {totalPages}
+      </span>
+      <span className="ml-4 flex items-center">
+        <label
+          htmlFor="pagination-size"
+          className="mr-2 text-xs text-slate-500"
+        >
+          Items per page:
+        </label>
+        <select
+          id="pagination-size"
+          value={paginationSize}
+          onChange={handlePaginationSizeChange}
+          className="rounded border border-slate-300 px-3 py-1 text-sm"
+        >
+          <option value={PaginationSize.FIFTY}>50</option>
+          <option value={PaginationSize.HUNDRED}>100</option>
+          <option value={PaginationSize.TWO_FIFTY}>250</option>
+          <option value={PaginationSize.ALL}>All</option>
+        </select>
+      </span>
+    </>
+  );
+};

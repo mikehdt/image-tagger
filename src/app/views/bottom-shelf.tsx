@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
 
+import { PaginationControls } from '../components/pagination/controls';
 import { Pagination } from '../components/pagination/pagination';
 import { selectAllImages } from '../store/assets';
 import {
+  PaginationSize,
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectPaginationSize,
 } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
@@ -18,6 +21,7 @@ type BottomShelfProps = {
 
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const allAssets = useAppSelector(selectAllImages);
+  const paginationSize = useAppSelector(selectPaginationSize);
 
   // Get filters
   const filterTags = useAppSelector(selectFilterTags);
@@ -52,8 +56,20 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
           )}
         </div>
 
-        <div className="flex w-3/4 items-center justify-end">
+        <div className="flex w-2/4 items-center justify-center">
           <Pagination currentPage={currentPage} totalItems={filteredCount} />
+        </div>
+
+        <div className="flex w-1/4 items-center justify-end">
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={
+              paginationSize === PaginationSize.ALL
+                ? 1
+                : Math.ceil(filteredCount / paginationSize)
+            }
+            totalItems={filteredCount}
+          />
         </div>
       </div>
     </div>
