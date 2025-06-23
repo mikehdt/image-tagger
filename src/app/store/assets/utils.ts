@@ -7,6 +7,9 @@ export const hasState = (state: number, flag: TagState): boolean =>
 
 export const addState = (state: number, flag: TagState): number => state | flag;
 
+/**
+ * @public
+ */
 export const removeState = (state: number, flag: TagState): number =>
   state & ~flag;
 

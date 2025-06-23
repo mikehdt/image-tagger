@@ -5,7 +5,6 @@ import path from 'node:path';
 
 import { imageDimensionsFromStream } from 'image-dimensions';
 
-import { DEFAULT_BATCH_SIZE } from '../constants';
 import {
   type ImageAsset,
   ImageDimensions,
@@ -26,8 +25,11 @@ export const getImageFileList = async (): Promise<string[]> => {
   );
 };
 
-// Process multiple image files at once and return their asset data
-// This reduces the number of round-trips between client and server
+/**
+ * Process multiple image files at once and return their asset data
+ * @param files Array of files to process
+ * @returns Array of image assets
+ */
 export const getMultipleImageAssetDetails = async (
   files: string[],
 ): Promise<ImageAsset[]> => {
@@ -111,38 +113,15 @@ export interface AssetTagOperation {
 /**
  * Write multiple tag sets to disk in a single operation
  * @param operations Array of tag write operations to perform
- * @param maxBatchSize Maximum number of operations to process in a single batch (optional)
  * @returns Result object with success flag and individual results
  */
 export const saveMultipleAssetTags = async (
   operations: AssetTagOperation[],
-  maxBatchSize = DEFAULT_BATCH_SIZE,
 ): Promise<{
   success: boolean;
   results: { fileId: string; success: boolean }[];
 }> => {
-  // If operations exceed max batch size, split into smaller batches
-  if (maxBatchSize > 0 && operations.length > maxBatchSize) {
-    const allResults: { fileId: string; success: boolean }[] = [];
-    let allSuccess = true;
-
-    // Process in batches of maxBatchSize
-    for (let i = 0; i < operations.length; i += maxBatchSize) {
-      const batchOperations = operations.slice(i, i + maxBatchSize);
-      // Process this batch (recursively calls this function with a smaller batch)
-      const batchResult = await saveMultipleAssetTags(batchOperations, 0); // 0 disables further splitting
-
-      allResults.push(...batchResult.results);
-      allSuccess = allSuccess && batchResult.success;
-    }
-
-    return {
-      success: allSuccess,
-      results: allResults,
-    };
-  }
-
-  // Process the batch (or individual operations if under max size)
+  // Process all operations in parallel
   const results = await Promise.all(
     operations.map(async ({ fileId, composedTags }) => {
       try {

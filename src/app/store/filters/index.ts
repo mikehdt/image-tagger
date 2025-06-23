@@ -33,7 +33,6 @@ export const { reducer: filtersReducer } = filtersSlice;
 export const {
   setTagFilterMode,
   setPaginationSize,
-  addTagFilter,
   toggleTagFilter,
   toggleSizeFilter,
   toggleExtensionFilter,
