@@ -31,9 +31,13 @@ export const updateSaveProgress = createAction<SaveProgress>(
   'assets/updateSaveProgress',
 );
 
+export const clearSaveErrors = createAction('assets/clearSaveErrors');
+
 export const updateLoadProgress = createAction<LoadProgress>(
   'assets/updateLoadProgress',
 );
+
+export const clearLoadErrors = createAction('assets/clearLoadErrors');
 
 export const loadAllAssets = createAsyncThunk(
   'assets/loadAllAssets',
@@ -42,9 +46,11 @@ export const loadAllAssets = createAsyncThunk(
       // First, get the list of image files (fast operation)
       const imageFiles = await getImageFileList();
 
-      // Initialize progress tracking when we know the total
+      // Initialize progress tracking when we know the total and clear any previous errors
       const totalFiles = imageFiles.length;
       if (totalFiles === 0) return [];
+
+      dispatch(clearLoadErrors());
 
       // Define the update progress function that includes error tracking
       // Track failed loads
@@ -159,8 +165,9 @@ export const saveAllAssets = createAsyncThunk<
     return { savedCount: 0 };
   }
 
-  // Initialize progress tracking
+  // Initialize progress tracking and clear any previous errors
   const totalAssets = modifiedAssets.length;
+  dispatch(clearSaveErrors());
   dispatch(updateSaveProgress({ total: totalAssets, completed: 0, failed: 0 }));
 
   // Prepare batch operations for disk writes using helper functions

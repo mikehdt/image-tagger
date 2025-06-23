@@ -10,7 +10,7 @@ export const Error = () => {
   const loadProgress = useAppSelector(selectLoadProgress);
 
   return (
-    <div className="mx-auto w-1/4 text-center">
+    <div className="mx-auto w-1/4 py-20 text-center">
       <p>
         <ExclamationTriangleIcon />
       </p>

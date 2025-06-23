@@ -12,7 +12,7 @@ export const NoContent = ({ onReload }: NoContentProps) => {
   };
 
   return (
-    <div className="mx-auto w-1/4 text-center">
+    <div className="mx-auto w-1/4 py-20 text-center">
       <p>
         <CubeTransparentIcon />
       </p>

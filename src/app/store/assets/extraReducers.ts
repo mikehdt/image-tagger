@@ -2,6 +2,8 @@
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
 
 import {
+  clearLoadErrors,
+  clearSaveErrors,
   loadAllAssets,
   resetAllTags,
   saveAllAssets,
@@ -148,5 +150,20 @@ export const setupExtraReducers = (
   // Add the updateLoadProgress handler
   builder.addCase(updateLoadProgress, (state, action) => {
     state.loadProgress = action.payload;
+  });
+
+  // Add handlers for clearing errors
+  builder.addCase(clearLoadErrors, (state) => {
+    if (state.loadProgress) {
+      state.loadProgress.failed = 0;
+      state.loadProgress.errors = undefined;
+    }
+  });
+
+  builder.addCase(clearSaveErrors, (state) => {
+    if (state.saveProgress) {
+      state.saveProgress.failed = 0;
+      state.saveProgress.errors = undefined;
+    }
   });
 };
