@@ -110,8 +110,8 @@ export const TopShelf = () => {
                 }
                 disabled={!hasModifiedAssets}
               >
-                <BookmarkIcon className="mr-1 w-4" />
-                Save All
+                <BookmarkIcon className="w-4" />
+                <span className="ml-1 max-lg:hidden">Save All</span>
               </button>
 
               {/* TODO: Implement later */}
@@ -141,8 +141,8 @@ export const TopShelf = () => {
                 }
                 disabled={!hasModifiedAssets}
               >
-                <BookmarkSlashIcon className="mr-1 w-4" />
-                Cancel All
+                <BookmarkSlashIcon className="w-4" />
+                <span className="ml-1 max-lg:hidden">Cancel All</span>
               </button>
             </>
           )}
@@ -267,7 +267,8 @@ export const TopShelf = () => {
               className={`inline-flex cursor-pointer items-center rounded-md p-2 ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
               title="Show tag summary"
             >
-              <TagIcon className="mr-2 w-4" /> Filter List
+              <TagIcon className="w-4" />
+              <span className="ml-2 max-lg:hidden"> Filter List</span>
             </span>
 
             {/* Tag panel component */}

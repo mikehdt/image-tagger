@@ -2,9 +2,9 @@ import { PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 import { memo, useCallback, useEffect, useState } from 'react';
 
-import { TagInput } from '@/app/components/tag-input';
+import { TagInput } from '@/app/components/tag/tag-input';
 
-import { hasState, TagState } from '../store/assets';
+import { hasState, TagState } from '../../store/assets';
 import { getTagStyles, tagButtonStyles } from './tag-styles';
 
 type TagProps = {

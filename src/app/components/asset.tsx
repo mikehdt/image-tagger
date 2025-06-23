@@ -44,8 +44,8 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 // import { flexWrapSortingStrategy } from '../utils/flex-wrap-sorting-strategy';
 import { composeDimensions } from '../utils/helpers';
 import { AssetActions } from './asset-actions';
-import { SortableTag } from './sortable-tag';
-import { TagInput } from './tag-input';
+import { SortableTag } from './tag/sortable-tag';
+import { TagInput } from './tag/tag-input';
 
 type AssetProps = {
   assetId: string;
@@ -364,10 +364,10 @@ export const Asset = ({
       </div>
 
       <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">
-        <span className="inline-flex h-8 min-w-0 items-center tabular-nums">
+        <span className="inline-flex min-w-0 flex-wrap items-center py-0.5 tabular-nums">
           <button
             type="button"
-            className={`mr-2 cursor-pointer rounded-sm border border-sky-300 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'} px-2 py-0.5`}
+            className={`mr-2 cursor-pointer rounded-sm border border-sky-300 max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'} px-2 py-0.5`}
             onClick={() => toggleSize(dimensionsComposed)}
           >
             {dimensions.width}&times;{dimensions.height}
@@ -375,14 +375,14 @@ export const Asset = ({
 
           <button
             type="button"
-            className={`mr-2 cursor-pointer rounded-sm border border-stone-300 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'} px-2 py-0.5 max-sm:hidden`}
+            className={`mr-2 cursor-pointer rounded-sm border border-stone-300 max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'} px-2 py-0.5`}
             onClick={() => toggleExtension(fileExtension)}
           >
             {fileExtension}
           </button>
 
           <span
-            className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:hidden"
+            className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pb-2"
             style={{ textShadow: 'white 0 1px 0' }}
           >
             {assetId}

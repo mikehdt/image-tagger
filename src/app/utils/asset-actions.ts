@@ -71,28 +71,34 @@ export const getImageAssetDetails = async (
   let tagList: string[] = [];
 
   try {
-    const tagContent = fs
-      .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
-      .trim();
+    // Check if the tag file exists first before trying to read it
+    if (fs.existsSync(`${dataPath}/${fileId}.txt`)) {
+      const tagContent = fs
+        .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
+        .trim();
 
-    // Only process if the file has actual content
-    if (tagContent) {
-      tagStatus = tagContent
-        .split(', ')
-        .filter((tag) => tag.trim() !== '') // Filter out empty tags
-        .reduce(
-          (acc, tag) => ({
-            ...acc,
-            [tag.trim()]: TagState.SAVED,
-          }),
-          {} as { [key: string]: TagState },
-        );
+      // Only process if the file has actual content
+      if (tagContent) {
+        tagStatus = tagContent
+          .split(', ')
+          .filter((tag) => tag.trim() !== '') // Filter out empty tags
+          .reduce(
+            (acc, tag) => ({
+              ...acc,
+              [tag.trim()]: TagState.SAVED,
+            }),
+            {} as { [key: string]: TagState },
+          );
 
-      tagList = Object.keys(tagStatus);
+        tagList = Object.keys(tagStatus);
+      }
+    } else {
+      // File doesn't exist - use empty tags but log this info
+      console.log(`No tag file found for ${fileId}, using empty tags`);
     }
   } catch (err) {
-    // File doesn't exist or other error - just use empty tags
-    console.log(`No tags found for ${fileId}, using empty tags`, err);
+    // Other errors during read operation
+    console.error(`Error reading tags for ${fileId}:`, err);
   }
 
   return {
