@@ -177,23 +177,19 @@ export const TopShelf = () => {
             </>
           ) : null}
 
-          <div className="mr-4">
+          <div className="mr-4 flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3.5 tabular-nums">
             {filterTags.length ? (
-              <span
-                className={`${filterSizes.length || filterExtensions.length ? 'mr-1' : ''} inline-flex cursor-default rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-500 tabular-nums`}
-              >
+              <span className="bg-emerald-100 px-2 text-emerald-500">
                 {filterTags.length}
               </span>
             ) : null}
             {filterSizes.length ? (
-              <span
-                className={`${filterExtensions.length ? 'mr-1' : ''} inline-flex cursor-default rounded-full bg-sky-100 px-2 py-0.5 text-sky-500 tabular-nums`}
-              >
+              <span className="bg-sky-100 px-2 text-sky-500">
                 {filterSizes.length}
               </span>
             ) : null}
             {filterExtensions.length ? (
-              <span className="inline-flex cursor-default rounded-full bg-stone-100 px-2 py-0.5 text-stone-500 tabular-nums">
+              <span className="bg-stone-100 px-2 text-stone-500">
                 {filterExtensions.length}
               </span>
             ) : null}

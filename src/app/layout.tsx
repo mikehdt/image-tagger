@@ -18,8 +18,30 @@ const geistSans = Geist({
 // });
 
 export const metadata: Metadata = {
-  title: 'Tagger',
-  description: 'Taggy tag',
+  title: 'Image Tagger',
+  description: 'Tag images with text to identify things',
+  icons: {
+    icon: [
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon-128.png', sizes: '128x128', type: 'image/png' },
+      { url: '/favicon-196.png', sizes: '196x196', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'apple-touch-icon',
+        url: '/favicon-196.png',
+      },
+      {
+        rel: 'mask-icon',
+        url: '/favicon.svg',
+      },
+    ],
+  },
 };
 
 export default function Root({
