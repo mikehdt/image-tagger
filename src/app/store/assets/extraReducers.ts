@@ -17,9 +17,15 @@ export const setupExtraReducers = (
   builder: ActionReducerMapBuilder<ImageAssets>,
 ) => {
   // Loading
-  builder.addCase(loadAllAssets.pending, (state) => {
-    state.ioState = IoState.LOADING;
-    state.ioMessage = 'Loading assets...';
+  builder.addCase(loadAllAssets.pending, (state, action) => {
+    const maintainIoState = action.meta.arg?.maintainIoState ?? false;
+
+    // Only change the IoState if not maintaining the current state
+    if (!maintainIoState) {
+      state.ioState = IoState.LOADING;
+      state.ioMessage = 'Loading assets...';
+    }
+
     // Initialize the load progress
     // (actual progress will be updated by the client-side code)
     state.loadProgress = {

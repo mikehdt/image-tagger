@@ -67,11 +67,11 @@ export const TopShelf = () => {
         <div className="flex py-2 pl-4">
           {showLoader ? (
             <>
-              <div className="mr-2 w-6">
+              <div className="mr-4 w-6">
                 <Loader />
               </div>
 
-              <div className="align-middle text-slate-600 tabular-nums">
+              <div className="mr-4 self-center text-xs font-medium text-slate-500 tabular-nums">
                 {saveProgress && (
                   <>
                     {saveProgress.completed} / {saveProgress.total}

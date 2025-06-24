@@ -39,80 +39,80 @@ export const updateLoadProgress = createAction<LoadProgress>(
 
 export const clearLoadErrors = createAction('assets/clearLoadErrors');
 
-export const loadAllAssets = createAsyncThunk(
-  'assets/loadAllAssets',
-  async (_, { dispatch }) => {
-    try {
-      // First, get the list of image files (fast operation)
-      const imageFiles = await getImageFileList();
+export const loadAllAssets = createAsyncThunk<
+  ImageAsset[],
+  { maintainIoState: boolean } | undefined
+>('assets/loadAllAssets', async (_options, { dispatch }) => {
+  try {
+    // First, get the list of image files (fast operation)
+    const imageFiles = await getImageFileList();
 
-      // Initialize progress tracking when we know the total and clear any previous errors
-      const totalFiles = imageFiles.length;
-      if (totalFiles === 0) return [];
+    // Initialize progress tracking when we know the total and clear any previous errors
+    const totalFiles = imageFiles.length;
+    if (totalFiles === 0) return [];
 
-      dispatch(clearLoadErrors());
+    dispatch(clearLoadErrors());
 
-      // Define the update progress function that includes error tracking
-      // Track failed loads
-      let failedCount = 0;
-      const failedFiles: string[] = [];
+    // Define the update progress function that includes error tracking
+    // Track failed loads
+    let failedCount = 0;
+    const failedFiles: string[] = [];
 
-      // Define the update progress function that includes error tracking
-      const updateProgress = (completed: number, total: number) => {
-        dispatch(
-          updateLoadProgress({
-            completed,
-            total,
-            failed: failedCount,
-            errors: failedFiles.length > 0 ? failedFiles : undefined,
-          }),
-        );
-      };
-
-      // Process batches using the helper
-      const imageAssets = await processBatchesWithProgress<
-        string,
-        ImageAsset,
-        ImageAsset
-      >(
-        imageFiles,
-        // Process a batch of files
-        async (batch) => {
-          const { assets, errors } = await getMultipleImageAssetDetails(batch);
-          // Update error count and track failed files for this batch
-          if (errors.length > 0) {
-            failedCount += errors.length;
-            failedFiles.push(...errors);
-          }
-          return assets;
-        },
-        // Update progress
-        updateProgress,
-        // Total items for progress tracking
-        totalFiles,
-        // Fallback for individual processing
-        async (file) => {
-          try {
-            return await getImageAssetDetails(file);
-          } catch (error) {
-            console.error(`Failed to process file ${file}:`, error);
-            failedCount++;
-            failedFiles.push(file);
-            return null;
-          }
-        },
+    // Define the update progress function that includes error tracking
+    const updateProgress = (completed: number, total: number) => {
+      dispatch(
+        updateLoadProgress({
+          completed,
+          total,
+          failed: failedCount,
+          errors: failedFiles.length > 0 ? failedFiles : undefined,
+        }),
       );
+    };
 
-      return imageAssets;
-    } catch (error) {
-      // Provide better error messages to the user
-      console.error('Error loading assets:', error);
-      throw new Error(
-        error instanceof Error ? error.message : 'Failed to load assets',
-      );
-    }
-  },
-);
+    // Process batches using the helper
+    const imageAssets = await processBatchesWithProgress<
+      string,
+      ImageAsset,
+      ImageAsset
+    >(
+      imageFiles,
+      // Process a batch of files
+      async (batch) => {
+        const { assets, errors } = await getMultipleImageAssetDetails(batch);
+        // Update error count and track failed files for this batch
+        if (errors.length > 0) {
+          failedCount += errors.length;
+          failedFiles.push(...errors);
+        }
+        return assets;
+      },
+      // Update progress
+      updateProgress,
+      // Total items for progress tracking
+      totalFiles,
+      // Fallback for individual processing
+      async (file) => {
+        try {
+          return await getImageAssetDetails(file);
+        } catch (error) {
+          console.error(`Failed to process file ${file}:`, error);
+          failedCount++;
+          failedFiles.push(file);
+          return null;
+        }
+      },
+    );
+
+    return imageAssets;
+  } catch (error) {
+    // Provide better error messages to the user
+    console.error('Error loading assets:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'Failed to load assets',
+    );
+  }
+});
 
 export const saveAsset = createAsyncThunk<
   SaveAssetResult,
