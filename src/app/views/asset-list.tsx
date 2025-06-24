@@ -148,11 +148,11 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   if (paginatedAssets.length === 0 && currentPage > 1) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <CubeTransparentIcon className="h-12 w-12 text-slate-400" />
+        <CubeTransparentIcon className="h-12 w-12 text-slate-500" />
         <h1 className="mt-4 mb-4 w-full text-xl">
           This page no longer contains results
         </h1>
-        <p className="text-gray-500">
+        <p className="text-slate-500">
           The applied filters have reduced the number of available pages.
         </p>
       </div>

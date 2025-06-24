@@ -49,7 +49,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return <InitialLoad />;
   }
 
-  if (ioState === IoState.ERROR) {
+  if (true || ioState === IoState.ERROR) {
     return <Error />;
   }
 

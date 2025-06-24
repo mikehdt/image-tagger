@@ -16,10 +16,9 @@ export const Error = () => {
   };
 
   return (
-    <div className="mx-auto w-1/4 py-20 text-center">
-      <p>
-        <ExclamationTriangleIcon />
-      </p>
+    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
+      <ExclamationTriangleIcon className="w-full max-w-80 text-slate-500" />
+
       <h1 className="mt-4 mb-4 w-full text-xl">An I/O error occurred</h1>
       {errorMessage && (
         <p className="mb-2 text-red-600">{String(errorMessage)}</p>
@@ -32,9 +31,9 @@ export const Error = () => {
       <p className="mt-4">
         <button
           onClick={handleRetry}
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          className="min-w-30 cursor-pointer rounded bg-sky-500 px-4 py-2 text-white transition-colors hover:bg-sky-700"
         >
-          Return to Home
+          Retry
         </button>
       </p>
     </div>
