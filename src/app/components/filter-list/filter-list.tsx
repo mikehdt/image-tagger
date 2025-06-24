@@ -19,6 +19,7 @@ export const FilterList = ({
   containerRef,
 }: FilterListProps) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [isPositioned, setIsPositioned] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
@@ -101,12 +102,18 @@ export const FilterList = ({
         top: rect.bottom,
         left: leftPos,
       });
+      setIsPositioned(true);
     }
   }, [isOpen, containerRef]);
 
   // Update position when the panel opens or container reference changes
   useEffect(() => {
-    updatePosition();
+    if (isOpen) {
+      updatePosition();
+    } else {
+      // Reset positioning state when panel closes
+      setIsPositioned(false);
+    }
   }, [isOpen, containerRef, updatePosition]);
 
   // Handle window resize to keep panel in view
@@ -173,7 +180,7 @@ export const FilterList = ({
     }, 0);
   }, [activeView]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !isPositioned) return null;
 
   return (
     <div
