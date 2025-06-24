@@ -9,6 +9,7 @@ import { StoreProvider } from './providers/StoreProvider';
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  fallback: ['system-ui', 'arial'],
 });
 
 // const geistMono = Geist_Mono({
