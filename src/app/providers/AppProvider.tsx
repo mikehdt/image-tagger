@@ -22,9 +22,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const imageCount = useAppSelector(selectImageCount);
 
   // Load assets only once on initial mount
-  const loadImageAssets = useCallback(async () => {
-    dispatch(loadAllAssets());
-  }, [dispatch]);
+  const loadImageAssets = useCallback(
+    async (_args?: { maintainIoState: boolean }) => {
+      dispatch(loadAllAssets(_args));
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (initialLoad.current) {
@@ -50,7 +53,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (ioState === IoState.ERROR) {
-    return <Error />;
+    return <Error onReload={loadImageAssets} />;
   }
 
   // Handle empty state at the provider level instead of in page components

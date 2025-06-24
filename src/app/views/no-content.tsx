@@ -12,10 +12,8 @@ export const NoContent = ({ onReload }: NoContentProps) => {
   };
 
   return (
-    <div className="mx-auto w-1/4 py-20 text-center">
-      <p className="text-slate-500">
-        <CubeTransparentIcon />
-      </p>
+    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
+      <CubeTransparentIcon className="w-full max-w-80 text-slate-500" />
 
       <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
         No assets were found

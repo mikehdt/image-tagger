@@ -1,7 +1,7 @@
 import './globals.css';
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist /* Geist_Mono */ } from 'next/font/google';
 
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
@@ -11,10 +11,10 @@ const geistSans = Geist({
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
+// const geistMono = Geist_Mono({
+//   variable: '--font-geist-mono',
+//   subsets: ['latin'],
+// });
 
 export const metadata: Metadata = {
   title: 'Tagger',
@@ -28,12 +28,10 @@ export default function Root({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.className} antialiased`}>
         <StoreProvider>
           <AppProvider>
-            <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 font-sans">
+            <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4">
               {children}
             </div>
           </AppProvider>
