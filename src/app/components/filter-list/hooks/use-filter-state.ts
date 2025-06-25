@@ -1,8 +1,10 @@
 import { RefObject, useCallback, useEffect, useState } from 'react';
 
-import { getFiletypeSortOptions } from '../components/file-types';
-import { getSizeSortOptions } from '../components/sizes';
-import { getTagSortOptions } from '../components/tags';
+import {
+  getFiletypeSortOptions,
+  getSizeSortOptions,
+  getTagSortOptions,
+} from '../components';
 import { FilterView, SortDirection, SortType } from '../types';
 
 export const useFilterState = (

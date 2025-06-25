@@ -149,14 +149,10 @@ const SizeVisualizer = ({
   boxHeight = Math.max(boxHeight, 8);
 
   return (
-    <div
-      className={`mr-2 transition-all ${
-        isActive ? 'opacity-100' : 'opacity-60'
-      }`}
-    >
+    <div className={`mr-2 w-10 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
       <div
-        className={`${
-          isActive ? 'border border-blue-400 bg-blue-100' : 'border bg-slate-50'
+        className={`border ${
+          isActive ? 'border-sky-400 bg-sky-200' : 'bg-slate-50'
         }`}
         style={{ width: boxWidth, height: boxHeight }}
       />
@@ -317,27 +313,32 @@ export const SizesView = () => {
   };
 
   return (
-    <div className="max-h-80 overflow-y-auto py-2">
+    <div className="max-h-80 overflow-y-auto">
       {filteredSizes.length === 0 ? (
-        <div className="px-4 py-2 text-sm text-gray-500">
+        <div className="px-4 py-2 text-center text-sm text-slate-500">
           {searchTerm
             ? `No sizes matching "${searchTerm}"`
             : 'No sizes available'}
         </div>
       ) : (
-        <ul className="flex flex-col gap-1 px-2">
+        <ul className="divide-y divide-slate-100">
           {filteredSizes.map((item, index) => (
             <li
               id={`size-${item.dimensions}`}
               key={item.dimensions}
-              className={`flex cursor-pointer items-center rounded border px-2 py-1 transition-all ${
-                item.isActive
-                  ? 'border-blue-200 bg-blue-50 text-blue-800'
-                  : 'border-transparent hover:bg-slate-50'
-              } ${selectedIndex === index ? 'ring-2 ring-blue-400' : ''}`}
               onClick={() => handleToggle(item.dimensions)}
+              className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+                index === selectedIndex
+                  ? item.isActive
+                    ? 'bg-sky-200'
+                    : 'bg-blue-100'
+                  : item.isActive
+                    ? 'bg-sky-100'
+                    : 'hover:bg-blue-50'
+              }`}
             >
               <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
+
               <div className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
@@ -350,13 +351,13 @@ export const SizesView = () => {
                   </span>
                 </div>
                 <div className="flex text-xs">
-                  <span className="text-gray-500">{item.ratio}</span>
-                  <span className="mx-1 text-gray-300">•</span>
-                  <span className="text-gray-500">{item.type}</span>
+                  <span className="text-slate-500">{item.ratio}</span>
+                  <span className="mx-1 text-slate-300">•</span>
+                  <span className="text-slate-500">{item.type}</span>
                   {item.pixelCount > 100000 && (
                     <>
-                      <span className="mx-1 text-gray-300">•</span>
-                      <span className="text-gray-500">
+                      <span className="mx-1 text-slate-300">•</span>
+                      <span className="text-slate-500">
                         {formatMegaPixels(item.pixelCount)}
                       </span>
                     </>

@@ -174,11 +174,11 @@ export const TagsView = () => {
               className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
                 index === selectedIndex
                   ? item.isActive
-                    ? 'bg-emerald-100'
+                    ? 'bg-emerald-200'
                     : 'bg-blue-100'
                   : item.isActive
-                    ? 'bg-emerald-50'
-                    : 'hover:bg-slate-50'
+                    ? 'bg-emerald-100'
+                    : 'hover:bg-blue-50'
               }`}
               title={
                 item.isActive
