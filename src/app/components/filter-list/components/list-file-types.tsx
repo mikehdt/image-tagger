@@ -19,7 +19,7 @@ export const getFiletypeSortOptions = (
   switch (sortType) {
     case 'count':
       typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9';
+      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
       break;
     case 'active':
       typeLabel = 'Active';

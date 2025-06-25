@@ -173,24 +173,27 @@ export const getSizeSortOptions = (
   switch (sortType) {
     case 'count':
       typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9';
+      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
       break;
     case 'dimensions':
       typeLabel = 'Size';
-      directionLabel =
-        sortDirection === 'asc' ? '↑ Small-Large' : '↓ Large-Small';
+      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
       break;
     case 'active':
       typeLabel = 'Active';
       directionLabel = sortDirection === 'asc' ? '↑ Active' : '↓ Active';
       break;
-    case 'alphabetical':
-      typeLabel = 'Name';
-      directionLabel = sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A';
+    case 'aspectRatio':
+      typeLabel = 'Ratio';
+      directionLabel = sortDirection === 'asc' ? '↑ Tall-Wide' : '↓ Wide-Tall';
       break;
-    default: // for other types, use similar to alphabetical
-      typeLabel = 'Name';
-      directionLabel = sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A';
+    case 'megapixels':
+      typeLabel = 'Megapixel';
+      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
+      break;
+    default:
+      typeLabel = 'Size';
+      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
   }
 
   // Calculate next sort type based on current sort type
@@ -201,8 +204,10 @@ export const getSizeSortOptions = (
   } else if (sortType === 'dimensions') {
     nextType = 'active';
   } else if (sortType === 'active') {
-    nextType = 'alphabetical';
-  } else if (sortType === 'alphabetical') {
+    nextType = 'aspectRatio';
+  } else if (sortType === 'aspectRatio') {
+    nextType = 'megapixels';
+  } else if (sortType === 'megapixels') {
     nextType = 'count';
   }
 
@@ -219,12 +224,120 @@ const formatDimensions = (dimensions: string): string => {
   return dimensions.replace('x', '×');
 };
 
+// Format the count with the appropriate megapixel label
+const formatMegaPixels = (pixelCount: number): string => {
+  const mp = pixelCount / 1000000;
+  if (mp < 0.1) {
+    return ''; // Skip showing MP for very small images
+  }
+  return mp.toFixed(1) + ' MP';
+};
+
 // Calculate the pixel count from dimensions
 // This function is not currently used but kept for future functionality
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getPixelCount = (dimensions: string): number => {
   const { width, height } = decomposeDimensions(dimensions);
   return width * height;
+};
+
+// Component to display conditional info based on sort type
+const SizeInfo = ({
+  item,
+  sortType,
+  searchTerm,
+}: {
+  item: {
+    dimensions: string;
+    width: number;
+    height: number;
+    count: number;
+    pixelCount: number;
+    ratio: string;
+    type: string;
+    isActive: boolean;
+  };
+  sortType: SortType;
+  searchTerm: string;
+}) => {
+  const mp = item.pixelCount / 1000000;
+  const formattedMP = mp.toFixed(1) + ' MP';
+
+  // Format the main display based on sort type
+  if (sortType === 'aspectRatio') {
+    return (
+      <>
+        <div className="flex items-center justify-between">
+          <span className="font-medium">
+            <span className="text-slate-800">{item.ratio}</span>{' '}
+            <span className="text-sm text-slate-500">({item.type})</span>
+          </span>
+          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+        </div>
+        <div className="flex text-xs">
+          <span className="text-slate-500">
+            {searchTerm
+              ? highlightMatches(item.dimensions, searchTerm)
+              : formatDimensions(item.dimensions)}
+          </span>
+          {item.pixelCount > 100000 && (
+            <>
+              <span className="mx-1 text-slate-300">•</span>
+              <span className="text-slate-500">{formattedMP}</span>
+            </>
+          )}
+        </div>
+      </>
+    );
+  } else if (sortType === 'megapixels') {
+    return (
+      <>
+        <div className="flex items-center justify-between">
+          <span className="font-medium">
+            <span className="text-slate-800">{formattedMP}</span>
+          </span>
+          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+        </div>
+        <div className="flex text-xs">
+          <span className="text-slate-500">
+            {searchTerm
+              ? highlightMatches(item.dimensions, searchTerm)
+              : formatDimensions(item.dimensions)}
+          </span>
+          <span className="mx-1 text-slate-300">•</span>
+          <span className="text-slate-500">{item.ratio}</span>
+          <span className="mx-1 text-slate-300">•</span>
+          <span className="text-slate-500">{item.type}</span>
+        </div>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <div className="flex items-center justify-between">
+          <span className="font-medium text-slate-800">
+            {searchTerm
+              ? highlightMatches(item.dimensions, searchTerm)
+              : formatDimensions(item.dimensions)}
+          </span>
+          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+        </div>
+        <div className="flex text-xs">
+          <span className="text-slate-500">{item.ratio}</span>
+          <span className="mx-1 text-slate-300">•</span>
+          <span className="text-slate-500">{item.type}</span>
+          {item.pixelCount > 100000 && (
+            <>
+              <span className="mx-1 text-slate-300">•</span>
+              <span className="text-slate-500">
+                {formatMegaPixels(item.pixelCount)}
+              </span>
+            </>
+          )}
+        </div>
+      </>
+    );
+  }
 };
 
 export const SizesView = () => {
@@ -293,11 +406,23 @@ export const SizesView = () => {
         return sortDirection === 'asc'
           ? a.pixelCount - b.pixelCount // ascending
           : b.pixelCount - a.pixelCount; // descending
-      } else {
-        // Sort by dimensions as string (name)
+      } else if (sortType === 'aspectRatio') {
+        // Calculate aspect ratio as width/height (normalized)
+        const aRatio = a.width / a.height;
+        const bRatio = b.width / b.height;
         return sortDirection === 'asc'
-          ? a.dimensions.localeCompare(b.dimensions) // A-Z
-          : b.dimensions.localeCompare(a.dimensions); // Z-A
+          ? aRatio - bRatio // ascending: square to wide
+          : bRatio - aRatio; // descending: wide to square
+      } else if (sortType === 'megapixels') {
+        // Sort by megapixels directly
+        return sortDirection === 'asc'
+          ? a.pixelCount - b.pixelCount // ascending
+          : b.pixelCount - a.pixelCount; // descending
+      } else {
+        // Default to dimensions
+        return sortDirection === 'asc'
+          ? a.pixelCount - b.pixelCount // ascending
+          : b.pixelCount - a.pixelCount; // descending
       }
     });
   }, [allSizes, activeSizes, searchTerm, sortType, sortDirection]);
@@ -362,14 +487,7 @@ export const SizesView = () => {
     };
   }, [selectedIndex, filteredSizes, handleToggle]);
 
-  // Format the count with the appropriate megapixel label
-  const formatMegaPixels = (pixelCount: number): string => {
-    const mp = pixelCount / 1000000;
-    if (mp < 0.1) {
-      return ''; // Skip showing MP for very small images
-    }
-    return mp.toFixed(1) + ' MP';
-  };
+  // Reference the formatMegaPixels function defined above
 
   return (
     <div className="max-h-80 overflow-y-auto">
@@ -399,29 +517,11 @@ export const SizesView = () => {
               <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
 
               <div className="flex flex-1 flex-col">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-800">
-                    {searchTerm
-                      ? highlightMatches(item.dimensions, searchTerm)
-                      : formatDimensions(item.dimensions)}
-                  </span>
-                  <span className="ml-auto text-xs text-slate-500">
-                    {item.count}
-                  </span>
-                </div>
-                <div className="flex text-xs">
-                  <span className="text-slate-500">{item.ratio}</span>
-                  <span className="mx-1 text-slate-300">•</span>
-                  <span className="text-slate-500">{item.type}</span>
-                  {item.pixelCount > 100000 && (
-                    <>
-                      <span className="mx-1 text-slate-300">•</span>
-                      <span className="text-slate-500">
-                        {formatMegaPixels(item.pixelCount)}
-                      </span>
-                    </>
-                  )}
-                </div>
+                <SizeInfo
+                  item={item}
+                  sortType={sortType}
+                  searchTerm={searchTerm}
+                />
               </div>
             </li>
           ))}

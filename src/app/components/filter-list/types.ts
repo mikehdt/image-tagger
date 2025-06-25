@@ -4,7 +4,8 @@ export type SortType =
   | 'alphabetical'
   | 'active'
   | 'dimensions'
-  | 'aspectRatio';
+  | 'aspectRatio'
+  | 'megapixels';
 export type SortDirection = 'asc' | 'desc';
 
 // Define view types

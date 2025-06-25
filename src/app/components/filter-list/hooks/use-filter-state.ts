@@ -14,8 +14,9 @@ export const useFilterState = (
   const [activeView, setActiveView] = useState<FilterView>('tag');
 
   // Add state for sort direction and type
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [sortType, setSortType] = useState<SortType>('count');
+  // Default to 'desc' for count (large to small) and 'asc' for others
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Add state for search term - used for filtering tags, sizes, or filetypes
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,6 +51,8 @@ export const useFilterState = (
   useEffect(() => {
     // Default to count sorting when switching views
     setSortType('count');
+    // Set default direction to 'desc' for count (large to small)
+    setSortDirection('desc');
     // Reset list length to ensure proper keyboard navigation
     setListLength(0);
     // Reset selected index (redundant with button click handlers, but adds safety)
@@ -64,13 +67,22 @@ export const useFilterState = (
     }, 0);
   }, [activeView, inputRef]);
 
+  // Update sort direction when sort type changes
+  const updateSortType = useCallback((newSortType: SortType) => {
+    setSortType(newSortType);
+    // Set default direction based on sort type
+    if (newSortType === 'count') {
+      setSortDirection('desc'); // Large to small for counts
+    }
+  }, []);
+
   return {
     activeView,
     setActiveView,
     sortDirection,
     setSortDirection,
     sortType,
-    setSortType,
+    setSortType: updateSortType, // Use the updated function here
     searchTerm,
     setSearchTerm,
     selectedIndex,
