@@ -15,16 +15,19 @@ import { SortDirection, SortType } from '../types';
  */
 const highlightMatches = (text: string, searchTerm: string) => {
   if (!searchTerm || searchTerm.trim() === '') {
-    return text; // Return the original text if no search term
+    return formatDimensions(text); // Return the formatted text if no search term
   }
 
   // Normalize the search term and text by replacing × with x for matching
   const normalizedTerm = searchTerm.toLowerCase().replace('×', 'x');
   const normalizedText = text.toLowerCase().replace('×', 'x');
 
-  // If no matches, return original text
+  // Get the original text with proper × symbol
+  const formattedText = formatDimensions(text);
+
+  // If no matches, return formatted text
   if (!normalizedText.includes(normalizedTerm)) {
-    return text;
+    return formattedText;
   }
 
   const result = [];
@@ -38,15 +41,15 @@ const highlightMatches = (text: string, searchTerm: string) => {
     if (index > lastIndex) {
       result.push(
         <Fragment key={`text-${lastIndex}`}>
-          {text.substring(lastIndex, index)}
+          {formatDimensions(text.substring(lastIndex, index))}
         </Fragment>,
       );
     }
 
     // Add the highlighted match
     result.push(
-      <span key={`match-${index}`} className="bg-yellow-200 text-black">
-        {text.substring(index, index + searchTerm.length)}
+      <span key={`match-${index}`} className="font-bold">
+        {formatDimensions(text.substring(index, index + searchTerm.length))}
       </span>,
     );
 
@@ -58,7 +61,7 @@ const highlightMatches = (text: string, searchTerm: string) => {
   if (lastIndex < text.length) {
     result.push(
       <Fragment key={`text-${lastIndex}`}>
-        {text.substring(lastIndex)}
+        {formatDimensions(text.substring(lastIndex))}
       </Fragment>,
     );
   }
@@ -177,6 +180,10 @@ export const getSizeSortOptions = (
       directionLabel =
         sortDirection === 'asc' ? '↑ Small-Large' : '↓ Large-Small';
       break;
+    case 'active':
+      typeLabel = 'Active';
+      directionLabel = sortDirection === 'asc' ? '↑ Active' : '↓ Active';
+      break;
     case 'alphabetical':
       typeLabel = 'Name';
       directionLabel = sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A';
@@ -192,6 +199,8 @@ export const getSizeSortOptions = (
   if (sortType === 'count') {
     nextType = 'dimensions';
   } else if (sortType === 'dimensions') {
+    nextType = 'active';
+  } else if (sortType === 'active') {
     nextType = 'alphabetical';
   } else if (sortType === 'alphabetical') {
     nextType = 'count';
@@ -202,6 +211,12 @@ export const getSizeSortOptions = (
     directionLabel,
     nextType,
   };
+};
+
+// Format the dimensions for display with proper × symbol
+const formatDimensions = (dimensions: string): string => {
+  if (!dimensions.includes('x')) return dimensions;
+  return dimensions.replace('x', '×');
 };
 
 // Calculate the pixel count from dimensions
@@ -254,7 +269,22 @@ export const SizesView = () => {
 
     // Sort the sizes
     return list.sort((a, b) => {
-      if (sortType === 'count') {
+      if (sortType === 'active') {
+        // First compare by active state
+        if (a.isActive !== b.isActive) {
+          return sortDirection === 'asc'
+            ? a.isActive
+              ? -1
+              : 1 // active items first when ascending
+            : a.isActive
+              ? 1
+              : -1; // active items last when descending
+        }
+        // If both have same active state, sort by width as secondary criteria
+        return sortDirection === 'asc'
+          ? a.width - b.width // ascending width as tie-breaker
+          : b.width - a.width; // descending width as tie-breaker
+      } else if (sortType === 'count') {
         return sortDirection === 'asc'
           ? a.count - b.count // ascending
           : b.count - a.count; // descending
@@ -344,7 +374,7 @@ export const SizesView = () => {
   return (
     <div className="max-h-80 overflow-y-auto">
       {filteredSizes.length === 0 ? (
-        <div className="px-4 py-2 text-center text-sm text-slate-500">
+        <div className="p-4 text-center text-sm text-slate-500">
           {searchTerm
             ? `No sizes matching "${searchTerm}"`
             : 'No sizes available'}
@@ -370,12 +400,12 @@ export const SizesView = () => {
 
               <div className="flex flex-1 flex-col">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">
+                  <span className="text-slate-800">
                     {searchTerm
                       ? highlightMatches(item.dimensions, searchTerm)
-                      : item.dimensions}
+                      : formatDimensions(item.dimensions)}
                   </span>
-                  <span className="ml-auto text-xs text-gray-500">
+                  <span className="ml-auto text-xs text-slate-500">
                     {item.count}
                   </span>
                 </div>

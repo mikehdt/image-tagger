@@ -43,7 +43,7 @@ const highlightMatches = (text: string, searchTerm: string) => {
 
     // Add the highlighted match
     result.push(
-      <span key={`match-${index}`} className="bg-yellow-200 text-black">
+      <span key={`match-${index}`} className="font-bold">
         {text.substring(index, index + searchTerm.length)}
       </span>,
     );
@@ -69,16 +69,37 @@ export const getTagSortOptions = (
   sortType: SortType,
   sortDirection: SortDirection,
 ) => {
+  let typeLabel: string, directionLabel: string;
+
+  switch (sortType) {
+    case 'count':
+      typeLabel = 'Count';
+      directionLabel = sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9';
+      break;
+    case 'active':
+      typeLabel = 'Active';
+      directionLabel = sortDirection === 'asc' ? '↑ Active' : '↓ Active';
+      break;
+    case 'alphabetical':
+    default:
+      typeLabel = 'Name';
+      directionLabel = sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A';
+  }
+
+  // Calculate next sort type based on current sort type
+  let nextType: SortType = 'count';
+  if (sortType === 'count') {
+    nextType = 'active';
+  } else if (sortType === 'active') {
+    nextType = 'alphabetical';
+  } else if (sortType === 'alphabetical') {
+    nextType = 'count';
+  }
+
   return {
-    directionLabel:
-      sortType === 'count'
-        ? `${sortDirection === 'asc' ? '↓ 9-0' : '↑ 0-9'}`
-        : `${sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A'}`,
-    typeLabel: sortType === 'count' ? 'Count' : 'Name',
-    nextType:
-      sortType === 'count'
-        ? ('alphabetical' as SortType)
-        : ('count' as SortType),
+    typeLabel,
+    directionLabel,
+    nextType,
   };
 };
 
@@ -113,13 +134,31 @@ export const TagsView = () => {
 
     // Sort the tags
     return list.sort((a, b) => {
+      // If sort type is active, compare by active state first
+      if (sortType === 'active') {
+        // First compare by active state
+        if (a.isActive !== b.isActive) {
+          return sortDirection === 'asc'
+            ? a.isActive
+              ? -1
+              : 1 // active items first when ascending
+            : a.isActive
+              ? 1
+              : -1; // active items last when descending
+        }
+        // If both have same active state, sort alphabetically as secondary criteria
+        return sortDirection === 'asc'
+          ? a.tag.localeCompare(b.tag) // A-Z as tie-breaker
+          : b.tag.localeCompare(a.tag); // Z-A as tie-breaker
+      }
       // If sort type is count, compare by count
-      if (sortType === 'count') {
+      else if (sortType === 'count') {
         return sortDirection === 'asc'
           ? a.count - b.count // ascending
           : b.count - a.count; // descending
-      } else {
-        // Otherwise sort by tag name
+      }
+      // Otherwise sort by tag name (alphabetical)
+      else {
         return sortDirection === 'asc'
           ? a.tag.localeCompare(b.tag) // A-Z
           : b.tag.localeCompare(a.tag); // Z-A
