@@ -15,19 +15,18 @@ import { SortDirection, SortType } from '../types';
  */
 const highlightMatches = (text: string, searchTerm: string) => {
   if (!searchTerm || searchTerm.trim() === '') {
-    return formatDimensions(text); // Return the formatted text if no search term
+    return text; // Return the text if no search term
   }
 
-  // Normalize the search term and text by replacing × with x for matching
+  // Normalize the search term and text if needed
+  // For dimensions, replace × with x for matching
+  // For ratios and megapixels, just lowercase
   const normalizedTerm = searchTerm.toLowerCase().replace('×', 'x');
   const normalizedText = text.toLowerCase().replace('×', 'x');
 
-  // Get the original text with proper × symbol
-  const formattedText = formatDimensions(text);
-
-  // If no matches, return formatted text
+  // If no matches, return text
   if (!normalizedText.includes(normalizedTerm)) {
-    return formattedText;
+    return text;
   }
 
   const result = [];
@@ -41,7 +40,7 @@ const highlightMatches = (text: string, searchTerm: string) => {
     if (index > lastIndex) {
       result.push(
         <Fragment key={`text-${lastIndex}`}>
-          {formatDimensions(text.substring(lastIndex, index))}
+          {text.substring(lastIndex, index)}
         </Fragment>,
       );
     }
@@ -49,7 +48,7 @@ const highlightMatches = (text: string, searchTerm: string) => {
     // Add the highlighted match
     result.push(
       <span key={`match-${index}`} className="font-bold">
-        {formatDimensions(text.substring(index, index + searchTerm.length))}
+        {text.substring(index, index + searchTerm.length)}
       </span>,
     );
 
@@ -61,7 +60,7 @@ const highlightMatches = (text: string, searchTerm: string) => {
   if (lastIndex < text.length) {
     result.push(
       <Fragment key={`text-${lastIndex}`}>
-        {formatDimensions(text.substring(lastIndex))}
+        {text.substring(lastIndex)}
       </Fragment>,
     );
   }
@@ -223,6 +222,7 @@ const formatDimensions = (dimensions: string): string => {
 };
 
 // Format the count with the appropriate megapixel label
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formatMegaPixels = (pixelCount: number): string => {
   const mp = pixelCount / 1000000;
   if (mp < 0.1) {
@@ -254,34 +254,35 @@ const SizeInfo = ({
     ratio: string;
     type: string;
     isActive: boolean;
+    formattedMP: string;
   };
   sortType: SortType;
   searchTerm: string;
 }) => {
-  const mp = item.pixelCount / 1000000;
-  const formattedMP = mp.toFixed(1) + ' MP';
-
   // Format the main display based on sort type
   if (sortType === 'aspectRatio') {
     return (
       <>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between tabular-nums">
           <span>
-            <span className="text-slate-800">{item.ratio}</span>{' '}
-            <span className="text-sm text-slate-500">({item.type})</span>
+            <span className="text-slate-800">
+              {searchTerm
+                ? highlightMatches(item.ratio, searchTerm)
+                : item.ratio}
+            </span>
+            <span className="mx-1 text-slate-300">•</span>
+            <span className="text-sm text-slate-500">{item.type}</span>
           </span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>
         </div>
-        <div className="flex text-xs">
+        <div className="flex text-xs tabular-nums">
           <span className="text-slate-500">
-            {searchTerm
-              ? highlightMatches(item.dimensions, searchTerm)
-              : formatDimensions(item.dimensions)}
+            {formatDimensions(item.dimensions)}
           </span>
           {item.pixelCount > 100000 && (
             <>
               <span className="mx-1 text-slate-300">•</span>
-              <span className="text-slate-500">{formattedMP}</span>
+              <span className="text-slate-500">{item.formattedMP}</span>
             </>
           )}
         </div>
@@ -290,15 +291,17 @@ const SizeInfo = ({
   } else if (sortType === 'megapixels') {
     return (
       <>
-        <div className="flex items-center justify-between">
-          <span className="text-slate-800">{formattedMP}</span>
+        <div className="flex items-center justify-between tabular-nums">
+          <span className="text-slate-800">
+            {searchTerm
+              ? highlightMatches(item.formattedMP, searchTerm)
+              : item.formattedMP}
+          </span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>
         </div>
-        <div className="flex text-xs">
+        <div className="flex text-xs tabular-nums">
           <span className="text-slate-500">
-            {searchTerm
-              ? highlightMatches(item.dimensions, searchTerm)
-              : formatDimensions(item.dimensions)}
+            {formatDimensions(item.dimensions)}
           </span>
           <span className="mx-1 text-slate-300">•</span>
           <span className="text-slate-500">{item.ratio}</span>
@@ -310,24 +313,22 @@ const SizeInfo = ({
   } else {
     return (
       <>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between tabular-nums">
           <span className="text-slate-800">
             {searchTerm
-              ? highlightMatches(item.dimensions, searchTerm)
+              ? highlightMatches(formatDimensions(item.dimensions), searchTerm)
               : formatDimensions(item.dimensions)}
           </span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>
         </div>
-        <div className="flex text-xs">
+        <div className="flex text-xs tabular-nums">
           <span className="text-slate-500">{item.ratio}</span>
           <span className="mx-1 text-slate-300">•</span>
           <span className="text-slate-500">{item.type}</span>
           {item.pixelCount > 100000 && (
             <>
               <span className="mx-1 text-slate-300">•</span>
-              <span className="text-slate-500">
-                {formatMegaPixels(item.pixelCount)}
-              </span>
+              <span className="text-slate-500">{item.formattedMP}</span>
             </>
           )}
         </div>
@@ -355,15 +356,12 @@ export const SizesView = () => {
     // Convert map to array and filter by search term (if present)
     const filter = searchTerm.toLowerCase().replace('×', 'x');
     const list = Object.entries(allSizes)
-      .filter(([dimensions]) => {
-        if (!filter) return true;
-        // Normalize the dimensions format for searching (× to x)
-        const normalizedDimensions = dimensions.toLowerCase().replace('×', 'x');
-        return normalizedDimensions.includes(filter);
-      })
       .map(([dimensions, count]) => {
         const { width, height } = decomposeDimensions(dimensions);
         const { ratio, type } = formatAspectRatio(width, height);
+        const pixelCount = width * height;
+        const mp = pixelCount / 1000000;
+        const formattedMP = mp.toFixed(1) + ' MP';
         return {
           dimensions,
           count,
@@ -371,9 +369,29 @@ export const SizesView = () => {
           height,
           ratio,
           type,
-          pixelCount: width * height,
+          pixelCount,
+          formattedMP,
           isActive: activeSizes.includes(dimensions),
         };
+      })
+      .filter((item) => {
+        if (!filter) return true;
+
+        // Filter based on the sort type
+        if (sortType === 'aspectRatio') {
+          // When in aspectRatio mode, search in the ratio field
+          return item.ratio.toLowerCase().includes(filter);
+        } else if (sortType === 'megapixels') {
+          // When in megapixels mode, search in the megapixel value
+          return item.formattedMP.toLowerCase().includes(filter);
+        } else {
+          // Default behavior: filter by dimensions
+          // Normalize the dimensions format for searching (× to x)
+          const normalizedDimensions = item.dimensions
+            .toLowerCase()
+            .replace('×', 'x');
+          return normalizedDimensions.includes(filter);
+        }
       });
 
     // Sort the sizes
