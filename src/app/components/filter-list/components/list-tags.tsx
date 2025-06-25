@@ -158,6 +158,35 @@ export const TagsView = () => {
     }
   }, [selectedIndex, filteredTags]);
 
+  // Listen for keyboard selection events
+  useEffect(() => {
+    const handleKeyboardSelect = (e: CustomEvent) => {
+      // Check if the event is for our component by comparing selectedIndex
+      if (
+        e.detail?.index === selectedIndex &&
+        selectedIndex >= 0 &&
+        selectedIndex < filteredTags.length
+      ) {
+        // Get the selected tag and toggle it
+        const selectedTag = filteredTags[selectedIndex].tag;
+        handleToggle(selectedTag);
+      }
+    };
+
+    // Add event listener for custom keyboard selection event
+    document.addEventListener(
+      'filterlist:keyboardselect',
+      handleKeyboardSelect as EventListener,
+    );
+
+    return () => {
+      document.removeEventListener(
+        'filterlist:keyboardselect',
+        handleKeyboardSelect as EventListener,
+      );
+    };
+  }, [selectedIndex, filteredTags, handleToggle]);
+
   return (
     <div>
       {filteredTags.length === 0 ? (

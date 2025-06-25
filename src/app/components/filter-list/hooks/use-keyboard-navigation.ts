@@ -19,8 +19,13 @@ export const useKeyboardNavigation = (
         e.preventDefault(); // Prevent cursor movement in input
         setSelectedIndex(selectedIndex > 0 ? selectedIndex - 1 : 0);
       } else if (e.key === 'Enter' && selectedIndex >= 0) {
-        // The actual tag selection will be handled in the TagsView component
+        // Inform listeners that an item was selected with keyboard
         e.preventDefault();
+        document.dispatchEvent(
+          new CustomEvent('filterlist:keyboardselect', {
+            detail: { index: selectedIndex },
+          }),
+        );
         // We'll maintain the selected index and just focus back on the input
         if (inputRef.current) {
           inputRef.current.focus();

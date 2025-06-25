@@ -303,6 +303,35 @@ export const SizesView = () => {
     }
   }, [selectedIndex, filteredSizes]);
 
+  // Listen for keyboard selection events
+  useEffect(() => {
+    const handleKeyboardSelect = (e: CustomEvent) => {
+      // Check if the event is for our component by comparing selectedIndex
+      if (
+        e.detail?.index === selectedIndex &&
+        selectedIndex >= 0 &&
+        selectedIndex < filteredSizes.length
+      ) {
+        // Get the selected size and toggle it
+        const selectedSize = filteredSizes[selectedIndex].dimensions;
+        handleToggle(selectedSize);
+      }
+    };
+
+    // Add event listener for custom keyboard selection event
+    document.addEventListener(
+      'filterlist:keyboardselect',
+      handleKeyboardSelect as EventListener,
+    );
+
+    return () => {
+      document.removeEventListener(
+        'filterlist:keyboardselect',
+        handleKeyboardSelect as EventListener,
+      );
+    };
+  }, [selectedIndex, filteredSizes, handleToggle]);
+
   // Format the count with the appropriate megapixel label
   const formatMegaPixels = (pixelCount: number): string => {
     const mp = pixelCount / 1000000;
