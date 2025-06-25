@@ -11,10 +11,12 @@ type SortableTagProps = {
   count: number;
   highlight: boolean;
   fade: boolean;
+  nonInteractive?: boolean; // New prop to control interactivity separately from fading
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   onEditTag?: (oldTagName: string, newTagName: string) => void;
   onEditValueChange?: (tagName: string, value: string) => void;
+  onEditStateChange?: (tagName: string, isEditing: boolean) => void;
   isDuplicate?: boolean;
 };
 
@@ -25,10 +27,12 @@ const SortableTag = ({
   count,
   highlight,
   fade,
+  nonInteractive = false, // Default to interactive
   onToggleTag,
   onDeleteTag,
   onEditTag,
   onEditValueChange,
+  onEditStateChange,
   isDuplicate = false,
 }: SortableTagProps) => {
   // Track whether the tag is currently being edited
@@ -86,6 +90,12 @@ const SortableTag = ({
   // Handler for when edit state changes
   const handleEditStateChange = (editing: boolean) => {
     setIsEditing(editing);
+
+    // Notify parent component about edit state change
+    if (onEditStateChange) {
+      onEditStateChange(tagName, editing);
+    }
+
     // When editing starts, set an empty value to trigger fading
     // When editing ends, reset the edit value
     if (onEditValueChange) {
@@ -108,10 +118,10 @@ const SortableTag = ({
     <div
       ref={setRefs}
       style={style}
-      // Don't apply drag attributes or listeners when editing or faded
-      {...(isEditing || fade ? {} : attributes)}
-      {...(isEditing || fade ? {} : listeners)}
-      className={`touch-none ${fade ? 'pointer-events-none' : ''}`}
+      // Don't apply drag attributes or listeners when editing, faded, or explicitly non-interactive
+      {...(isEditing || fade || nonInteractive ? {} : attributes)}
+      {...(isEditing || fade || nonInteractive ? {} : listeners)}
+      className={`touch-none ${fade || nonInteractive ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
       <Tag
@@ -120,6 +130,7 @@ const SortableTag = ({
         count={count}
         highlight={highlight}
         fade={fade}
+        nonInteractive={nonInteractive}
         onToggleTag={onToggleTag}
         onDeleteTag={onDeleteTag}
         onEditTag={onEditTag}
@@ -143,7 +154,8 @@ const areSortableTagsEqual = (
     prevProps.tagState === nextProps.tagState &&
     prevProps.count === nextProps.count &&
     prevProps.highlight === nextProps.highlight &&
-    prevProps.fade === nextProps.fade
+    prevProps.fade === nextProps.fade &&
+    prevProps.nonInteractive === nextProps.nonInteractive
     // Functions references should be stable from parent with useCallback
   );
 };

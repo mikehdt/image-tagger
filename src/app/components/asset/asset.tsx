@@ -76,6 +76,7 @@ export const Asset = ({
   const [newTagInput, setNewTagInput] = useState<string>('');
   const [editTagValue, setEditTagValue] = useState<string>('');
   const [editingTagName, setEditingTagName] = useState<string>('');
+  const [isEditing, setIsEditing] = useState<boolean>(false); // Track if we're in edit mode
   const dispatch = useAppDispatch();
   const globalTagList = useAppSelector(selectAllTags);
   const filterTags = useAppSelector(selectFilterTags);
@@ -269,12 +270,34 @@ export const Asset = ({
     [dispatch, localTagList, assetId],
   );
 
-  const handleEditValueChange = useCallback(
-    (tagName: string, value: string) => {
-      setEditingTagName(tagName);
-      setEditTagValue(value);
+  // Track edit state changes and handle start/end of edit mode
+  const handleEditStateChange = useCallback(
+    (tagName: string, editing: boolean) => {
+      setIsEditing(editing);
+
+      if (editing) {
+        // Start of edit mode - set the tag being edited
+        setEditingTagName(tagName);
+      } else {
+        // End of edit mode - clear both states
+        setEditingTagName('');
+        setEditTagValue('');
+      }
     },
     [],
+  );
+
+  const handleEditValueChange = useCallback(
+    (tagName: string, value: string) => {
+      // Only update the tag being edited if we're not already tracking it
+      if (tagName && editingTagName === '') {
+        setEditingTagName(tagName);
+      }
+
+      // Always update the edit value
+      setEditTagValue(value);
+    },
+    [editingTagName],
   );
 
   // Check if the current edit value is a duplicate of another tag
@@ -327,13 +350,18 @@ export const Asset = ({
                   key={`${assetId}-${tagName}-${index}`}
                   id={tagName}
                   fade={
-                    // For add mode: fade tags except the one being typed (if it exists)
+                    // For add mode: fade tags except one matching current input
                     (newTagInput !== '' && newTagInput !== tagName) ||
                     // For edit mode: fade tags except the one being edited or one that matches current edit value
-                    // TODO: Need to disable controls but not fade when tag is not being edited but matches another tag that is being edited
-                    (editTagValue !== '' &&
+                    (isEditing &&
                       tagName !== editingTagName &&
                       tagName !== editTagValue)
+                  }
+                  nonInteractive={
+                    // Always make tags non-interactive when in edit mode, except for the tag being edited
+                    (isEditing && tagName !== editingTagName) ||
+                    // Always make tags non-interactive in add mode
+                    newTagInput !== ''
                   }
                   tagName={tagName}
                   tagState={tagsByStatus[tagName]}
@@ -343,6 +371,7 @@ export const Asset = ({
                   onEditTag={handleEditTag}
                   highlight={filterTagsSet.has(tagName)}
                   onEditValueChange={handleEditValueChange}
+                  onEditStateChange={handleEditStateChange}
                   isDuplicate={editingTagName === tagName && isEditingDuplicate}
                 />
               ))}
@@ -351,7 +380,7 @@ export const Asset = ({
         </DndContext>
 
         <div
-          className={`transition-all ${editTagValue !== '' ? 'pointer-events-none opacity-25' : ''}`}
+          className={`transition-all ${isEditing || editTagValue !== '' ? 'pointer-events-none opacity-25' : ''}`}
         >
           <TagInput
             inputValue={newTagInput}
@@ -359,6 +388,7 @@ export const Asset = ({
             onSubmit={(e: SyntheticEvent) => addNewTag(e, newTagInput)}
             mode="add"
             placeholder="Add tag..."
+            nonInteractive={isEditing}
           />
         </div>
       </div>

@@ -21,6 +21,7 @@ type TagInputProps = {
   placeholder?: string;
   mode: 'add' | 'edit';
   isDuplicate?: boolean;
+  nonInteractive?: boolean;
 };
 
 const TagInputComponent = ({
@@ -31,6 +32,7 @@ const TagInputComponent = ({
   placeholder = 'Add tag...',
   mode = 'add',
   isDuplicate,
+  nonInteractive = false,
 }: TagInputProps) => {
   // Reference to the input element to maintain focus
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,13 +40,23 @@ const TagInputComponent = ({
   // Allow submitting via Enter key
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && inputValue.trim() !== '' && !isDuplicate) {
+      if (
+        e.key === 'Enter' &&
+        inputValue.trim() !== '' &&
+        !isDuplicate &&
+        !nonInteractive
+      ) {
         onSubmit(e);
-      } else if (e.key === 'Escape' && mode === 'edit' && onCancel) {
+      } else if (
+        e.key === 'Escape' &&
+        mode === 'edit' &&
+        onCancel &&
+        !nonInteractive
+      ) {
         onCancel(e);
       }
     },
-    [inputValue, onSubmit, onCancel, mode, isDuplicate],
+    [inputValue, onSubmit, onCancel, mode, isDuplicate, nonInteractive],
   );
 
   // Calculate the width based on input length (between min and max width)
@@ -105,18 +117,20 @@ const TagInputComponent = ({
         onKeyUp={handleKeyPress}
         type="text"
         placeholder={placeholder}
-        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all`}
+        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all ${nonInteractive ? 'pointer-events-none' : ''}`}
       />
 
       {/* Render action buttons based on mode */}
       {mode === 'add' ? (
         <span
-          className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
-            inputValue.trim() !== ''
-              ? 'text-green-600 hover:bg-green-500 hover:text-white'
+          className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
+            inputValue.trim() !== '' && !nonInteractive
+              ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
               : 'cursor-not-allowed text-slate-300'
           }`}
-          onClick={inputValue.trim() !== '' ? onSubmit : undefined}
+          onClick={
+            inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
+          }
         >
           <PlusIcon />
         </span>
@@ -124,13 +138,14 @@ const TagInputComponent = ({
         <>
           <span
             className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 ${
-              !isDuplicate && inputValue.trim() !== ''
+              !isDuplicate && inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
             } rounded-full p-0.5`}
             onClick={(e) => {
               e.stopPropagation();
-              if (inputValue.trim() !== '' && !isDuplicate) onSubmit(e);
+              if (inputValue.trim() !== '' && !isDuplicate && !nonInteractive)
+                onSubmit(e);
             }}
             title={isDuplicate ? 'Tag name already exists' : 'Save tag'}
           >
@@ -138,10 +153,10 @@ const TagInputComponent = ({
           </span>
           {onCancel && (
             <span
-              className="absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 hover:bg-slate-500 hover:text-white"
+              className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
               onClick={(e) => {
                 e.stopPropagation();
-                onCancel(e);
+                if (!nonInteractive) onCancel(e);
               }}
               title="Cancel"
             >

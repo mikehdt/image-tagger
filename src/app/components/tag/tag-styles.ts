@@ -20,6 +20,7 @@ export function getTagStyles(
   highlight: boolean,
   fade: boolean,
   isDraggable: boolean = false,
+  nonInteractive: boolean = false,
 ): TagStyles {
   // Common base classes
   const baseTagClass =
@@ -61,7 +62,7 @@ export function getTagStyles(
   }
 
   return {
-    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25 pointer-events-none' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
+    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${fade || nonInteractive ? 'pointer-events-none' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
     tagTextClass: hasState(tagState, TagState.TO_DELETE) ? 'line-through' : '',
     countClass: `${baseCountClass} ${tagCountClasses}`,
   };

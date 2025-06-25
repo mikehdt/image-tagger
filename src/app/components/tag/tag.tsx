@@ -14,6 +14,7 @@ type TagProps = {
   highlight: boolean;
   fade: boolean;
   isDraggable?: boolean;
+  nonInteractive?: boolean; // Whether the tag should be non-interactive regardless of fade state
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   onEditTag?: (oldTagName: string, newTagName: string) => void;
@@ -29,6 +30,7 @@ const Tag = ({
   highlight,
   fade,
   isDraggable = false,
+  nonInteractive = false,
   onToggleTag,
   onDeleteTag,
   onEditTag,
@@ -67,11 +69,16 @@ const Tag = ({
   const handleCancelEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      setEditValue(tagName);
+      setEditValue(tagName); // Reset to original value
       setIsEditing(false);
+
+      // The order here matters - first notify about edit state change
       if (onEditStateChange) onEditStateChange(false);
+
+      // Then clear the edit value - this passes up through SortableTag to Asset
+      if (onEditValueChange) onEditValueChange('');
     },
-    [tagName, onEditStateChange],
+    [tagName, onEditStateChange, onEditValueChange],
   );
 
   // Update edit value when tagName changes (if not editing)
@@ -82,7 +89,13 @@ const Tag = ({
   }, [tagName, isEditing]);
 
   // Get styles from the extracted styling utility
-  const styles = getTagStyles(tagState, highlight, fade, isDraggable);
+  const styles = getTagStyles(
+    tagState,
+    highlight,
+    fade,
+    isDraggable,
+    nonInteractive,
+  );
   const handleToggleTag = useCallback(
     (e: SyntheticEvent) => {
       if (!isEditing) onToggleTag(e, tagName);
@@ -120,26 +133,35 @@ const Tag = ({
     <div className={styles.tagClass} onClick={handleToggleTag}>
       <span className={styles.countClass}>{count}</span>
       <span className={styles.tagTextClass}>{tagName}</span>
-      {hasState(tagState, TagState.TO_DELETE) ? (
-        <span className="ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-500 opacity-30">
-          <PencilIcon />
-        </span>
+      {hasState(tagState, TagState.TO_DELETE) || nonInteractive ? (
+        <>
+          <span className={`${tagButtonStyles.editButton} opacity-20`}>
+            <PencilIcon />
+          </span>
+
+          <span className={`${tagButtonStyles.deleteButton} opacity-20`}>
+            <XMarkIcon />
+          </span>
+        </>
       ) : (
-        <span
-          className={tagButtonStyles.editButton}
-          onClick={handleStartEdit}
-          title="Edit tag"
-        >
-          <PencilIcon />
-        </span>
+        <>
+          <span
+            className={tagButtonStyles.editButton}
+            onClick={handleStartEdit}
+            title="Edit tag"
+          >
+            <PencilIcon />
+          </span>
+
+          <span
+            className={tagButtonStyles.deleteButton}
+            onClick={handleDeleteTag}
+            title="Delete tag"
+          >
+            <XMarkIcon />
+          </span>
+        </>
       )}
-      <span
-        className={tagButtonStyles.deleteButton}
-        onClick={handleDeleteTag}
-        title="Delete tag"
-      >
-        <XMarkIcon />
-      </span>
     </div>
   );
 };
