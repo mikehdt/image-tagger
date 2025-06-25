@@ -1,6 +1,6 @@
-import { selectSaveProgress } from '../../store/assets';
-import { IoState } from '../../store/assets/types';
-import { useAppSelector } from '../../store/hooks';
+import { selectSaveProgress } from '../../../store/assets';
+import { IoState } from '../../../store/assets/types';
+import { useAppSelector } from '../../../store/hooks';
 
 type AssetActionsProps = {
   onSave: () => void;

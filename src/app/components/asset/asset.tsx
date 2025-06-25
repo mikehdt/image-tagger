@@ -45,7 +45,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { composeDimensions } from '../../utils/helpers';
 import { SortableTag } from '../tag/sortable-tag';
 import { TagInput } from '../tag/tag-input';
-import { AssetActions } from './asset-actions';
+import { AssetActions } from './components/asset-actions';
 
 type AssetProps = {
   assetId: string;
