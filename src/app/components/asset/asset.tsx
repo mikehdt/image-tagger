@@ -237,6 +237,16 @@ export const Asset = ({
     [],
   );
 
+  const handleCancelAdd = useCallback((e: SyntheticEvent) => {
+    e.stopPropagation();
+    // Clear the input field and optionally blur the input to remove focus
+    setNewTagInput('');
+    // Blur the input if we have access to it
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, []);
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -386,6 +396,7 @@ export const Asset = ({
             inputValue={newTagInput}
             onInputChange={handleInputChange}
             onSubmit={(e: SyntheticEvent) => addNewTag(e, newTagInput)}
+            onCancel={handleCancelAdd}
             mode="add"
             placeholder="Add tag..."
             nonInteractive={isEditing}

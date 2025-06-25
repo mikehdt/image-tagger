@@ -1,8 +1,5 @@
 import { MinusIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
-import type { SyntheticEvent } from 'react';
-import { memo, useCallback, useEffect, useState } from 'react';
-
-import { TagInput } from '@/app/components/tag/tag-input';
+import { memo, type SyntheticEvent, useCallback } from 'react';
 
 import { hasState, TagState } from '../../store/assets';
 import { getTagStyles, tagButtonStyles } from './tag-styles';
@@ -17,10 +14,7 @@ type TagProps = {
   nonInteractive?: boolean; // Whether the tag should be non-interactive regardless of fade state
   onToggleTag: (e: SyntheticEvent, tagName: string) => void;
   onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
-  onEditTag?: (oldTagName: string, newTagName: string) => void;
-  onEditStateChange?: (isEditing: boolean) => void;
-  onEditValueChange?: (value: string) => void;
-  isDuplicate?: boolean; // Whether the current edit value already exists
+  onStartEdit?: (e: SyntheticEvent) => void;
 };
 
 const Tag = ({
@@ -33,67 +27,8 @@ const Tag = ({
   nonInteractive = false,
   onToggleTag,
   onDeleteTag,
-  onEditTag,
-  onEditStateChange,
-  onEditValueChange,
-  isDuplicate = false,
+  onStartEdit,
 }: TagProps) => {
-  // State for managing edit mode
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(tagName);
-
-  // Define edit-related functions with useCallback to avoid dependency issues
-  const handleStartEdit = useCallback(
-    (e: SyntheticEvent) => {
-      e.stopPropagation();
-
-      // Don't allow editing of tags marked for deletion
-      if (hasState(tagState, TagState.TO_DELETE)) {
-        return;
-      }
-
-      setIsEditing(true);
-      setEditValue(tagName);
-      if (onEditStateChange) onEditStateChange(true);
-    },
-    [tagName, onEditStateChange, tagState],
-  );
-
-  const handleSaveEdit = useCallback(
-    (e: SyntheticEvent) => {
-      e.stopPropagation();
-      const trimmedValue = editValue.trim();
-      if (trimmedValue && trimmedValue !== tagName && onEditTag) {
-        onEditTag(tagName, trimmedValue);
-      }
-      setIsEditing(false);
-      if (onEditStateChange) onEditStateChange(false);
-    },
-    [editValue, tagName, onEditTag, onEditStateChange],
-  );
-
-  const handleCancelEdit = useCallback(
-    (e: SyntheticEvent) => {
-      e.stopPropagation();
-      setEditValue(tagName); // Reset to original value
-      setIsEditing(false);
-
-      // The order here matters - first notify about edit state change
-      if (onEditStateChange) onEditStateChange(false);
-
-      // Then clear the edit value - this passes up through SortableTag to Asset
-      if (onEditValueChange) onEditValueChange('');
-    },
-    [tagName, onEditStateChange, onEditValueChange],
-  );
-
-  // Update edit value when tagName changes (if not editing)
-  useEffect(() => {
-    if (!isEditing) {
-      setEditValue(tagName);
-    }
-  }, [tagName, isEditing]);
-
   // Get styles from the extracted styling utility
   const styles = getTagStyles(
     tagState,
@@ -102,11 +37,12 @@ const Tag = ({
     isDraggable,
     nonInteractive,
   );
+
   const handleToggleTag = useCallback(
     (e: SyntheticEvent) => {
-      if (!isEditing) onToggleTag(e, tagName);
+      onToggleTag(e, tagName);
     },
-    [isEditing, onToggleTag, tagName],
+    [onToggleTag, tagName],
   );
 
   const handleDeleteTag = useCallback(
@@ -117,26 +53,23 @@ const Tag = ({
     [onDeleteTag, tagName],
   );
 
-  return isEditing ? (
-    <span className="mb-2 flex">
-      <TagInput
-        inputValue={editValue}
-        onInputChange={(e) => {
-          const newValue = e.target.value;
-          setEditValue(newValue);
-          if (onEditValueChange) {
-            onEditValueChange(newValue);
-          }
-        }}
-        onSubmit={handleSaveEdit}
-        onCancel={handleCancelEdit}
-        placeholder="Edit tag..."
-        mode="edit"
-        isDuplicate={isDuplicate}
-        nonInteractive={nonInteractive}
-      />
-    </span>
-  ) : (
+  const handleStartEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+
+      // Don't allow editing of tags marked for deletion
+      if (hasState(tagState, TagState.TO_DELETE)) {
+        return;
+      }
+
+      if (onStartEdit) {
+        onStartEdit(e);
+      }
+    },
+    [tagState, onStartEdit],
+  );
+
+  return (
     <div className={styles.tagClass} onClick={handleToggleTag}>
       <span className={styles.countClass}>{count}</span>
       <span className={styles.tagTextClass}>{tagName}</span>
@@ -199,6 +132,7 @@ const Tag = ({
   );
 };
 
+// Memoize the component for better performance
 const MemoizedTag = memo(Tag);
 
 export { MemoizedTag as Tag };

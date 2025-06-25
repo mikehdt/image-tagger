@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 
 // Configuration constants
@@ -17,7 +18,7 @@ type TagInputProps = {
   inputValue: string;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: SyntheticEvent) => void;
-  onCancel?: (e: SyntheticEvent) => void;
+  onCancel: (e: SyntheticEvent) => void;
   placeholder?: string;
   mode: 'add' | 'edit';
   isDuplicate?: boolean;
@@ -36,8 +37,25 @@ const TagInputComponent = ({
 }: TagInputProps) => {
   // Reference to the input element to maintain focus
   const inputRef = useRef<HTMLInputElement>(null);
+  // Track if the input is focused for showing/hiding controls in add mode
+  const [isFocused, setIsFocused] = useState(mode === 'edit');
 
-  // Allow submitting via Enter key
+  // Handle focus and blur events
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    // Only hide buttons in add mode, edit mode always shows buttons
+    if (mode === 'add') {
+      // Small delay to allow button clicks to register before hiding
+      setTimeout(() => {
+        setIsFocused(false);
+      }, 100);
+    }
+  }, [mode]);
+
+  // Allow submitting via Enter key and canceling via Escape
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (
@@ -47,12 +65,8 @@ const TagInputComponent = ({
         !nonInteractive
       ) {
         onSubmit(e);
-      } else if (
-        e.key === 'Escape' &&
-        mode === 'edit' &&
-        onCancel &&
-        !nonInteractive
-      ) {
+      } else if (e.key === 'Escape' && !nonInteractive) {
+        // Support escape key in both add and edit modes
         onCancel(e);
       } else if (
         e.key === 'Enter' &&
@@ -62,7 +76,7 @@ const TagInputComponent = ({
         e.preventDefault();
       }
     },
-    [inputValue, onSubmit, onCancel, mode, isDuplicate, nonInteractive],
+    [inputValue, onSubmit, onCancel, isDuplicate, nonInteractive],
   );
 
   // Calculate the width based on input length (between min and max width)
@@ -85,7 +99,7 @@ const TagInputComponent = ({
         (length - MIN_TAG_LENGTH) / (MAX_TAG_LENGTH - MIN_TAG_LENGTH); // 0 to 1 scale
       // Maps to tailwind w classes between w-36 and w-64
       const widthClasses = [
-        'w-36',
+        // 'w-36',
         'w-40',
         'w-44',
         'w-48',
@@ -124,33 +138,43 @@ const TagInputComponent = ({
         type="text"
         placeholder={placeholder}
         tabIndex={nonInteractive ? -1 : 0}
-        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all ${nonInteractive ? 'pointer-events-none' : ''}`}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 pe-14 transition-all ${nonInteractive ? 'pointer-events-none' : ''} ${isFocused ? 'ring-2 ring-blue-500' : ''}`}
       />
 
       {/* Render action buttons based on mode */}
       {mode === 'add' ? (
         <>
           <span
-            className="absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 hover:bg-slate-500 hover:text-white"
-            onClick={() => {}}
+            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
+              inputValue.trim() !== '' && !nonInteractive
+                ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
+                : 'cursor-not-allowed text-slate-300'
+            } ${mode === 'add' && !isFocused ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+            onClick={
+              inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
+            }
             tabIndex={nonInteractive ? -1 : 0}
-            title="Cancel"
+            title="Add tag"
           >
-            <XMarkIcon />
+            <PlusIcon />
           </span>
 
           <span
             className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
               inputValue.trim() !== '' && !nonInteractive
-                ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
+                ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
-            }`}
-            onClick={
-              inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
-            }
-            tabIndex={nonInteractive ? -1 : 0}
+            } ${mode === 'add' && !isFocused ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (inputValue.trim() !== '' && !nonInteractive) onCancel(e);
+            }}
+            tabIndex={nonInteractive || inputValue.trim() === '' ? -1 : 0}
+            title="Cancel"
           >
-            <PlusIcon />
+            <XMarkIcon />
           </span>
         </>
       ) : (
@@ -172,19 +196,17 @@ const TagInputComponent = ({
             <CheckIcon />
           </span>
 
-          {onCancel && (
-            <span
-              className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!nonInteractive) onCancel(e);
-              }}
-              tabIndex={nonInteractive ? -1 : 0}
-              title={isDuplicate ? 'Cancel (duplicate tag)' : 'Cancel'}
-            >
-              <XMarkIcon />
-            </span>
-          )}
+          <span
+            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!nonInteractive) onCancel(e);
+            }}
+            tabIndex={nonInteractive ? -1 : 0}
+            title={isDuplicate ? 'Cancel (duplicate tag)' : 'Cancel'}
+          >
+            <XMarkIcon />
+          </span>
         </>
       )}
     </div>

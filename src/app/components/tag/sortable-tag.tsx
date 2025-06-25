@@ -1,8 +1,11 @@
+// External imports
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { memo, type SyntheticEvent, useRef, useState } from 'react';
+import type { ChangeEvent, SyntheticEvent } from 'react';
+import { memo, useRef, useState } from 'react';
 
 import { Tag } from './tag';
+import { TagInput } from './tag-input';
 
 type SortableTagProps = {
   id: string;
@@ -37,6 +40,7 @@ const SortableTag = ({
 }: SortableTagProps) => {
   // Track whether the tag is currently being edited
   const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(tagName);
 
   const {
     attributes,
@@ -96,7 +100,12 @@ const SortableTag = ({
       onEditStateChange(tagName, editing);
     }
 
-    // When editing starts, set an empty value to trigger fading
+    // When editing ends, reset the edit value
+    if (!editing) {
+      setEditValue(tagName);
+    }
+
+    // When editing starts, set current value
     // When editing ends, reset the edit value
     if (onEditValueChange) {
       if (editing) {
@@ -107,11 +116,35 @@ const SortableTag = ({
     }
   };
 
-  // Handler for tracking edit input value
-  const handleEditValueChange = (value: string) => {
+  // Handler for input value changes
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setEditValue(newValue);
     if (onEditValueChange) {
-      onEditValueChange(tagName, value);
+      onEditValueChange(tagName, newValue);
     }
+  };
+
+  // Handler for saving edits
+  const handleSaveEdit = (e: SyntheticEvent) => {
+    e.stopPropagation();
+    const trimmedValue = editValue.trim();
+    if (trimmedValue && trimmedValue !== tagName && onEditTag) {
+      onEditTag(tagName, trimmedValue);
+    }
+    handleEditStateChange(false);
+  };
+
+  // Handler for canceling edits
+  const handleCancelEdit = (e: SyntheticEvent) => {
+    e.stopPropagation();
+    handleEditStateChange(false);
+  };
+
+  // Handler for starting edit mode
+  const handleStartEdit = (e: SyntheticEvent) => {
+    e.stopPropagation();
+    handleEditStateChange(true);
   };
 
   return (
@@ -124,21 +157,33 @@ const SortableTag = ({
       className={`touch-none ${nonInteractive ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
-      <Tag
-        tagName={tagName}
-        tagState={tagState}
-        count={count}
-        highlight={highlight}
-        fade={fade}
-        nonInteractive={nonInteractive}
-        onToggleTag={onToggleTag}
-        onDeleteTag={onDeleteTag}
-        onEditTag={onEditTag}
-        isDraggable={!isEditing}
-        onEditStateChange={handleEditStateChange}
-        onEditValueChange={handleEditValueChange}
-        isDuplicate={isDuplicate}
-      />
+      {isEditing ? (
+        <span className="mb-2 flex">
+          <TagInput
+            inputValue={editValue}
+            onInputChange={handleInputChange}
+            onSubmit={handleSaveEdit}
+            onCancel={handleCancelEdit}
+            placeholder="Edit tag..."
+            mode="edit"
+            isDuplicate={isDuplicate}
+            nonInteractive={nonInteractive}
+          />
+        </span>
+      ) : (
+        <Tag
+          tagName={tagName}
+          tagState={tagState}
+          count={count}
+          highlight={highlight}
+          fade={fade}
+          nonInteractive={nonInteractive}
+          onToggleTag={onToggleTag}
+          onDeleteTag={onDeleteTag}
+          onStartEdit={handleStartEdit}
+          isDraggable={!isEditing}
+        />
+      )}
     </div>
   );
 };
@@ -155,7 +200,8 @@ const areSortableTagsEqual = (
     prevProps.count === nextProps.count &&
     prevProps.highlight === nextProps.highlight &&
     prevProps.fade === nextProps.fade &&
-    prevProps.nonInteractive === nextProps.nonInteractive
+    prevProps.nonInteractive === nextProps.nonInteractive &&
+    prevProps.isDuplicate === nextProps.isDuplicate
     // Functions references should be stable from parent with useCallback
   );
 };
