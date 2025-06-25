@@ -5,18 +5,37 @@ import {
   getSizeSortOptions,
   getTagSortOptions,
 } from '../components';
+import { usePersistentFilterState } from '../persistent-filter-context';
 import { FilterView, SortDirection, SortType } from '../types';
 
 export const useFilterState = (
   inputRef: RefObject<HTMLInputElement | null>,
 ) => {
-  // Add state for active view
-  const [activeView, setActiveView] = useState<FilterView>('tag');
+  // Use persistent context
+  const {
+    activeView,
+    setActiveView,
+    tagSortSettings,
+    setTagSortSettings,
+    sizeSortSettings,
+    setSizeSortSettings,
+    filetypeSortSettings,
+    setFiletypeSortSettings,
+  } = usePersistentFilterState();
+
+  // Initialize sort settings based on active view
+  const initialSettings =
+    activeView === 'tag'
+      ? tagSortSettings
+      : activeView === 'size'
+        ? sizeSortSettings
+        : filetypeSortSettings;
 
   // Add state for sort direction and type
-  const [sortType, setSortType] = useState<SortType>('count');
-  // Default to 'desc' for count (large to small) and 'asc' for others
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortType, setSortType] = useState<SortType>(initialSettings.type);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    initialSettings.direction,
+  );
 
   // Add state for search term - used for filtering tags, sizes, or filetypes
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,32 +66,91 @@ export const useFilterState = (
     }
   }, [activeView, sortType, sortDirection]);
 
-  // Reset sorting and keyboard navigation when switching views
+  // Track previous active view to know when it changes
+  const [previousView, setPreviousView] = useState<FilterView>(activeView);
+
+  // Save sort settings before view changes
+  const saveSortSettings = useCallback(() => {
+    if (previousView === 'tag') {
+      setTagSortSettings({ type: sortType, direction: sortDirection });
+    } else if (previousView === 'size') {
+      setSizeSortSettings({ type: sortType, direction: sortDirection });
+    } else {
+      setFiletypeSortSettings({ type: sortType, direction: sortDirection });
+    }
+  }, [
+    previousView,
+    sortType,
+    sortDirection,
+    setTagSortSettings,
+    setSizeSortSettings,
+    setFiletypeSortSettings,
+  ]);
+
+  // Apply saved sort settings when switching views
   useEffect(() => {
-    // Default to count sorting when switching views
-    setSortType('count');
-    // Set default direction to 'desc' for count (large to small)
-    setSortDirection('desc');
-    // Reset list length to ensure proper keyboard navigation
-    setListLength(0);
-    // Reset selected index (redundant with button click handlers, but adds safety)
-    setSelectedIndex(-1);
+    // If the view has changed
+    if (activeView !== previousView) {
+      // Save settings from the previous view first
+      saveSortSettings();
 
-    // Focus the input field when switching views (if it exists)
-    // Use a small timeout to ensure the DOM is ready
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
+      // Update previous view tracker
+      setPreviousView(activeView);
+
+      // Determine which settings to load based on the new active view
+      let settings;
+      if (activeView === 'tag') {
+        settings = tagSortSettings;
+      } else if (activeView === 'size') {
+        settings = sizeSortSettings;
+      } else {
+        settings = filetypeSortSettings;
       }
-    }, 0);
-  }, [activeView, inputRef]);
 
-  // Update sort direction when sort type changes
+      // Restore sort settings for the current view
+      setSortType(settings.type);
+      setSortDirection(settings.direction);
+
+      // Reset list length and selected index
+      setListLength(0);
+      setSelectedIndex(-1);
+
+      // Focus the input field when switching views (if it exists)
+      // Use a small timeout to ensure the DOM is ready
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  }, [
+    activeView,
+    previousView,
+    saveSortSettings,
+    tagSortSettings,
+    sizeSortSettings,
+    filetypeSortSettings,
+    inputRef,
+  ]);
+
+  // Save settings when sort type or direction changes
+  useEffect(() => {
+    // Only save if this isn't the initial render and we're not in the middle of a view change
+    if (activeView === previousView) {
+      saveSortSettings();
+    }
+  }, [sortType, sortDirection, activeView, previousView, saveSortSettings]);
+
+  // Function to update sort type with appropriate direction
   const updateSortType = useCallback((newSortType: SortType) => {
-    setSortType(newSortType);
-    // Set default direction based on sort type
+    // Batch the state updates to avoid triggering multiple renders
     if (newSortType === 'count') {
-      setSortDirection('desc'); // Large to small for counts
+      // For count, always set direction to desc (large to small)
+      setSortType(newSortType);
+      setSortDirection('desc');
+    } else {
+      // For other types, just update the type
+      setSortType(newSortType);
     }
   }, []);
 
@@ -82,7 +160,7 @@ export const useFilterState = (
     sortDirection,
     setSortDirection,
     sortType,
-    setSortType: updateSortType, // Use the updated function here
+    setSortType: updateSortType, // Use our updated function here
     searchTerm,
     setSearchTerm,
     selectedIndex,

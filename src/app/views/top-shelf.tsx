@@ -11,6 +11,7 @@ import {
 import { useRef, useState } from 'react';
 
 import { FilterList } from '../components/filter-list/filter-list';
+import { PersistentFilterProvider } from '../components/filter-list/persistent-filter-context';
 import { Loader } from '../components/loader';
 import {
   IoState,
@@ -208,7 +209,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
-                className={`flex cursor-pointer items-center rounded-sm px-2 py-1 ${
+                className={`flex cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
                   filterTagsMode === FilterMode.SHOW_ALL
                     ? 'bg-white shadow-sm'
                     : 'hover:bg-slate-300'
@@ -219,7 +220,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
-                className={`flex items-center rounded-sm px-2 py-1 ${
+                className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
                   filterTagsMode === FilterMode.MATCH_ANY
                     ? 'bg-white shadow-sm'
                     : ''
@@ -231,7 +232,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
-                className={`flex items-center rounded-sm px-2 py-1 ${
+                className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
                   filterTagsMode === FilterMode.MATCH_ALL
                     ? 'bg-white shadow-sm'
                     : ''
@@ -246,7 +247,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={() => dispatch(toggleModifiedFilter())}
-                className={`rounded-sm p-1 px-2 ${
+                className={`rounded-sm p-1 px-2 transition-colors ${
                   filterModifiedActive ? 'bg-white shadow-sm' : ''
                 } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}
                 disabled={!hasModifiedAssets}
@@ -260,7 +261,7 @@ export const TopShelf = () => {
           <div className="relative" ref={tagButtonRef}>
             <span
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className={`inline-flex cursor-pointer items-center rounded-md p-2 ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
+              className={`inline-flex cursor-pointer items-center rounded-md p-2 transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
               title="Show tag summary"
             >
               <TagIcon className="w-4" />
@@ -268,11 +269,13 @@ export const TopShelf = () => {
             </span>
 
             {/* Tag panel component */}
-            <FilterList
-              isOpen={isTagPanelOpen}
-              onClose={() => setIsTagPanelOpen(false)}
-              containerRef={tagButtonRef}
-            />
+            <PersistentFilterProvider>
+              <FilterList
+                isOpen={isTagPanelOpen}
+                onClose={() => setIsTagPanelOpen(false)}
+                containerRef={tagButtonRef}
+              />
+            </PersistentFilterProvider>
           </div>
         </div>
       </div>

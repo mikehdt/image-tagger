@@ -11,16 +11,6 @@ export type SortDirection = 'asc' | 'desc';
 // Define view types
 export type FilterView = 'tag' | 'size' | 'filetype';
 
-// Props for the filter view components
-export interface FilterViewProps {
-  sortType: SortType;
-  sortDirection: SortDirection;
-  searchTerm?: string;
-  selectedIndex?: number;
-  updateListLength?: (length: number) => void;
-  onItemSelect?: (index: number) => void;
-}
-
 // Base props for the filter list component
 export interface FilterListProps {
   isOpen: boolean;

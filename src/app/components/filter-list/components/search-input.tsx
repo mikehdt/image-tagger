@@ -21,7 +21,7 @@ export const SearchInput = () => {
         className={`absolute top-1.5 right-4 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
           searchTerm.trim() !== ''
             ? 'text-slate-600 hover:bg-slate-500 hover:text-white'
-            : 'cursor-not-allowed text-gray-300'
+            : 'cursor-not-allowed text-slate-300'
         }`}
         onClick={searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined}
       >

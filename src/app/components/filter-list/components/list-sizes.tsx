@@ -152,14 +152,12 @@ const SizeVisualizer = ({
   boxHeight = Math.max(boxHeight, 8);
 
   return (
-    <div className={`mr-2 w-10 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
-      <div
-        className={`border ${
-          isActive ? 'border-sky-400 bg-sky-200' : 'bg-slate-50'
-        }`}
-        style={{ width: boxWidth, height: boxHeight }}
-      />
-    </div>
+    <div
+      className={`border ${
+        isActive ? 'border-sky-500 bg-sky-200' : 'border-slate-300 bg-slate-50'
+      }`}
+      style={{ width: boxWidth, height: boxHeight }}
+    />
   );
 };
 
@@ -268,7 +266,7 @@ const SizeInfo = ({
     return (
       <>
         <div className="flex items-center justify-between">
-          <span className="font-medium">
+          <span>
             <span className="text-slate-800">{item.ratio}</span>{' '}
             <span className="text-sm text-slate-500">({item.type})</span>
           </span>
@@ -293,9 +291,7 @@ const SizeInfo = ({
     return (
       <>
         <div className="flex items-center justify-between">
-          <span className="font-medium">
-            <span className="text-slate-800">{formattedMP}</span>
-          </span>
+          <span className="text-slate-800">{formattedMP}</span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>
         </div>
         <div className="flex text-xs">
@@ -315,7 +311,7 @@ const SizeInfo = ({
     return (
       <>
         <div className="flex items-center justify-between">
-          <span className="font-medium text-slate-800">
+          <span className="text-slate-800">
             {searchTerm
               ? highlightMatches(item.dimensions, searchTerm)
               : formatDimensions(item.dimensions)}
@@ -514,7 +510,12 @@ export const SizesView = () => {
                     : 'hover:bg-blue-50'
               }`}
             >
-              <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
+              <div className="mr-2 flex w-10 justify-center">
+                <SizeVisualizer
+                  size={item.dimensions}
+                  isActive={item.isActive}
+                />
+              </div>
 
               <div className="flex flex-1 flex-col">
                 <SizeInfo

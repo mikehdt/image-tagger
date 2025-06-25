@@ -114,7 +114,7 @@ const TagInputComponent = ({
           className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 ${
             inputValue.trim() !== ''
               ? 'text-green-600 hover:bg-green-500 hover:text-white'
-              : 'cursor-not-allowed text-gray-300'
+              : 'cursor-not-allowed text-slate-300'
           }`}
           onClick={inputValue.trim() !== '' ? onSubmit : undefined}
         >
@@ -126,7 +126,7 @@ const TagInputComponent = ({
             className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 ${
               !isDuplicate && inputValue.trim() !== ''
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
-                : 'cursor-not-allowed text-gray-300'
+                : 'cursor-not-allowed text-slate-300'
             } rounded-full p-0.5`}
             onClick={(e) => {
               e.stopPropagation();
@@ -138,7 +138,7 @@ const TagInputComponent = ({
           </span>
           {onCancel && (
             <span
-              className="absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-gray-600 hover:bg-gray-500 hover:text-white"
+              className="absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 hover:bg-slate-500 hover:text-white"
               onClick={(e) => {
                 e.stopPropagation();
                 onCancel(e);

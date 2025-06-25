@@ -22,7 +22,7 @@ export const ViewSelector = () => {
       <button
         type="button"
         onClick={() => handleViewChange('tag')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
+        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
           activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
         }`}
       >
@@ -31,7 +31,7 @@ export const ViewSelector = () => {
       <button
         type="button"
         onClick={() => handleViewChange('size')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
+        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
           activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
         }`}
       >
@@ -40,7 +40,7 @@ export const ViewSelector = () => {
       <button
         type="button"
         onClick={() => handleViewChange('filetype')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 ${
+        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
           activeView === 'filetype'
             ? 'bg-white shadow-sm'
             : 'hover:bg-slate-300'
@@ -50,7 +50,7 @@ export const ViewSelector = () => {
       </button>
       <button
         onClick={onClose}
-        className="ml-2 cursor-pointer rounded-full p-1 hover:bg-slate-200"
+        className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200"
         title="Close filter list"
       >
         <XMarkIcon className="h-4 w-4" />

@@ -44,7 +44,7 @@ export const FilterControls = () => {
     <>
       <button
         onClick={() => setSortType(getSortOptions().nextType)}
-        className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
+        className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs transition-colors hover:bg-slate-100"
         title="Toggle sort type"
       >
         By {getSortOptions().typeLabel}
@@ -56,7 +56,7 @@ export const FilterControls = () => {
             sortDirection === 'asc' ? 'desc' : 'asc';
           setSortDirection(newDirection);
         }}
-        className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs hover:bg-slate-100"
+        className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs transition-colors hover:bg-slate-100"
         title="Toggle sort direction"
       >
         Sort {getSortOptions().directionLabel}
@@ -64,7 +64,7 @@ export const FilterControls = () => {
 
       <button
         onClick={handleClearFilters}
-        className={`ml-auto rounded border border-slate-200 px-2 py-1 text-xs ${
+        className={`ml-auto rounded border border-slate-200 px-2 py-1 text-xs transition-colors ${
           !isButtonDisabled
             ? 'cursor-pointer bg-white hover:bg-slate-100'
             : 'cursor-not-allowed bg-slate-50 text-slate-400'

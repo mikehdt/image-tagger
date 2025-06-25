@@ -76,7 +76,7 @@ export const tagButtonStyles = {
   saveButton:
     'ml-1 inline-flex w-5 cursor-pointer rounded-full p-0.5 text-green-600 hover:bg-green-500 hover:text-white',
   cancelButton:
-    'ml-1 inline-flex w-5 cursor-pointer rounded-full p-0.5 text-gray-600 hover:bg-gray-500 hover:text-white',
+    'ml-1 inline-flex w-5 cursor-pointer rounded-full p-0.5 text-slate-600 hover:bg-slate-500 hover:text-white',
   inputField:
     'min-w-24 rounded-md bg-white px-2 py-0.5 text-sm outline-none focus:ring-0',
 };

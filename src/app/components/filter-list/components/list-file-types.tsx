@@ -115,7 +115,7 @@ export const FiletypesView = () => {
   return (
     <div className="max-h-80 overflow-y-auto">
       {extensionList.length === 0 ? (
-        <div className="px-4 py-2 text-sm text-gray-500">
+        <div className="px-4 py-2 text-sm text-slate-500">
           No file extensions available
         </div>
       ) : (
