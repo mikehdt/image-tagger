@@ -54,6 +54,12 @@ const TagInputComponent = ({
         !nonInteractive
       ) {
         onCancel(e);
+      } else if (
+        e.key === 'Enter' &&
+        (isDuplicate || inputValue.trim() === '')
+      ) {
+        // Prevent default behavior for Enter when we have a duplicate or empty value
+        e.preventDefault();
       }
     },
     [inputValue, onSubmit, onCancel, mode, isDuplicate, nonInteractive],
@@ -117,23 +123,36 @@ const TagInputComponent = ({
         onKeyUp={handleKeyPress}
         type="text"
         placeholder={placeholder}
+        tabIndex={nonInteractive ? -1 : 0}
         className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 ${mode === 'edit' && onCancel ? 'pe-12' : 'pe-8'} transition-all ${nonInteractive ? 'pointer-events-none' : ''}`}
       />
 
       {/* Render action buttons based on mode */}
       {mode === 'add' ? (
-        <span
-          className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
-            inputValue.trim() !== '' && !nonInteractive
-              ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
-              : 'cursor-not-allowed text-slate-300'
-          }`}
-          onClick={
-            inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
-          }
-        >
-          <PlusIcon />
-        </span>
+        <>
+          <span
+            className="absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 hover:bg-slate-500 hover:text-white"
+            onClick={() => {}}
+            tabIndex={nonInteractive ? -1 : 0}
+            title="Cancel"
+          >
+            <XMarkIcon />
+          </span>
+
+          <span
+            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
+              inputValue.trim() !== '' && !nonInteractive
+                ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
+                : 'cursor-not-allowed text-slate-300'
+            }`}
+            onClick={
+              inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
+            }
+            tabIndex={nonInteractive ? -1 : 0}
+          >
+            <PlusIcon />
+          </span>
+        </>
       ) : (
         <>
           <span
@@ -147,10 +166,12 @@ const TagInputComponent = ({
               if (inputValue.trim() !== '' && !isDuplicate && !nonInteractive)
                 onSubmit(e);
             }}
+            tabIndex={isDuplicate || nonInteractive ? -1 : 0}
             title={isDuplicate ? 'Tag name already exists' : 'Save tag'}
           >
             <CheckIcon />
           </span>
+
           {onCancel && (
             <span
               className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
@@ -158,7 +179,8 @@ const TagInputComponent = ({
                 e.stopPropagation();
                 if (!nonInteractive) onCancel(e);
               }}
-              title="Cancel"
+              tabIndex={nonInteractive ? -1 : 0}
+              title={isDuplicate ? 'Cancel (duplicate tag)' : 'Cancel'}
             >
               <XMarkIcon />
             </span>

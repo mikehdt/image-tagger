@@ -118,10 +118,10 @@ const SortableTag = ({
     <div
       ref={setRefs}
       style={style}
-      // Don't apply drag attributes or listeners when editing, faded, or explicitly non-interactive
-      {...(isEditing || fade || nonInteractive ? {} : attributes)}
-      {...(isEditing || fade || nonInteractive ? {} : listeners)}
-      className={`touch-none ${fade || nonInteractive ? 'pointer-events-none' : ''}`}
+      // Don't apply drag attributes or listeners when editing or explicitly non-interactive
+      {...(isEditing || nonInteractive ? {} : attributes)}
+      {...(isEditing || nonInteractive ? {} : listeners)}
+      className={`touch-none ${nonInteractive ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
       <Tag

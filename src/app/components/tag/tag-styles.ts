@@ -62,7 +62,7 @@ export function getTagStyles(
   }
 
   return {
-    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${fade || nonInteractive ? 'pointer-events-none' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
+    tagClass: `${baseTagClass} ${tagStateClasses} ${fade ? 'opacity-25' : ''} ${nonInteractive ? 'pointer-events-none' : ''} ${isDraggable ? 'cursor-grab active:cursor-grabbing' : ''}`,
     tagTextClass: hasState(tagState, TagState.TO_DELETE) ? 'line-through' : '',
     countClass: `${baseCountClass} ${tagCountClasses}`,
   };
@@ -70,10 +70,8 @@ export function getTagStyles(
 
 // Additional styled elements for the tag component
 export const tagButtonStyles = {
-  editButton:
-    'ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-500 hover:bg-blue-500 hover:text-white',
-  deleteButton:
-    'ml-1 inline-flex w-5 rounded-full p-0.5 hover:bg-pink-500 hover:text-white',
+  editButton: 'ml-1 inline-flex w-5 rounded-full p-0.5 text-slate-500',
+  deleteButton: 'ml-1 inline-flex w-5 rounded-full p-0.5',
   saveButton:
     'ml-1 inline-flex w-5 cursor-pointer rounded-full p-0.5 text-green-600 hover:bg-green-500 hover:text-white',
   cancelButton:
