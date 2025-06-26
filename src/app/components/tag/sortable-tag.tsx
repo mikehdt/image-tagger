@@ -4,9 +4,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent } from 'react';
 import { memo, useRef } from 'react';
 
-import { Tag } from './tag';
+import { Tag, TagInput } from './components';
 import { useTagContext } from './tag-context';
-import { TagInput } from './tag-input';
 
 type SortableTagProps = {
   id: string;

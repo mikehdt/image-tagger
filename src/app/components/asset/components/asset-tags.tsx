@@ -2,9 +2,9 @@ import { closestCenter, DndContext } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { SyntheticEvent } from 'react';
 
+import { TagInput } from '../../tag/components';
 import { SortableTag } from '../../tag/sortable-tag';
 import { TagProvider, useTagContext } from '../../tag/tag-context';
-import { TagInput } from '../../tag/tag-input';
 import { useAssetTags, useDragDrop } from '../hooks';
 
 type AssetTagsProps = {

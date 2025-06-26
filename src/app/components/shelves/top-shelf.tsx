@@ -62,6 +62,9 @@ export const TopShelf = () => {
     filterExtensions.length ||
     filterModifiedActive;
 
+  const filterSelectionActive =
+    filterTags.length || filterSizes.length || filterExtensions.length;
+
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center">
@@ -178,6 +181,29 @@ export const TopShelf = () => {
             </>
           ) : null}
 
+          <div className="mr-4 flex cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
+            <span
+              className={`px-2 text-sky-500 ${filterSizes.length ? 'bg-sky-100' : ''}`}
+              title="Active size filters"
+            >
+              {filterSizes.length || '-'}
+            </span>
+
+            <span
+              className={`px-2 text-emerald-500 ${filterTags.length ? 'bg-emerald-100' : ''}`}
+              title="Active tag filters"
+            >
+              {filterTags.length || '-'}
+            </span>
+
+            <span
+              className={`px-2 text-stone-500 ${filterExtensions.length ? 'bg-stone-100' : ''}`}
+              title="Active filetype filters"
+            >
+              {filterExtensions.length || '-'}
+            </span>
+          </div>
+
           <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
             <span className="mr-1 py-1">
               {filterTagsMode === FilterMode.SHOW_ALL ? (
@@ -188,7 +214,7 @@ export const TopShelf = () => {
             </span>
 
             <div
-              className={`mr-2 flex items-center rounded-sm ${filterActive ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+              className={`mr-2 flex items-center rounded-sm ${filterSelectionActive ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
             >
               <button
                 type="button"
@@ -208,8 +234,8 @@ export const TopShelf = () => {
                   filterTagsMode === FilterMode.MATCH_ANY
                     ? 'bg-white shadow-sm'
                     : ''
-                } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-                disabled={!filterActive}
+                } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+                disabled={!filterSelectionActive}
               >
                 Match Any
               </button>
@@ -220,8 +246,8 @@ export const TopShelf = () => {
                   filterTagsMode === FilterMode.MATCH_ALL
                     ? 'bg-white shadow-sm'
                     : ''
-                } ${filterActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-                disabled={!filterActive}
+                } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+                disabled={!filterSelectionActive}
               >
                 Match All
               </button>
@@ -245,35 +271,6 @@ export const TopShelf = () => {
 
           {/* Tag summary list button */}
           <div className="relative" ref={tagButtonRef}>
-            {filterActive ? (
-              <span className="absolute flex h-0 cursor-pointer flex-col rounded-sm text-center text-xs leading-3.5 tabular-nums">
-                {filterTags.length ? (
-                  <span
-                    className="bg-emerald-100 px-2 text-emerald-500"
-                    title="Tag filters active"
-                  >
-                    {filterTags.length}
-                  </span>
-                ) : null}
-                {filterSizes.length ? (
-                  <span
-                    className="bg-sky-100 px-2 text-sky-500"
-                    title="Size filters active"
-                  >
-                    {filterSizes.length}
-                  </span>
-                ) : null}
-                {filterExtensions.length ? (
-                  <span
-                    className="bg-stone-100 px-2 text-stone-500"
-                    title="Filetype filters active"
-                  >
-                    {filterExtensions.length}
-                  </span>
-                ) : null}
-              </span>
-            ) : null}
-
             <div
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
               className={`inline-flex cursor-pointer items-center rounded-md p-2 transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
