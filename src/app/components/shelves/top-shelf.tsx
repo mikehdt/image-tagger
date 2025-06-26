@@ -10,9 +10,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useRef, useState } from 'react';
 
-import { FilterList } from '../components/filter-list/filter-list';
-import { PersistentFilterProvider } from '../components/filter-list/persistent-filter-context';
-import { Loader } from '../components/loader';
 import {
   IoState,
   loadAllAssets,
@@ -23,7 +20,7 @@ import {
   selectIoState,
   selectLoadProgress,
   selectSaveProgress,
-} from '../store/assets';
+} from '../../store/assets';
 import {
   clearFilters,
   FilterMode,
@@ -34,8 +31,11 @@ import {
   selectShowModified,
   setTagFilterMode,
   toggleModifiedFilter,
-} from '../store/filters';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+} from '../../store/filters';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { FilterList } from '../filter-list/filter-list';
+import { PersistentFilterProvider } from '../filter-list/persistent-filter-context';
+import { Loader } from '../loader';
 
 export const TopShelf = () => {
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
@@ -178,33 +178,6 @@ export const TopShelf = () => {
             </>
           ) : null}
 
-          <div className="mr-4 flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3.5 tabular-nums">
-            {filterTags.length ? (
-              <span
-                className="bg-emerald-100 px-2 text-emerald-500"
-                title="Tag filters active"
-              >
-                {filterTags.length}
-              </span>
-            ) : null}
-            {filterSizes.length ? (
-              <span
-                className="bg-sky-100 px-2 text-sky-500"
-                title="Size filters active"
-              >
-                {filterSizes.length}
-              </span>
-            ) : null}
-            {filterExtensions.length ? (
-              <span
-                className="bg-stone-100 px-2 text-stone-500"
-                title="Filetype filters active"
-              >
-                {filterExtensions.length}
-              </span>
-            ) : null}
-          </div>
-
           <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
             <span className="mr-1 py-1">
               {filterTagsMode === FilterMode.SHOW_ALL ? (
@@ -214,7 +187,9 @@ export const TopShelf = () => {
               )}
             </span>
 
-            <span className="flex items-center border-r border-white pr-2">
+            <div
+              className={`mr-2 flex items-center rounded-sm ${filterActive ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+            >
               <button
                 type="button"
                 onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
@@ -250,9 +225,11 @@ export const TopShelf = () => {
               >
                 Match All
               </button>
-            </span>
+            </div>
 
-            <span className="flex items-center border-l border-slate-300 pl-2">
+            <div
+              className={`rounded-sm ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+            >
               <button
                 type="button"
                 onClick={() => dispatch(toggleModifiedFilter())}
@@ -263,19 +240,49 @@ export const TopShelf = () => {
               >
                 Modified
               </button>
-            </span>
+            </div>
           </div>
 
           {/* Tag summary list button */}
           <div className="relative" ref={tagButtonRef}>
-            <span
+            {filterActive ? (
+              <span className="absolute flex h-0 cursor-pointer flex-col rounded-sm text-center text-xs leading-3.5 tabular-nums">
+                {filterTags.length ? (
+                  <span
+                    className="bg-emerald-100 px-2 text-emerald-500"
+                    title="Tag filters active"
+                  >
+                    {filterTags.length}
+                  </span>
+                ) : null}
+                {filterSizes.length ? (
+                  <span
+                    className="bg-sky-100 px-2 text-sky-500"
+                    title="Size filters active"
+                  >
+                    {filterSizes.length}
+                  </span>
+                ) : null}
+                {filterExtensions.length ? (
+                  <span
+                    className="bg-stone-100 px-2 text-stone-500"
+                    title="Filetype filters active"
+                  >
+                    {filterExtensions.length}
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
+
+            <div
               onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
               className={`inline-flex cursor-pointer items-center rounded-md p-2 transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
               title="Show tag summary"
             >
-              <TagIcon className="w-4" />
+              <TagIcon className="mr-1 ml-1 w-4" />
+
               <span className="ml-2 max-lg:hidden"> Filter List</span>
-            </span>
+            </div>
 
             {/* Tag panel component */}
             <PersistentFilterProvider>

@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
 
-import { PaginationControls } from '../components/pagination/controls';
-import { Pagination } from '../components/pagination/pagination';
-import { selectAllImages } from '../store/assets';
+import { selectAllImages } from '../../store/assets';
 import {
   PaginationSize,
   selectFilterExtensions,
@@ -10,9 +8,11 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectPaginationSize,
-} from '../store/filters';
-import { useAppSelector } from '../store/hooks';
-import { applyFilters } from '../utils/filter-actions';
+} from '../../store/filters';
+import { useAppSelector } from '../../store/hooks';
+import { applyFilters } from '../../utils/filter-actions';
+import { PaginationControls } from '../pagination/controls';
+import { Pagination } from '../pagination/pagination';
 
 type BottomShelfProps = {
   currentPage?: number;

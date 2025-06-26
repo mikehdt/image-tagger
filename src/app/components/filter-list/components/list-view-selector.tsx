@@ -19,35 +19,38 @@ export const ViewSelector = () => {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => handleViewChange('tag')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-          activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
-        }`}
-      >
-        Tag
-      </button>
-      <button
-        type="button"
-        onClick={() => handleViewChange('size')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-          activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
-        }`}
-      >
-        Size
-      </button>
-      <button
-        type="button"
-        onClick={() => handleViewChange('filetype')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-          activeView === 'filetype'
-            ? 'bg-white shadow-sm'
-            : 'hover:bg-slate-300'
-        }`}
-      >
-        Filetype
-      </button>
+      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300">
+        <button
+          type="button"
+          onClick={() => handleViewChange('tag')}
+          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+            activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
+          }`}
+        >
+          Tag
+        </button>
+        <button
+          type="button"
+          onClick={() => handleViewChange('size')}
+          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+            activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
+          }`}
+        >
+          Size
+        </button>
+        <button
+          type="button"
+          onClick={() => handleViewChange('filetype')}
+          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+            activeView === 'filetype'
+              ? 'bg-white shadow-sm'
+              : 'hover:bg-slate-300'
+          }`}
+        >
+          Filetype
+        </button>
+      </div>
+
       <button
         onClick={onClose}
         className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200"

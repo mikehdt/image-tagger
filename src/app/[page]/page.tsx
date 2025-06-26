@@ -3,6 +3,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
+import { BottomShelf } from '../components/shelves/bottom-shelf';
+import { TopShelf } from '../components/shelves/top-shelf';
 import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,
@@ -14,8 +16,6 @@ import {
 import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
 import { AssetList } from '../views/asset-list';
-import { BottomShelf } from '../views/bottom-shelf';
-import { TopShelf } from '../views/top-shelf';
 
 const PaginatedPageContent = () => {
   const router = useRouter();

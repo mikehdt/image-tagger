@@ -127,9 +127,7 @@ const TagInputComponent = ({
   }, [mode]);
 
   return (
-    <div
-      className={`relative inline-flex ${mode === 'edit' ? 'z-10' : ''} mr-2`}
-    >
+    <div className="relative mr-2 inline-flex">
       <input
         ref={inputRef}
         value={inputValue}
