@@ -1,46 +1,44 @@
 // External imports
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { ChangeEvent, SyntheticEvent } from 'react';
-import { memo, useRef, useState } from 'react';
+import { SyntheticEvent } from 'react';
+import { memo, useRef } from 'react';
 
 import { Tag } from './tag';
+import { useTagContext } from './tag-context';
 import { TagInput } from './tag-input';
 
 type SortableTagProps = {
   id: string;
   tagName: string;
-  tagState: number; // Changed to number to support bitwise flags
-  count: number;
-  highlight: boolean;
-  fade: boolean;
-  nonInteractive?: boolean; // New prop to control interactivity separately from fading
-  onToggleTag: (e: SyntheticEvent, tagName: string) => void;
-  onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
-  onEditTag?: (oldTagName: string, newTagName: string) => void;
-  onEditValueChange?: (tagName: string, value: string) => void;
-  onEditStateChange?: (tagName: string, isEditing: boolean) => void;
-  isDuplicate?: boolean;
+  fade?: boolean;
+  nonInteractive?: boolean;
+  tagState?: number;
+  count?: number;
 };
 
 const SortableTag = ({
   id,
   tagName,
-  tagState,
-  count,
-  highlight,
-  fade,
-  nonInteractive = false, // Default to interactive
-  onToggleTag,
-  onDeleteTag,
-  onEditTag,
-  onEditValueChange,
-  onEditStateChange,
-  isDuplicate = false,
+  fade = false,
+  nonInteractive = false,
 }: SortableTagProps) => {
-  // Track whether the tag is currently being edited
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(tagName);
+  const {
+    isTagBeingEdited,
+    isDuplicate,
+    editTagValue,
+    handleEditValueChange,
+    startEditingTag,
+    saveEditingTag,
+    cancelEditingTag,
+    handleDeleteTag,
+    handleToggleTag,
+    isHighlighted,
+    tagsByStatus,
+    globalTagList,
+  } = useTagContext();
+
+  const isEditing = isTagBeingEdited(tagName);
 
   const {
     attributes,
@@ -91,62 +89,31 @@ const SortableTag = ({
     willChange: transition ? 'transform' : undefined,
   };
 
-  // Handler for when edit state changes
-  const handleEditStateChange = (editing: boolean) => {
-    setIsEditing(editing);
-
-    // Notify parent component about edit state change through the dedicated function
-    if (onEditStateChange) {
-      onEditStateChange(tagName, editing);
-    }
-
-    // When editing ends, reset the edit value locally
-    if (!editing) {
-      setEditValue(tagName);
-    }
-
-    // When editing starts, set current value
-    if (onEditValueChange && editing) {
-      onEditValueChange(tagName, tagName); // Pass current tag name to start with
-      // Note: When editing ends, we don't call onEditValueChange with '' anymore
-      // That's now handled by the parent's handleEditStateChange
-    }
-  };
+  // No handleEditStateChange needed - all handled by context now
 
   // Handler for input value changes
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    // Update local state
-    setEditValue(newValue);
-    // Always notify parent with both tag name and value
-    // Even if the value is empty, we must maintain the edit mode
-    if (onEditValueChange) {
-      onEditValueChange(tagName, newValue);
-    }
+    // Update via context
+    handleEditValueChange(newValue);
   };
 
   // Handler for saving edits
   const handleSaveEdit = (e: SyntheticEvent) => {
     e.stopPropagation();
-    const trimmedValue = editValue.trim();
-    if (trimmedValue && trimmedValue !== tagName && onEditTag) {
-      onEditTag(tagName, trimmedValue);
-    }
-    handleEditStateChange(false);
+    saveEditingTag(e);
   };
 
   // Handler for canceling edits
   const handleCancelEdit = (e: SyntheticEvent) => {
     e.stopPropagation();
-    // This will call onEditStateChange(tagName, false)
-    // which will properly clean up all states and un-fade tags
-    handleEditStateChange(false);
+    cancelEditingTag(e);
   };
 
   // Handler for starting edit mode
   const handleStartEdit = (e: SyntheticEvent) => {
     e.stopPropagation();
-    handleEditStateChange(true);
+    startEditingTag(tagName);
   };
 
   return (
@@ -162,26 +129,26 @@ const SortableTag = ({
       {isEditing ? (
         <span className="mb-2 flex">
           <TagInput
-            inputValue={editValue}
+            inputValue={editTagValue}
             onInputChange={handleInputChange}
             onSubmit={handleSaveEdit}
             onCancel={handleCancelEdit}
             placeholder="Edit tag..."
             mode="edit"
-            isDuplicate={isDuplicate}
+            isDuplicate={isDuplicate(editTagValue)}
             nonInteractive={nonInteractive}
           />
         </span>
       ) : (
         <Tag
           tagName={tagName}
-          tagState={tagState}
-          count={count}
-          highlight={highlight}
+          tagState={tagsByStatus[tagName] || 0}
+          count={globalTagList[tagName] || 0}
+          highlight={isHighlighted(tagName)}
           fade={fade}
           nonInteractive={nonInteractive}
-          onToggleTag={onToggleTag}
-          onDeleteTag={onDeleteTag}
+          onToggleTag={(e) => handleToggleTag(e, tagName)}
+          onDeleteTag={(e) => handleDeleteTag(e, tagName)}
           onStartEdit={handleStartEdit}
           isDraggable={!isEditing}
         />
@@ -200,11 +167,9 @@ const areSortableTagsEqual = (
     prevProps.tagName === nextProps.tagName &&
     prevProps.tagState === nextProps.tagState &&
     prevProps.count === nextProps.count &&
-    prevProps.highlight === nextProps.highlight &&
     prevProps.fade === nextProps.fade &&
-    prevProps.nonInteractive === nextProps.nonInteractive &&
-    prevProps.isDuplicate === nextProps.isDuplicate
-    // Functions references should be stable from parent with useCallback
+    prevProps.nonInteractive === nextProps.nonInteractive
+    // Functions references come from context now
   );
 };
 
