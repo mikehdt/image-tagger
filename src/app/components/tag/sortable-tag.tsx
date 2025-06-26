@@ -95,31 +95,31 @@ const SortableTag = ({
   const handleEditStateChange = (editing: boolean) => {
     setIsEditing(editing);
 
-    // Notify parent component about edit state change
+    // Notify parent component about edit state change through the dedicated function
     if (onEditStateChange) {
       onEditStateChange(tagName, editing);
     }
 
-    // When editing ends, reset the edit value
+    // When editing ends, reset the edit value locally
     if (!editing) {
       setEditValue(tagName);
     }
 
     // When editing starts, set current value
-    // When editing ends, reset the edit value
-    if (onEditValueChange) {
-      if (editing) {
-        onEditValueChange(tagName, tagName); // Pass current tag name to start with
-      } else {
-        onEditValueChange(tagName, ''); // Clear on finish
-      }
+    if (onEditValueChange && editing) {
+      onEditValueChange(tagName, tagName); // Pass current tag name to start with
+      // Note: When editing ends, we don't call onEditValueChange with '' anymore
+      // That's now handled by the parent's handleEditStateChange
     }
   };
 
   // Handler for input value changes
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    // Update local state
     setEditValue(newValue);
+    // Always notify parent with both tag name and value
+    // Even if the value is empty, we must maintain the edit mode
     if (onEditValueChange) {
       onEditValueChange(tagName, newValue);
     }
@@ -138,6 +138,8 @@ const SortableTag = ({
   // Handler for canceling edits
   const handleCancelEdit = (e: SyntheticEvent) => {
     e.stopPropagation();
+    // This will call onEditStateChange(tagName, false)
+    // which will properly clean up all states and un-fade tags
     handleEditStateChange(false);
   };
 

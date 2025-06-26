@@ -58,25 +58,42 @@ const TagInputComponent = ({
   // Allow submitting via Enter key and canceling via Escape
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (
-        e.key === 'Enter' &&
-        inputValue.trim() !== '' &&
-        !isDuplicate &&
-        !nonInteractive
-      ) {
-        onSubmit(e);
-      } else if (e.key === 'Escape' && !nonInteractive) {
-        // Support escape key in both add and edit modes
-        onCancel(e);
-      } else if (
-        e.key === 'Enter' &&
-        (isDuplicate || inputValue.trim() === '')
-      ) {
-        // Prevent default behavior for Enter when we have a duplicate or empty value
-        e.preventDefault();
+      // For edit mode, we need different handling
+      if (mode === 'edit') {
+        if (
+          e.key === 'Enter' &&
+          inputValue.trim() !== '' &&
+          !isDuplicate &&
+          !nonInteractive
+        ) {
+          // Only allow submission of non-empty, non-duplicate values in edit mode
+          onSubmit(e);
+        } else if (e.key === 'Escape' && !nonInteractive) {
+          // Always call cancel in edit mode, which will properly un-fade tags
+          // This is the ONLY way to exit edit mode
+          onCancel(e);
+        } else if (e.key === 'Enter') {
+          // Prevent default form submission behavior for empty/duplicate values
+          e.preventDefault();
+        }
+      } else {
+        // Add mode behavior
+        if (
+          e.key === 'Enter' &&
+          inputValue.trim() !== '' &&
+          !isDuplicate &&
+          !nonInteractive
+        ) {
+          onSubmit(e);
+        } else if (e.key === 'Escape' && !nonInteractive) {
+          onCancel(e);
+        } else if (e.key === 'Enter') {
+          // Prevent form submission on empty/duplicate in add mode
+          e.preventDefault();
+        }
       }
     },
-    [inputValue, onSubmit, onCancel, isDuplicate, nonInteractive],
+    [inputValue, onSubmit, onCancel, isDuplicate, nonInteractive, mode],
   );
 
   // Calculate the width based on input length (between min and max width)
@@ -146,15 +163,17 @@ const TagInputComponent = ({
         <>
           <span
             className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
-              inputValue.trim() !== '' && !nonInteractive
+              inputValue.trim() !== '' && !isDuplicate && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
-            } ${mode === 'add' && !isFocused ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+            }`}
             onClick={
-              inputValue.trim() !== '' && !nonInteractive ? onSubmit : undefined
+              inputValue.trim() !== '' && !isDuplicate && !nonInteractive
+                ? onSubmit
+                : undefined
             }
-            tabIndex={nonInteractive ? -1 : 0}
-            title="Add tag"
+            tabIndex={nonInteractive || isDuplicate ? -1 : 0}
+            title={isDuplicate ? 'Tag already exists' : 'Add tag'}
           >
             <PlusIcon />
           </span>
@@ -164,7 +183,7 @@ const TagInputComponent = ({
               inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
-            } ${mode === 'add' && !isFocused ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+            }`}
             onClick={(e) => {
               e.stopPropagation();
               if (inputValue.trim() !== '' && !nonInteractive) onCancel(e);
@@ -195,9 +214,11 @@ const TagInputComponent = ({
           </span>
 
           <span
+            // In edit mode, the cancel button should always be active regardless of input value
             className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
             onClick={(e) => {
               e.stopPropagation();
+              // Always call onCancel directly in edit mode, regardless of input value
               if (!nonInteractive) onCancel(e);
             }}
             tabIndex={nonInteractive ? -1 : 0}

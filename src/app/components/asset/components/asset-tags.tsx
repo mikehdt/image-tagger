@@ -24,6 +24,7 @@ export const AssetTags = ({ assetId }: AssetTagsProps) => {
   const {
     newTagInput,
     setNewTagInput,
+    editTagValue,
     editingTagName,
     isEditing,
     handleEditTag,
@@ -59,11 +60,21 @@ export const AssetTags = ({ assetId }: AssetTagsProps) => {
                 fade={
                   // For add mode: fade tags except one matching current input
                   (newTagInput !== '' && newTagInput !== tagName) ||
-                  // For edit mode: fade tags except the one being edited or one that matches current edit value
-                  (isEditing && tagName !== editingTagName)
+                  // For edit mode: fade tags except:
+                  // 1. The one being edited
+                  // 2. Any potential duplicate tags (which should be visible but non-interactive)
+                  (isEditing &&
+                    tagName !== editingTagName &&
+                    !(
+                      editTagValue &&
+                      tagName.toLowerCase() ===
+                        editTagValue.toLowerCase().trim()
+                    ))
                 }
                 nonInteractive={
-                  // Always make tags non-interactive when in edit mode, except for the tag being edited
+                  // Always make tags non-interactive in both modes:
+                  // In edit mode - all tags except the one being edited
+                  // In add mode - all tags
                   (isEditing && tagName !== editingTagName) ||
                   // Always make tags non-interactive in add mode
                   newTagInput !== ''

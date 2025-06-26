@@ -12,7 +12,13 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
 
   const handleEditTag = useCallback(
     (oldTagName: string, newTagName: string) => {
-      if (newTagName.trim() === '') return;
+      // Don't allow saving empty values in edit mode
+      if (newTagName.trim() === '') {
+        console.log("Can't save an empty tag name");
+        return;
+      }
+
+      // No change, nothing to do
       if (oldTagName === newTagName) return;
 
       // Check if the new tag name already exists in the list
@@ -21,11 +27,10 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
           "Couldn't edit tag, the new name already exists in the list",
           newTagName,
         );
-
         return;
       }
 
-      // Clear all edit state variables
+      // Clear all edit state variables - this will un-fade tags
       setEditTagValue('');
       setEditingTagName('');
       setIsEditing(false);
@@ -56,16 +61,17 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
   // Track edit state changes and handle start/end of edit mode
   const handleEditStateChange = useCallback(
     (tagName: string, editing: boolean) => {
-      // When editing ends, always make sure all states are cleaned up at once
+      // When editing ends (save or cancel), always make sure all states are cleaned up at once
       if (!editing) {
         // Batch these state updates to ensure they happen together
+        // This is what un-fades the tags when edit mode ends
         setIsEditing(false);
         setEditingTagName('');
         setEditTagValue('');
         return;
       }
 
-      // Start editing mode
+      // Start editing mode - which will fade all tags except the one being edited
       setIsEditing(true);
       setEditingTagName(tagName);
     },
@@ -74,21 +80,35 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
 
   const handleEditValueChange = useCallback(
     (tagName: string, value: string) => {
-      // Only update the tag being edited if we're not already tracking it
-      if (tagName && editingTagName === '') {
-        setEditingTagName(tagName);
-        // Ensure isEditing is synced when a tag name is set
-        setIsEditing(true);
-      }
+      // First, determine if this is an edit mode or add mode operation
+      const isEditMode =
+        editingTagName !== '' || (tagName && editingTagName === '');
 
-      // Clear all editing state when value is empty (edit canceled or complete)
-      if (value === '') {
-        setEditingTagName('');
-        setIsEditing(false);
-      }
+      // In edit mode, always track the tag being edited
+      if (isEditMode) {
+        // If we don't have an editing tag name yet, set it now
+        if (tagName && editingTagName === '') {
+          setEditingTagName(tagName);
+          setIsEditing(true);
+        }
 
-      // Always update the edit value
-      setEditTagValue(value);
+        // CRITICAL: In edit mode, NEVER clear states when value is empty
+        // We always want to maintain edit state, even with empty input
+        // States will ONLY be cleared through handleEditStateChange (on save/cancel)
+        setEditTagValue(value);
+      } else {
+        // This is add mode (no tag being edited)
+        // In add mode: clear all editing state when value is empty
+        // This is what allows tags to un-fade when the add input is cleared
+        if (value === '') {
+          setEditingTagName('');
+          setIsEditing(false);
+          setEditTagValue('');
+        } else {
+          // Only update the value if not empty in add mode
+          setEditTagValue(value);
+        }
+      }
     },
     [editingTagName],
   );
