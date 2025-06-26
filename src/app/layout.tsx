@@ -51,7 +51,7 @@ export default function Root({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={geistSans.className}>
         <StoreProvider>
           <AppProvider>
             <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4">
