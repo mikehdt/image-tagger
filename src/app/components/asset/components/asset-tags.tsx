@@ -110,6 +110,12 @@ export const AssetTags = ({ assetId }: AssetTagsProps) => {
           mode="add"
           placeholder="Add tag..."
           nonInteractive={isEditing}
+          isDuplicate={
+            newTagInput !== '' &&
+            tagList.some(
+              (tag) => tag.toLowerCase() === newTagInput.toLowerCase().trim(),
+            )
+          }
         />
       </div>
     </>
