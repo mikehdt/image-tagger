@@ -25,14 +25,15 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
         return;
       }
 
-      // Clear the edit state variables
+      // Clear all edit state variables
       setEditTagValue('');
       setEditingTagName('');
+      setIsEditing(false);
 
       // Dispatch the edit action
       dispatch(editTag({ assetId, oldTagName, newTagName }));
     },
-    [dispatch, assetId, tagList, setEditTagValue, setEditingTagName],
+    [dispatch, assetId, tagList],
   );
 
   const handleInputChange = useCallback(
@@ -55,16 +56,18 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
   // Track edit state changes and handle start/end of edit mode
   const handleEditStateChange = useCallback(
     (tagName: string, editing: boolean) => {
-      setIsEditing(editing);
-
-      if (editing) {
-        // Start of edit mode - set the tag being edited
-        setEditingTagName(tagName);
-      } else {
-        // End of edit mode - clear both states
+      // When editing ends, always make sure all states are cleaned up at once
+      if (!editing) {
+        // Batch these state updates to ensure they happen together
+        setIsEditing(false);
         setEditingTagName('');
         setEditTagValue('');
+        return;
       }
+
+      // Start editing mode
+      setIsEditing(true);
+      setEditingTagName(tagName);
     },
     [],
   );
@@ -74,6 +77,14 @@ export const useTagEditing = (assetId: string, tagList: string[]) => {
       // Only update the tag being edited if we're not already tracking it
       if (tagName && editingTagName === '') {
         setEditingTagName(tagName);
+        // Ensure isEditing is synced when a tag name is set
+        setIsEditing(true);
+      }
+
+      // Clear all editing state when value is empty (edit canceled or complete)
+      if (value === '') {
+        setEditingTagName('');
+        setIsEditing(false);
       }
 
       // Always update the edit value

@@ -18,19 +18,17 @@ export const usePanelPosition = (
       const rect = containerRef.current.getBoundingClientRect();
       const panelWidth = 256; // w-64 = 16rem = 256px
 
-      // Calculate the right edge position of the panel if aligned to the left of the button
-      const rightEdge = rect.left + panelWidth;
+      // Calculate position to align with the right edge of the button
+      // This positions the right edge of the panel at the right edge of the button
+      const rightAlignedPosition = rect.right - panelWidth;
 
-      // Check if panel would overflow the window when placed at button's left
-      const windowWidth = window.innerWidth;
-      const wouldOverflow = rightEdge > windowWidth;
+      // Check if panel would overflow the left side of the window
+      const wouldOverflowLeft = rightAlignedPosition < 0;
 
       // Adjust left position to keep panel fully visible
-      let leftPos = rect.left;
-      if (wouldOverflow) {
-        // Align to the right edge of the window with some padding
-        leftPos = Math.max(0, windowWidth - panelWidth - 16); // 16px padding from right edge
-      }
+      const leftPos = wouldOverflowLeft
+        ? 16 // 16px padding from left edge if it would overflow
+        : rightAlignedPosition;
 
       setPosition({
         top: rect.bottom,

@@ -17,7 +17,7 @@ export const toggleState = (state: number, flag: TagState): number =>
   state ^ flag;
 
 /**
- * @public For debugging and display purposes
+ * @public For debugging and display purposes only
  */
 export const debug_getTagStateString = (state: number): string => {
   if (hasState(state, TagState.SAVED)) return 'Saved';
@@ -27,5 +27,5 @@ export const debug_getTagStateString = (state: number): string => {
   if (hasState(state, TagState.TO_ADD)) states.push('ToAdd');
   if (hasState(state, TagState.DIRTY)) states.push('Dirty');
 
-  return states.join('+');
+  return states.join(', ');
 };

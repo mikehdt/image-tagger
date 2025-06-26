@@ -1,7 +1,7 @@
 import {
   ArrowPathIcon,
-  BookmarkIcon,
   BookmarkSlashIcon,
+  BookmarkSquareIcon,
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
   DocumentMinusIcon,
@@ -111,7 +111,7 @@ export const TopShelf = () => {
                 }
                 disabled={!hasModifiedAssets}
               >
-                <BookmarkIcon className="w-4" />
+                <BookmarkSquareIcon className="w-4" />
                 <span className="ml-1 max-lg:hidden">Save All</span>
               </button>
 
@@ -180,17 +180,26 @@ export const TopShelf = () => {
 
           <div className="mr-4 flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3.5 tabular-nums">
             {filterTags.length ? (
-              <span className="bg-emerald-100 px-2 text-emerald-500">
+              <span
+                className="bg-emerald-100 px-2 text-emerald-500"
+                title="Tag filters active"
+              >
                 {filterTags.length}
               </span>
             ) : null}
             {filterSizes.length ? (
-              <span className="bg-sky-100 px-2 text-sky-500">
+              <span
+                className="bg-sky-100 px-2 text-sky-500"
+                title="Size filters active"
+              >
                 {filterSizes.length}
               </span>
             ) : null}
             {filterExtensions.length ? (
-              <span className="bg-stone-100 px-2 text-stone-500">
+              <span
+                className="bg-stone-100 px-2 text-stone-500"
+                title="Filetype filters active"
+              >
                 {filterExtensions.length}
               </span>
             ) : null}

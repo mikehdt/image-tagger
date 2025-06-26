@@ -2,7 +2,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 
 import { ImageAssets, TagState } from './types';
-import { addState, hasState, toggleState } from './utils';
+import { addState, hasState, removeState, toggleState } from './utils';
 
 export const coreReducers = {
   markFilterTagsToDelete: (
@@ -71,11 +71,27 @@ export const coreReducers = {
 
     state.images[assetIndex].tagList[tagListIndex] = newTagName;
 
-    // Need to update the tagStatus key, and the tagList
-    state.images[assetIndex].tagStatus[newTagName] = addState(
-      state.images[assetIndex].tagStatus[oldTagName],
-      TagState.DIRTY,
-    );
+    const asset = state.images[assetIndex];
+    const savedIndex = asset.savedTagList?.indexOf(newTagName);
+
+    // Check if this is a revert to the original name AND position
+    const isBackToOriginal =
+      savedIndex !== undefined &&
+      savedIndex !== -1 &&
+      savedIndex === tagListIndex;
+
+    // If tag is back to original name and position, don't mark as DIRTY
+    if (isBackToOriginal) {
+      // Copy any other flags except DIRTY
+      state.images[assetIndex].tagStatus[newTagName] =
+        state.images[assetIndex].tagStatus[oldTagName] & ~TagState.DIRTY;
+    } else {
+      // Otherwise, mark as DIRTY
+      state.images[assetIndex].tagStatus[newTagName] = addState(
+        state.images[assetIndex].tagStatus[oldTagName],
+        TagState.DIRTY,
+      );
+    }
 
     delete state.images[assetIndex].tagStatus[oldTagName];
 
@@ -144,17 +160,28 @@ export const coreReducers = {
     // Create a new tag status object
     const newTagStatus = { ...asset.tagStatus };
 
-    // Mark tags affected by the reordering as DIRTY
-    // Only if they were previously SAVED
+    // Use savedTagList to compare current vs original positions
+    const savedTagList = asset.savedTagList || [];
+
+    // Only examine tags in the range that was reordered
     const minIndex = Math.min(oldIndex, newIndex);
     const maxIndex = Math.max(oldIndex, newIndex);
 
-    // Mark all tags in the affected range as DIRTY if they don't already have TO_ADD state
+    // Check each tag in the affected range
     for (let i = minIndex; i <= maxIndex; i++) {
       const tag = i === newIndex ? tagToMove : newTagList[i];
+
+      // Skip TO_ADD tags (they're always dirty)
       if (tag && !hasState(newTagStatus[tag], TagState.TO_ADD)) {
-        // Add DIRTY flag without removing other flags
-        newTagStatus[tag] = addState(newTagStatus[tag], TagState.DIRTY);
+        const originalIndex = savedTagList.indexOf(tag);
+
+        // If tag is in its original position, remove DIRTY flag
+        // Otherwise, add DIRTY flag
+        if (originalIndex === i) {
+          newTagStatus[tag] = removeState(newTagStatus[tag], TagState.DIRTY);
+        } else {
+          newTagStatus[tag] = addState(newTagStatus[tag], TagState.DIRTY);
+        }
       }
     }
 

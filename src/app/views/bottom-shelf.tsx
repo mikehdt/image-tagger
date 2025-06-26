@@ -50,7 +50,9 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="w-1/4 text-xs whitespace-nowrap text-slate-500">
           {isFiltered ? (
-            <>{filteredCount} filtered items selected</>
+            <>
+              {filteredCount} filtered items from {allAssets.length} total
+            </>
           ) : (
             <>{allAssets.length} items total</>
           )}

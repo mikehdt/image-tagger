@@ -229,8 +229,8 @@ export const TagsView = () => {
   return (
     <div>
       {filteredTags.length === 0 ? (
-        <div className="p-4 text-center text-sm text-slate-500">
-          {searchTerm ? `No tags matching "${searchTerm}"` : 'No tags found'}
+        <div className="truncate p-4 text-center text-sm text-slate-500">
+          {searchTerm ? `No tags match "${searchTerm}"` : 'No tags found'}
         </div>
       ) : (
         <ul className="divide-y divide-slate-100">

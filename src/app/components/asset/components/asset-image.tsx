@@ -18,19 +18,17 @@ export const AssetImage = ({
   imageZoom,
 }: AssetImageProps) => {
   return (
-    <>
-      <span className="pointer-events-none absolute mt-1 ml-1 rounded-full bg-white/80 px-2 text-sm font-medium text-slate-500 tabular-nums opacity-60 shadow-xs text-shadow-sm text-shadow-white">
+    <div className="relative flex border-r border-r-slate-300 bg-slate-300">
+      <span className="pointer-events-none absolute top-0 left-0 mt-1 ml-1 rounded-full bg-white/80 px-2 text-sm font-medium text-slate-500 tabular-nums opacity-60 shadow-xs text-shadow-sm text-shadow-white">
         {assetNumber}
       </span>
-      <div className="flex border-r border-r-slate-300 bg-slate-300">
-        <Image
-          className={`${!imageZoom && 'max-h-64'} h-auto w-auto object-contain`}
-          src={`/assets/${assetId}.${fileExtension}`}
-          width={dimensions.width}
-          height={dimensions.height}
-          alt=""
-        />
-      </div>
-    </>
+      <Image
+        className={`${!imageZoom && 'max-h-64'} h-auto w-auto object-contain`}
+        src={`/assets/${assetId}.${fileExtension}`}
+        width={dimensions.width}
+        height={dimensions.height}
+        alt=""
+      />
+    </div>
   );
 };

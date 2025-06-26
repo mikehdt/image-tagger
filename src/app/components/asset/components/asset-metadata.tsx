@@ -1,3 +1,4 @@
+import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
 import { IoState, selectSaveProgress } from '../../../store/assets';
@@ -43,7 +44,7 @@ export const AssetMetadata = ({
   const isSaving = ioState === IoState.SAVING || isBatchSaveInProgress;
 
   // Memoize this calculation to prevent unnecessary re-renders
-  const showActions = useMemo(
+  const hasModifiedTags = useMemo(
     () =>
       tagList.length &&
       tagList.some((tagName: string) => tagsByStatus[tagName] !== 0) && // TagState.SAVED is 0
@@ -56,7 +57,7 @@ export const AssetMetadata = ({
       <span className="inline-flex min-w-0 flex-wrap items-center py-0.5 tabular-nums">
         <button
           type="button"
-          className={`mr-2 cursor-pointer rounded-sm border border-sky-300 max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'} px-2 py-0.5`}
+          className={`mr-2 cursor-pointer rounded-sm border border-sky-300 px-2 py-0.5 transition-colors max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'}`}
           onClick={() => toggleSize(dimensionsComposed)}
         >
           {dimensions.width}&times;{dimensions.height}
@@ -64,7 +65,7 @@ export const AssetMetadata = ({
 
         <button
           type="button"
-          className={`mr-2 cursor-pointer rounded-sm border border-stone-300 max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'} px-2 py-0.5`}
+          className={`mr-2 cursor-pointer rounded-sm border border-stone-300 px-2 py-0.5 transition-colors max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'}`}
           onClick={() => toggleExtension(fileExtension)}
         >
           {fileExtension}
@@ -78,20 +79,21 @@ export const AssetMetadata = ({
         </span>
       </span>
 
-      {showActions ? (
+      {hasModifiedTags ? (
         <span className="ml-auto flex pl-2">
           <button
-            className={`${isSaving ? 'cursor-not-allowed' : 'cursor-pointer'} rounded-sm bg-slate-200 px-4 py-1 ${isSaving ? 'opacity-50' : 'hover:bg-slate-400'}`}
+            className={`flex rounded-sm bg-slate-200 px-4 py-1 text-slate-800 transition-colors ${isSaving ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-slate-300'}`}
             onClick={isSaving ? undefined : cancelAction}
             disabled={isSaving}
           >
             Cancel
           </button>
           <button
-            className={`ml-2 ${isSaving ? 'cursor-not-allowed' : 'cursor-pointer'} rounded-sm bg-emerald-200 px-4 py-1 ${isSaving ? 'opacity-50' : 'hover:bg-emerald-400'}`}
+            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 transition-colors ${isSaving ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-emerald-300'}`}
             onClick={isSaving ? undefined : saveAction}
             disabled={isSaving}
           >
+            <BookmarkIcon className="mr-1 w-4" />
             Save
           </button>
         </span>

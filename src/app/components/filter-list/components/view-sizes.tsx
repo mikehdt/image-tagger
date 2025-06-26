@@ -506,10 +506,8 @@ export const SizesView = () => {
   return (
     <div className="max-h-80 overflow-y-auto">
       {filteredSizes.length === 0 ? (
-        <div className="p-4 text-center text-sm text-slate-500">
-          {searchTerm
-            ? `No sizes matching "${searchTerm}"`
-            : 'No sizes available'}
+        <div className="truncate p-4 text-center text-sm text-slate-500">
+          {searchTerm ? `No sizes match "${searchTerm}"` : 'No sizes available'}
         </div>
       ) : (
         <ul className="divide-y divide-slate-100">
