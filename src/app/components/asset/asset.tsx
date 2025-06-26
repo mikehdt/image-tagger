@@ -1,8 +1,8 @@
+import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState } from '../../store/assets';
 import { composeDimensions } from '../../utils/helpers';
-import { AssetImage } from './components/asset-image';
 import { AssetMetadata } from './components/asset-metadata';
 import { AssetTags } from './components/asset-tags';
 
@@ -40,19 +40,23 @@ export const Asset = ({
   return (
     <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
       <div
-        className={`flex w-full items-center justify-center ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'} cursor-pointer self-stretch bg-slate-300 transition-all`}
+        className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-slate-300 transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
         onClick={toggleImageZoom}
       >
-        <AssetImage
-          assetId={assetId}
-          fileExtension={fileExtension}
-          assetNumber={assetNumber}
-          dimensions={dimensions}
-          imageZoom={imageZoom}
+        <span className="pointer-events-none absolute top-0 left-0 mt-1 ml-1 rounded-full bg-white/80 px-2 text-sm font-medium text-slate-500 tabular-nums opacity-60 shadow-xs text-shadow-sm text-shadow-white">
+          {assetNumber}
+        </span>
+
+        <Image
+          className={`h-auto w-auto object-contain ${!imageZoom && 'max-h-64'}`}
+          src={`/assets/${assetId}.${fileExtension}`}
+          width={dimensions.width}
+          height={dimensions.height}
+          alt=""
         />
       </div>
 
-      <div className={`${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} p-4`}>
+      <div className={`min-h-40 p-4 ${imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}>
         <AssetTags assetId={assetId} />
       </div>
 
