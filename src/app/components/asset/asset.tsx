@@ -3,8 +3,8 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState } from '../../store/assets';
 import { composeDimensions } from '../../utils/helpers';
-import { AssetMetadata } from './components/asset-metadata';
-import { AssetTags } from './components/asset-tags';
+import { TaggingManager } from '../tagging';
+import { AssetMetadata } from './components';
 
 type AssetProps = {
   assetId: string;
@@ -57,7 +57,7 @@ export const Asset = ({
       </div>
 
       <div className={`min-h-40 p-4 ${imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}>
-        <AssetTags assetId={assetId} />
+        <TaggingManager assetId={assetId} />
       </div>
 
       <AssetMetadata

@@ -3,7 +3,6 @@
   "ignoreDependencies": [
     "eslint-config-next",
     "eslint-config-prettier",
-    "tailwindcss",
     "postcss-load-config"
   ]
 }

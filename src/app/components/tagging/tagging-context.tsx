@@ -1,10 +1,13 @@
 import { SyntheticEvent } from 'react';
 import { createContext, ReactNode, useContext, useMemo } from 'react';
 
+/**
+ * Tagging module - Provides functionality for managing tags on assets
+ */
 import { useTagActions, useTagCalculations, useTagState } from './hooks';
 
 // Define the context shape
-type TagContextType = {
+type TaggingContextType = {
   // Tag state
   tagList: string[];
   tagsByStatus: Record<string, number>;
@@ -35,10 +38,10 @@ type TagContextType = {
 };
 
 // Create the context with a default value
-const TagContext = createContext<TagContextType | undefined>(undefined);
+const TaggingContext = createContext<TaggingContextType | undefined>(undefined);
 
 // Provider component
-export const TagProvider = ({
+export const TaggingProvider = ({
   children,
   assetId,
   tagList,
@@ -157,16 +160,18 @@ export const TagProvider = ({
   );
 
   return (
-    <TagContext.Provider value={contextValue}>{children}</TagContext.Provider>
+    <TaggingContext.Provider value={contextValue}>
+      {children}
+    </TaggingContext.Provider>
   );
 };
 
 // Custom hook for accessing the context
-export const useTagContext = () => {
-  const context = useContext(TagContext);
+export const useTaggingContext = () => {
+  const context = useContext(TaggingContext);
 
   if (context === undefined) {
-    throw new Error('useTagContext must be used within a TagProvider');
+    throw new Error('useTaggingContext must be used within a TaggingProvider');
   }
 
   return context;

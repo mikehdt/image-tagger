@@ -10,18 +10,32 @@ import {
   useState,
 } from 'react';
 
-// Configuration constants
+/**
+ * Configuration constants for tag input sizing
+ */
 const MIN_TAG_LENGTH = 6;
 const MAX_TAG_LENGTH = 20;
 
+/**
+ * Props for the InputTag component
+ * @interface InputTagProps
+ */
 type InputTagProps = {
+  /** Current input value */
   inputValue: string;
+  /** Handler for input change events */
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  /** Handler for form submission */
   onSubmit: (e: SyntheticEvent) => void;
+  /** Handler for cancellation */
   onCancel: (e: SyntheticEvent) => void;
+  /** Placeholder text for the input */
   placeholder?: string;
+  /** Mode of operation - 'add' for new tags, 'edit' for existing tags */
   mode: 'add' | 'edit';
+  /** Whether the current input value would create a duplicate tag */
   isDuplicate?: boolean;
+  /** Whether the component should be non-interactive */
   nonInteractive?: boolean;
 };
 

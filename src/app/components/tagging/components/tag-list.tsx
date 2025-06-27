@@ -1,18 +1,30 @@
-import { closestCenter, DndContext } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { SyntheticEvent } from 'react';
 
-import { InputTag } from '../../tag/input-tag';
-import { SortableTag } from '../../tag/sortable-tag';
-import { TagProvider, useTagContext } from '../../tag/tag-context';
-import { useAssetTags, useDragDrop } from '../hooks';
+import { useTaggingContext } from '../tagging-context';
+import { InputTag } from './input-tag';
+import { SortableTag } from './sortable-tag';
 
-type AssetTagsProps = {
-  assetId: string;
+/**
+ * TagList Component Properties
+ */
+type TagListProps = {
+  /** Optional CSS class name to apply to the container */
+  className?: string;
 };
 
-// Inner component that uses the tag context
-const AssetTagsContent = () => {
+/**
+ * Tag list component that renders all tags with proper sorting functionality
+ *
+ * This component:
+ * 1. Consumes data from the TaggingContext
+ * 2. Renders a list of SortableTag components within a SortableContext
+ * 3. Provides an InputTag component for adding new tags
+ * 4. Handles tag interactions including adding, editing and filtering
+ *
+ * It relies on being wrapped in both a TaggingProvider and a SortableProvider
+ */
+export const TagList = ({ className = '' }: TagListProps) => {
   const {
     tagList,
     newTagInput,
@@ -26,19 +38,19 @@ const AssetTagsContent = () => {
     handleAddTag,
     tagsByStatus,
     globalTagList,
-  } = useTagContext();
+  } = useTaggingContext();
 
   return (
-    <>
+    <div className={className}>
       <div className="relative flex flex-wrap">
         <SortableContext
           items={tagList}
           strategy={rectSortingStrategy}
-          id={`taglist-content`}
+          id="taglist-content"
         >
-          {tagList.map((tagName: string, index: number) => (
+          {tagList.map((tagName: string) => (
             <SortableTag
-              key={`tag-${tagName}-${index}`}
+              key={`tag-${tagName}`}
               id={tagName}
               tagName={tagName}
               fade={shouldFade(tagName)}
@@ -68,34 +80,6 @@ const AssetTagsContent = () => {
           isDuplicate={isDuplicate(newTagInput)}
         />
       </div>
-    </>
-  );
-};
-
-// Main component that provides the context
-export const AssetTags = ({ assetId }: AssetTagsProps) => {
-  // Extract what we need from useAssetTags, including filter info
-  const { tagList, tagsByStatus, globalTagList, filterTagsSet, toggleTag } =
-    useAssetTags(assetId);
-
-  const { sensors, handleDragEnd } = useDragDrop(assetId, tagList);
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <TagProvider
-        assetId={assetId}
-        tagList={tagList}
-        tagsByStatus={tagsByStatus}
-        globalTagList={globalTagList}
-        filterTagsSet={filterTagsSet}
-        toggleTag={toggleTag}
-      >
-        <AssetTagsContent />
-      </TagProvider>
-    </DndContext>
+    </div>
   );
 };

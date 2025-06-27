@@ -1,7 +1,11 @@
 import { MinusIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { memo, type SyntheticEvent, useCallback } from 'react';
 
-import { hasState, TagState } from '../../../store/assets';
+/**
+ * Tag Component - Displays an individual tag with interactive controls
+ */
+import { hasState, TagState } from '@/app/store/assets';
+
 import { getTagStyles, tagButtonStyles } from './tag-styles';
 
 type TagProps = {
@@ -17,7 +21,7 @@ type TagProps = {
   onStartEdit?: (e: SyntheticEvent) => void;
 };
 
-const Tag = ({
+const TagComponent = ({
   tagName,
   tagState,
   count,
@@ -133,6 +137,6 @@ const Tag = ({
 };
 
 // Memoize the component for better performance
-const MemoizedTag = memo(Tag);
+const MemoizedTag = memo(TagComponent);
 
 export { MemoizedTag as Tag };

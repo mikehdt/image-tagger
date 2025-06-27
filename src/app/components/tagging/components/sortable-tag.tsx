@@ -4,9 +4,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent } from 'react';
 import { memo, useRef } from 'react';
 
-import { Tag } from './components';
+import { useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';
-import { useTagContext } from './tag-context';
+import { Tag } from './tag';
 
 type SortableTagProps = {
   id: string;
@@ -17,7 +17,7 @@ type SortableTagProps = {
   count?: number;
 };
 
-const SortableTag = ({
+const SortableTagComponent = ({
   id,
   tagName,
   fade = false,
@@ -36,7 +36,7 @@ const SortableTag = ({
     isHighlighted,
     tagsByStatus,
     globalTagList,
-  } = useTagContext();
+  } = useTaggingContext();
 
   const isEditing = isTagBeingEdited(tagName);
 
@@ -88,8 +88,6 @@ const SortableTag = ({
     // Add will-change to improve rendering performance during animations
     willChange: transition ? 'transform' : undefined,
   };
-
-  // No handleEditStateChange needed - all handled by context now
 
   // Handler for input value changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,7 +171,6 @@ const areSortableTagsEqual = (
   );
 };
 
-const MemoizedSortableTag = memo(SortableTag, areSortableTagsEqual);
+const MemoizedSortableTag = memo(SortableTagComponent, areSortableTagsEqual);
 
-// For backward compatibility
 export { MemoizedSortableTag as SortableTag };
