@@ -4,7 +4,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent } from 'react';
 import { memo, useRef } from 'react';
 
-import { Tag, TagInput } from './components';
+import { Tag } from './components';
+import { InputTag } from './input-tag';
 import { useTagContext } from './tag-context';
 
 type SortableTagProps = {
@@ -127,7 +128,7 @@ const SortableTag = ({
     >
       {isEditing ? (
         <span className="mb-2 flex">
-          <TagInput
+          <InputTag
             inputValue={editTagValue}
             onInputChange={handleInputChange}
             onSubmit={handleSaveEdit}

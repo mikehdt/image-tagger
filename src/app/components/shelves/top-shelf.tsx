@@ -153,35 +153,36 @@ export const TopShelf = () => {
         </div>
 
         <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
-          {filterActive ? (
-            <>
-              <button
-                className={`mr-4 inline-flex items-center py-2 ${
-                  filterTags.length
-                    ? 'cursor-pointer text-slate-700'
-                    : 'cursor-not-allowed text-slate-300'
-                }`}
-                type="button"
-                onClick={() => dispatch(markFilterTagsToDelete(filterTags))}
-                disabled={!filterTags.length}
-                title="Toggle selected tags for deletion"
-              >
-                <DocumentMinusIcon className="mr-1 w-4" />
-                Toggle Delete
-              </button>
+          <button
+            className={`mr-4 inline-flex items-center py-2 ${
+              filterTags.length
+                ? 'cursor-pointer text-slate-700'
+                : 'cursor-not-allowed text-slate-300'
+            }`}
+            type="button"
+            onClick={() => dispatch(markFilterTagsToDelete(filterTags))}
+            disabled={!filterTags.length}
+            title="Toggle selected tags for deletion"
+          >
+            <DocumentMinusIcon className="mr-1 w-4" />
+            Toggle Delete
+          </button>
 
-              <button
-                className="mr-4 inline-flex cursor-pointer items-center py-2 text-slate-700"
-                type="button"
-                onClick={() => dispatch(clearFilters())}
-              >
-                <XMarkIcon className="mr-1 w-4" />
-                Clear Filters
-              </button>
-            </>
-          ) : null}
+          <button
+            className={`mr-4 inline-flex items-center py-2 ${
+              filterActive
+                ? 'cursor-pointer text-slate-700'
+                : 'cursor-not-allowed text-slate-300'
+            }`}
+            type="button"
+            onClick={() => dispatch(clearFilters())}
+            disabled={!filterActive}
+          >
+            <XMarkIcon className="mr-1 w-4" />
+            Clear Filters
+          </button>
 
-          <div className="mr-4 flex cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
+          <div className="flex cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
             <span
               className={`px-2 text-sky-500 ${filterSizes.length ? 'bg-sky-100' : ''}`}
               title="Active size filters"

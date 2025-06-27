@@ -14,7 +14,7 @@ import {
 const MIN_TAG_LENGTH = 6;
 const MAX_TAG_LENGTH = 20;
 
-type TagInputProps = {
+type InputTagProps = {
   inputValue: string;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: SyntheticEvent) => void;
@@ -25,7 +25,7 @@ type TagInputProps = {
   nonInteractive?: boolean;
 };
 
-const TagInputComponent = ({
+const InputTagComponent = ({
   inputValue,
   onInputChange,
   onSubmit,
@@ -34,7 +34,7 @@ const TagInputComponent = ({
   mode = 'add',
   isDuplicate,
   nonInteractive = false,
-}: TagInputProps) => {
+}: InputTagProps) => {
   // Reference to the input element to maintain focus
   const inputRef = useRef<HTMLInputElement>(null);
   // Track if the input is focused for showing/hiding controls in add mode
@@ -233,4 +233,4 @@ const TagInputComponent = ({
 };
 
 // Memoize the component to prevent unnecessary re-renders
-export const TagInput = memo(TagInputComponent);
+export const InputTag = memo(InputTagComponent);

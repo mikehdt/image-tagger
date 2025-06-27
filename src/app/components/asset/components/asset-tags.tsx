@@ -2,7 +2,7 @@ import { closestCenter, DndContext } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { SyntheticEvent } from 'react';
 
-import { TagInput } from '../../tag/components';
+import { InputTag } from '../../tag/input-tag';
 import { SortableTag } from '../../tag/sortable-tag';
 import { TagProvider, useTagContext } from '../../tag/tag-context';
 import { useAssetTags, useDragDrop } from '../hooks';
@@ -53,7 +53,7 @@ const AssetTagsContent = () => {
       <div
         className={`transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
       >
-        <TagInput
+        <InputTag
           inputValue={newTagInput}
           onInputChange={handleInputChange}
           onSubmit={(e: SyntheticEvent) => {
