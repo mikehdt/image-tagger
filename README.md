@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project using React, Redux and TypeScript. Package management is handled with `pnpm`.
 
+## Project Overview
+
+This project allows the user to manage and tag image collections. Users can view images in a paginated gallery, add/edit/reorder tags for each image, filter images by tags, dimensions, or filetype, and save tags back to associated text files.
+
 ## Getting Started
 
 To run the development server:
@@ -18,17 +22,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 /src
   /app                    # Next.js App Router structure
     /components           # Reusable UI components
-      /asset              # Asset-related components
-      /shared             # Shared utility components
-      /tagging            # Tagging functionality
     /constants            # Application constants
     /providers            # React context providers
     /store                # Redux store configuration
-      /assets             # Asset-related state
-      /filters            # Filter-related state
-      /middleware         # Redux middleware
     /utils                # Utility functions
     /views                # Page-specific components
+    /[page]               # Paginated list view (dynamic route)
     layout.tsx            # Root layout component
     page.tsx              # Home page component
 ```

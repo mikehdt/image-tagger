@@ -67,8 +67,8 @@ export const TopShelf = () => {
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center">
-        <div className="flex py-2 pl-4">
+      <div className="mx-auto flex h-12 max-w-400 items-center px-4 text-sm">
+        <div className="flex py-2">
           {showLoader ? (
             <>
               <div className="mr-4 w-6">
@@ -106,7 +106,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={saveAllChanges}
-                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-emerald-700' : 'cursor-not-allowed text-slate-300'}`}
+                className={`mr-4 inline-flex items-center py-2 ${hasModifiedAssets ? 'cursor-pointer text-emerald-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets
                     ? 'Save all tag changes'
@@ -122,7 +122,7 @@ export const TopShelf = () => {
               {/* <button
                 type="button"
                 onClick={() => {}}
-                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets && filterActive ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
+                className={`mr-4 inline-flex items-center py-2 ${hasModifiedAssets && filterActive ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets && filterActive
                     ? 'Save only filtered tag changes'
@@ -137,7 +137,7 @@ export const TopShelf = () => {
               <button
                 type="button"
                 onClick={cancelAllChanges}
-                className={`mr-4 inline-flex items-center py-2 text-sm ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
+                className={`mr-4 inline-flex items-center py-2 ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'cursor-not-allowed text-slate-300'}`}
                 title={
                   hasModifiedAssets
                     ? 'Cancel all tag changes'
@@ -152,7 +152,7 @@ export const TopShelf = () => {
           )}
         </div>
 
-        <div className="ml-auto flex items-center py-2 pr-4 pl-2 text-sm">
+        <div className="mr-4 ml-auto flex items-center">
           <button
             className={`mr-4 inline-flex items-center py-2 ${
               filterTags.length
@@ -169,7 +169,7 @@ export const TopShelf = () => {
           </button>
 
           <button
-            className={`mr-4 inline-flex items-center py-2 ${
+            className={`inline-flex items-center py-2 ${
               filterActive
                 ? 'cursor-pointer text-slate-700'
                 : 'cursor-not-allowed text-slate-300'
@@ -181,120 +181,130 @@ export const TopShelf = () => {
             <XMarkIcon className="mr-1 w-4" />
             Clear Filters
           </button>
+        </div>
 
-          <div className="flex mr-4 cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
-            {filterSizes.length > 0 && (
-              <span
-                className="px-2 text-sky-500 bg-sky-100"
-                title="Active size filters"
-              >
-                {filterSizes.length || '–'}
-              </span>
-            )}
+        <div className="mr-2 flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3 tabular-nums">
+          {!filterSizes.length &&
+          !filterTags.length &&
+          !filterExtensions.length ? (
+            <span className="px-2 text-slate-300" title="Active size filters">
+              &ndash;
+            </span>
+          ) : null}
 
+          {filterSizes.length > 0 && (
             <span
-              className={`px-2 ${filterTags.length ? 'text-emerald-500 bg-emerald-100' : 'text-slate-300'}`}
+              className="bg-sky-100 px-2 text-sky-500"
+              title="Active size filters"
+            >
+              {filterSizes.length || '–'}
+            </span>
+          )}
+
+          {filterTags.length > 0 && (
+            <span
+              className="bg-emerald-100 px-2 text-emerald-500"
               title="Active tag filters"
             >
               {filterTags.length || '–'}
             </span>
+          )}
 
-            {filterExtensions.length > 0 && (
-              <span
-                className="px-2 text-stone-500 bg-stone-100"
-                title="Active filetype filters"
-              >
-                {filterExtensions.length || '–'}
-              </span>
-            )}
-          </div>
-
-          <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
-            <span className="mr-1 py-1">
-              {filterTagsMode === FilterMode.SHOW_ALL ? (
-                <DocumentCheckIcon className="w-4" />
-              ) : (
-                <DocumentMagnifyingGlassIcon className="w-4" />
-              )}
+          {filterExtensions.length > 0 && (
+            <span
+              className="bg-stone-100 px-2 text-stone-500"
+              title="Active filetype filters"
+            >
+              {filterExtensions.length || '–'}
             </span>
+          )}
+        </div>
 
-            <div
-              className={`mr-2 flex items-center rounded-sm ${filterSelectionActive ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
-            >
-              <button
-                type="button"
-                onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
-                className={`flex cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-                  filterTagsMode === FilterMode.SHOW_ALL
-                    ? 'bg-white shadow-sm'
-                    : 'hover:bg-slate-300'
-                }`}
-              >
-                Show All
-              </button>
-              <button
-                type="button"
-                onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
-                className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
-                  filterTagsMode === FilterMode.MATCH_ANY
-                    ? 'bg-white shadow-sm'
-                    : ''
-                } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-                disabled={!filterSelectionActive}
-              >
-                Match Any
-              </button>
-              <button
-                type="button"
-                onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
-                className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
-                  filterTagsMode === FilterMode.MATCH_ALL
-                    ? 'bg-white shadow-sm'
-                    : ''
-                } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
-                disabled={!filterSelectionActive}
-              >
-                Match All
-              </button>
-            </div>
+        <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
+          <span className="mr-1 py-1">
+            {filterTagsMode === FilterMode.SHOW_ALL ? (
+              <DocumentCheckIcon className="w-4" />
+            ) : (
+              <DocumentMagnifyingGlassIcon className="w-4" />
+            )}
+          </span>
 
-            <div
-              className={`rounded-sm ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+          <div
+            className={`mr-2 flex items-center rounded-sm ${filterSelectionActive ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+          >
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.SHOW_ALL))}
+              className={`flex cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+                filterTagsMode === FilterMode.SHOW_ALL
+                  ? 'bg-white shadow-sm'
+                  : 'hover:bg-slate-300'
+              }`}
             >
-              <button
-                type="button"
-                onClick={() => dispatch(toggleModifiedFilter())}
-                className={`rounded-sm p-1 px-2 transition-colors ${
-                  filterModifiedActive ? 'bg-white shadow-sm' : ''
-                } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}
-                disabled={!hasModifiedAssets}
-              >
-                Modified
-              </button>
-            </div>
+              Show All
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ANY))}
+              className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
+                filterTagsMode === FilterMode.MATCH_ANY
+                  ? 'bg-white shadow-sm'
+                  : ''
+              } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+              disabled={!filterSelectionActive}
+            >
+              Match Any
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch(setTagFilterMode(FilterMode.MATCH_ALL))}
+              className={`flex items-center rounded-sm px-2 py-1 transition-colors ${
+                filterTagsMode === FilterMode.MATCH_ALL
+                  ? 'bg-white shadow-sm'
+                  : ''
+              } ${filterSelectionActive ? 'cursor-pointer text-slate-700 hover:bg-slate-300' : 'text-slate-300'}`}
+              disabled={!filterSelectionActive}
+            >
+              Match All
+            </button>
           </div>
 
-          {/* Tag summary list button */}
-          <div className="relative" ref={tagButtonRef}>
-            <div
-              onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-              className={`inline-flex cursor-pointer items-center rounded-md p-2 transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
-              title="Show tag summary"
+          <div
+            className={`rounded-sm ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
+          >
+            <button
+              type="button"
+              onClick={() => dispatch(toggleModifiedFilter())}
+              className={`rounded-sm p-1 px-2 transition-colors ${
+                filterModifiedActive ? 'bg-white shadow-sm' : ''
+              } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}
+              disabled={!hasModifiedAssets}
             >
-              <TagIcon className="mr-1 ml-1 w-4" />
-
-              <span className="ml-2 max-lg:hidden"> Filter List</span>
-            </div>
-
-            {/* Tag panel component */}
-            <PersistentFilterProvider>
-              <FilterList
-                isOpen={isTagPanelOpen}
-                onClose={() => setIsTagPanelOpen(false)}
-                containerRef={tagButtonRef}
-              />
-            </PersistentFilterProvider>
+              Modified
+            </button>
           </div>
+        </div>
+
+        {/* Tag summary list button */}
+        <div className="relative" ref={tagButtonRef}>
+          <div
+            onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
+            className={`inline-flex cursor-pointer items-center rounded-md p-2 transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-300'}`}
+            title="Show tag summary"
+          >
+            <TagIcon className="mr-1 ml-1 w-4" />
+
+            <span className="ml-2 max-lg:hidden"> Filter List</span>
+          </div>
+
+          {/* Tag panel component */}
+          <PersistentFilterProvider>
+            <FilterList
+              isOpen={isTagPanelOpen}
+              onClose={() => setIsTagPanelOpen(false)}
+              containerRef={tagButtonRef}
+            />
+          </PersistentFilterProvider>
         </div>
       </div>
     </div>

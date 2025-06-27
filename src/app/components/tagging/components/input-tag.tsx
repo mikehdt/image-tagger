@@ -169,7 +169,7 @@ export const InputTag = ({
             className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
               inputValue.trim() !== '' && !isDuplicate && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
-                : 'pointer-events-none opacity-0 text-slate-300'
+                : 'pointer-events-none text-slate-300 opacity-0'
             }`}
             onClick={
               inputValue.trim() !== '' && !isDuplicate && !nonInteractive
@@ -186,7 +186,7 @@ export const InputTag = ({
             className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
               inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-                : 'pointer-events-none opacity-0 text-slate-300'
+                : 'pointer-events-none text-slate-300 opacity-0'
             }`}
             onClick={(e) => {
               e.stopPropagation();
