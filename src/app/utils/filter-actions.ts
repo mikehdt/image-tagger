@@ -18,13 +18,12 @@ export const applyFilters = ({
   filterMode: FilterMode;
   showModified?: boolean;
 }) => {
-  // Quick return if no filters are active or show all mode is selected with no showModified filter
+  // Handle the case where no filters are active - show everything
   if (
-    (filterTags.length === 0 &&
-      filterSizes.length === 0 &&
-      filterExtensions.length === 0 &&
-      !showModified) ||
-    (filterMode === FilterMode.SHOW_ALL && !showModified)
+    filterTags.length === 0 &&
+    filterSizes.length === 0 &&
+    filterExtensions.length === 0 &&
+    !showModified
   ) {
     return assets;
   }
@@ -34,18 +33,23 @@ export const applyFilters = ({
   const filterExtensionsSet = new Set(filterExtensions);
 
   return assets.filter((img: ImageAsset) => {
-    // Check if we need to filter by modified state first
+    // Check modified status first if needed (applies to all filter modes)
     if (showModified) {
-      // Check if any tag has a non-SAVED state
       const hasModifiedTags = img.tagList.some(
         (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
       );
       if (!hasModifiedTags) {
-        return false;
+        return false; // Skip this asset if not modified and we want modified
       }
     }
 
-    // Check dimensions and extension
+    // SHOW_ALL mode - show all assets regardless of tag/size/extension filters
+    // The only filter that applies in SHOW_ALL mode is the modified filter, which was already applied above
+    if (filterMode === FilterMode.SHOW_ALL) {
+      return true; // Show everything that passed the modified filter check (if any)
+    }
+
+    // For MATCH modes, apply standard dimension and extension filters
     const dimensionsComposed = composeDimensions(img.dimensions);
     const sizeMatches =
       filterSizes.length === 0 || filterSizesSet.has(dimensionsComposed);
@@ -53,37 +57,26 @@ export const applyFilters = ({
       filterExtensions.length === 0 ||
       filterExtensionsSet.has(img.fileExtension);
 
-    // If no tag filters, just check size and extension
+    // For all MATCH modes, if there are no tag filters but we have size/extension filters,
+    // just apply the size/extension filters
     if (filterTags.length === 0) {
-      // If we have both size and extension filters, both must match
-      if (filterSizes.length > 0 && filterExtensions.length > 0) {
-        return sizeMatches && extensionMatches;
-      }
-      // Otherwise just check what we have
       return sizeMatches && extensionMatches;
     }
 
-    // Match based on filter mode
+    // MATCH_ALL mode - asset must have ALL selected tags and meet size/extension criteria
     if (filterMode === FilterMode.MATCH_ALL) {
+      // Every selected tag must be present in the asset's tags
       const allTagsMatch = filterTags.every((tag) => img.tagList.includes(tag));
-
-      // If we have other filters too, all must match
       return allTagsMatch && sizeMatches && extensionMatches;
     }
 
+    // MATCH_ANY mode - asset must have ANY selected tag and meet size/extension criteria
     if (filterMode === FilterMode.MATCH_ANY) {
-      // For MATCH_ANY mode, we want a union of matches from any filter class
-      // This means if any filter type matches, we show the asset
+      // At least one selected tag must be present in the asset's tags
+      const anyTagMatches = filterTags.some((tag) => img.tagList.includes(tag));
 
-      // Define whether each filter type is applied and matches
-      const tagsMatch =
-        filterTags.length > 0 &&
-        filterTags.some((tag) => img.tagList.includes(tag));
-      const sizesMatch = filterSizes.length > 0 && sizeMatches;
-      const extensionsMatch = filterExtensions.length > 0 && extensionMatches;
-
-      // Return true if ANY of the filter classes match
-      return tagsMatch || sizesMatch || extensionsMatch;
+      // Size and extension filters are still combined with AND logic
+      return anyTagMatches && sizeMatches && extensionMatches;
     }
 
     // This should never happen if using enum correctly
