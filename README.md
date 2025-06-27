@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project using React, Redux and TypeScript. Package management is handled with `pnpm`.
 
 ## Getting Started
 
-First, run the development server:
+To run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Coding Style
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Project Structure
 
-## Learn More
+```
+/src
+  /app                    # Next.js App Router structure
+    /components           # Reusable UI components
+      /asset              # Asset-related components
+      /shared             # Shared utility components
+      /tagging            # Tagging functionality
+    /constants            # Application constants
+    /providers            # React context providers
+    /store                # Redux store configuration
+      /assets             # Asset-related state
+      /filters            # Filter-related state
+      /middleware         # Redux middleware
+    /utils                # Utility functions
+    /views                # Page-specific components
+    layout.tsx            # Root layout component
+    page.tsx              # Home page component
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Component Organization
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Feature-based Structure**: Components are organized by feature (asset, tagging, etc.)
+2. **Component Hierarchy**:
+   - Main components at the root level of feature directory
+   - Subcomponents in a `/components` subdirectory
+   - Hooks in a `/hooks` subdirectory
+   - Only use `index.ts` files to export sub-component folder contents, hook folder contents, or Redux slices.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### State Management
 
-## Deploy on Vercel
+1. **Global State**: Redux with Redux Toolkit for application-wide state
+   - Store organized by domain (assets, filters)
+   - Use typed selectors and action creators
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Local State**: React hooks for component-specific state
+   - `useState` for simple state
+   - `useReducer` for complex state logic or to avoid long prop drilling
+   - Custom hooks to encapsulate related state and logic
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Context API**: Used to avoid prop drilling within feature boundaries
+   - Keep contexts focused on specific features
+   - Provide proper TypeScript typing for context values
+   - Use context providers only where there is a lot of state or component complexity
+
+### TypeScript Usage
+
+1. **Strict Type Safety**: TypeScript's strict mode is enabled
+2. **Type Definitions**:
+   - Define interfaces for component props
+   - Use type inference where possible
+   - Export types and interfaces for reuse
+3. **Path Aliases**: Use `@/*` import paths for cleaner imports
+
+### Component Design
+
+1. **Composition over Inheritance**: Build complex UIs by composing smaller components
+2. **Single Responsibility**: Each component should do one thing well
+3. **Container/Presentational Pattern**: Separate data management from presentation
+4. **Custom Hooks**: Extract reusable logic into custom hooks
+
+### CSS and Styling
+
+1. **Tailwind CSS**: Use Tailwind utilities for styling
+2. **Component Classes**: Group related Tailwind classes with meaningful names
+3. **Responsive Design**: Use Tailwind's responsive prefixes consistently
+
+### Import Conventions
+
+1. **Organized Imports**: Use the simple-import-sort plugin rules
+2. **Import Order**:
+   - External dependencies first
+   - Internal absolute imports
+   - Relative imports
+     - An eslint plugin to automatically sort import order is used
+
+### Code Formatting
+
+1. **Prettier**: Automatic code formatting using Prettier
+2. **ESLint**: Code quality rules enforced by ESLint
+3. **Consistency**: Follow existing patterns in the codebase
+4. **Knip**: Run every now and then to help find unused code
+
+### Documentation
+
+1. **README Files**: Each major feature has its own README
+2. **Code Comments**: Document complex logic and non-obvious decisions
+3. **JSDoc**: Use JSDoc comments for public APIs and utility functions
+
+### Performance Considerations
+
+1. **Memoization**: Use React.memo, useMemo, and useCallback appropriately
+2. **Code Splitting**: Utilize Next.js dynamic imports for larger components
+3. **Bundle Size**: Monitor and optimize bundle size

@@ -182,27 +182,31 @@ export const TopShelf = () => {
             Clear Filters
           </button>
 
-          <div className="flex cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
-            <span
-              className={`px-2 text-sky-500 ${filterSizes.length ? 'bg-sky-100' : ''}`}
-              title="Active size filters"
-            >
-              {filterSizes.length || '-'}
-            </span>
+          <div className="flex mr-4 cursor-default flex-col overflow-hidden rounded-sm border border-slate-200 text-center text-xs leading-3 tabular-nums">
+            {filterSizes.length > 0 && (
+              <span
+                className="px-2 text-sky-500 bg-sky-100"
+                title="Active size filters"
+              >
+                {filterSizes.length || '–'}
+              </span>
+            )}
 
             <span
-              className={`px-2 text-emerald-500 ${filterTags.length ? 'bg-emerald-100' : ''}`}
+              className={`px-2 ${filterTags.length ? 'text-emerald-500 bg-emerald-100' : 'text-slate-300'}`}
               title="Active tag filters"
             >
-              {filterTags.length || '-'}
+              {filterTags.length || '–'}
             </span>
 
-            <span
-              className={`px-2 text-stone-500 ${filterExtensions.length ? 'bg-stone-100' : ''}`}
-              title="Active filetype filters"
-            >
-              {filterExtensions.length || '-'}
-            </span>
+            {filterExtensions.length > 0 && (
+              <span
+                className="px-2 text-stone-500 bg-stone-100"
+                title="Active filetype filters"
+              >
+                {filterExtensions.length || '–'}
+              </span>
+            )}
           </div>
 
           <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">

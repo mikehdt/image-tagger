@@ -1,4 +1,4 @@
-export * from './use-asset-tags';
-export * from './use-tag-actions';
-export * from './use-tag-calculations';
-export * from './use-tag-state';
+export { useAssetTags } from './use-asset-tags';
+export { useTagActions } from './use-tag-actions';
+export { useTagCalculations } from './use-tag-calculations';
+export { useTagState } from './use-tag-state';

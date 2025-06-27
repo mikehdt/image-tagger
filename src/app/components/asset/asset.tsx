@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState } from '../../store/assets';
 import { composeDimensions } from '../../utils/helpers';
-import { TaggingManager } from '../tagging';
+import { TaggingManager } from '../tagging/tagging-manager';
 import { AssetMetadata } from './components';
 
 type AssetProps = {

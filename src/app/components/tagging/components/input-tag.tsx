@@ -2,19 +2,12 @@ import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { ChangeEvent, SyntheticEvent } from 'react';
 import {
   KeyboardEvent,
-  memo,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-
-/**
- * Configuration constants for tag input sizing
- */
-const MIN_TAG_LENGTH = 6;
-const MAX_TAG_LENGTH = 20;
 
 /**
  * Props for the InputTag component
@@ -39,7 +32,7 @@ type InputTagProps = {
   nonInteractive?: boolean;
 };
 
-const InputTagComponent = ({
+export const InputTag = ({
   inputValue,
   onInputChange,
   onSubmit,
@@ -112,35 +105,27 @@ const InputTagComponent = ({
 
   // Calculate the width based on input length (between min and max width)
   const inputWidth = useMemo(() => {
-    // Set minimum width for empty or short inputs
-    const minWidth = 'w-36'; // Default width (9rem)
-    // Maximum width for longer inputs (up to MAX_TAG_LENGTH characters)
-    const maxWidth = 'w-64'; // 16rem
+    // min/max range of string length to match to Tailwind class steps
+    const MIN_CHAR_LENGTH = 6;
+    const MAX_CHAR_LENGTH = 20;
 
     const length = inputValue.length;
 
-    if (length <= MIN_TAG_LENGTH) {
-      return minWidth;
-    } else if (length >= MAX_TAG_LENGTH) {
-      return maxWidth;
+    // A note on Tailwind classes: They must be whole strings (`w-24` etc.) as otherwise Tailwind's parser won't properly extract the correct CSS for them
+    if (length <= MIN_CHAR_LENGTH) {
+      return `w-40`;
+    } else if (length >= MAX_CHAR_LENGTH) {
+      return `w-68`;
     } else {
       // Dynamic width between min and max based on character count
       // Each character increment between MIN-MAX will increase width proportionally
       const widthStep =
-        (length - MIN_TAG_LENGTH) / (MAX_TAG_LENGTH - MIN_TAG_LENGTH); // 0 to 1 scale
-      // Maps to tailwind w classes between w-36 and w-64
-      const widthClasses = [
-        // 'w-36',
-        'w-40',
-        'w-44',
-        'w-48',
-        'w-52',
-        'w-56',
-        'w-60',
-        'w-64',
-      ];
+        (length - MIN_CHAR_LENGTH) / (MAX_CHAR_LENGTH - MIN_CHAR_LENGTH); // 0 to 1 scale
+
+      const widthClasses = ['w-44', 'w-48', 'w-52', 'w-56', 'w-60', 'w-64'];
+
       const index = Math.min(
-        Math.floor(widthStep * (widthClasses.length - 1)),
+        Math.floor(widthStep * widthClasses.length),
         widthClasses.length - 1,
       );
       return widthClasses[index];
@@ -148,7 +133,12 @@ const InputTagComponent = ({
   }, [inputValue]);
 
   // Border colors based on mode
-  const borderColor = mode === 'add' ? 'border-amber-300' : 'border-blue-300';
+  const border =
+    mode === 'add' ? 'border border-amber-300' : 'border border-blue-300';
+  const insetShadow =
+    mode === 'add'
+      ? 'inset-shadow-sm inset-shadow-amber-100'
+      : 'inset-shadow-sm inset-shadow-blue-100';
 
   // Auto-focus when in edit mode on component mount
   useEffect(() => {
@@ -169,17 +159,17 @@ const InputTagComponent = ({
         tabIndex={nonInteractive ? -1 : 0}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`${inputWidth} rounded-full border ${borderColor} py-1 ps-4 pe-14 transition-all ${nonInteractive ? 'pointer-events-none' : ''} ${isFocused ? 'ring-2 ring-blue-500' : ''}`}
+        className={`${inputWidth} rounded-full py-1 ps-4 pe-14 transition-all ${border} ${nonInteractive ? 'pointer-events-none' : ''} ${isFocused ? `${insetShadow} ring-2 ring-blue-500` : ''}`}
       />
 
       {/* Render action buttons based on mode */}
       {mode === 'add' ? (
         <>
           <span
-            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
+            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
               inputValue.trim() !== '' && !isDuplicate && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
-                : 'cursor-not-allowed text-slate-300'
+                : 'pointer-events-none opacity-0 text-slate-300'
             }`}
             onClick={
               inputValue.trim() !== '' && !isDuplicate && !nonInteractive
@@ -193,10 +183,10 @@ const InputTagComponent = ({
           </span>
 
           <span
-            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${
+            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
               inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-                : 'cursor-not-allowed text-slate-300'
+                : 'pointer-events-none opacity-0 text-slate-300'
             }`}
             onClick={(e) => {
               e.stopPropagation();
@@ -211,7 +201,7 @@ const InputTagComponent = ({
       ) : (
         <>
           <span
-            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 ${
+            className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 transition-colors ${
               !isDuplicate && inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
@@ -229,7 +219,7 @@ const InputTagComponent = ({
 
           <span
             // In edit mode, the cancel button should always be active regardless of input value
-            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
+            className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
             onClick={(e) => {
               e.stopPropagation();
               // Always call onCancel directly in edit mode, regardless of input value
@@ -247,4 +237,4 @@ const InputTagComponent = ({
 };
 
 // Memoize the component to prevent unnecessary re-renders
-export const InputTag = memo(InputTagComponent);
+// export const InputTag = memo(InputTagComponent);

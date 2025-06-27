@@ -1,6 +1,6 @@
-export * from './filter-controls';
-export * from './list-view-selector';
-export * from './search-input';
-export * from './view-file-types';
-export * from './view-sizes';
-export * from './view-tags';
+export { FilterControls } from './filter-controls';
+export { ViewSelector } from './list-view-selector';
+export { SearchInput } from './search-input';
+export { FiletypesView, getFiletypeSortOptions } from './view-file-types';
+export { getSizeSortOptions, SizesView } from './view-sizes';
+export { getTagSortOptions, TagsView } from './view-tags';

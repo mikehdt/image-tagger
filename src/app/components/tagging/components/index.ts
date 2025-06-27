@@ -1,4 +1,4 @@
-export * from './input-tag';
-export * from './sortable-tag';
-export * from './tag';
-export * from './tag-list';
+export { InputTag } from './input-tag';
+export { SortableTag } from './sortable-tag';
+export { Tag } from './tag';
+export { TagList } from './tag-list';

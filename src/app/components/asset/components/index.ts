@@ -1,1 +1,1 @@
-export * from './asset-metadata';
+export { AssetMetadata } from './asset-metadata';

@@ -1,1 +1,1 @@
-export * from './use-asset-tags';
+export { useAssetTags } from './use-asset-tags';
