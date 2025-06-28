@@ -4,7 +4,11 @@ import { createContext, ReactNode, useContext, useMemo } from 'react';
 /**
  * Tagging module - Provides functionality for managing tags on assets
  */
-import { useTagActions, useTagCalculations, useTagState } from './hooks';
+import {
+  useTagActions,
+  useTagCalculations,
+  useTagStateWithCallback,
+} from './hooks';
 
 // Define the context shape
 type TaggingContextType = {
@@ -49,6 +53,7 @@ export const TaggingProvider = ({
   globalTagList = {},
   filterTagsSet = new Set<string>(),
   toggleTag,
+  onTagEditingChange,
 }: {
   children: ReactNode;
   assetId: string;
@@ -57,8 +62,9 @@ export const TaggingProvider = ({
   globalTagList?: Record<string, number>;
   filterTagsSet?: Set<string>;
   toggleTag?: (e: SyntheticEvent, tagName: string) => void;
+  onTagEditingChange?: (isEditing: boolean) => void;
 }) => {
-  // Use extracted hooks
+  // Use extracted hooks with callback for editing state
   const {
     newTagInput,
     editTagValue,
@@ -68,7 +74,7 @@ export const TaggingProvider = ({
     setEditTagValue,
     setEditingTagName,
     setIsEditing,
-  } = useTagState();
+  } = useTagStateWithCallback(onTagEditingChange);
 
   const {
     isDuplicate,

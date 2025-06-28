@@ -26,6 +26,8 @@ export const Asset = ({
   ioState,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
+  // Track if any tag is currently being edited or added
+  const [isTagInteracting, setIsTagInteracting] = useState<boolean>(false);
 
   // Memoize the composed dimensions so it's not recreated on every render
   const dimensionsComposed = useMemo(
@@ -57,7 +59,10 @@ export const Asset = ({
       </div>
 
       <div className={`min-h-40 p-4 ${imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}>
-        <TaggingManager assetId={assetId} />
+        <TaggingManager
+          assetId={assetId}
+          onTagEditingChange={setIsTagInteracting}
+        />
       </div>
 
       <AssetMetadata
@@ -68,6 +73,7 @@ export const Asset = ({
         extensionActive={extensionActive}
         ioState={ioState}
         dimensionsComposed={dimensionsComposed}
+        isTagEditing={isTagInteracting}
       />
     </div>
   );

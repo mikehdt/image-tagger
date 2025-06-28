@@ -13,6 +13,7 @@ type AssetMetadataProps = {
   extensionActive: boolean;
   ioState: IoState;
   dimensionsComposed: string;
+  isTagEditing?: boolean; // True when either editing or adding a tag
 };
 
 export const AssetMetadata = ({
@@ -23,6 +24,7 @@ export const AssetMetadata = ({
   extensionActive,
   ioState,
   dimensionsComposed,
+  isTagEditing = false,
 }: AssetMetadataProps) => {
   const {
     tagList,
@@ -35,15 +37,17 @@ export const AssetMetadata = ({
 
   const saveProgress = useAppSelector(selectSaveProgress);
 
-  // Disable buttons when either individual asset is saving or a batch save is in progress
+  // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =
     saveProgress &&
     saveProgress.total > 0 &&
     saveProgress.completed < saveProgress.total;
 
-  const isSaving = ioState === IoState.SAVING || isBatchSaveInProgress;
+  const isSaving =
+    ioState === IoState.SAVING || isBatchSaveInProgress || isTagEditing;
 
   // Memoize this calculation to prevent unnecessary re-renders
+  // We want to show the buttons whenever there are modified tags, even during tag editing
   const hasModifiedTags = useMemo(
     () =>
       tagList.length &&
@@ -82,16 +86,50 @@ export const AssetMetadata = ({
       {hasModifiedTags ? (
         <span className="ml-auto flex pl-2">
           <button
-            className={`flex rounded-sm bg-slate-200 px-4 py-1 text-slate-800 transition-colors ${isSaving ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-slate-300'}`}
-            onClick={isSaving ? undefined : cancelAction}
-            disabled={isSaving}
+            className={`flex rounded-sm bg-slate-200 px-4 py-1 text-slate-800 transition-colors ${
+              isTagEditing
+                ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
+                : isSaving
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'cursor-pointer hover:bg-slate-300'
+            }`}
+            onClick={(e) => {
+              // Extra guard to prevent clicking during tag editing
+              if (isTagEditing || isSaving) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              cancelAction();
+            }}
+            disabled={isTagEditing || isSaving}
+            aria-disabled={isTagEditing || isSaving}
+            tabIndex={isTagEditing || isSaving ? -1 : undefined}
+            title={isTagEditing ? 'Finish tag operation first' : ''}
           >
             Cancel
           </button>
           <button
-            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 transition-colors ${isSaving ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-emerald-300'}`}
-            onClick={isSaving ? undefined : saveAction}
-            disabled={isSaving}
+            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 transition-colors ${
+              isTagEditing
+                ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
+                : isSaving
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'cursor-pointer hover:bg-emerald-300'
+            }`}
+            onClick={(e) => {
+              // Extra guard to prevent clicking during tag editing
+              if (isTagEditing || isSaving) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              saveAction();
+            }}
+            disabled={isTagEditing || isSaving}
+            aria-disabled={isTagEditing || isSaving}
+            tabIndex={isTagEditing || isSaving ? -1 : undefined}
+            title={isTagEditing ? 'Finish tag operation first' : ''}
           >
             <BookmarkIcon className="mr-1 w-4" />
             Save

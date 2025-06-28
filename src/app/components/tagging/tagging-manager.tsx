@@ -18,6 +18,7 @@ import { TaggingProvider } from './tagging-context';
 interface TaggingManagerProps {
   assetId: string;
   className?: string;
+  onTagEditingChange?: (isEditing: boolean) => void;
 }
 
 /**
@@ -27,6 +28,7 @@ interface TaggingManagerProps {
 export const TaggingManager = ({
   assetId,
   className = '',
+  onTagEditingChange,
 }: TaggingManagerProps) => {
   // Get tag data for this specific asset
   const {
@@ -62,6 +64,7 @@ export const TaggingManager = ({
           globalTagList={globalTagList}
           filterTagsSet={filterTagsSet}
           toggleTag={toggleTag}
+          onTagEditingChange={onTagEditingChange}
         >
           <TagList />
         </TaggingProvider>

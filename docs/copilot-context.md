@@ -25,13 +25,14 @@ An image tagging application that allows users to:
 
 ## Technical Implementation
 
+- **Package Management**: pnpm
 - **Frontend**: Next.js with App Router, React, TypeScript
 - **State Management**: Redux for global state (image list, filters), React state (useState) for local state
-- **Performance**: `useMemo`, `React.memo` and `useCallback` to minimise re-renders and keep the UI fast
 - **Styling**: Tailwind CSS for responsive design
-- **Package Management**: pnpm
+- **Performance**: `useMemo`, `React.memo` and `useCallback` to minimise re-renders and keep the UI fast
 - **Formatting**: eslint and prettier, imports ordered with an eslint plugin
-- **Filenames**: lower kebab-case filenames for all Typescript files
+- **Filenames**: Lower kebab-case filenames eg. `file-name.ts` for all Typescript/TSX files
+- **Struture**: Follow established file and folder patterns. Avoid unnecessary exports to keep code comprehension tight. Structure reference can be found in component `README.md` files if needed.
 
 ## Architecture Decisions
 
