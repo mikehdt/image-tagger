@@ -57,7 +57,9 @@ export const AssetMetadata = ({
   );
 
   return (
-    <div className="flex w-full items-center border-t border-t-slate-300 bg-slate-100 px-2 py-1 text-sm">
+    <div
+      className={`flex w-full items-center border-t px-2 py-1 text-sm transition-colors ${hasModifiedTags ? 'border-t-amber-300 bg-amber-100 inset-shadow-xs inset-shadow-white' : 'border-t-slate-300 bg-slate-100'}`}
+    >
       <span className="inline-flex min-w-0 flex-wrap items-center py-0.5 tabular-nums">
         <button
           type="button"
@@ -86,12 +88,12 @@ export const AssetMetadata = ({
       {hasModifiedTags ? (
         <span className="ml-auto flex pl-2">
           <button
-            className={`flex rounded-sm bg-slate-200 px-4 py-1 text-slate-800 transition-colors ${
+            className={`flex rounded-sm bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors ${
               isTagEditing
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving
                   ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-slate-300'
+                  : 'cursor-pointer hover:bg-stone-300'
             }`}
             onClick={(e) => {
               // Extra guard to prevent clicking during tag editing
@@ -109,8 +111,9 @@ export const AssetMetadata = ({
           >
             Cancel
           </button>
+
           <button
-            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 transition-colors ${
+            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 shadow-xs inset-shadow-xs shadow-emerald-400 inset-shadow-white transition-colors ${
               isTagEditing
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving
