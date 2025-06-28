@@ -97,16 +97,16 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const renderedAssets = useMemo(
     () =>
       paginatedAssets.map(
-        ({ fileId, fileExtension, dimensions, ioState }, index) => {
+        ({ fileId, fileExtension, dimensions, ioState, originalIndex }) => {
           // Get the pre-calculated dimension string
           const dimensionString = assetDimensions.get(fileId);
           // Check if dimensions or extension are in our filter sets
           const isDimensionActive = filterSizesSet.has(dimensionString);
           const isExtensionActive = filterExtensionsSet.has(fileExtension);
 
-          // Calculate the global item number based on filtered assets
-          const globalItemNumber =
-            (currentPage - 1) * paginationSize + index + 1;
+          // Use the originalIndex which represents the asset's position in the global store
+          // This is already 1-based for display purposes
+          const globalItemNumber = originalIndex;
 
           return (
             <MemoizedAsset
@@ -122,14 +122,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           );
         },
       ),
-    [
-      paginatedAssets,
-      filterSizesSet,
-      filterExtensionsSet,
-      assetDimensions,
-      currentPage,
-      paginationSize,
-    ],
+    [paginatedAssets, filterSizesSet, filterExtensionsSet, assetDimensions],
   );
 
   // Render a message when no assets match the filters

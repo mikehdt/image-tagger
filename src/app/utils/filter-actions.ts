@@ -3,6 +3,11 @@ import { hasState } from '../store/assets/utils';
 import { FilterMode } from '../store/filters';
 import { composeDimensions } from './helpers';
 
+// Define an interface that extends ImageAsset with originalIndex
+export interface ImageAssetWithIndex extends ImageAsset {
+  originalIndex: number;
+}
+
 export const applyFilters = ({
   assets,
   filterTags,
@@ -17,7 +22,7 @@ export const applyFilters = ({
   filterExtensions: string[];
   filterMode: FilterMode;
   showModified?: boolean;
-}) => {
+}): ImageAssetWithIndex[] => {
   // Handle the case where no filters are active - show everything
   if (
     filterTags.length === 0 &&
@@ -25,14 +30,24 @@ export const applyFilters = ({
     filterExtensions.length === 0 &&
     !showModified
   ) {
-    return assets;
+    // Add originalIndex to each asset (1-based for display)
+    return assets.map((asset, index) => ({
+      ...asset,
+      originalIndex: index + 1,
+    })) as ImageAssetWithIndex[];
   }
 
   // Create a Set for faster lookups when checking dimensions and extensions
   const filterSizesSet = new Set(filterSizes);
   const filterExtensionsSet = new Set(filterExtensions);
 
-  return assets.filter((img: ImageAsset) => {
+  // Map assets to include their original index (1-based for display)
+  const assetsWithIndex = assets.map((asset, index) => ({
+    ...asset,
+    originalIndex: index + 1,
+  })) as ImageAssetWithIndex[];
+
+  return assetsWithIndex.filter((img: ImageAssetWithIndex) => {
     // Check modified status first if needed (applies to all filter modes)
     if (showModified) {
       const hasModifiedTags = img.tagList.some(
