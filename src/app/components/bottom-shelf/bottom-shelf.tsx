@@ -48,21 +48,17 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
-        <div className="w-1/4 text-xs whitespace-nowrap text-slate-500">
-          {isFiltered ? (
-            <>
-              {filteredCount} filtered items from {allAssets.length} total
-            </>
-          ) : (
-            <>{allAssets.length} items total</>
-          )}
-        </div>
+        <div className="flex w-1/4 items-center text-xs whitespace-nowrap text-slate-500">
+          <span className="mr-4">
+            {isFiltered && (
+              <>
+                {filteredCount} filtered items
+                <br />
+              </>
+            )}
+            {allAssets.length} items total
+          </span>
 
-        <div className="flex w-2/4 items-center justify-center">
-          <Pagination currentPage={currentPage} totalItems={filteredCount} />
-        </div>
-
-        <div className="flex w-1/4 items-center justify-end">
           <PaginationControls
             currentPage={currentPage}
             totalPages={
@@ -72,6 +68,14 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             }
             totalItems={filteredCount}
           />
+        </div>
+
+        <div className="flex w-2/4 items-center justify-center">
+          <Pagination currentPage={currentPage} totalItems={filteredCount} />
+        </div>
+
+        <div className="flex w-1/4 items-center justify-end">
+          [move save/cancel all controls to here]
         </div>
       </div>
     </div>

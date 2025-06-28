@@ -4,7 +4,7 @@ import { FilterMode } from '../store/filters';
 import { composeDimensions } from './helpers';
 
 // Define an interface that extends ImageAsset with originalIndex
-export interface ImageAssetWithIndex extends ImageAsset {
+interface ImageAssetWithIndex extends ImageAsset {
   originalIndex: number;
 }
 

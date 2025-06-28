@@ -32,6 +32,7 @@ An image tagging application that allows users to:
 - **Formatting**: eslint and prettier, imports ordered with an eslint plugin
 - **Filenames**: Lower kebab-case filenames eg. `file-name.ts` for all Typescript/TSX files
 - **Structure**: Follow established file and folder patterns. Avoid unnecessary exports to keep code comprehension tight. Preference named exports over default exports. Avoid wildcard exports. Structure reference can be found in component `README.md` files if needed.
+- **Timing**: Prefer `requestAnimationFrame` for immediate delays over `setTimeout`
 - **Documentation**: Use `/** ... */` docblock style block comments to describe major complex components. Use a single comment `//` to describe simple or obvious components or functions as needed. If the component is very complex with many sub-parts (eg. has its own `components` or `hooks` sub-folders), also keep a `README.md` file for the component updated to explain its use and structure
 
 ## Architecture Decisions

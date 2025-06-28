@@ -16,7 +16,6 @@ type PaginationControlsProps = {
 
 export const PaginationControls = ({
   currentPage,
-  totalPages,
   totalItems,
   basePath = '',
 }: PaginationControlsProps) => {
@@ -35,7 +34,7 @@ export const PaginationControls = ({
     dispatch(setPaginationSize(newSize));
 
     // Don't navigate away immediately, let the Redux store update first
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       // If we're switching to "All", always go to page 1
       if (newSize === PaginationSize.ALL) {
         router.push(`${basePath}/1`);
@@ -49,37 +48,30 @@ export const PaginationControls = ({
       if (currentPage > newTotalPages) {
         router.push(`${basePath}/1`);
       }
-    }, 0);
+    });
   };
 
   return (
-    <>
-      <span className="text-right text-xs text-slate-500">
-        Page {currentPage} of {totalPages}
-      </span>
-      <span className="ml-4 flex items-center">
-        <label
-          htmlFor="pagination-size"
-          className="mr-2 text-xs text-slate-500 max-lg:hidden"
-        >
-          Items per page:
-        </label>
-        <select
-          id="pagination-size"
-          value={paginationSize}
-          onChange={handlePaginationSizeChange}
-          className="rounded border border-slate-300 px-3 py-1 text-sm"
-        >
-          <option value={PaginationSize.FIFTY}>{PaginationSize.FIFTY}</option>
-          <option value={PaginationSize.HUNDRED}>
-            {PaginationSize.HUNDRED}
-          </option>
-          <option value={PaginationSize.TWO_FIFTY}>
-            {PaginationSize.TWO_FIFTY}
-          </option>
-          <option value={PaginationSize.ALL}>All</option>
-        </select>
-      </span>
-    </>
+    <span className="mr-4 flex items-center">
+      <label
+        htmlFor="pagination-size"
+        className="mr-2 text-xs text-slate-500 max-lg:hidden"
+      >
+        Per page:
+      </label>
+      <select
+        id="pagination-size"
+        value={paginationSize}
+        onChange={handlePaginationSizeChange}
+        className="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm"
+      >
+        <option value={PaginationSize.FIFTY}>{PaginationSize.FIFTY}</option>
+        <option value={PaginationSize.HUNDRED}>{PaginationSize.HUNDRED}</option>
+        <option value={PaginationSize.TWO_FIFTY}>
+          {PaginationSize.TWO_FIFTY}
+        </option>
+        <option value={PaginationSize.ALL}>All</option>
+      </select>
+    </span>
   );
 };

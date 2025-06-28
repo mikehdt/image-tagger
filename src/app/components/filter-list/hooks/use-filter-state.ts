@@ -173,6 +173,7 @@ export const useFilterState = (
       case 'aspectRatio':
         // For aspect ratio, keep current behavior
         setSortType(newSortType);
+        setSortDirection('desc');
         break;
       default:
         // For other types, just update the type
