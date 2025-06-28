@@ -3,8 +3,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
-import { BottomShelf } from '../components/shelves/bottom-shelf';
-import { TopShelf } from '../components/shelves/top-shelf';
+import { BottomShelf } from '../components/bottom-shelf/bottom-shelf';
+import { TopShelf } from '../components/top-shelf/top-shelf';
 import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,

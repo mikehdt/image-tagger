@@ -147,7 +147,9 @@ export const Modal = ({
     ? createPortal(
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out ${
-            isVisible ? 'opacity-100' : 'opacity-0'
+            isVisible
+              ? 'opacity-100 backdrop-blur-xs'
+              : 'opacity-0 backdrop-blur-none'
           }`}
           aria-modal="true"
           role="dialog"
