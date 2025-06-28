@@ -3,6 +3,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist /* Geist_Mono */ } from 'next/font/google';
 
+import { ModalProvider } from './components/shared/modal';
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
 
@@ -54,9 +55,11 @@ export default function Root({
       <body className={geistSans.className}>
         <StoreProvider>
           <AppProvider>
-            <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4">
-              {children}
-            </div>
+            <ModalProvider>
+              <div className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4">
+                {children}
+              </div>
+            </ModalProvider>
           </AppProvider>
         </StoreProvider>
       </body>

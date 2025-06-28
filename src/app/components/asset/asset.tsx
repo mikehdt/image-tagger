@@ -40,7 +40,7 @@ export const Asset = ({
   }, []);
 
   return (
-    <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-b-lg border border-slate-300">
+    <div className="mb-4 flex w-full flex-wrap overflow-hidden rounded-lg rounded-tl-none border border-slate-300">
       <div
         className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-slate-300 transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
         onClick={toggleImageZoom}
