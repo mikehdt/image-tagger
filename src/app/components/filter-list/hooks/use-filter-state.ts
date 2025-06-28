@@ -144,13 +144,39 @@ export const useFilterState = (
   // Function to update sort type with appropriate direction
   const updateSortType = useCallback((newSortType: SortType) => {
     // Batch the state updates to avoid triggering multiple renders
-    if (newSortType === 'count') {
-      // For count, always set direction to desc (large to small)
-      setSortType(newSortType);
-      setSortDirection('desc');
-    } else {
-      // For other types, just update the type
-      setSortType(newSortType);
+    switch (newSortType) {
+      case 'count':
+        // For count, always set direction to desc (9-0)
+        setSortType(newSortType);
+        setSortDirection('desc');
+        break;
+      case 'active':
+        // For active, always set direction to asc (active first)
+        setSortType(newSortType);
+        setSortDirection('asc');
+        break;
+      case 'alphabetical':
+        // For alphabetical, always set direction to asc (A-Z)
+        setSortType(newSortType);
+        setSortDirection('asc');
+        break;
+      case 'dimensions':
+        // For dimensions, set direction to asc (0-9 by x then y)
+        setSortType(newSortType);
+        setSortDirection('asc');
+        break;
+      case 'megapixels':
+        // For megapixels, set direction to asc (0-9)
+        setSortType(newSortType);
+        setSortDirection('asc');
+        break;
+      case 'aspectRatio':
+        // For aspect ratio, keep current behavior
+        setSortType(newSortType);
+        break;
+      default:
+        // For other types, just update the type
+        setSortType(newSortType);
     }
   }, []);
 

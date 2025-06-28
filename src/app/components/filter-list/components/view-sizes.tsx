@@ -197,10 +197,10 @@ export const getSizeSortOptions = (
   // Define a safe mapping for sort type transitions
   let nextType: SortType = 'count';
   if (sortType === 'count') {
-    nextType = 'dimensions';
-  } else if (sortType === 'dimensions') {
     nextType = 'active';
   } else if (sortType === 'active') {
+    nextType = 'dimensions';
+  } else if (sortType === 'dimensions') {
     nextType = 'aspectRatio';
   } else if (sortType === 'aspectRatio') {
     nextType = 'megapixels';
@@ -407,19 +407,23 @@ export const SizesView = () => {
               ? 1
               : -1; // active items last when descending
         }
-        // If both have same active state, sort by width as secondary criteria
-        return sortDirection === 'asc'
-          ? a.width - b.width // ascending width as tie-breaker
-          : b.width - a.width; // descending width as tie-breaker
+        // If both have same active state, sort by count descending (9-0) as secondary criteria
+        return b.count - a.count; // always descending count (9-0) as tie-breaker
       } else if (sortType === 'count') {
         return sortDirection === 'asc'
           ? a.count - b.count // ascending
           : b.count - a.count; // descending
       } else if (sortType === 'dimensions') {
-        // Sort by total pixels (width × height)
+        // Sort by width first, then by height
+        if (a.width !== b.width) {
+          return sortDirection === 'asc'
+            ? a.width - b.width // ascending by width
+            : b.width - a.width; // descending by width
+        }
+        // If widths are equal, sort by height
         return sortDirection === 'asc'
-          ? a.pixelCount - b.pixelCount // ascending
-          : b.pixelCount - a.pixelCount; // descending
+          ? a.height - b.height // ascending by height
+          : b.height - a.height; // descending by height
       } else if (sortType === 'aspectRatio') {
         // Calculate aspect ratio as width/height (normalized)
         const aRatio = a.width / a.height;
@@ -430,8 +434,8 @@ export const SizesView = () => {
       } else if (sortType === 'megapixels') {
         // Sort by megapixels directly
         return sortDirection === 'asc'
-          ? a.pixelCount - b.pixelCount // ascending
-          : b.pixelCount - a.pixelCount; // descending
+          ? a.pixelCount - b.pixelCount // ascending (0-9)
+          : b.pixelCount - a.pixelCount; // descending (9-0)
       } else {
         // Default to dimensions
         return sortDirection === 'asc'
@@ -503,47 +507,36 @@ export const SizesView = () => {
 
   // Reference the formatMegaPixels function defined above
 
-  return (
-    <div className="max-h-80 overflow-y-auto">
-      {filteredSizes.length === 0 ? (
-        <div className="truncate p-4 text-center text-sm text-slate-500">
-          {searchTerm ? `No sizes match "${searchTerm}"` : 'No sizes available'}
-        </div>
-      ) : (
-        <ul className="divide-y divide-slate-100">
-          {filteredSizes.map((item, index) => (
-            <li
-              id={`size-${item.dimensions}`}
-              key={item.dimensions}
-              onClick={() => handleToggle(item.dimensions)}
-              className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
-                index === selectedIndex
-                  ? item.isActive
-                    ? 'bg-sky-200'
-                    : 'bg-blue-100'
-                  : item.isActive
-                    ? 'bg-sky-100'
-                    : 'hover:bg-blue-50'
-              }`}
-            >
-              <div className="mr-2 flex w-10 justify-center">
-                <SizeVisualizer
-                  size={item.dimensions}
-                  isActive={item.isActive}
-                />
-              </div>
-
-              <div className="flex flex-1 flex-col">
-                <SizeInfo
-                  item={item}
-                  sortType={sortType}
-                  searchTerm={searchTerm}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+  return filteredSizes.length === 0 ? (
+    <div className="truncate p-4 text-center text-sm text-slate-500">
+      {searchTerm ? `No sizes match "${searchTerm}"` : 'No sizes available'}
     </div>
+  ) : (
+    <ul className="divide-y divide-slate-100">
+      {filteredSizes.map((item, index) => (
+        <li
+          id={`size-${item.dimensions}`}
+          key={item.dimensions}
+          onClick={() => handleToggle(item.dimensions)}
+          className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+            index === selectedIndex
+              ? item.isActive
+                ? 'bg-sky-200'
+                : 'bg-blue-100'
+              : item.isActive
+                ? 'bg-sky-100'
+                : 'hover:bg-blue-50'
+          }`}
+        >
+          <div className="mr-2 flex w-10 justify-center">
+            <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
+          </div>
+
+          <div className="flex flex-1 flex-col">
+            <SizeInfo item={item} sortType={sortType} searchTerm={searchTerm} />
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 };

@@ -79,10 +79,8 @@ export const FiletypesView = () => {
               ? 1
               : -1; // active items last when descending
         }
-        // If both have same active state, sort alphabetically as secondary criteria
-        return sortDirection === 'asc'
-          ? a.ext.localeCompare(b.ext) // A-Z as tie-breaker
-          : b.ext.localeCompare(a.ext); // Z-A as tie-breaker
+        // If both have same active state, sort by count descending (9-0) as secondary criteria
+        return b.count - a.count; // always descending count (9-0) as tie-breaker
       }
       // If sort type is count, compare by count
       else if (sortType === 'count') {
@@ -112,54 +110,48 @@ export const FiletypesView = () => {
     [dispatch],
   );
 
-  return (
-    <div className="max-h-80 overflow-y-auto">
-      {extensionList.length === 0 ? (
-        <div className="px-4 py-2 text-sm text-slate-500">
-          No file extensions available
-        </div>
-      ) : (
-        <ul className="divide-y divide-slate-100">
-          {extensionList.map((item, index) => (
-            <li
-              id={`tag-${item.ext}`}
-              key={item.ext}
-              onClick={() => handleToggle(item.ext)}
-              className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
-                index === selectedIndex
-                  ? item.isActive
-                    ? 'bg-stone-200'
-                    : 'bg-blue-100'
-                  : item.isActive
-                    ? 'bg-stone-100'
-                    : 'hover:bg-blue-50'
-              }`}
-              title={
-                item.isActive
-                  ? 'Click to remove from filters'
-                  : 'Click to add to filters'
-              }
-            >
-              <span
-                className={`text-sm ${
-                  item.isActive
-                    ? 'font-medium text-stone-700'
-                    : 'text-slate-800'
-                }`}
-              >
-                {item.ext}
-              </span>
-              <span
-                className={`text-xs tabular-nums ${
-                  item.isActive ? 'text-stone-600' : 'text-slate-500'
-                }`}
-              >
-                {item.count}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+  return extensionList.length === 0 ? (
+    <div className="px-4 py-2 text-sm text-slate-500">
+      No file extensions available
     </div>
+  ) : (
+    <ul className="divide-y divide-slate-100">
+      {extensionList.map((item, index) => (
+        <li
+          id={`tag-${item.ext}`}
+          key={item.ext}
+          onClick={() => handleToggle(item.ext)}
+          className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+            index === selectedIndex
+              ? item.isActive
+                ? 'bg-stone-200'
+                : 'bg-blue-100'
+              : item.isActive
+                ? 'bg-stone-100'
+                : 'hover:bg-blue-50'
+          }`}
+          title={
+            item.isActive
+              ? 'Click to remove from filters'
+              : 'Click to add to filters'
+          }
+        >
+          <span
+            className={`text-sm ${
+              item.isActive ? 'font-medium text-stone-700' : 'text-slate-800'
+            }`}
+          >
+            {item.ext}
+          </span>
+          <span
+            className={`text-xs tabular-nums ${
+              item.isActive ? 'text-stone-600' : 'text-slate-500'
+            }`}
+          >
+            {item.count}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 };

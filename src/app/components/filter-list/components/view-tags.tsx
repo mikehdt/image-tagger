@@ -146,10 +146,8 @@ export const TagsView = () => {
               ? 1
               : -1; // active items last when descending
         }
-        // If both have same active state, sort alphabetically as secondary criteria
-        return sortDirection === 'asc'
-          ? a.tag.localeCompare(b.tag) // A-Z as tie-breaker
-          : b.tag.localeCompare(a.tag); // Z-A as tie-breaker
+        // If both have same active state, sort by count descending (9-0) as secondary criteria
+        return b.count - a.count; // always descending count (9-0) as tie-breaker
       }
       // If sort type is count, compare by count
       else if (sortType === 'count') {
@@ -226,54 +224,48 @@ export const TagsView = () => {
     };
   }, [selectedIndex, filteredTags, handleToggle]);
 
-  return (
-    <div>
-      {filteredTags.length === 0 ? (
-        <div className="truncate p-4 text-center text-sm text-slate-500">
-          {searchTerm ? `No tags match "${searchTerm}"` : 'No tags found'}
-        </div>
-      ) : (
-        <ul className="divide-y divide-slate-100">
-          {filteredTags.map((item, index) => (
-            <li
-              id={`tag-${item.tag}`}
-              key={item.tag}
-              onClick={() => handleToggle(item.tag)}
-              className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
-                index === selectedIndex
-                  ? item.isActive
-                    ? 'bg-emerald-200'
-                    : 'bg-blue-100'
-                  : item.isActive
-                    ? 'bg-emerald-100'
-                    : 'hover:bg-blue-50'
-              }`}
-              title={
-                item.isActive
-                  ? 'Click to remove from filters'
-                  : 'Click to add to filters'
-              }
-            >
-              <span
-                className={`text-sm ${
-                  item.isActive
-                    ? 'font-medium text-emerald-700'
-                    : 'text-slate-800'
-                }`}
-              >
-                {searchTerm ? highlightMatches(item.tag, searchTerm) : item.tag}
-              </span>
-              <span
-                className={`text-xs tabular-nums ${
-                  item.isActive ? 'text-emerald-600' : 'text-slate-500'
-                }`}
-              >
-                {item.count}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+  return filteredTags.length === 0 ? (
+    <div className="truncate p-4 text-center text-sm text-slate-500">
+      {searchTerm ? `No tags match "${searchTerm}"` : 'No tags found'}
     </div>
+  ) : (
+    <ul className="divide-y divide-slate-100">
+      {filteredTags.map((item, index) => (
+        <li
+          id={`tag-${item.tag}`}
+          key={item.tag}
+          onClick={() => handleToggle(item.tag)}
+          className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+            index === selectedIndex
+              ? item.isActive
+                ? 'bg-emerald-200'
+                : 'bg-blue-100'
+              : item.isActive
+                ? 'bg-emerald-100'
+                : 'hover:bg-blue-50'
+          }`}
+          title={
+            item.isActive
+              ? 'Click to remove from filters'
+              : 'Click to add to filters'
+          }
+        >
+          <span
+            className={`text-sm ${
+              item.isActive ? 'font-medium text-emerald-700' : 'text-slate-800'
+            }`}
+          >
+            {searchTerm ? highlightMatches(item.tag, searchTerm) : item.tag}
+          </span>
+          <span
+            className={`text-xs tabular-nums ${
+              item.isActive ? 'text-emerald-600' : 'text-slate-500'
+            }`}
+          >
+            {item.count}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 };

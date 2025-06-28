@@ -21,7 +21,7 @@ An image tagging application that allows users to:
 1. **Image Display**: Paginated gallery of images from assets folder
 2. **Tag Management**: UI for adding, editing, reordering tags per image
 3. **Filtering System**: Filter images by tags, dimensions, and filetype
-4. **Persistence**: Save modified tags back to text files
+4. **Persistence**: Save modified tags back to text files; UI state is transient and not persisted across sessions
 
 ## Technical Implementation
 
@@ -29,23 +29,21 @@ An image tagging application that allows users to:
 - **Frontend**: Next.js with App Router, React, TypeScript
 - **State Management**: Redux for global state (image list, filters), React state (useState) for local state
 - **Styling**: Tailwind CSS for responsive design, Heroicons for simple SVG icons
-- **Performance**: `useMemo`, `React.memo` and `useCallback` to minimise re-renders and keep the UI fast
 - **Formatting**: eslint and prettier, imports ordered with an eslint plugin
 - **Filenames**: Lower kebab-case filenames eg. `file-name.ts` for all Typescript/TSX files
 - **Structure**: Follow established file and folder patterns. Avoid unnecessary exports to keep code comprehension tight. Preference named exports over default exports. Avoid wildcard exports. Structure reference can be found in component `README.md` files if needed.
-- **Documentation**: Use `/** ... */` docblock style block comments to describe major complex components. Don't use them to describe simple or obvious components or functions. If the component is very complex with many sub-parts (eg. has its own `components` or `hooks` sub-folders), also keep a `README.md` file for the component updated to explain its use and structure
+- **Documentation**: Use `/** ... */` docblock style block comments to describe major complex components. Use a single comment `//` to describe simple or obvious components or functions as needed. If the component is very complex with many sub-parts (eg. has its own `components` or `hooks` sub-folders), also keep a `README.md` file for the component updated to explain its use and structure
 
 ## Architecture Decisions
 
 - Feature-based component organization
-- Strict TypeScript usage
 - Container/Presentational component pattern
 - Path aliases (@/\*) for clean imports
 
 ## Performance Considerations
 
 - Optimize image loading for potentially large collections
-- Memoization for expensive operations
+- Memoization for expensive operations (`useMemo`, `React.memo` and `useCallback` to minimise re-renders and keep the UI fast)
 - Code splitting for larger components
 
 ## Future Considerations
