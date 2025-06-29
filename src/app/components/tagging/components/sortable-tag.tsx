@@ -121,22 +121,20 @@ const SortableTagComponent = ({
       // Don't apply drag attributes or listeners when editing or explicitly non-interactive
       {...(isEditing || nonInteractive ? {} : attributes)}
       {...(isEditing || nonInteractive ? {} : listeners)}
-      className={`touch-none ${nonInteractive ? 'pointer-events-none' : ''}`}
+      className={`mr-2 mb-2 flex touch-none ${nonInteractive ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
       {isEditing ? (
-        <span className="mb-2 flex">
-          <InputTag
-            inputValue={editTagValue}
-            onInputChange={handleInputChange}
-            onSubmit={handleSaveEdit}
-            onCancel={handleCancelEdit}
-            placeholder="Edit tag..."
-            mode="edit"
-            isDuplicate={isDuplicate(editTagValue)}
-            nonInteractive={nonInteractive}
-          />
-        </span>
+        <InputTag
+          inputValue={editTagValue}
+          onInputChange={handleInputChange}
+          onSubmit={handleSaveEdit}
+          onCancel={handleCancelEdit}
+          placeholder="Edit tag..."
+          mode="edit"
+          isDuplicate={isDuplicate(editTagValue)}
+          nonInteractive={nonInteractive}
+        />
       ) : (
         <Tag
           tagName={tagName}

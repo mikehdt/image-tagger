@@ -165,7 +165,7 @@ export const Modal = ({
           {/* Modal container */}
           <div
             ref={modalRef}
-            className={`relative max-h-[90vh] max-w-[90vw] overflow-auto rounded-lg bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
+            className={`relative max-h-[90vh] w-full overflow-auto rounded-lg bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
               isVisible
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-4 scale-95 opacity-0'

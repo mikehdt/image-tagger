@@ -1,18 +1,23 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { selectAllImages } from '../assets';
-import { RootState } from '../index';
 import { selectSelectedAssets } from '../selection';
 
 /**
- * Checks if any of the selected assets already have the specified tag
+ * Returns information about duplicates in selected assets
+ * @returns An object with information about tag duplication status
  */
-export const selectTagExistsInSelectedAssets = (tagName: string) =>
+export const selectDuplicateTagInfo = (tagName: string) =>
   createSelector(
     [selectSelectedAssets, selectAllImages],
     (selectedAssets, allImages) => {
       if (!tagName.trim() || selectedAssets.length === 0) {
-        return false;
+        return {
+          isDuplicate: false,
+          duplicateCount: 0,
+          totalSelected: selectedAssets.length,
+          isAllDuplicates: false,
+        };
       }
 
       // Find all selected assets in the assets slice
@@ -20,9 +25,24 @@ export const selectTagExistsInSelectedAssets = (tagName: string) =>
         selectedAssets.includes(img.fileId),
       );
 
-      // Check if any of these assets already have the tag
-      return selectedImagesData.some((img) =>
+      // Count how many assets already have this tag
+      const duplicateCount = selectedImagesData.filter((img) =>
         img.tagList.includes(tagName.trim()),
-      );
+      ).length;
+
+      return {
+        isDuplicate: duplicateCount > 0,
+        duplicateCount,
+        totalSelected: selectedImagesData.length,
+        isAllDuplicates:
+          duplicateCount === selectedImagesData.length && duplicateCount > 0,
+      };
     },
   );
+
+/**
+ * Simplified selector that just checks if the tag exists in any selected assets
+ * @deprecated Use selectDuplicateTagInfo instead for more detailed information
+ */
+export const selectTagExistsInSelectedAssets = (tagName: string) =>
+  createSelector([selectDuplicateTagInfo(tagName)], (info) => info.isDuplicate);

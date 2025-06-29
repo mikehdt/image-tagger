@@ -10,7 +10,7 @@ import {
 } from 'react';
 
 import { useAppSelector } from '../../../store/hooks';
-import { selectTagExistsInSelectedAssets } from '../../../store/selection';
+import { selectDuplicateTagInfo } from '../../../store/selection';
 import { Modal } from './modal';
 
 type AddTagsModalProps = {
@@ -28,8 +28,10 @@ export const AddTagsModal = ({
 }: AddTagsModalProps) => {
   const [tagInput, setTagInput] = useState('');
 
-  // Check if the current tag input exists in any selected assets
-  const isDuplicate = useAppSelector(selectTagExistsInSelectedAssets(tagInput));
+  // Get detailed information about duplicate tags
+  const duplicateInfo = useAppSelector(selectDuplicateTagInfo(tagInput));
+  const { isDuplicate, isAllDuplicates, duplicateCount, totalSelected } =
+    duplicateInfo;
 
   // Reset the form state when modal is closed
   useEffect(() => {
@@ -45,7 +47,9 @@ export const AddTagsModal = ({
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    if (!tagInput.trim() || isDuplicate) return;
+    // Only block submission if all selected assets already have the tag
+    // or if the tag is empty
+    if (!tagInput.trim() || isAllDuplicates) return;
 
     onAddTag(tagInput.trim());
     setTagInput('');
@@ -53,7 +57,7 @@ export const AddTagsModal = ({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && tagInput.trim() && !isDuplicate) {
+    if (e.key === 'Enter' && tagInput.trim() && !isAllDuplicates) {
       e.preventDefault();
       handleSubmit(e);
     } else if (e.key === 'Escape') {
@@ -63,7 +67,7 @@ export const AddTagsModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
       <div className="relative space-y-4">
         {/* Title */}
         <h2 className="text-2xl font-semibold text-gray-800">Add Tags</h2>
@@ -89,20 +93,30 @@ export const AddTagsModal = ({
             />
             {isDuplicate && (
               <p className="mt-1 text-sm text-red-600">
-                This tag already exists on one or more selected assets.
+                {isAllDuplicates
+                  ? `This tag already exists on all selected assets.`
+                  : `This tag already exists on ${duplicateCount} of ${totalSelected} selected assets.`}
               </p>
             )}
           </div>
 
-          {isDuplicate ? (
+          {!tagInput.trim() ? (
+            <p className="text-xs text-gray-500">
+              Enter a tag name to add to selected assets.
+            </p>
+          ) : isAllDuplicates ? (
             <p className="text-xs text-amber-600">
-              This tag already exists on one or more selected assets. You can
-              still add it to assets that don't have it.
+              This tag already exists on all selected assets. No changes will be
+              made.
+            </p>
+          ) : isDuplicate ? (
+            <p className="text-xs text-amber-600">
+              This tag already exists on some selected assets. It will only be
+              added to assets that don&lsquo;t have it.
             </p>
           ) : (
             <p className="text-xs text-gray-500">
-              Tag will be added to all selected assets that don't already have
-              it.
+              Tag will be added to all selected assets.
             </p>
           )}
 
@@ -117,9 +131,9 @@ export const AddTagsModal = ({
             </button>
             <button
               type="submit"
-              disabled={!tagInput.trim() || isDuplicate}
+              disabled={!tagInput.trim() || isAllDuplicates}
               className={`flex rounded-sm px-4 py-1 shadow-xs inset-shadow-xs inset-shadow-white transition-colors ${
-                !tagInput.trim() || isDuplicate
+                !tagInput.trim() || isAllDuplicates
                   ? 'cursor-not-allowed bg-emerald-100 text-emerald-600 opacity-50'
                   : 'cursor-pointer bg-emerald-200 text-emerald-800 shadow-emerald-400 hover:bg-emerald-300'
               }`}
