@@ -63,7 +63,7 @@ export const PaginationControls = ({
         id="pagination-size"
         value={paginationSize}
         onChange={handlePaginationSizeChange}
-        className="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm"
+        className="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-sm inset-shadow-white"
       >
         <option value={PaginationSize.FIFTY}>{PaginationSize.FIFTY}</option>
         <option value={PaginationSize.HUNDRED}>{PaginationSize.HUNDRED}</option>

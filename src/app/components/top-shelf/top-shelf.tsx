@@ -1,11 +1,10 @@
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useRef } from 'react';
 
 import {
   IoState,
   loadAllAssets,
   markFilterTagsToDelete,
-  resetAllTags,
-  saveAllAssets,
   selectHasModifiedAssets,
   selectIoState,
   selectLoadProgress,
@@ -24,7 +23,6 @@ import {
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  AssetActions,
   FilterActions,
   FilterIndicators,
   FilterModeControls,
@@ -51,8 +49,6 @@ export const TopShelf = () => {
 
   // Action handlers
   const doRefresh = () => dispatch(loadAllAssets());
-  const saveAllChanges = () => dispatch(saveAllAssets());
-  const cancelAllChanges = () => dispatch(resetAllTags());
   const handleMarkFilterTagsToDelete = (tags: string[]) =>
     dispatch(markFilterTagsToDelete(tags));
   const handleClearFilters = () => dispatch(clearFilters());
@@ -66,7 +62,7 @@ export const TopShelf = () => {
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4 text-sm">
         <div className="flex py-2">
-          {/* Loading status or action buttons */}
+          {/* Loading status or refresh button */}
           {ioState === IoState.LOADING || ioState === IoState.SAVING ? (
             <LoadingStatus
               ioState={ioState}
@@ -74,12 +70,14 @@ export const TopShelf = () => {
               loadProgress={loadProgress}
             />
           ) : (
-            <AssetActions
-              hasModifiedAssets={hasModifiedAssets}
-              doRefresh={doRefresh}
-              saveAllChanges={saveAllChanges}
-              cancelAllChanges={cancelAllChanges}
-            />
+            <button
+              type="button"
+              onClick={doRefresh}
+              className="mr-4 inline-flex cursor-pointer"
+              title="Reload asset list"
+            >
+              <ArrowPathIcon className="w-6" />
+            </button>
           )}
         </div>
 

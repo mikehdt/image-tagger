@@ -1,6 +1,15 @@
+import {
+  BookmarkSlashIcon,
+  BookmarkSquareIcon,
+} from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
-import { selectAllImages } from '../../store/assets';
+import {
+  resetAllTags,
+  saveAllAssets,
+  selectAllImages,
+  selectHasModifiedAssets,
+} from '../../store/assets';
 import {
   PaginationSize,
   selectFilterExtensions,
@@ -9,7 +18,7 @@ import {
   selectFilterTags,
   selectPaginationSize,
 } from '../../store/filters';
-import { useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { applyFilters } from '../../utils/filter-actions';
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
@@ -20,14 +29,20 @@ type BottomShelfProps = {
 };
 
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
+  const dispatch = useAppDispatch();
   const allAssets = useAppSelector(selectAllImages);
   const paginationSize = useAppSelector(selectPaginationSize);
+  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
   // Get filters
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
+
+  // Action handlers
+  const saveAllChanges = () => dispatch(saveAllAssets());
+  const cancelAllChanges = () => dispatch(resetAllTags());
 
   // Calculate filtered assets count
   const filteredAssets = useMemo(
@@ -74,8 +89,34 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
           <Pagination currentPage={currentPage} totalItems={filteredCount} />
         </div>
 
-        <div className="flex w-1/4 items-center justify-end">
-          [move save/cancel all controls to here]
+        <div className="flex w-1/4 items-center justify-end text-sm">
+          <button
+            type="button"
+            onClick={cancelAllChanges}
+            className={`mr-4 inline-flex items-center py-2 transition-colors ${hasModifiedAssets ? 'cursor-pointer text-slate-700 hover:text-slate-500' : 'cursor-not-allowed text-slate-300'}`}
+            title={
+              hasModifiedAssets
+                ? 'Cancel all tag changes'
+                : 'No changes to cancel'
+            }
+            disabled={!hasModifiedAssets}
+          >
+            <BookmarkSlashIcon className="w-4" />
+            <span className="ml-1 max-lg:hidden">Cancel All</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={saveAllChanges}
+            className={`mr-4 inline-flex items-center py-2 transition-colors ${hasModifiedAssets ? 'cursor-pointer text-emerald-700 hover:text-emerald-500' : 'cursor-not-allowed text-slate-300'}`}
+            title={
+              hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
+            }
+            disabled={!hasModifiedAssets}
+          >
+            <BookmarkSquareIcon className="w-4" />
+            <span className="ml-1 max-lg:hidden">Save All</span>
+          </button>
         </div>
       </div>
     </div>
