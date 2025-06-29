@@ -1,4 +1,4 @@
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, TagIcon } from '@heroicons/react/24/outline';
 import { useRef } from 'react';
 
 import {
@@ -22,6 +22,11 @@ import {
   toggleModifiedFilter,
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  clearSelection,
+  selectHasSelectedAssets,
+  selectSelectedAssetsCount,
+} from '../../store/selection';
 import {
   FilterActions,
   FilterIndicators,
@@ -47,6 +52,10 @@ export const TopShelf = () => {
   const filterModifiedActive = useAppSelector(selectShowModified);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
+  // Selection selectors
+  const hasSelectedAssets = useAppSelector(selectHasSelectedAssets);
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
+
   // Action handlers
   const doRefresh = () => dispatch(loadAllAssets());
   const handleMarkFilterTagsToDelete = (tags: string[]) =>
@@ -55,6 +64,7 @@ export const TopShelf = () => {
   const handleSetTagFilterMode = (mode: FilterMode) =>
     dispatch(setTagFilterMode(mode));
   const handleToggleModifiedFilter = () => dispatch(toggleModifiedFilter());
+  const handleClearSelection = () => dispatch(clearSelection());
 
   // No derived state needed - moved to individual components
 
@@ -80,7 +90,30 @@ export const TopShelf = () => {
             </button>
           )}
         </div>
-
+        {/* Asset actions */}
+        {hasSelectedAssets && (
+          <div className="mr-4 flex">
+            <button
+              type="button"
+              onClick={() => {
+                /* Will be implemented in the next step */
+              }}
+              className="mr-2 flex items-center rounded-md bg-sky-500 px-3 py-1 text-white transition-colors hover:bg-sky-600"
+              title="Add tags to selected assets"
+            >
+              <TagIcon className="mr-1 h-4 w-4" />
+              <span>Add Tags ({selectedAssetsCount})</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleClearSelection}
+              className="rounded-md bg-slate-200 px-2 py-1 transition-colors hover:bg-slate-300"
+              title="Clear selection"
+            >
+              <span>✕</span>
+            </button>
+          </div>
+        )}
         {/* Filter actions */}
         <FilterActions
           filterTags={filterTags}
@@ -90,14 +123,12 @@ export const TopShelf = () => {
           markFilterTagsToDelete={handleMarkFilterTagsToDelete}
           clearFilters={handleClearFilters}
         />
-
         {/* Filter indicators */}
         <FilterIndicators
           filterSizes={filterSizes}
           filterTags={filterTags}
           filterExtensions={filterExtensions}
         />
-
         {/* Filter mode controls */}
         <FilterModeControls
           filterTagsMode={filterTagsMode}
@@ -109,7 +140,6 @@ export const TopShelf = () => {
           setTagFilterMode={handleSetTagFilterMode}
           toggleModifiedFilter={handleToggleModifiedFilter}
         />
-
         {/* Tag filter button */}
         <TagFilterButton tagButtonRef={tagButtonRef} />
       </div>

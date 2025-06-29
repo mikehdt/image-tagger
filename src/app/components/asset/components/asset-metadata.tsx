@@ -1,8 +1,12 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { IoState, selectSaveProgress } from '../../../store/assets';
-import { useAppSelector } from '../../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import {
+  selectAssetIsSelected,
+  toggleAssetSelection,
+} from '../../../store/selection';
 import { useAssetTags } from '../hooks';
 
 type AssetMetadataProps = {
@@ -26,8 +30,8 @@ export const AssetMetadata = ({
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
-  // Local state for selection until we move to Redux
-  const [isSelected, setIsSelected] = useState(false);
+  const dispatch = useAppDispatch();
+  const isSelected = useAppSelector(selectAssetIsSelected(assetId));
   const {
     tagList,
     tagsByStatus,
@@ -75,14 +79,14 @@ export const AssetMetadata = ({
               ? 'border-sky-700 bg-sky-600 text-white hover:bg-sky-700'
               : 'border-slate-400 bg-white hover:border-sky-500 hover:bg-sky-50'
           }`}
-          onClick={() => setIsSelected(!isSelected)}
+          onClick={() => dispatch(toggleAssetSelection(assetId))}
           role="checkbox"
           aria-checked={isSelected}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              setIsSelected(!isSelected);
+              dispatch(toggleAssetSelection(assetId));
             }
           }}
         >
