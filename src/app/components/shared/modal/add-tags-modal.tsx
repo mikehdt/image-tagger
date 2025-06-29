@@ -1,8 +1,16 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { ChangeEvent, KeyboardEvent, SyntheticEvent, useState } from 'react';
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  SyntheticEvent,
+  useEffect,
+  useState,
+} from 'react';
 
+import { useAppSelector } from '../../../store/hooks';
+import { selectTagExistsInSelectedAssets } from '../../../store/selection';
 import { Modal } from './modal';
 
 type AddTagsModalProps = {
@@ -19,12 +27,20 @@ export const AddTagsModal = ({
   onAddTag,
 }: AddTagsModalProps) => {
   const [tagInput, setTagInput] = useState('');
-  const [isDuplicate, setIsDuplicate] = useState(false);
+
+  // Check if the current tag input exists in any selected assets
+  const isDuplicate = useAppSelector(selectTagExistsInSelectedAssets(tagInput));
+
+  // Reset the form state when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setTagInput('');
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);
-    // Here we would check for duplicates, but we'll implement that logic later
-    setIsDuplicate(false);
+    // Duplicate checking is now handled by the selector
   };
 
   const handleSubmit = (e: SyntheticEvent) => {
@@ -78,10 +94,17 @@ export const AddTagsModal = ({
             )}
           </div>
 
-          <p className="text-xs text-gray-500">
-            Note: Duplicate tags will not be added to assets that already have
-            the tag.
-          </p>
+          {isDuplicate ? (
+            <p className="text-xs text-amber-600">
+              This tag already exists on one or more selected assets. You can
+              still add it to assets that don't have it.
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500">
+              Tag will be added to all selected assets that don't already have
+              it.
+            </p>
+          )}
 
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">

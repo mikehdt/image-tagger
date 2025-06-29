@@ -23,6 +23,7 @@ import {
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
+  addTagToSelectedAssets,
   clearSelection,
   selectHasSelectedAssets,
   selectSelectedAssetsCount,
@@ -70,8 +71,9 @@ export const TopShelf = () => {
 
   // Handler for adding tags to selected assets
   const handleAddTag = (tag: string) => {
-    console.log('Adding tag:', tag, 'to selected assets');
-    // Will be implemented in the next step with Redux
+    dispatch(addTagToSelectedAssets(tag));
+    // Close the modal after adding the tag
+    setIsAddTagsModalOpen(false);
   };
 
   // No derived state needed - moved to individual components
