@@ -6,10 +6,9 @@ across different parts of the application.
 ## Directory Structure
 
 ```
-/dnd # Drag and Drop components and utilities
-├── /hooks
-│   └── use-sortable.ts # Hook for creating sortable functionality
-└── sortable-provider.tsx # Component that provides sortable context
+/component
+├── /hooks # Put any hooks in a hooks folder
+└── index.ts # Export hooks and the component with named exports
 ```
 
 ## Usage Guidelines
