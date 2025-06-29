@@ -1,5 +1,5 @@
 import { ArrowPathIcon, TagIcon } from '@heroicons/react/24/outline';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import {
   IoState,
@@ -27,6 +27,7 @@ import {
   selectHasSelectedAssets,
   selectSelectedAssetsCount,
 } from '../../store/selection';
+import { AddTagsModal } from '../shared/modal';
 import {
   FilterActions,
   FilterIndicators,
@@ -38,6 +39,7 @@ import {
 export const TopShelf = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
+  const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
 
   // IO state selectors
   const ioState = useAppSelector(selectIoState);
@@ -65,6 +67,12 @@ export const TopShelf = () => {
     dispatch(setTagFilterMode(mode));
   const handleToggleModifiedFilter = () => dispatch(toggleModifiedFilter());
   const handleClearSelection = () => dispatch(clearSelection());
+
+  // Handler for adding tags to selected assets
+  const handleAddTag = (tag: string) => {
+    console.log('Adding tag:', tag, 'to selected assets');
+    // Will be implemented in the next step with Redux
+  };
 
   // No derived state needed - moved to individual components
 
@@ -95,9 +103,7 @@ export const TopShelf = () => {
           <div className="mr-4 flex">
             <button
               type="button"
-              onClick={() => {
-                /* Will be implemented in the next step */
-              }}
+              onClick={() => setIsAddTagsModalOpen(true)}
               className="mr-2 flex items-center rounded-md bg-sky-500 px-3 py-1 text-white transition-colors hover:bg-sky-600"
               title="Add tags to selected assets"
             >
@@ -143,6 +149,14 @@ export const TopShelf = () => {
         {/* Tag filter button */}
         <TagFilterButton tagButtonRef={tagButtonRef} />
       </div>
+
+      {/* Add Tags Modal */}
+      <AddTagsModal
+        isOpen={isAddTagsModalOpen}
+        onClose={() => setIsAddTagsModalOpen(false)}
+        selectedAssetsCount={selectedAssetsCount}
+        onAddTag={handleAddTag}
+      />
     </div>
   );
 };

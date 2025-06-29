@@ -165,7 +165,7 @@ export const Modal = ({
           {/* Modal container */}
           <div
             ref={modalRef}
-            className={`relative max-h-[90vh] max-w-[90vw] overflow-auto bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
+            className={`relative max-h-[90vh] max-w-[90vw] overflow-auto rounded-lg bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
               isVisible
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-4 scale-95 opacity-0'
@@ -174,7 +174,7 @@ export const Modal = ({
           >
             {/* Close button */}
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="absolute top-4 right-4 cursor-pointer text-gray-500 hover:text-gray-700 focus:outline-none"
               onClick={onClose}
               aria-label="Close modal"
             >
