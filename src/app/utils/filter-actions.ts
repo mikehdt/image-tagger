@@ -94,6 +94,15 @@ export const applyFilters = ({
       return anyTagMatches && sizeMatches && extensionMatches;
     }
 
+    // MATCH_NONE mode - asset must have NONE of the selected tags and meet size/extension criteria
+    if (filterMode === FilterMode.MATCH_NONE) {
+      // None of the selected tags can be present in the asset's tags
+      const noTagMatches = !filterTags.some((tag) => img.tagList.includes(tag));
+
+      // Size and extension filters are still combined with AND logic
+      return noTagMatches && sizeMatches && extensionMatches;
+    }
+
     // This should never happen if using enum correctly
     console.error('Unknown filter mode:', filterMode);
     return false;

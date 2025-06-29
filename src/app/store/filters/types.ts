@@ -3,6 +3,7 @@ export enum FilterMode {
   SHOW_ALL = 'ShowAll',
   MATCH_ANY = 'MatchAny',
   MATCH_ALL = 'MatchAll',
+  MATCH_NONE = 'MatchNone',
 }
 
 export enum PaginationSize {

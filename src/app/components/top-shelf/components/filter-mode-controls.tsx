@@ -91,6 +91,8 @@ export const FilterModeControls = ({
         return 'Match Any';
       case FilterMode.MATCH_ALL:
         return 'Match All';
+      case FilterMode.MATCH_NONE:
+        return 'Match None';
       default:
         return 'Show All';
     }
@@ -221,6 +223,9 @@ export const FilterModeControls = ({
                 if (e.key === 'Escape') {
                   setIsDropdownOpen(false);
                   e.preventDefault();
+                } else if (e.key === 'ArrowDown') {
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.focus();
+                  e.preventDefault();
                 } else if (e.key === 'ArrowUp') {
                   (
                     e.currentTarget.previousElementSibling as HTMLElement
@@ -237,6 +242,35 @@ export const FilterModeControls = ({
               role="menuitem"
             >
               Match All
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (filterSelectionActive) {
+                  setTagFilterMode(FilterMode.MATCH_NONE);
+                  setIsDropdownOpen(false);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsDropdownOpen(false);
+                  e.preventDefault();
+                } else if (e.key === 'ArrowUp') {
+                  (
+                    e.currentTarget.previousElementSibling as HTMLElement
+                  )?.focus();
+                  e.preventDefault();
+                }
+              }}
+              className={`block w-full px-2 py-1 text-left text-sm ${
+                filterTagsMode === FilterMode.MATCH_NONE
+                  ? 'bg-slate-100 font-medium'
+                  : 'hover:bg-slate-50'
+              } ${!filterSelectionActive ? 'cursor-not-allowed text-slate-300' : ''}`}
+              disabled={!filterSelectionActive}
+              role="menuitem"
+            >
+              Match None
             </button>
           </div>
         </div>
