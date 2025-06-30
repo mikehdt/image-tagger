@@ -27,7 +27,6 @@ export interface DropdownProps<T> {
   itemClassName?: string;
   selectedItemClassName?: string;
   disabledItemClassName?: string;
-  minMenuWidth?: string;
   alignRight?: boolean;
 }
 
@@ -45,7 +44,6 @@ export function Dropdown<T>({
   itemClassName = '',
   selectedItemClassName = '',
   disabledItemClassName = '',
-  minMenuWidth = '110px',
   alignRight = false,
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,7 +110,7 @@ export function Dropdown<T>({
   // Handle keyboard navigation in dropdown items
   const handleItemKeyDown = (
     e: React.KeyboardEvent,
-    item: DropdownItem<T>,
+    _item: DropdownItem<T>,
     index: number,
   ) => {
     if (e.key === 'Escape') {
@@ -195,7 +193,6 @@ export function Dropdown<T>({
         style={{
           left: alignRight ? 'auto' : `${dropdownPosition.left}px`,
           right: alignRight ? 0 : 'auto',
-          minWidth: minMenuWidth,
         }}
         className={`absolute z-10 mt-1 origin-top-left transform rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg transition-all focus:outline-none ${
           isOpen

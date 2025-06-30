@@ -109,7 +109,7 @@ export const AssetMetadata = ({
       {hasModifiedTags ? (
         <span className="ml-auto flex pl-2">
           <button
-            className={`flex rounded-sm bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors ${
+            className={`flex rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors ${
               isTagEditing
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving
@@ -134,7 +134,7 @@ export const AssetMetadata = ({
           </button>
 
           <button
-            className={`ml-2 flex rounded-sm bg-emerald-200 px-4 py-1 text-emerald-800 shadow-xs inset-shadow-xs shadow-emerald-400 inset-shadow-white transition-colors ${
+            className={`ml-2 flex rounded-sm border border-emerald-300 bg-emerald-200 px-4 py-1 text-emerald-800 shadow-xs inset-shadow-xs shadow-emerald-400 inset-shadow-white transition-colors ${
               isTagEditing
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving

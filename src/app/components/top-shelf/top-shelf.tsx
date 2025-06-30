@@ -28,7 +28,6 @@ import {
   selectHasSelectedAssets,
   selectSelectedAssetsCount,
 } from '../../store/selection';
-import { AddTagsModal } from '../shared/modal';
 import {
   FilterActions,
   FilterIndicators,
@@ -36,6 +35,7 @@ import {
   LoadingStatus,
   TagFilterButton,
 } from './components';
+import { AddTagsModal } from './components/add-tags-modal';
 
 export const TopShelf = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
@@ -106,30 +106,30 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={() => setIsAddTagsModalOpen(true)}
-              className="mr-2 flex items-center rounded-md bg-sky-500 px-3 py-1 text-white transition-colors hover:bg-sky-600"
+              className="mr-2 flex cursor-pointer items-center rounded-md border border-sky-500 bg-sky-500 px-3 py-1 text-white inset-shadow-xs inset-shadow-sky-300 transition-colors hover:bg-sky-600"
               title="Add tags to selected assets"
             >
               <TagIcon className="mr-1 h-4 w-4" />
-              <span>Add Tags ({selectedAssetsCount})</span>
+              <span>Add Tags</span>
+              <span className="ml-2 rounded-full bg-white px-1 text-xs font-bold text-sky-500 tabular-nums">
+                {selectedAssetsCount}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={handleClearSelection}
-              className="rounded-md bg-slate-200 px-2 py-1 transition-colors hover:bg-slate-300"
+              className="cursor-pointer rounded-md bg-slate-200 px-2 py-1 transition-colors hover:bg-slate-300"
               title="Clear selection"
             >
-              <span>✕</span>
+              <span>&times; Clear</span>
             </button>
           </div>
         )}
         {/* Filter actions */}
         <FilterActions
           filterTags={filterTags}
-          filterSizes={filterSizes}
-          filterExtensions={filterExtensions}
-          filterModifiedActive={filterModifiedActive}
           markFilterTagsToDelete={handleMarkFilterTagsToDelete}
-          clearFilters={handleClearFilters}
         />
         {/* Filter indicators */}
         <FilterIndicators
@@ -147,6 +147,7 @@ export const TopShelf = () => {
           filterExtensions={filterExtensions}
           setTagFilterMode={handleSetTagFilterMode}
           toggleModifiedFilter={handleToggleModifiedFilter}
+          clearFilters={handleClearFilters}
         />
         {/* Tag filter button */}
         <TagFilterButton tagButtonRef={tagButtonRef} />

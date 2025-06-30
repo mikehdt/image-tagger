@@ -1,6 +1,7 @@
 import {
   DocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
@@ -15,6 +16,7 @@ interface FilterModeControlsProps {
   filterExtensions: string[];
   setTagFilterMode: (mode: FilterMode) => void;
   toggleModifiedFilter: () => void;
+  clearFilters: () => void;
 }
 
 export const FilterModeControls = ({
@@ -26,7 +28,16 @@ export const FilterModeControls = ({
   filterExtensions,
   setTagFilterMode,
   toggleModifiedFilter,
+  clearFilters,
 }: FilterModeControlsProps) => {
+  // Derive filterActive within the component
+  const filterActive = !!(
+    filterTags.length ||
+    filterSizes.length ||
+    filterExtensions.length ||
+    filterModifiedActive
+  );
+
   // Derive filterSelectionActive within the component
   const filterSelectionActive = !!(
     filterTags.length ||
@@ -71,7 +82,6 @@ export const FilterModeControls = ({
         items={filterModeItems}
         selectedValue={filterTagsMode}
         onChange={setTagFilterMode}
-        minMenuWidth="110px"
         buttonClassName={`mr-2 ${
           filterTagsMode !== FilterMode.SHOW_ALL && !filterSelectionActive
             ? 'text-slate-300'
@@ -79,18 +89,32 @@ export const FilterModeControls = ({
         }`}
       />
 
-      <div
-        className={`rounded-sm ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300' : ''}`}
-      >
+      <div className="border-r border-white pr-1">
         <button
           type="button"
           onClick={toggleModifiedFilter}
-          className={`rounded-sm p-1 px-2 transition-colors ${
-            filterModifiedActive ? 'bg-white shadow-sm' : ''
-          } ${hasModifiedAssets ? 'cursor-pointer text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'hover:bg-slate-300' : ''}`}
+          className={`rounded-sm border p-1 px-2 transition-colors ${
+            filterModifiedActive ? 'border-white bg-white shadow-sm' : ''
+          } ${hasModifiedAssets ? 'cursor-pointer border-slate-100 text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300 hover:bg-slate-300' : 'border-slate-100/0'}`}
           disabled={!hasModifiedAssets}
         >
           Modified
+        </button>
+      </div>
+
+      <div className="border-l border-slate-300 pl-1">
+        <button
+          className={`flex items-center rounded-sm border border-slate-300/0 px-2 py-1 transition-colors ${
+            filterActive
+              ? 'cursor-pointer text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 hover:inset-shadow-xs hover:inset-shadow-white'
+              : 'text-slate-300'
+          }`}
+          type="button"
+          onClick={clearFilters}
+          disabled={!filterActive}
+        >
+          <XMarkIcon className="mr-1 w-4" />
+          Clear
         </button>
       </div>
     </div>

@@ -6,26 +6,10 @@ import { createPortal } from 'react-dom';
 import { useModalPortal } from './modal-provider';
 
 type ModalProps = {
-  /**
-   * Whether the modal is currently open
-   */
   isOpen: boolean;
-  /**
-   * Function to close the modal
-   */
   onClose: () => void;
-  /**
-   * Content to render inside the modal
-   */
   children: React.ReactNode;
-  /**
-   * Optional custom class names for the modal container
-   */
   className?: string;
-  /**
-   * Optional custom animation duration
-   * This is just for documentation - actual duration is controlled by Tailwind classes
-   */
   animationDuration?: never;
 };
 

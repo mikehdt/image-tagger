@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useState } from 'react';
+import { RefObject, useEffect, useState } from 'react';
 
 interface PanelPosition {
   top: number;
@@ -9,50 +9,37 @@ export const usePanelPosition = (
   isOpen: boolean,
   containerRef: RefObject<HTMLElement | null> | undefined,
 ) => {
-  const [position, setPosition] = useState<PanelPosition>({ top: 0, left: 0 });
+  // We're keeping this simplified and similar to the dropdown's approach
+  // We'll just track if we've attempted positioning - the actual positioning will be done with CSS
   const [isPositioned, setIsPositioned] = useState(false);
 
-  // Calculate and update panel position
-  const updatePosition = useCallback(() => {
-    if (isOpen && containerRef?.current) {
+  // Simple position tracking for animation triggers
+  const [position, setPosition] = useState<PanelPosition>({ top: 0, left: 0 });
+
+  // Set positioned state when opening
+  useEffect(() => {
+    if (isOpen && containerRef?.current && !isPositioned) {
+      setIsPositioned(true);
+
+      // Keep minimal position information for compatibility
+      // The actual positioning will be handled by CSS absolute positioning
       const rect = containerRef.current.getBoundingClientRect();
-      const panelWidth = 256; // w-64 = 16rem = 256px
-
-      // Calculate position to align with the right edge of the button
-      // This positions the right edge of the panel at the right edge of the button
-      const rightAlignedPosition = rect.right - panelWidth;
-
-      // Check if panel would overflow the left side of the window
-      const wouldOverflowLeft = rightAlignedPosition < 0;
-
-      // Adjust left position to keep panel fully visible
-      const leftPos = wouldOverflowLeft
-        ? 16 // 16px padding from left edge if it would overflow
-        : rightAlignedPosition;
-
       setPosition({
         top: rect.bottom,
-        left: leftPos,
+        left: rect.right,
       });
-      setIsPositioned(true);
     }
-  }, [isOpen, containerRef]);
+  }, [isOpen, containerRef, isPositioned]);
 
-  // Update position when the panel opens or container reference changes
+  // Handle window resize
   useEffect(() => {
-    if (isOpen) {
-      updatePosition();
-    } else {
-      // Reset positioning state when panel closes
-      setIsPositioned(false);
-    }
-  }, [isOpen, containerRef, updatePosition]);
-
-  // Handle window resize to keep panel in view
-  useEffect(() => {
-    if (isOpen) {
+    if (isOpen && containerRef?.current) {
       const handleResize = () => {
-        updatePosition();
+        const rect = containerRef.current!.getBoundingClientRect();
+        setPosition({
+          top: rect.bottom,
+          left: rect.right,
+        });
       };
 
       window.addEventListener('resize', handleResize);
@@ -60,7 +47,7 @@ export const usePanelPosition = (
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [isOpen, updatePosition]);
+  }, [isOpen, containerRef]);
 
   return { position, isPositioned };
 };

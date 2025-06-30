@@ -16,6 +16,9 @@ import {
 import { FilterListProps, FilterView, SortDirection, SortType } from './types';
 
 interface FilterListContextType {
+  // Panel visibility
+  isOpen: boolean;
+
   // Panel positioning
   position: { top: number; left: number };
   isPositioned: boolean;
@@ -101,6 +104,8 @@ export const FilterListProvider = ({
   // Use useMemo to prevent unnecessary re-renders when the value hasn't changed
   const contextValue = useMemo(
     () => ({
+      // Include isOpen state for animations
+      isOpen,
       position,
       isPositioned,
       panelRef,
@@ -122,6 +127,7 @@ export const FilterListProvider = ({
       onClose,
     }),
     [
+      isOpen, // Added isOpen to the dependency array
       position,
       isPositioned,
       panelRef,

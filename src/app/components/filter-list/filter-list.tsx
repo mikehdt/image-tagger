@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import {
   FiletypesView,
   FilterControls,
@@ -15,9 +17,6 @@ export const FilterList = ({
   onClose,
   containerRef,
 }: FilterListProps) => {
-  // If not open, don't render anything
-  if (!isOpen) return null;
-
   // Use the provider pattern to share state with all children
   return (
     <FilterListProvider
@@ -41,19 +40,64 @@ const FilterPanel = () => {
     setSearchTerm,
     inputRef,
     handleKeyDown,
+    isOpen, // We use isOpen directly from context
   } = useFilterList();
 
-  if (!isPositioned) return null;
+  // We're simplifying to match the dropdown behavior
+  // We'll use absolute positioning with calculated position adjustment
+  const [panelPosition, setPanelPosition] = useState({ right: true, left: 0 });
+
+  // Calculate position when the panel opens or its positioning changes
+  useEffect(() => {
+    if (isOpen && isPositioned) {
+      // Use right alignment by default (similar to dropdown's alignRight)
+      let useRightAlignment = true;
+      let leftPosition = 0;
+
+      // Check if we need to adjust left position to keep within viewport
+      if (position.left < 0) {
+        useRightAlignment = false;
+        leftPosition = 16; // Small padding from left edge
+      }
+
+      setPanelPosition({
+        right: useRightAlignment,
+        left: leftPosition,
+      });
+    }
+  }, [isOpen, isPositioned, position]);
+
+  // Focus the search input when the panel opens and search is available
+  useEffect(() => {
+    if (
+      isOpen &&
+      isPositioned &&
+      inputRef.current &&
+      activeView !== 'filetype'
+    ) {
+      // Use requestAnimationFrame to focus after the next paint
+      // This ensures the panel is fully rendered and visible
+      const frameId = requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+
+      return () => cancelAnimationFrame(frameId);
+    }
+  }, [isOpen, isPositioned, inputRef, activeView]);
 
   return (
     <div
       ref={panelRef}
-      className="fixed z-20 flex max-h-[80vh] w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
       style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        transformOrigin: 'top left',
+        right: panelPosition.right ? 0 : 'auto',
+        left: panelPosition.right ? 'auto' : `${panelPosition.left}px`,
+        minWidth: '256px', // 16rem = 256px (w-64)
       }}
+      className={`absolute z-20 mt-1 flex max-h-[80vh] w-64 origin-top-right flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg transition-all duration-150 ease-in-out ${
+        isOpen
+          ? 'scale-100 opacity-100'
+          : 'pointer-events-none scale-95 opacity-0'
+      }`}
     >
       <div className="inline-flex w-full items-center bg-slate-100 p-2">
         <ViewSelector />
