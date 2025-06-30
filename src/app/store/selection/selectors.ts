@@ -9,7 +9,7 @@ export const selectSelectedAssets = (state: RootState) =>
 // Derived selectors
 export const selectHasSelectedAssets = createSelector(
   [selectSelectedAssets],
-  (selectedAssets) => selectedAssets.length > 0,
+  (selectedAssets) => selectedAssets.length > 1,
 );
 
 export const selectAssetIsSelected = (assetId: string) =>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { DropdownItem } from './dropdown';
 
 /**
- * Hook to manage dropdown state and selection
+ * @public Hook to manage dropdown state and selection
  * @param items Array of dropdown items
  * @param initialSelectedValue Initially selected value
  * @returns State and handlers for the dropdown

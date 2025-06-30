@@ -39,10 +39,3 @@ export const selectDuplicateTagInfo = (tagName: string) =>
       };
     },
   );
-
-/**
- * Simplified selector that just checks if the tag exists in any selected assets
- * @deprecated Use selectDuplicateTagInfo instead for more detailed information
- */
-export const selectTagExistsInSelectedAssets = (tagName: string) =>
-  createSelector([selectDuplicateTagInfo(tagName)], (info) => info.isDuplicate);

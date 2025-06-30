@@ -1,4 +1,4 @@
-export interface SelectionState {
+interface SelectionState {
   selectedAssets: string[];
 }
 

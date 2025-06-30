@@ -20,7 +20,7 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
       >
         <TagIcon className="w-4" />
 
-        <span className="mr-1 ml-2 max-lg:hidden"> Filter List</span>
+        <span className="mr-1 ml-2 max-lg:hidden">Filter List</span>
       </div>
 
       <PersistentFilterProvider>

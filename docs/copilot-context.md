@@ -36,7 +36,8 @@ An image tagging application that allows users to:
   - Avoid unnecessary exports to keep code comprehension tight
   - Preference named exports over default exports
   - Avoid wildcard exports
-  - Structure reference can be found in component `README.md` files if needed.
+  - Structure reference can be found in component `README.md` files if needed
+  - Shared UI components should be placed in the `components/shared` folder
 - **Timing**: Prefer `requestAnimationFrame` for immediate delays over `setTimeout`
 - **Documentation**:
   - There is usually no need to document what every single prop is

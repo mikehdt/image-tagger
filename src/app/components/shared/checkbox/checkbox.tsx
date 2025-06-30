@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * Props for the Checkbox component
  */
-export interface CheckboxProps {
+interface CheckboxProps {
   isSelected: boolean;
   onChange: () => void;
   className?: string;
@@ -29,7 +29,7 @@ export const Checkbox = ({
         disabled
           ? 'cursor-not-allowed opacity-50'
           : isSelected
-            ? 'border-sky-700 bg-sky-600 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-700'
+            ? 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600'
             : 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50'
       } ${className}`}
       onClick={() => {

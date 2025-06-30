@@ -1,4 +1,4 @@
-import { ArrowPathIcon, TagIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useRef, useState } from 'react';
 
 import {
@@ -119,10 +119,10 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={handleClearSelection}
-              className="cursor-pointer rounded-md bg-slate-200 px-2 py-1 transition-colors hover:bg-slate-300"
+              className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-200 px-2 py-1 inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-300"
               title="Clear selection"
             >
-              <span>&times; Clear</span>
+              <XMarkIcon className="mr-1 w-4" /> <span>Clear</span>
             </button>
           </div>
         )}

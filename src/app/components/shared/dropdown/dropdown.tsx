@@ -16,7 +16,7 @@ export interface DropdownItem<T> {
 /**
  * Props for the Dropdown component
  */
-export interface DropdownProps<T> {
+interface DropdownProps<T> {
   items: DropdownItem<T>[];
   selectedValue: T;
   onChange: (value: T) => void;
