@@ -1,6 +1,7 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
+import { Checkbox } from '../../../components/shared/checkbox';
 import { IoState, selectSaveProgress } from '../../../store/assets';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import {
@@ -73,38 +74,11 @@ export const AssetMetadata = ({
       }`}
     >
       <span className="mr-2">
-        <div
-          className={`relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded border transition-all ${
-            isSelected
-              ? 'border-sky-700 bg-sky-600 text-white hover:bg-sky-700'
-              : 'border-slate-400 bg-white hover:border-sky-500 hover:bg-sky-50'
-          }`}
-          onClick={() => dispatch(toggleAssetSelection(assetId))}
-          role="checkbox"
-          aria-checked={isSelected}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              dispatch(toggleAssetSelection(assetId));
-            }
-          }}
-        >
-          {isSelected && (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-white"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          )}
-        </div>
+        <Checkbox
+          isSelected={isSelected}
+          onChange={() => dispatch(toggleAssetSelection(assetId))}
+          ariaLabel={`Select asset ${assetId}`}
+        />
       </span>
 
       <span className="inline-flex min-w-0 flex-wrap items-center py-0.5 tabular-nums">
