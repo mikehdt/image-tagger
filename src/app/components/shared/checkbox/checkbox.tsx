@@ -25,12 +25,12 @@ export const Checkbox = ({
 }: CheckboxProps) => {
   return (
     <div
-      className={`relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded border transition-all ${
+      className={`relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded border shadow-sm inset-shadow-xs transition-all ${
         disabled
           ? 'cursor-not-allowed opacity-50'
           : isSelected
-            ? 'border-sky-700 bg-sky-600 text-white hover:bg-sky-700'
-            : 'border-slate-400 bg-white hover:border-sky-500 hover:bg-sky-50'
+            ? 'border-sky-700 bg-sky-600 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-700'
+            : 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50'
       } ${className}`}
       onClick={() => {
         if (!disabled) onChange();
