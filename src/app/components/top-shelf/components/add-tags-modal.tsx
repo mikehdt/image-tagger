@@ -1,10 +1,12 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
+import { createSelector } from '@reduxjs/toolkit';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
 import { useAppSelector } from '../../../store/hooks';
 import { selectDuplicateTagInfo } from '../../../store/selection';
+import { Checkbox } from '../../shared/checkbox/checkbox';
 import { Modal } from '../../shared/modal';
 import { MultiTagInput } from '../../shared/multi-tag-input';
 
@@ -13,6 +15,7 @@ type AddTagsModalProps = {
   onClose: () => void;
   selectedAssetsCount: number;
   onAddTag: (tag: string) => void;
+  onClearSelection?: () => void; // Optional callback to clear selection
 };
 
 export const AddTagsModal = ({
@@ -20,8 +23,10 @@ export const AddTagsModal = ({
   onClose,
   selectedAssetsCount,
   onAddTag,
+  onClearSelection,
 }: AddTagsModalProps) => {
   const [tags, setTags] = useState<string[]>([]);
+  const [keepSelection, setKeepSelection] = useState(false);
 
   // For duplicate checking, we'll get the current tag from the multitagInput
   // by using an Effect instead of setting state during render
@@ -30,22 +35,41 @@ export const AddTagsModal = ({
   // Get duplicate info for the current check tag
   const tagDuplicateInfo = useAppSelector(selectDuplicateTagInfo(checkTag));
 
-  // Generate tag status information for each tag
-  const tagsStatus = useAppSelector((state) => {
-    // Create status objects for each tag
-    return tags.map((tag) => {
-      const selector = selectDuplicateTagInfo(tag);
-      const info = selector(state);
+  // Create a real memoized selector outside of render
+  // This ensures we're not creating a new selector on each render
+  const makeTagStatusSelector = () =>
+    createSelector(
+      [(state) => state, (_state, tagsList: string[]) => tagsList],
+      (state, tagsList) => {
+        // Return empty array for empty tags to avoid unnecessary processing
+        if (!tagsList.length) return [];
 
-      // Set status based on duplicate information
-      let status: 'all' | 'some' | 'none' = 'none';
-      if (info.isDuplicate) {
-        status = info.isAllDuplicates ? 'all' : 'some';
-      }
+        // Process all tags at once inside the memoized function
+        return tagsList.map((tag) => {
+          const selector = selectDuplicateTagInfo(tag);
+          const info = selector(state);
 
-      return { tag, status };
-    });
-  });
+          // Map the tag info to a status
+          let status: 'all' | 'some' | 'none' = 'none';
+          if (info.isDuplicate) {
+            status = info.isAllDuplicates ? 'all' : 'some';
+          }
+
+          return { tag, status };
+        });
+      },
+    );
+
+  // Keep the selector instance stable across renders with useRef
+  const tagStatusSelectorRef = useRef<ReturnType<typeof makeTagStatusSelector>>(
+    makeTagStatusSelector(),
+  );
+  // Note: No need for initialization check since we provide the initial value above
+
+  // Use the stable selector with the current tags array
+  const tagsStatus = useAppSelector((state) =>
+    tagStatusSelectorRef.current!(state, tags),
+  );
 
   // Reset the form state when modal is closed
   useEffect(() => {
@@ -59,20 +83,17 @@ export const AddTagsModal = ({
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-
-    // Process all tags
     if (tags.length === 0) return;
-
-    // Add only valid tags (exclude tags that exist on ALL assets)
     tags.forEach((tag) => {
-      // Find tag status - only add if it's not on all assets
       const tagInfo = tagsStatus.find((t) => t.tag === tag);
       if (!tagInfo || tagInfo.status !== 'all') {
         onAddTag(tag);
       }
     });
-
     setTags([]);
+    if (!keepSelection && onClearSelection) {
+      onClearSelection();
+    }
     onClose();
   };
 
@@ -177,12 +198,22 @@ export const AddTagsModal = ({
             </p>
           )}
 
+          {/* Keep selection checkbox */}
+          <div className="flex items-center gap-2 pb-2">
+            <Checkbox
+              isSelected={keepSelection}
+              onChange={() => setKeepSelection((v) => !v)}
+              label="Keep asset selection after adding new tags"
+              ariaLabel="Keep asset selection after adding new tags"
+            />
+          </div>
+
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="cursor-pointer rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors hover:bg-stone-300"
+              className="cursor-pointer rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors hover:bg-stone-100"
             >
               Cancel
             </button>
@@ -190,14 +221,14 @@ export const AddTagsModal = ({
             <button
               type="submit"
               disabled={hasNoValidTags}
-              className={`flex rounded-sm border border-emerald-300 px-4 py-1 shadow-xs inset-shadow-xs inset-shadow-white transition-colors ${
+              className={`flex rounded-sm border border-amber-300 px-4 py-1 shadow-xs inset-shadow-xs inset-shadow-white transition-colors ${
                 hasNoValidTags
-                  ? 'cursor-not-allowed bg-emerald-100 text-emerald-600 opacity-40'
-                  : 'cursor-pointer bg-emerald-200 text-emerald-800 shadow-emerald-400 hover:bg-emerald-300'
+                  ? 'cursor-not-allowed bg-amber-100 text-amber-600 opacity-40'
+                  : 'cursor-pointer bg-amber-200 text-amber-800 shadow-amber-400 hover:bg-amber-100'
               }`}
             >
               <BookmarkIcon className="mr-1 w-4" />
-              Save
+              Add New Tags
             </button>
           </div>
         </form>

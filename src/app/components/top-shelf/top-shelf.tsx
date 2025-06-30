@@ -106,7 +106,7 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={() => setIsAddTagsModalOpen(true)}
-              className="mr-2 flex cursor-pointer items-center rounded-md border border-sky-500 bg-sky-500 px-3 py-1 text-white inset-shadow-xs inset-shadow-sky-300 transition-colors hover:bg-sky-600"
+              className="mr-2 flex cursor-pointer items-center rounded-md border border-sky-500 bg-sky-500 px-3 py-1 text-white inset-shadow-xs inset-shadow-sky-300 transition-colors hover:bg-sky-400"
               title="Add tags to selected assets"
             >
               <TagIcon className="mr-1 h-4 w-4" />
@@ -119,25 +119,25 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={handleClearSelection}
-              className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-200 px-2 py-1 inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-300"
+              className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-200 px-2 py-1 inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
               title="Clear selection"
             >
               <XMarkIcon className="mr-1 w-4" /> <span>Clear</span>
             </button>
           </div>
         )}
-        {/* Filter actions */}
-        <FilterActions
-          filterTags={filterTags}
-          markFilterTagsToDelete={handleMarkFilterTagsToDelete}
-        />
-        {/* Filter indicators */}
+
         <FilterIndicators
           filterSizes={filterSizes}
           filterTags={filterTags}
           filterExtensions={filterExtensions}
         />
-        {/* Filter mode controls */}
+
+        <FilterActions
+          filterTags={filterTags}
+          markFilterTagsToDelete={handleMarkFilterTagsToDelete}
+        />
+
         <FilterModeControls
           filterTagsMode={filterTagsMode}
           filterModifiedActive={filterModifiedActive}
@@ -157,6 +157,7 @@ export const TopShelf = () => {
       <AddTagsModal
         isOpen={isAddTagsModalOpen}
         onClose={() => setIsAddTagsModalOpen(false)}
+        onClearSelection={() => handleClearSelection()}
         selectedAssetsCount={selectedAssetsCount}
         onAddTag={handleAddTag}
       />

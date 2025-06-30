@@ -10,11 +10,11 @@ export const FilterActions = ({
   markFilterTagsToDelete,
 }: FilterActionsProps) => {
   return (
-    <div className="mr-4 ml-auto flex items-center">
+    <div className="mr-2 flex items-center rounded-md bg-slate-100 px-1 py-1">
       <button
-        className={`inline-flex items-center py-2 transition-colors ${
+        className={`flex items-center rounded-sm border border-slate-300/0 px-2 py-1 transition-colors ${
           filterTags.length
-            ? 'cursor-pointer text-slate-700 hover:text-slate-500'
+            ? 'cursor-pointer text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 hover:inset-shadow-xs hover:inset-shadow-white'
             : 'cursor-not-allowed text-slate-300'
         }`}
         type="button"
@@ -23,7 +23,7 @@ export const FilterActions = ({
         title="Toggle selected tags for deletion"
       >
         <DocumentMinusIcon className="mr-1 w-4" />
-        Toggle Delete
+        Toggle
       </button>
     </div>
   );

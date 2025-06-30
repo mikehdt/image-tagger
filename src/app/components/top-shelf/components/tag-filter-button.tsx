@@ -15,7 +15,7 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
     <div className="relative" ref={tagButtonRef}>
       <div
         onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-        className={`inline-flex cursor-pointer items-center rounded-md border border-slate-300 p-2 inset-shadow-xs inset-shadow-white transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-100 hover:bg-slate-200'}`}
+        className={`inline-flex cursor-pointer items-center rounded-md border border-slate-300 p-2 inset-shadow-xs inset-shadow-white transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-200 hover:bg-slate-100'}`}
         title="Show tag summary"
       >
         <TagIcon className="w-4" />

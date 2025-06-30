@@ -94,7 +94,7 @@ export const FilterModeControls = ({
           type="button"
           onClick={toggleModifiedFilter}
           className={`rounded-sm border p-1 px-2 transition-colors ${
-            filterModifiedActive ? 'border-white bg-white shadow-sm' : ''
+            filterModifiedActive ? 'border-slate-300 bg-white shadow-sm' : ''
           } ${hasModifiedAssets ? 'cursor-pointer border-slate-100 text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300 hover:bg-slate-300' : 'border-slate-100/0'}`}
           disabled={!hasModifiedAssets}
         >

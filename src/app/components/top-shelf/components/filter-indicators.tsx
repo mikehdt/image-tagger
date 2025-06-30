@@ -13,7 +13,7 @@ export const FilterIndicators = ({
     !filterSizes.length && !filterTags.length && !filterExtensions.length;
 
   return (
-    <div className="mr-2 flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3 tabular-nums">
+    <div className="mr-2 ml-auto flex cursor-default flex-col overflow-hidden rounded-sm text-center text-xs leading-3 tabular-nums">
       {noFilters ? (
         <span className="px-2 text-slate-300" title="Active size filters">
           &ndash;

@@ -114,7 +114,7 @@ export const AssetMetadata = ({
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving
                   ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-stone-300'
+                  : 'cursor-pointer hover:bg-stone-100'
             }`}
             onClick={(e) => {
               // Extra guard to prevent clicking during tag editing
@@ -139,7 +139,7 @@ export const AssetMetadata = ({
                 ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
                 : isSaving
                   ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-emerald-300'
+                  : 'cursor-pointer hover:bg-emerald-100'
             }`}
             onClick={(e) => {
               // Extra guard to prevent clicking during tag editing
