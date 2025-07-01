@@ -1,8 +1,4 @@
-import {
-  DocumentCheckIcon,
-  DocumentMagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
 import { FilterMode } from '../../../store/filters';
@@ -71,11 +67,7 @@ export const FilterModeControls = ({
   return (
     <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
       <span className="mr-1">
-        {filterTagsMode === FilterMode.SHOW_ALL ? (
-          <DocumentCheckIcon className="w-4" />
-        ) : (
-          <DocumentMagnifyingGlassIcon className="w-4" />
-        )}
+        <FunnelIcon className="w-4" />
       </span>
 
       <Dropdown

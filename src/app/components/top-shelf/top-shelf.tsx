@@ -136,6 +136,7 @@ export const TopShelf = () => {
         <FilterActions
           filterTags={filterTags}
           markFilterTagsToDelete={handleMarkFilterTagsToDelete}
+          onClearSelection={handleClearSelection}
         />
 
         <FilterModeControls
