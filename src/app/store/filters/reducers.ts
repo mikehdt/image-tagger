@@ -63,4 +63,21 @@ export const coreReducers = {
     state.filterExtensions = [];
     state.showModified = false;
   },
+
+  // Update tag filter names when tags are edited
+  updateTagFilters: (
+    state: Filters,
+    {
+      payload,
+    }: PayloadAction<Array<{ oldTagName: string; newTagName: string }>>,
+  ) => {
+    // Replace old tag names with new ones in the filter list
+    payload.forEach(({ oldTagName, newTagName }) => {
+      const index = state.filterTags.indexOf(oldTagName);
+      if (index !== -1) {
+        // Replace the old tag with the new one
+        state.filterTags[index] = newTagName;
+      }
+    });
+  },
 };

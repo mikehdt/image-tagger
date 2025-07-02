@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import { addTag, editTag } from '../assets';
+import { updateTagFilters } from '../filters';
 import { RootState } from '../index';
 
 /**
@@ -67,18 +68,22 @@ export const editTagsAcrossAssets = createAsyncThunk(
       // Find all assets with this tag
       allAssets.forEach((asset) => {
         if (asset.tagList.includes(oldTagName)) {
-          // Dispatch edit action for each asset that has this tag
-          dispatch(
-            editTag({
-              assetId: asset.fileId,
-              oldTagName,
-              newTagName: newTagName.trim(),
-            }),
-          );
+          // Check if the asset already has the new tag - prevent duplicates
+          if (!asset.tagList.includes(newTagName.trim())) {
+            // Only dispatch edit action for assets that don't already have the new tag
+            dispatch(
+              editTag({
+                assetId: asset.fileId,
+                oldTagName,
+                newTagName: newTagName.trim(),
+              }),
+            );
 
-          // Count modifications
-          modifiedAssetCount[oldTagName] =
-            (modifiedAssetCount[oldTagName] || 0) + 1;
+            // Count modifications
+            modifiedAssetCount[oldTagName] =
+              (modifiedAssetCount[oldTagName] || 0) + 1;
+          }
+          // If asset already has the tag, we don't apply the change to avoid duplicates
         }
       });
     });
@@ -89,6 +94,11 @@ export const editTagsAcrossAssets = createAsyncThunk(
       (sum, count) => sum + count,
       0,
     );
+
+    // Also update the filter tags to keep the selection in sync with the edits
+    if (totalChangedTags > 0) {
+      dispatch(updateTagFilters(tagUpdates));
+    }
 
     return {
       success: totalChangedTags > 0,

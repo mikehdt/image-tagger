@@ -11,7 +11,7 @@ export const selectDuplicateTagInfo = (tagName: string) =>
   createSelector(
     [selectSelectedAssets, selectAllImages],
     (selectedAssets, allImages) => {
-      if (!tagName.trim() || selectedAssets.length === 0) {
+      if (!tagName || selectedAssets.length === 0) {
         return {
           isDuplicate: false,
           duplicateCount: 0,
@@ -27,7 +27,7 @@ export const selectDuplicateTagInfo = (tagName: string) =>
 
       // Count how many assets already have this tag
       const duplicateCount = selectedImagesData.filter((img) =>
-        img.tagList.includes(tagName.trim()),
+        img.tagList.includes(tagName),
       ).length;
 
       return {
@@ -39,3 +39,38 @@ export const selectDuplicateTagInfo = (tagName: string) =>
       };
     },
   );
+
+/**
+ * Checks if two tags co-exist in the same assets
+ * This is useful to determine if renaming one tag to another would create duplicates
+ * @returns Information about tag co-existence
+ */
+export const selectTagCoExistence = (
+  originalTag: string,
+  newTagValue: string,
+) =>
+  createSelector([selectAllImages], (allImages) => {
+    if (!originalTag || !newTagValue || originalTag === newTagValue) {
+      return {
+        wouldCreateDuplicates: false,
+        assetsWithOriginalTag: 0,
+        assetsWithBothTags: 0,
+      };
+    }
+
+    // Find all assets that have the original tag
+    const assetsWithOriginalTag = allImages.filter((img) =>
+      img.tagList.includes(originalTag),
+    );
+
+    // Count how many of those assets also have the new tag
+    const assetsWithBothTags = assetsWithOriginalTag.filter((img) =>
+      img.tagList.includes(newTagValue),
+    );
+
+    return {
+      wouldCreateDuplicates: assetsWithBothTags.length > 0,
+      assetsWithOriginalTag: assetsWithOriginalTag.length,
+      assetsWithBothTags: assetsWithBothTags.length,
+    };
+  });

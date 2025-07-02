@@ -12,7 +12,6 @@ interface FilterActionsProps {
 export const FilterActions = ({
   filterTags,
   markFilterTagsToDelete,
-  onClearSelection,
 }: FilterActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -61,7 +60,6 @@ export const FilterActions = ({
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         filterTags={filterTags}
-        onClearSelection={onClearSelection}
       />
     </>
   );

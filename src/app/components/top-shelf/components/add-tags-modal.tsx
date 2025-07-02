@@ -179,13 +179,13 @@ export const AddTagsModal = ({
             <div className="space-y-2 text-xs text-slate-500">
               {tagsStatus.some((t) => t.status === 'all') && (
                 <p className="flex">
-                  <span className="mt-0.5 mr-2 h-3 w-3 rounded-full border border-rose-300 bg-rose-100 align-middle"></span>
+                  <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
                   Red tags exist on all selected assets and will be disregarded.
                 </p>
               )}
               {tagsStatus.some((t) => t.status === 'some') && (
                 <p className="flex">
-                  <span className="mt-0.5 mr-2 inline-block h-3 w-3 rounded-full border border-amber-300 bg-amber-50"></span>
+                  <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-amber-400 bg-amber-50"></span>
                   Yellow tags exist on some assets and will only be added to
                   assets without them.
                 </p>

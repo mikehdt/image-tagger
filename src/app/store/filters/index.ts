@@ -38,6 +38,7 @@ export const {
   toggleExtensionFilter,
   toggleModifiedFilter,
   clearTagFilters,
+  updateTagFilters,
   clearSizeFilters,
   clearExtensionFilters,
   clearFilters,
