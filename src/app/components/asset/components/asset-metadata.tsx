@@ -8,6 +8,7 @@ import {
   selectAssetIsSelected,
   toggleAssetSelection,
 } from '../../../store/selection';
+import { Button } from '../../shared/button';
 import { useAssetTags } from '../hooks';
 
 type AssetMetadataProps = {
@@ -65,7 +66,7 @@ export const AssetMetadata = ({
 
   return (
     <div
-      className={`flex w-full items-center border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+      className={`flex w-full items-center space-x-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
         isSelected
           ? 'border-t-purple-600 bg-purple-100'
           : hasModifiedTags
@@ -73,18 +74,16 @@ export const AssetMetadata = ({
             : 'border-t-slate-300 bg-slate-100'
       }`}
     >
-      <span className="mr-2">
-        <Checkbox
-          isSelected={isSelected}
-          onChange={() => dispatch(toggleAssetSelection(assetId))}
-          ariaLabel={`Select asset ${assetId}`}
-        />
-      </span>
+      <Checkbox
+        isSelected={isSelected}
+        onChange={() => dispatch(toggleAssetSelection(assetId))}
+        ariaLabel={`Select asset ${assetId}`}
+      />
 
-      <span className="inline-flex min-w-0 flex-wrap items-center py-0.5 tabular-nums">
+      <span className="inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
         <button
           type="button"
-          className={`mr-2 cursor-pointer rounded-sm border border-sky-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'}`}
+          className={`cursor-pointer rounded-sm border border-sky-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'}`}
           onClick={() => toggleSize(dimensionsComposed)}
         >
           {dimensions.width}&times;{dimensions.height}
@@ -92,7 +91,7 @@ export const AssetMetadata = ({
 
         <button
           type="button"
-          className={`mr-2 cursor-pointer rounded-sm border border-stone-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'}`}
+          className={`cursor-pointer rounded-sm border border-stone-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'}`}
           onClick={() => toggleExtension(fileExtension)}
         >
           {fileExtension}
@@ -107,57 +106,40 @@ export const AssetMetadata = ({
       </span>
 
       {hasModifiedTags ? (
-        <span className="ml-auto flex pl-2">
-          <button
-            className={`flex rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors ${
-              isTagEditing
-                ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
-                : isSaving
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-stone-100'
-            }`}
-            onClick={(e) => {
+        <span className="ml-auto flex space-x-2 pl-2">
+          <Button
+            color="stone"
+            size="medium"
+            onClick={() => {
               // Extra guard to prevent clicking during tag editing
               if (isTagEditing || isSaving) {
-                e.preventDefault();
-                e.stopPropagation();
                 return;
               }
               cancelAction();
             }}
             disabled={isTagEditing || isSaving}
-            aria-disabled={isTagEditing || isSaving}
-            tabIndex={isTagEditing || isSaving ? -1 : undefined}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
             Cancel
-          </button>
+          </Button>
 
-          <button
-            className={`ml-2 flex rounded-sm border border-emerald-300 bg-emerald-200 px-4 py-1 text-emerald-800 shadow-xs inset-shadow-xs shadow-emerald-400 inset-shadow-white transition-colors ${
-              isTagEditing
-                ? 'cursor-not-allowed opacity-40' // More faded when editing or adding tags
-                : isSaving
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-emerald-100'
-            }`}
-            onClick={(e) => {
+          <Button
+            color="emerald"
+            size="medium"
+            onClick={() => {
               // Extra guard to prevent clicking during tag editing
               if (isTagEditing || isSaving) {
-                e.preventDefault();
-                e.stopPropagation();
                 return;
               }
+
               saveAction();
             }}
             disabled={isTagEditing || isSaving}
-            aria-disabled={isTagEditing || isSaving}
-            tabIndex={isTagEditing || isSaving ? -1 : undefined}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
             <BookmarkIcon className="mr-1 w-4" />
             Save
-          </button>
+          </Button>
         </span>
       ) : null}
     </div>

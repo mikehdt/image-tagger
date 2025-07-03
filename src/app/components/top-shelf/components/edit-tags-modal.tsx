@@ -10,6 +10,7 @@ import {
   selectTagCoExistence,
 } from '../../../store/selection/combinedSelectors';
 import { editTagsAcrossAssets } from '../../../store/selection/thunks';
+import { Button } from '../../shared/button';
 import { Modal } from '../../shared/modal';
 
 interface EditTagsModalProps {
@@ -392,26 +393,24 @@ export const EditTagsModal = ({
 
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="cursor-pointer rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors hover:bg-stone-100"
+              color="slate"
+              size="mediumWide"
             >
               Cancel
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="submit"
               disabled={!hasModifiedTags}
-              className={`flex rounded-sm border border-indigo-300 px-4 py-1 shadow-xs inset-shadow-xs inset-shadow-white transition-colors ${
-                !hasModifiedTags
-                  ? 'cursor-not-allowed bg-indigo-100 text-indigo-600 opacity-40'
-                  : 'cursor-pointer bg-indigo-200 text-indigo-800 shadow-indigo-400 hover:bg-indigo-100'
-              }`}
+              color="indigo"
+              size="mediumWide"
             >
               <BookmarkIcon className="mr-1 w-4" />
               Save Changes
-            </button>
+            </Button>
           </div>
         </form>
       </div>

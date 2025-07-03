@@ -1,16 +1,15 @@
 'use client';
 
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { SyntheticEvent } from 'react';
 
+import { Button } from '../components/shared/button';
 import { selectIoMessage, selectLoadProgress } from '../store/assets';
 import { useAppSelector } from '../store/hooks';
 
 type ErrorProps = { onReload: (_args?: { maintainIoState: boolean }) => void };
 
 export const Error = ({ onReload }: ErrorProps) => {
-  const doReload = (e: SyntheticEvent) => {
-    e.preventDefault();
+  const handleRetry = () => {
     onReload({ maintainIoState: true });
   };
 
@@ -26,12 +25,14 @@ export const Error = ({ onReload }: ErrorProps) => {
       </h1>
 
       <p className="mt-4 w-full">
-        <button
-          onClick={doReload}
-          className="min-w-30 cursor-pointer rounded bg-sky-500 px-4 py-2 text-white transition-colors hover:bg-sky-700"
+        <Button
+          onClick={handleRetry}
+          color="sky"
+          size="mediumWide"
+          className="min-w-30"
         >
           Retry
-        </button>
+        </Button>
       </p>
 
       {errorMessage && (

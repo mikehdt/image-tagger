@@ -28,6 +28,7 @@ import {
   selectHasSelectedAssets,
   selectSelectedAssetsCount,
 } from '../../store/selection';
+import { Button } from '../shared/button';
 import {
   FilterActions,
   FilterIndicators,
@@ -80,9 +81,8 @@ export const TopShelf = () => {
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center px-4 text-sm">
+      <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
         <div className="flex py-2">
-          {/* Loading status or refresh button */}
           {ioState === IoState.LOADING || ioState === IoState.SAVING ? (
             <LoadingStatus
               ioState={ioState}
@@ -93,37 +93,41 @@ export const TopShelf = () => {
             <button
               type="button"
               onClick={doRefresh}
-              className="mr-4 inline-flex cursor-pointer"
+              className="inline-flex cursor-pointer"
               title="Reload asset list"
             >
               <ArrowPathIcon className="w-6" />
             </button>
           )}
         </div>
-        {/* Asset actions */}
+
         {hasSelectedAssets && (
-          <div className="mr-4 flex">
-            <button
+          <div className="flex">
+            <Button
               type="button"
               onClick={() => setIsAddTagsModalOpen(true)}
-              className="mr-2 flex cursor-pointer items-center rounded-md border border-sky-500 bg-sky-500 px-3 py-1 text-white inset-shadow-xs inset-shadow-sky-300 transition-colors hover:bg-sky-400"
+              className="mr-2 flex items-center px-3"
+              color="sky"
+              size="medium"
               title="Add tags to selected assets"
             >
-              <TagIcon className="mr-1 h-4 w-4" />
+              <TagIcon className="mr-2 h-4 w-4" />
               <span>Add Tags</span>
               <span className="ml-2 rounded-full bg-white px-1 text-xs font-bold text-sky-500 tabular-nums">
                 {selectedAssetsCount}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={handleClearSelection}
-              className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-200 px-2 py-1 inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
+              className="inline-flex items-center"
+              color="slate"
+              size="medium"
               title="Clear selection"
             >
               <XMarkIcon className="mr-1 w-4" /> <span>Clear</span>
-            </button>
+            </Button>
           </div>
         )}
 
@@ -150,11 +154,10 @@ export const TopShelf = () => {
           toggleModifiedFilter={handleToggleModifiedFilter}
           clearFilters={handleClearFilters}
         />
-        {/* Tag filter button */}
+
         <TagFilterButton tagButtonRef={tagButtonRef} />
       </div>
 
-      {/* Add Tags Modal */}
       <AddTagsModal
         isOpen={isAddTagsModalOpen}
         onClose={() => setIsAddTagsModalOpen(false)}

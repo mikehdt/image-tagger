@@ -52,7 +52,7 @@ export const PaginationControls = ({
   };
 
   return (
-    <span className="mr-4 flex items-center">
+    <span className="flex items-center">
       <label
         htmlFor="pagination-size"
         className="mr-2 text-xs text-slate-500 max-lg:hidden"

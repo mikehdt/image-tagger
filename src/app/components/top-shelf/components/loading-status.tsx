@@ -18,11 +18,11 @@ export const LoadingStatus = ({
 
   return (
     <>
-      <div className="mr-4 w-6">
+      <div className="w-6">
         <Loader />
       </div>
 
-      <div className="mr-4 self-center text-xs font-medium text-slate-500 tabular-nums">
+      <div className="self-center text-xs font-medium text-slate-500 tabular-nums">
         {saveProgress && (
           <>
             {saveProgress.completed} / {saveProgress.total}
@@ -35,6 +35,8 @@ export const LoadingStatus = ({
             {loadProgress.total > 0
               ? `${loadProgress.completed} / ${loadProgress.total}`
               : ''}
+            {loadProgress.failed > 0 &&
+              ` (${loadProgress.failed} error${loadProgress.failed !== 1 ? 's' : ''})`}
           </>
         )}
       </div>

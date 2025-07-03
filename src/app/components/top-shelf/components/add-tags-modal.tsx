@@ -6,6 +6,7 @@ import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
 import { useAppSelector } from '../../../store/hooks';
 import { selectDuplicateTagInfo } from '../../../store/selection';
+import { Button } from '../../shared/button';
 import { Checkbox } from '../../shared/checkbox/checkbox';
 import { Modal } from '../../shared/modal';
 import { MultiTagInput } from '../../shared/multi-tag-input';
@@ -210,26 +211,24 @@ export const AddTagsModal = ({
 
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="cursor-pointer rounded-sm border border-stone-300 bg-stone-200 px-4 py-1 text-stone-800 shadow-xs inset-shadow-xs shadow-stone-400 inset-shadow-white transition-colors hover:bg-stone-100"
+              color="slate"
+              size="mediumWide"
             >
               Cancel
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="submit"
               disabled={hasNoValidTags}
-              className={`flex rounded-sm border border-amber-300 px-4 py-1 shadow-xs inset-shadow-xs inset-shadow-white transition-colors ${
-                hasNoValidTags
-                  ? 'cursor-not-allowed bg-amber-100 text-amber-600 opacity-40'
-                  : 'cursor-pointer bg-amber-200 text-amber-800 shadow-amber-400 hover:bg-amber-100'
-              }`}
+              color="amber"
+              size="mediumWide"
             >
               <BookmarkIcon className="mr-1 w-4" />
               Add New Tags
-            </button>
+            </Button>
           </div>
         </form>
       </div>

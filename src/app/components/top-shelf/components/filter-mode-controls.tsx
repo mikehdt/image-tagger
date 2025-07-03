@@ -1,5 +1,6 @@
 import { FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
+import { Button } from '../../../components/shared/button';
 import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
 import { FilterMode } from '../../../store/filters';
 
@@ -65,7 +66,7 @@ export const FilterModeControls = ({
   ];
 
   return (
-    <div className="mr-4 inline-flex items-center rounded-md bg-slate-100 p-1">
+    <div className="inline-flex items-center rounded-md bg-slate-100 p-1">
       <span className="mr-1">
         <FunnelIcon className="w-4" />
       </span>
@@ -82,32 +83,33 @@ export const FilterModeControls = ({
       />
 
       <div className="border-r border-white pr-1">
-        <button
+        <Button
           type="button"
           onClick={toggleModifiedFilter}
-          className={`rounded-sm border p-1 px-2 transition-colors ${
-            filterModifiedActive ? 'border-slate-300 bg-white shadow-sm' : ''
-          } ${hasModifiedAssets ? 'cursor-pointer border-slate-100 text-slate-700' : 'text-slate-300'} ${!filterModifiedActive && hasModifiedAssets ? 'shadow-md inset-shadow-sm shadow-white inset-shadow-slate-300 hover:bg-slate-300' : 'border-slate-100/0'}`}
+          variant="deep-toggle"
+          isPressed={filterModifiedActive}
           disabled={!hasModifiedAssets}
+          ghostDisabled={!hasModifiedAssets}
+          size="medium"
+          className="px-2"
         >
           Modified
-        </button>
+        </Button>
       </div>
 
       <div className="border-l border-slate-300 pl-1">
-        <button
-          className={`flex items-center rounded-sm border border-slate-300/0 px-2 py-1 transition-colors ${
-            filterActive
-              ? 'cursor-pointer text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 hover:inset-shadow-xs hover:inset-shadow-white'
-              : 'text-slate-300'
-          }`}
+        <Button
+          variant="ghost"
           type="button"
           onClick={clearFilters}
           disabled={!filterActive}
+          ghostDisabled={!filterActive}
+          size="medium"
+          className="flex items-center"
         >
           <XMarkIcon className="mr-1 w-4" />
           Clear
-        </button>
+        </Button>
       </div>
     </div>
   );

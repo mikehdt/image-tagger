@@ -4,6 +4,7 @@ import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset/asset';
+import { Button } from '../components/shared/button';
 import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,
@@ -125,17 +126,14 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     [paginatedAssets, filterSizesSet, filterExtensionsSet, assetDimensions],
   );
 
-  // Render a message when no assets match the filters
-  if (filteredAssets.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
-        <CubeTransparentIcon className="h-12 w-12" />
-        <h1 className="mt-4 mb-4 w-full text-xl">
-          No results match your filters
-        </h1>
-      </div>
-    );
-  }
-
-  return renderedAssets;
+  return filteredAssets.length ? (
+    renderedAssets
+  ) : (
+    <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
+      <CubeTransparentIcon className="h-12 w-12" />
+      <h1 className="mt-4 mb-4 w-full text-xl">
+        No results match your filters
+      </h1>
+    </div>
+  );
 };

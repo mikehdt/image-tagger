@@ -1,8 +1,9 @@
-import { TagIcon } from '@heroicons/react/24/outline';
+import { QueueListIcon } from '@heroicons/react/24/outline';
 import { RefObject, useState } from 'react';
 
 import { FilterList } from '../../filter-list/filter-list';
 import { PersistentFilterProvider } from '../../filter-list/persistent-filter-context';
+import { Button } from '../../shared/button';
 
 interface TagFilterButtonProps {
   tagButtonRef: RefObject<HTMLDivElement | null>;
@@ -13,15 +14,17 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
 
   return (
     <div className="relative" ref={tagButtonRef}>
-      <div
+      <Button
+        variant="toggle"
+        size="large"
+        isPressed={isTagPanelOpen}
         onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
-        className={`inline-flex cursor-pointer items-center rounded-md border border-slate-300 p-2 inset-shadow-xs inset-shadow-white transition-colors ${isTagPanelOpen ? 'bg-slate-300 hover:bg-slate-200' : 'bg-slate-200 hover:bg-slate-100'}`}
         title="Show tag summary"
       >
-        <TagIcon className="w-4" />
+        <QueueListIcon className="mr-2 w-4" />
 
-        <span className="mr-1 ml-2 max-lg:hidden">Filter List</span>
-      </div>
+        <span className="max-lg:hidden">Filter List</span>
+      </Button>
 
       <PersistentFilterProvider>
         <FilterList

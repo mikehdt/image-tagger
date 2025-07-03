@@ -22,6 +22,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { applyFilters } from '../../utils/filter-actions';
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
+import { Button } from '../shared/button';
 
 type BottomShelfProps = {
   currentPage?: number;
@@ -89,34 +90,37 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
           <Pagination currentPage={currentPage} totalItems={filteredCount} />
         </div>
 
-        <div className="flex w-1/4 items-center justify-end text-sm">
-          <button
+        <div className="flex w-1/4 items-center justify-end space-x-2 text-sm">
+          <Button
             type="button"
+            variant="ghost"
+            size="medium"
             onClick={cancelAllChanges}
-            className={`mr-4 inline-flex items-center py-2 transition-colors ${hasModifiedAssets ? 'cursor-pointer text-slate-700 hover:text-slate-500' : 'cursor-not-allowed text-slate-300'}`}
+            disabled={!hasModifiedAssets}
             title={
               hasModifiedAssets
                 ? 'Cancel all tag changes'
                 : 'No changes to cancel'
             }
-            disabled={!hasModifiedAssets}
           >
             <BookmarkSlashIcon className="w-4" />
             <span className="ml-1 max-lg:hidden">Cancel All</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="medium"
+            color="emerald"
             onClick={saveAllChanges}
-            className={`mr-4 inline-flex items-center py-2 transition-colors ${hasModifiedAssets ? 'cursor-pointer text-emerald-700 hover:text-emerald-500' : 'cursor-not-allowed text-slate-300'}`}
+            disabled={!hasModifiedAssets}
             title={
               hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
             }
-            disabled={!hasModifiedAssets}
           >
             <BookmarkSquareIcon className="w-4" />
             <span className="ml-1 max-lg:hidden">Save All</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

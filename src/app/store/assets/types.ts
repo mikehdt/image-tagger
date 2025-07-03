@@ -40,7 +40,7 @@ export type SaveProgress = {
 export type LoadProgress = {
   total: number;
   completed: number;
-  failed?: number;
+  failed: number;
   errors?: string[]; // List of fileIds that failed to load
 };
 
