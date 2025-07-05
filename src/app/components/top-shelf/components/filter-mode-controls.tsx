@@ -67,7 +67,7 @@ export const FilterModeControls = ({
 
   return (
     <div className="inline-flex items-center rounded-md bg-slate-100 p-1">
-      <span className="mr-1">
+      <span className="mr-1 border-r border-dotted border-r-slate-400 py-2 pr-1 text-slate-400">
         <FunnelIcon className="w-4" />
       </span>
 
@@ -107,8 +107,8 @@ export const FilterModeControls = ({
           size="medium"
           className="flex items-center"
         >
-          <XMarkIcon className="mr-1 w-4" />
-          Clear
+          <XMarkIcon className="w-4" />
+          <span className="ml-2 max-lg:hidden">Clear</span>
         </Button>
       </div>
     </div>

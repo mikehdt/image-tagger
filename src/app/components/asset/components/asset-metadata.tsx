@@ -81,21 +81,25 @@ export const AssetMetadata = ({
       />
 
       <span className="inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
-        <button
+        <Button
           type="button"
-          className={`cursor-pointer rounded-sm border border-sky-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${dimensionsActive ? 'bg-sky-300 hover:bg-sky-400' : 'bg-sky-100 hover:bg-sky-200'}`}
+          color="sky"
+          size="smallWide"
+          isPressed={dimensionsActive}
           onClick={() => toggleSize(dimensionsComposed)}
         >
           {dimensions.width}&times;{dimensions.height}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
-          className={`cursor-pointer rounded-sm border border-stone-300 px-2 py-0.5 inset-shadow-xs inset-shadow-white transition-colors max-sm:order-2 ${extensionActive ? 'bg-stone-300 hover:bg-stone-400' : 'bg-stone-100 hover:bg-stone-200'}`}
+          color="stone"
+          size="smallWide"
+          isPressed={extensionActive}
           onClick={() => toggleExtension(fileExtension)}
         >
           {fileExtension}
-        </button>
+        </Button>
 
         <span
           className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pb-2"

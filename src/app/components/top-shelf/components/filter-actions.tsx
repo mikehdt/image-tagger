@@ -1,6 +1,12 @@
-import { DocumentMinusIcon, PencilIcon } from '@heroicons/react/24/outline';
+import {
+  DocumentMinusIcon,
+  DocumentPlusIcon,
+  PencilIcon,
+  SwatchIcon,
+} from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
+import { Button } from '../../shared/button';
 import { EditTagsModal } from './edit-tags-modal';
 
 interface FilterActionsProps {
@@ -14,6 +20,7 @@ export const FilterActions = ({
   markFilterTagsToDelete,
 }: FilterActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isToggled, setIsToggled] = useState(false);
 
   const openEditModal = () => {
     if (filterTags.length > 0) {
@@ -21,44 +28,52 @@ export const FilterActions = ({
     }
   };
 
+  const toggleFilterTagsDelete = () => {
+    markFilterTagsToDelete(filterTags);
+    setIsToggled(!isToggled);
+  };
+
+  const handleOnCloseModal = () => {
+    setIsEditModalOpen(false);
+  };
+
   return (
     <>
       <div className="flex items-center space-x-1 rounded-md bg-slate-100 px-1 py-1">
-        <button
-          className={`flex items-center rounded-sm border border-slate-300/0 px-2 py-1 transition-colors ${
-            filterTags.length
-              ? 'cursor-pointer text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 hover:inset-shadow-xs hover:inset-shadow-white'
-              : 'cursor-not-allowed text-slate-300'
-          }`}
+        <span className="mr-1 border-r border-dotted border-r-slate-400 py-2 pr-1">
+          <SwatchIcon className="w-4 text-slate-400" />
+        </span>
+
+        <Button
           type="button"
+          variant="ghost"
           onClick={openEditModal}
           disabled={!filterTags.length}
           title="Edit selected tags"
         >
-          <PencilIcon className="mr-1 w-4" />
-          Edit
-        </button>
+          <PencilIcon className="w-4" />
+          <span className="ml-2 max-lg:hidden">Edit</span>
+        </Button>
 
-        <button
-          className={`flex items-center rounded-sm border border-slate-300/0 px-2 py-1 transition-colors ${
-            filterTags.length
-              ? 'cursor-pointer text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 hover:inset-shadow-xs hover:inset-shadow-white'
-              : 'cursor-not-allowed text-slate-300'
-          }`}
+        <Button
           type="button"
-          onClick={() => markFilterTagsToDelete(filterTags)}
+          variant="ghost"
+          onClick={toggleFilterTagsDelete}
           disabled={!filterTags.length}
           title="Toggle selected tags for deletion"
         >
-          <DocumentMinusIcon className="mr-1 w-4" />
-          Toggle
-        </button>
+          {isToggled ? (
+            <DocumentPlusIcon className="w-4" />
+          ) : (
+            <DocumentMinusIcon className="w-4" />
+          )}
+          <span className="ml-2 max-lg:hidden">Toggle</span>
+        </Button>
       </div>
 
-      {/* Edit tags modal */}
       <EditTagsModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={handleOnCloseModal}
         filterTags={filterTags}
       />
     </>

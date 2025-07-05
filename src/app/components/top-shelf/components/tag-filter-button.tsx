@@ -21,9 +21,9 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
         onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
         title="Show tag summary"
       >
-        <QueueListIcon className="mr-2 w-4" />
+        <QueueListIcon className="w-4" />
 
-        <span className="max-lg:hidden">Filter List</span>
+        <span className="ml-2 max-lg:hidden">Filter List</span>
       </Button>
 
       <PersistentFilterProvider>
