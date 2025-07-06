@@ -1,6 +1,6 @@
-export const Loader = () => (
+export const Loader = ({ className = '' }: { className?: string }) => (
   <svg
-    className="aspect-square h-full w-full animate-spin text-green-600"
+    className={`${className} aspect-square animate-spin text-green-600`}
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

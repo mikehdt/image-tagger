@@ -40,7 +40,7 @@ export const FilterActions = ({
   return (
     <>
       <div className="flex items-center space-x-1 rounded-md bg-slate-100 px-1 py-1">
-        <span className="mr-1 border-r border-dotted border-r-slate-400 py-2 pr-1">
+        <span className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1">
           <SwatchIcon className="w-4 text-slate-400" />
         </span>
 

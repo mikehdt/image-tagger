@@ -1,7 +1,9 @@
 // Complex selectors for assets slice
 import { createSelector } from '@reduxjs/toolkit';
 
+import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
+import type { RootState } from '../';
 import { selectAllImages } from '.';
 import { ImageAsset, KeyedCountList, TagState } from './types';
 import { hasState } from './utils';
@@ -96,5 +98,37 @@ export const selectAllExtensions = createSelector(
     }
 
     return extensionCounts;
+  },
+);
+
+// Combined selector to get filtered assets based on current filter state
+export const selectFilteredAssets = createSelector(
+  [
+    selectAllImages,
+    (state: RootState) => state.filters.filterTags,
+    (state: RootState) => state.filters.filterSizes,
+    (state: RootState) => state.filters.filterExtensions,
+    (state: RootState) => state.filters.filterMode,
+    (state: RootState) => state.filters.showModified,
+    (state: RootState) => state.filters.searchQuery,
+  ],
+  (
+    assets,
+    filterTags,
+    filterSizes,
+    filterExtensions,
+    filterMode,
+    showModified,
+    searchQuery,
+  ) => {
+    return applyFilters({
+      assets,
+      filterTags,
+      filterSizes,
+      filterExtensions,
+      filterMode,
+      showModified,
+      searchQuery,
+    });
   },
 );

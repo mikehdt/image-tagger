@@ -20,6 +20,7 @@ export type Filters = {
   filterExtensions: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
+  searchQuery: string;
 };
 
 export type FilterCount = {

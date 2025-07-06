@@ -15,6 +15,7 @@ export const applyFilters = ({
   filterExtensions,
   filterMode,
   showModified,
+  searchQuery,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
@@ -22,13 +23,15 @@ export const applyFilters = ({
   filterExtensions: string[];
   filterMode: FilterMode;
   showModified?: boolean;
+  searchQuery?: string;
 }): ImageAssetWithIndex[] => {
   // Handle the case where no filters are active - show everything
   if (
     filterTags.length === 0 &&
     filterSizes.length === 0 &&
     filterExtensions.length === 0 &&
-    !showModified
+    !showModified &&
+    (!searchQuery || searchQuery.trim() === '')
   ) {
     // Add originalIndex to each asset (1-based for display)
     return assets.map((asset, index) => ({
@@ -48,6 +51,15 @@ export const applyFilters = ({
   })) as ImageAssetWithIndex[];
 
   return assetsWithIndex.filter((img: ImageAssetWithIndex) => {
+    // Apply search filter first (if provided)
+    if (searchQuery && searchQuery.trim() !== '') {
+      const query = searchQuery.trim().toLowerCase();
+      const assetName = img.fileId.toLowerCase();
+      if (!assetName.includes(query)) {
+        return false; // Skip this asset if it doesn't match the search
+      }
+    }
+
     // Check modified status first if needed (applies to all filter modes)
     if (showModified) {
       const hasModifiedTags = img.tagList.some(

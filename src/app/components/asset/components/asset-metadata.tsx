@@ -3,11 +3,13 @@ import { useMemo } from 'react';
 
 import { Checkbox } from '../../../components/shared/checkbox';
 import { IoState, selectSaveProgress } from '../../../store/assets';
+import { selectSearchQuery } from '../../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import {
   selectAssetIsSelected,
   toggleAssetSelection,
 } from '../../../store/selection';
+import { highlightText } from '../../../utils/text-highlight';
 import { Button } from '../../shared/button';
 import { useAssetTags } from '../hooks';
 
@@ -34,6 +36,7 @@ export const AssetMetadata = ({
 }: AssetMetadataProps) => {
   const dispatch = useAppDispatch();
   const isSelected = useAppSelector(selectAssetIsSelected(assetId));
+  const searchQuery = useAppSelector(selectSearchQuery);
   const {
     tagList,
     tagsByStatus,
@@ -105,7 +108,7 @@ export const AssetMetadata = ({
           className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pb-2"
           style={{ textShadow: 'white 0 1px 0' }}
         >
-          {assetId}
+          {highlightText(assetId, searchQuery)}
         </span>
       </span>
 

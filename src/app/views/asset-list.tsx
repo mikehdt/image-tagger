@@ -4,7 +4,6 @@ import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset/asset';
-import { Button } from '../components/shared/button';
 import { selectAllImages } from '../store/assets';
 import {
   selectFilterExtensions,
@@ -12,6 +11,7 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectPaginationSize,
+  selectSearchQuery,
   selectShowModified,
 } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
@@ -37,6 +37,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
   const showModified = useAppSelector(selectShowModified);
+  const searchQuery = useAppSelector(selectSearchQuery);
 
   // Create Sets from filters for O(1) lookups instead of O(n)
   const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
@@ -55,6 +56,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
         filterExtensions,
         filterMode,
         showModified,
+        searchQuery,
       }),
     [
       assets,
@@ -63,6 +65,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       filterExtensions,
       filterMode,
       showModified,
+      searchQuery,
     ],
   );
 

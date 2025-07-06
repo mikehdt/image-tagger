@@ -63,25 +63,23 @@ export const TopShelf = () => {
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
-        <div className="flex">
-          {ioState === IoState.LOADING || ioState === IoState.SAVING ? (
-            <LoadingStatus
-              ioState={ioState}
-              saveProgress={saveProgress}
-              loadProgress={loadProgress}
-            />
-          ) : (
-            <Button
-              type="button"
-              onClick={doRefresh}
-              size="small"
-              variant="ghost"
-              title="Reload asset list"
-            >
-              <ArrowPathIcon className="w-6" />
-            </Button>
-          )}
-        </div>
+        {ioState === IoState.LOADING || ioState === IoState.SAVING ? (
+          <LoadingStatus
+            ioState={ioState}
+            saveProgress={saveProgress}
+            loadProgress={loadProgress}
+          />
+        ) : (
+          <Button
+            type="button"
+            onClick={doRefresh}
+            size="small"
+            variant="ghost"
+            title="Reload asset list"
+          >
+            <ArrowPathIcon className="w-6" />
+          </Button>
+        )}
 
         <AssetSelectionControls />
 

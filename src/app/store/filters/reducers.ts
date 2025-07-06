@@ -62,6 +62,11 @@ export const coreReducers = {
     state.filterSizes = [];
     state.filterExtensions = [];
     state.showModified = false;
+    state.searchQuery = '';
+  },
+
+  setSearchQuery: (state: Filters, { payload }: PayloadAction<string>) => {
+    state.searchQuery = payload;
   },
 
   // Update tag filter names when tags are edited

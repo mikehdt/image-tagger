@@ -11,6 +11,7 @@ const initialState: Filters = {
   filterExtensions: [],
   paginationSize: PaginationSize.HUNDRED,
   showModified: false,
+  searchQuery: '',
 };
 
 const filtersSlice = createSlice({
@@ -25,6 +26,7 @@ const filtersSlice = createSlice({
     selectFilterExtensions: (state) => state.filterExtensions,
     selectPaginationSize: (state) => state.paginationSize,
     selectShowModified: (state) => state.showModified,
+    selectSearchQuery: (state) => state.searchQuery,
   },
 });
 
@@ -42,6 +44,7 @@ export const {
   clearSizeFilters,
   clearExtensionFilters,
   clearFilters,
+  setSearchQuery,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice
@@ -52,6 +55,7 @@ export const {
   selectFilterExtensions,
   selectPaginationSize,
   selectShowModified,
+  selectSearchQuery,
 } = filtersSlice.selectors;
 
 // Main exports for filters module
