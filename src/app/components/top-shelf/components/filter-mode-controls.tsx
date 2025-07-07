@@ -1,4 +1,4 @@
-import { FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '../../../components/shared/button';
 import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
@@ -110,7 +110,7 @@ export const FilterModeControls = ({
           size="medium"
           className="flex items-center"
         >
-          <XMarkIcon className="w-4" />
+          <NoSymbolIcon className="w-4" />
           <span className="ml-2 max-lg:hidden">Clear</span>
         </Button>
       </div>

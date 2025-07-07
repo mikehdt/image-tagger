@@ -1,9 +1,9 @@
 import {
   IdentificationIcon,
   MagnifyingGlassIcon,
+  NoSymbolIcon,
   SquaresPlusIcon,
   TagIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useMemo, useRef, useState } from 'react';
 
@@ -124,7 +124,7 @@ export const AssetSelectionControls = () => {
         size="medium"
         title="Clear selection"
       >
-        <XMarkIcon className="w-4" />{' '}
+        <NoSymbolIcon className="w-4" />
         <span className="ml-2 max-lg:hidden">Clear</span>
       </Button>
 

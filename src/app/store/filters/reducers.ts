@@ -74,15 +74,29 @@ export const coreReducers = {
     state: Filters,
     {
       payload,
-    }: PayloadAction<Array<{ oldTagName: string; newTagName: string }>>,
+    }: PayloadAction<
+      Array<{
+        oldTagName: string;
+        newTagName: string;
+        operation: 'RENAME' | 'DELETE';
+      }>
+    >,
   ) => {
-    // Replace old tag names with new ones in the filter list
-    payload.forEach(({ oldTagName, newTagName }) => {
+    // Process each tag update
+    payload.forEach(({ oldTagName, newTagName, operation }) => {
       const index = state.filterTags.indexOf(oldTagName);
       if (index !== -1) {
-        // Replace the old tag with the new one
-        state.filterTags[index] = newTagName;
+        if (operation === 'RENAME') {
+          // Replace the old tag with the new one
+          state.filterTags[index] = newTagName;
+        } else if (operation === 'DELETE') {
+          // Remove the tag from filters
+          state.filterTags.splice(index, 1);
+        }
       }
     });
+
+    // Deduplicate the filter tags to remove any duplicates that might have been created
+    state.filterTags = [...new Set(state.filterTags)];
   },
 };

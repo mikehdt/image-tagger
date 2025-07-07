@@ -4,14 +4,86 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { selectAllImages, selectFilteredAssets } from '../../../store/assets';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import {
+  selectSelectedAssets,
+  selectSelectedAssetsCount,
+} from '../../../store/selection';
 import {
   selectDuplicateTagInfo,
   selectTagCoExistence,
 } from '../../../store/selection/combinedSelectors';
 import { editTagsAcrossAssets } from '../../../store/selection/thunks';
 import { Button } from '../../shared/button';
+import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';
+
+/**
+ * Enhanced tag processing that handles duplicate tags with precedence rules
+ */
+const processTagUpdatesWithDuplicateHandling = (
+  editedTags: Record<string, string>,
+  filterTags: string[],
+  getTagStatus: (originalTag: string) => 'none' | 'some' | 'all' | 'duplicate',
+): Array<{
+  oldTagName: string;
+  newTagName: string;
+  operation: 'RENAME' | 'DELETE';
+}> => {
+  const result: Array<{
+    oldTagName: string;
+    newTagName: string;
+    operation: 'RENAME' | 'DELETE';
+  }> = [];
+
+  // Track which new tag names have been used (for precedence)
+  const usedNewNames = new Set<string>();
+
+  // Process tags in the order they appear in filterTags (precedence)
+  filterTags.forEach((originalTag) => {
+    const newValue = editedTags[originalTag];
+
+    // Skip undefined, unchanged, or empty tags
+    if (!newValue || originalTag === newValue || newValue.trim() === '') {
+      return;
+    }
+
+    const trimmedValue = newValue.trim();
+    const status = getTagStatus(originalTag);
+
+    // Check if this value would create duplicates in ALL assets - these cannot be renamed
+    if (status === 'all') {
+      result.push({
+        oldTagName: originalTag,
+        newTagName: originalTag, // Keep original name
+        operation: 'DELETE',
+      });
+      return;
+    }
+
+    // Check if this new name has already been used by a previous tag (precedence rule)
+    if (usedNewNames.has(trimmedValue)) {
+      // This tag loses precedence - mark for deletion but keep original name
+      result.push({
+        oldTagName: originalTag,
+        newTagName: originalTag, // Keep original name
+        operation: 'DELETE',
+      });
+      return;
+    }
+
+    // This tag can be renamed safely - mark the new name as used
+    usedNewNames.add(trimmedValue);
+    result.push({
+      oldTagName: originalTag,
+      newTagName: trimmedValue,
+      operation: 'RENAME',
+    });
+  });
+
+  return result;
+};
 
 interface EditTagsModalProps {
   isOpen: boolean;
@@ -37,6 +109,23 @@ export const EditTagsModal = ({
       {} as Record<string, string>,
     );
   });
+
+  // State for the "only apply to filtered assets" checkbox
+  // Default to true only if there are active filters
+  const [onlyFilteredAssets, setOnlyFilteredAssets] = useState(true);
+
+  // State for the "only apply to selected assets" checkbox
+  const [onlySelectedAssets, setOnlySelectedAssets] = useState(false);
+
+  // Get filtered assets for the checkbox logic
+  const filteredAssets = useAppSelector(selectFilteredAssets);
+  const allAssets = useAppSelector(selectAllImages);
+  const selectedAssets = useAppSelector(selectSelectedAssets);
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
+
+  // Check if any filters are currently applied
+  const hasActiveFilters = filteredAssets.length !== allAssets.length;
+  const hasSelectedAssets = selectedAssetsCount > 0;
 
   // For duplicate checking - used to track tag changes
   const lastInputRef = useRef<{ tag: string; value: string }>({
@@ -112,8 +201,6 @@ export const EditTagsModal = ({
     tagStatusSelectorRef.current!(state, editedTags),
   );
 
-  // No longer need the effect that was updating the check tag
-
   // Reset the form when the modal opens or when filter tags change
   useEffect(() => {
     if (isOpen) {
@@ -130,8 +217,12 @@ export const EditTagsModal = ({
           {} as Record<string, string>,
         ),
       );
+
+      // Reset checkboxes based on current state
+      setOnlyFilteredAssets(hasActiveFilters);
+      setOnlySelectedAssets(hasSelectedAssets);
     }
-  }, [isOpen, filterTags]);
+  }, [isOpen, filterTags, hasActiveFilters, hasSelectedAssets]);
 
   // Handle tag value change for a specific tag
   const handleTagChange = useCallback(
@@ -218,42 +309,44 @@ export const EditTagsModal = ({
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      // Filter out unchanged tags and tags that are duplicate in all assets
-      const tagUpdates = Object.entries(editedTags)
-        .filter(([oldTagName, newTagName]) => {
-          // Skip undefined, unchanged, or empty tags
-          if (
-            !newTagName ||
-            oldTagName === newTagName ||
-            newTagName.trim() === ''
-          ) {
-            return false;
-          }
+      // Process all edited tags with enhanced duplicate handling
+      const processedUpdates = processTagUpdatesWithDuplicateHandling(
+        editedTags,
+        filterTags,
+        getTagStatus,
+      );
 
-          // Skip tags that exist in all assets (complete duplicates) or form duplicates
-          const status = getTagStatus(oldTagName);
-          return status !== 'all' && status !== 'duplicate';
-        })
-        .map(([oldTagName, newTagName]) => ({
-          oldTagName,
-          newTagName: newTagName.trim(),
-        }));
-
-      if (tagUpdates.length === 0) {
+      if (processedUpdates.length === 0) {
         onClose();
         return;
       }
 
-      // Dispatch the thunk to update tags
-      dispatch(editTagsAcrossAssets(tagUpdates));
+      // Dispatch the thunk to update tags with both constraints
+      dispatch(
+        editTagsAcrossAssets({
+          tagUpdates: processedUpdates,
+          onlyFilteredAssets: onlyFilteredAssets && hasActiveFilters,
+          onlySelectedAssets: onlySelectedAssets && hasSelectedAssets,
+        }),
+      );
 
       // Close the modal
       onClose();
     },
-    [dispatch, editedTags, getTagStatus, onClose],
+    [
+      dispatch,
+      editedTags,
+      filterTags,
+      getTagStatus,
+      onClose,
+      onlyFilteredAssets,
+      hasActiveFilters,
+      onlySelectedAssets,
+      hasSelectedAssets,
+    ],
   );
 
-  // Check if any tags have been modified and are not duplicates in all assets
+  // Check if any tags have been modified (allow form duplicates now)
   const hasModifiedTags = Object.entries(editedTags).some(
     ([originalTag, newTag]) => {
       // Must be defined, changed and not empty
@@ -261,9 +354,9 @@ export const EditTagsModal = ({
         return false;
       }
 
-      // Must not be a duplicate in all assets or form duplicate
+      // Allow all changes except those that would create duplicates in ALL assets
       const status = getTagStatus(originalTag);
-      return status !== 'all' && status !== 'duplicate';
+      return status !== 'all';
     },
   );
 
@@ -295,7 +388,7 @@ export const EditTagsModal = ({
         {/* Tag editing form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            {tagStatuses.map(({ tag, status }) => {
+            {tagStatuses.map(({ tag, status }, index) => {
               // Define style variants based on status
               const inputStyles = {
                 none: 'border-slate-300 inset-shadow-slate-300/0 focus:inset-shadow-slate-300 focus:border-blue-500 focus:ring-slate-500 focus:outline-slate-500',
@@ -336,7 +429,7 @@ export const EditTagsModal = ({
               }
 
               return (
-                <div key={tag} className="flex items-center">
+                <div key={`${tag}-${index}`} className="flex items-center">
                   {/* Original tag */}
                   <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500">
                     {tag}
@@ -364,6 +457,8 @@ export const EditTagsModal = ({
           <div className="space-y-4 text-xs text-slate-500">
             <p>
               Editing a tag will update it across all assets where it appears.
+              Duplicate tag names are allowed - duplicates will be marked for
+              deletion.
             </p>
 
             {/* Conditionally show the status explanations based on usage */}
@@ -390,6 +485,62 @@ export const EditTagsModal = ({
               </p>
             )}
           </div>
+
+          {hasActiveFilters ? (
+            <div className="flex items-center gap-2 pb-2">
+              <Checkbox
+                isSelected={onlyFilteredAssets}
+                onChange={() => setOnlyFilteredAssets(!onlyFilteredAssets)}
+                disabled={!hasActiveFilters}
+                label={
+                  hasActiveFilters
+                    ? `Only apply tag edits to filtered assets (${filteredAssets.length} assets)`
+                    : 'Only apply tag edits to filtered assets (no filters active)'
+                }
+                ariaLabel="Only apply tag edits to filtered assets"
+              />
+            </div>
+          ) : null}
+
+          {hasSelectedAssets ? (
+            <div className="flex items-center gap-2 pb-2">
+              <Checkbox
+                isSelected={onlySelectedAssets}
+                onChange={() => setOnlySelectedAssets(!onlySelectedAssets)}
+                disabled={!hasSelectedAssets}
+                label={
+                  hasSelectedAssets
+                    ? `Only apply tag edits to selected assets (${selectedAssetsCount} assets)`
+                    : 'Only apply tag edits to selected assets (no assets selected)'
+                }
+                ariaLabel="Only apply tag edits to selected assets"
+              />
+            </div>
+          ) : null}
+
+          <p>
+            {(() => {
+              const useFiltered = onlyFilteredAssets && hasActiveFilters;
+              const useSelected = onlySelectedAssets && hasSelectedAssets;
+
+              if (useFiltered && useSelected) {
+                // Both constraints active: intersection of filtered and selected
+                const intersection = selectedAssets.filter((assetId) =>
+                  filteredAssets.some((asset) => asset.fileId === assetId),
+                ).length;
+                return `Changes will apply to ${intersection} assets that are both filtered and selected.`;
+              } else if (useFiltered && !useSelected) {
+                // Only filtered constraint active
+                return `Changes will apply to the ${filteredAssets.length} currently filtered assets.`;
+              } else if (!useFiltered && useSelected) {
+                // Only selected constraint active
+                return `Changes will apply to the ${selectedAssetsCount} selected assets.`;
+              } else {
+                // No constraints active
+                return `Changes will apply to all assets that have these tags.`;
+              }
+            })()}
+          </p>
 
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">

@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import { addTag, editTag } from '../assets';
+import { addTag, deleteTag, editTag, markFilterTagsToDelete } from '../assets';
+import { selectFilteredAssets } from '../assets';
 import { updateTagFilters } from '../filters';
 import { RootState } from '../index';
 
@@ -50,11 +51,38 @@ export const addTagToSelectedAssets = createAsyncThunk(
 export const editTagsAcrossAssets = createAsyncThunk(
   'selection/editTagsAcrossAssets',
   async (
-    tagUpdates: Array<{ oldTagName: string; newTagName: string }>,
+    {
+      tagUpdates,
+      onlyFilteredAssets = false,
+      onlySelectedAssets = false,
+    }: {
+      tagUpdates: Array<{
+        oldTagName: string;
+        newTagName: string;
+        operation: 'RENAME' | 'DELETE';
+      }>;
+      onlyFilteredAssets?: boolean;
+      onlySelectedAssets?: boolean;
+    },
     { getState, dispatch },
   ) => {
     const state = getState() as RootState;
-    const allAssets = state.assets.images;
+
+    // Start with all assets or filtered assets based on the filter constraint
+    let candidateAssets = onlyFilteredAssets
+      ? selectFilteredAssets(state)
+      : state.assets.images;
+
+    // Further filter by selected assets if that constraint is active
+    if (onlySelectedAssets) {
+      const selectedAssetIds = new Set(state.selection.selectedAssets);
+      candidateAssets = candidateAssets.filter((asset) =>
+        selectedAssetIds.has(asset.fileId),
+      );
+    }
+
+    // These are the final assets we'll operate on
+    const allAssets = candidateAssets;
 
     // Validate the input
     if (!tagUpdates.length) {
@@ -66,36 +94,68 @@ export const editTagsAcrossAssets = createAsyncThunk(
 
     // For tracking modified assets
     const modifiedAssetCount: Record<string, number> = {};
+    const tagsToDelete: string[] = [];
 
     // Process each tag update
-    tagUpdates.forEach(({ oldTagName, newTagName }) => {
+    tagUpdates.forEach(({ oldTagName, newTagName, operation }) => {
       // Skip empty or unchanged tags
       if (!newTagName.trim() || oldTagName === newTagName) {
         return;
       }
 
-      // Find all assets with this tag
-      allAssets.forEach((asset) => {
-        if (asset.tagList.includes(oldTagName)) {
-          // Check if the asset already has the new tag - prevent duplicates
-          if (!asset.tagList.includes(newTagName.trim())) {
-            // Only dispatch edit action for assets that don't already have the new tag
-            dispatch(
-              editTag({
-                assetId: asset.fileId,
-                oldTagName,
-                newTagName: newTagName.trim(),
-              }),
-            );
+      if (operation === 'DELETE') {
+        // Collect tags to be marked for deletion
+        tagsToDelete.push(oldTagName);
+        return;
+      }
+
+      // Handle RENAME operations
+      if (operation === 'RENAME') {
+        // Find all assets with this tag
+        allAssets.forEach((asset) => {
+          if (asset.tagList.includes(oldTagName)) {
+            // Check if the asset already has the new tag
+            if (asset.tagList.includes(newTagName.trim())) {
+              // Asset already has the target tag, so:
+              // Don't rename - just mark the original tag for deletion (TO_DELETE)
+              // The existing target tag stays unchanged
+              dispatch(
+                deleteTag({
+                  assetId: asset.fileId,
+                  tagName: oldTagName, // Mark the ORIGINAL tag for deletion, not the target
+                }),
+              );
+            } else {
+              // Normal rename - asset doesn't have the target tag
+              dispatch(
+                editTag({
+                  assetId: asset.fileId,
+                  oldTagName,
+                  newTagName: newTagName.trim(),
+                }),
+              );
+            }
 
             // Count modifications
             modifiedAssetCount[oldTagName] =
               (modifiedAssetCount[oldTagName] || 0) + 1;
           }
-          // If asset already has the tag, we don't apply the change to avoid duplicates
-        }
-      });
+        });
+      }
     });
+
+    // Mark tags for deletion in bulk
+    if (tagsToDelete.length > 0) {
+      dispatch(markFilterTagsToDelete(tagsToDelete));
+
+      // Count deletions - count assets that have each tag
+      tagsToDelete.forEach((tagName) => {
+        const assetsWithTag = allAssets.filter((asset) =>
+          asset.tagList.includes(tagName),
+        ).length;
+        modifiedAssetCount[tagName] = assetsWithTag;
+      });
+    }
 
     // Create a summary of changes
     const totalChangedTags = Object.keys(modifiedAssetCount).length;
@@ -106,6 +166,7 @@ export const editTagsAcrossAssets = createAsyncThunk(
 
     // Also update the filter tags to keep the selection in sync with the edits
     if (totalChangedTags > 0) {
+      // Pass all operations to updateTagFilters - both RENAME and DELETE operations need filter updates
       dispatch(updateTagFilters(tagUpdates));
     }
 

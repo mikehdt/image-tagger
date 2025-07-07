@@ -27,16 +27,16 @@ export const Checkbox = ({
 }: CheckboxProps) => {
   return (
     <label
-      className="inline-flex cursor-pointer items-center gap-2 select-none"
+      className={`inline-flex items-start gap-2 text-sm select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
       onClick={() => {
         if (!disabled) onChange();
       }}
       tabIndex={-1} // prevent double tab stop
     >
       <div
-        className={`relative flex h-5 w-5 cursor-pointer items-center justify-center overflow-hidden rounded border shadow-sm inset-shadow-xs transition-all ${
+        className={`relative flex h-5 w-5 items-center justify-center overflow-hidden rounded border shadow-sm inset-shadow-xs transition-all ${
           disabled
-            ? 'cursor-not-allowed opacity-50'
+            ? 'border-slate-300 bg-slate-50 shadow-slate-200'
             : isSelected
               ? 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600'
               : 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50'
@@ -68,9 +68,7 @@ export const Checkbox = ({
           </svg>
         )}
       </div>
-      {label && (
-        <span className="text-sm text-slate-700 select-none">{label}</span>
-      )}
+      {label && <span>{label}</span>}
     </label>
   );
 };

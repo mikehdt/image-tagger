@@ -42,6 +42,7 @@ export interface ButtonProps {
 
   // Ghost disabled removes all styling when disabled
   ghostDisabled?: boolean;
+  neutralDisabled?: boolean;
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -169,6 +170,7 @@ export const Button = ({
   variant = 'default',
   isPressed = false,
   ghostDisabled = false,
+  neutralDisabled = false,
   ...props
 }: ButtonProps) => {
   const handleClick = () => {
@@ -201,17 +203,17 @@ export const Button = ({
     if (variant === 'deep-toggle') {
       styleClasses =
         isPressed && !ghostDisabled
-          ? `bg-white ${baseStyle.disabled} ${colorConfig.disabled}`
+          ? `bg-white ${baseStyle.disabled} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`
           : colorConfig.ghostDisabled;
     } else if (variant === 'toggle') {
       styleClasses = ghostDisabled
-        ? colorConfig.ghostDisabled
-        : `${isPressed ? `${baseStyle.togglePressed}` : ''} ${colorConfig.disabled}`;
+        ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled}`
+        : `${isPressed ? `${baseStyle.togglePressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
     } else {
       styleClasses =
         ghostDisabled || variant === 'ghost'
-          ? colorConfig.ghostDisabled
-          : `${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${colorConfig.disabled}`;
+          ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled}`
+          : `${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
     }
   } else {
     // Determine styling based on variant and state

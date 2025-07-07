@@ -143,6 +143,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             size="medium"
             color="emerald"
             ghostDisabled
+            neutralDisabled
             onClick={saveAllChanges}
             disabled={!hasModifiedAssets}
             title={
