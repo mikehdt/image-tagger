@@ -185,8 +185,8 @@ export const Button = ({
     normal: 'inset-shadow-xs inset-shadow-white',
     disabled: 'opacity-40',
     ghost: 'hover:inset-shadow-xs hover:inset-shadow-white',
-    pressed: 'shadow-sm',
-    togglePressed: 'shadow-sm',
+    pressed: 'inset-shadow-xs inset-shadow-white shadow-sm',
+    togglePressed: 'inset-shadow-xs inset-shadow-white shadow-sm',
     deepPressed: 'shadow-md inset-shadow-sm shadow-white border-slate-300',
   };
 

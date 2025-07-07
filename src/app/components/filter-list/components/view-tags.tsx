@@ -1,68 +1,11 @@
-import { Fragment, useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllTags } from '../../../store/assets';
 import { selectFilterTags, toggleTagFilter } from '../../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { highlightText } from '../../../utils/text-highlight';
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
-
-/**
- * Highlights all occurrences of a search term within text
- * @param text The text to search within
- * @param searchTerm The term to highlight
- * @returns Array of React elements with highlighted matches
- */
-const highlightMatches = (text: string, searchTerm: string) => {
-  if (!searchTerm || searchTerm.trim() === '') {
-    return text; // Return the original text if no search term
-  }
-
-  const termLower = searchTerm.toLowerCase();
-  const textLower = text.toLowerCase();
-
-  // If no matches, return original text
-  if (!textLower.includes(termLower)) {
-    return text;
-  }
-
-  const result = [];
-  let lastIndex = 0;
-
-  // Find all occurrences of the search term
-  let index = textLower.indexOf(termLower);
-
-  while (index !== -1) {
-    // Add the text before the match
-    if (index > lastIndex) {
-      result.push(
-        <Fragment key={`text-${lastIndex}`}>
-          {text.substring(lastIndex, index)}
-        </Fragment>,
-      );
-    }
-
-    // Add the highlighted match
-    result.push(
-      <span key={`match-${index}`} className="font-bold">
-        {text.substring(index, index + searchTerm.length)}
-      </span>,
-    );
-
-    lastIndex = index + searchTerm.length;
-    index = textLower.indexOf(termLower, lastIndex);
-  }
-
-  // Add any remaining text
-  if (lastIndex < text.length) {
-    result.push(
-      <Fragment key={`text-${lastIndex}`}>
-        {text.substring(lastIndex)}
-      </Fragment>,
-    );
-  }
-
-  return result;
-};
 
 // Get sort options for the tags view
 export const getTagSortOptions = (
@@ -255,7 +198,7 @@ export const TagsView = () => {
               item.isActive ? 'font-medium text-emerald-700' : 'text-slate-800'
             }`}
           >
-            {searchTerm ? highlightMatches(item.tag, searchTerm) : item.tag}
+            {searchTerm ? highlightText(item.tag, searchTerm) : item.tag}
           </span>
           <span
             className={`text-xs tabular-nums ${

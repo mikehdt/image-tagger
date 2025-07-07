@@ -4,68 +4,17 @@ import { selectImageSizes } from '../../../store/assets';
 import { selectFilterSizes, toggleSizeFilter } from '../../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { decomposeDimensions } from '../../../utils/helpers';
+import { highlightText } from '../../../utils/text-highlight';
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
 
 /**
- * Highlights all occurrences of a search term within text
- * @param text The text to search within
- * @param searchTerm The term to highlight
- * @returns Array of React elements with highlighted matches
+ * Normalization function for sizes - replaces × with x for matching
+ * @param text The text to normalize
+ * @returns Normalized text
  */
-const highlightMatches = (text: string, searchTerm: string) => {
-  if (!searchTerm || searchTerm.trim() === '') {
-    return text; // Return the text if no search term
-  }
-
-  // Normalize the search term and text if needed
-  // For dimensions, replace × with x for matching
-  // For ratios and megapixels, just lowercase
-  const normalizedTerm = searchTerm.toLowerCase().replace('×', 'x');
-  const normalizedText = text.toLowerCase().replace('×', 'x');
-
-  // If no matches, return text
-  if (!normalizedText.includes(normalizedTerm)) {
-    return text;
-  }
-
-  const result = [];
-  let lastIndex = 0;
-
-  // Find all occurrences of the search term
-  let index = normalizedText.indexOf(normalizedTerm);
-
-  while (index !== -1) {
-    // Add the text before the match
-    if (index > lastIndex) {
-      result.push(
-        <Fragment key={`text-${lastIndex}`}>
-          {text.substring(lastIndex, index)}
-        </Fragment>,
-      );
-    }
-
-    // Add the highlighted match
-    result.push(
-      <span key={`match-${index}`} className="font-bold">
-        {text.substring(index, index + searchTerm.length)}
-      </span>,
-    );
-
-    lastIndex = index + searchTerm.length;
-    index = normalizedText.indexOf(normalizedTerm, lastIndex);
-  }
-
-  // Add any remaining text
-  if (lastIndex < text.length) {
-    result.push(
-      <Fragment key={`text-${lastIndex}`}>
-        {text.substring(lastIndex)}
-      </Fragment>,
-    );
-  }
-
-  return result;
+const normalizeSizeText = (text: string): string => {
+  return text.replace('×', 'x');
 };
 
 // Calculate aspect ratio from width and height
@@ -266,9 +215,7 @@ const SizeInfo = ({
         <div className="flex items-center justify-between tabular-nums">
           <span>
             <span className="text-slate-800">
-              {searchTerm
-                ? highlightMatches(item.ratio, searchTerm)
-                : item.ratio}
+              {searchTerm ? highlightText(item.ratio, searchTerm) : item.ratio}
             </span>
             <span className="mx-1 text-slate-300">•</span>
             <span className="text-sm text-slate-500">{item.type}</span>
@@ -294,7 +241,7 @@ const SizeInfo = ({
         <div className="flex items-center justify-between tabular-nums">
           <span className="text-slate-800">
             {searchTerm
-              ? highlightMatches(item.formattedMP, searchTerm)
+              ? highlightText(item.formattedMP, searchTerm)
               : item.formattedMP}
           </span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>
@@ -316,7 +263,11 @@ const SizeInfo = ({
         <div className="flex items-center justify-between tabular-nums">
           <span className="text-slate-800">
             {searchTerm
-              ? highlightMatches(formatDimensions(item.dimensions), searchTerm)
+              ? highlightText(
+                  formatDimensions(item.dimensions),
+                  searchTerm,
+                  normalizeSizeText,
+                )
               : formatDimensions(item.dimensions)}
           </span>
           <span className="ml-auto text-xs text-slate-500">{item.count}</span>

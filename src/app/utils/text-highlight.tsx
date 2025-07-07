@@ -1,86 +1,71 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 /**
  * Highlights matching segments of text by wrapping them in bold tags
  * @param text - The text to highlight
  * @param searchQuery - The search query to highlight
- * @returns JSX with highlighted segments
+ * @param normalize - Optional function to normalize text for matching (applied to both text and query)
+ * @returns Array of React elements with highlighted matches
  */
 export const highlightText = (
   text: string,
   searchQuery: string,
+  normalize?: (text: string) => string,
 ): React.ReactNode => {
-  if (!searchQuery || !searchQuery.trim()) {
+  if (!searchQuery || searchQuery.trim() === '') {
     return text;
   }
 
-  const query = searchQuery.trim().toLowerCase();
-  const lowerText = text.toLowerCase();
+  const query = searchQuery.trim();
 
-  // Find all matches (case-insensitive)
-  const matches: { start: number; end: number }[] = [];
-  let index = 0;
+  // Apply normalization if provided
+  const normalizedQuery = normalize
+    ? normalize(query.toLowerCase())
+    : query.toLowerCase();
+  const normalizedText = normalize
+    ? normalize(text.toLowerCase())
+    : text.toLowerCase();
 
-  while (index < lowerText.length) {
-    const matchIndex = lowerText.indexOf(query, index);
-    if (matchIndex === -1) break;
-
-    matches.push({
-      start: matchIndex,
-      end: matchIndex + query.length,
-    });
-
-    index = matchIndex + 1; // Allow overlapping matches
-  }
-
-  if (matches.length === 0) {
+  // If no matches, return text
+  if (!normalizedText.includes(normalizedQuery)) {
     return text;
   }
 
-  // Sort matches by start position
-  matches.sort((a, b) => a.start - b.start);
+  const result = [];
+  let lastIndex = 0;
 
-  // Merge overlapping matches
-  const mergedMatches: { start: number; end: number }[] = [];
-  let currentMatch = matches[0];
+  // Find all occurrences of the search term
+  let index = normalizedText.indexOf(normalizedQuery);
 
-  for (let i = 1; i < matches.length; i++) {
-    const match = matches[i];
-    if (match.start <= currentMatch.end) {
-      // Overlapping or adjacent, merge them
-      currentMatch.end = Math.max(currentMatch.end, match.end);
-    } else {
-      // No overlap, save current and start new one
-      mergedMatches.push(currentMatch);
-      currentMatch = match;
-    }
-  }
-  mergedMatches.push(currentMatch);
-
-  // Build the highlighted text
-  const parts: React.ReactNode[] = [];
-  let lastEnd = 0;
-
-  mergedMatches.forEach((match, index) => {
-    // Add text before this match
-    if (match.start > lastEnd) {
-      parts.push(text.slice(lastEnd, match.start));
+  while (index !== -1) {
+    // Add the text before the match
+    if (index > lastIndex) {
+      result.push(
+        <Fragment key={`text-${lastIndex}`}>
+          {text.substring(lastIndex, index)}
+        </Fragment>,
+      );
     }
 
-    // Add highlighted match
-    parts.push(
-      <strong key={index} className="font-bold">
-        {text.slice(match.start, match.end)}
-      </strong>,
+    // Add the highlighted match
+    result.push(
+      <span key={`match-${index}`} className="font-bold">
+        {text.substring(index, index + query.length)}
+      </span>,
     );
 
-    lastEnd = match.end;
-  });
-
-  // Add remaining text
-  if (lastEnd < text.length) {
-    parts.push(text.slice(lastEnd));
+    lastIndex = index + query.length;
+    index = normalizedText.indexOf(normalizedQuery, lastIndex);
   }
 
-  return <>{parts}</>;
+  // Add any remaining text
+  if (lastIndex < text.length) {
+    result.push(
+      <Fragment key={`text-${lastIndex}`}>
+        {text.substring(lastIndex)}
+      </Fragment>,
+    );
+  }
+
+  return result;
 };
