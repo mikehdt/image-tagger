@@ -83,7 +83,7 @@ export const AssetMetadata = ({
         ariaLabel={`Select asset ${assetId}`}
       />
 
-      <span className="inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
+      <span className="ml-2 inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
         <Button
           type="button"
           color="sky"

@@ -81,14 +81,14 @@ const TagComponent = ({
         <>
           {/* Non-interactive state due to editing another tag */}
           <span
-            className={`${tagButtonStyles.editButton} opacity-20`}
+            className={`transition-colors ${tagButtonStyles.editButton} opacity-20`}
             tabIndex={-1}
           >
             <PencilIcon />
           </span>
 
           <span
-            className={`${tagButtonStyles.deleteButton} opacity-20`}
+            className={`transition-colors ${tagButtonStyles.deleteButton} opacity-20`}
             tabIndex={-1}
           >
             <MinusIcon />
@@ -98,7 +98,7 @@ const TagComponent = ({
         <>
           {/* Interactive state, but with special styling for TO_DELETE */}
           <span
-            className={`${tagButtonStyles.editButton} ${
+            className={`transition-colors ${tagButtonStyles.editButton} ${
               hasState(tagState, TagState.TO_DELETE)
                 ? 'cursor-not-allowed opacity-20'
                 : 'hover:bg-blue-500 hover:text-white'
@@ -115,7 +115,7 @@ const TagComponent = ({
           </span>
 
           <span
-            className={`${tagButtonStyles.deleteButton} hover:bg-pink-500 hover:text-white ${hasState(tagState, TagState.TO_DELETE) ? 'text-pink-500' : ''}`}
+            className={`transition-colors hover:bg-pink-500 hover:text-white ${tagButtonStyles.deleteButton} ${hasState(tagState, TagState.TO_DELETE) ? 'text-pink-500' : ''}`}
             onClick={handleDeleteTag}
             title={
               hasState(tagState, TagState.TO_DELETE)

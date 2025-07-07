@@ -12,7 +12,10 @@ import { RootState } from '../index';
  */
 export const addTagToSelectedAssets = createAsyncThunk(
   'selection/addTagToSelectedAssets',
-  async (tagName: string, { getState, dispatch }) => {
+  async (
+    { tagName, addToStart = false }: { tagName: string; addToStart?: boolean },
+    { getState, dispatch },
+  ) => {
     const state = getState() as RootState;
     const selectedAssets = state.selection.selectedAssets;
 
@@ -23,7 +26,13 @@ export const addTagToSelectedAssets = createAsyncThunk(
 
     // For each selected asset, dispatch an addTag action
     selectedAssets.forEach((assetId) => {
-      dispatch(addTag({ assetId, tagName: tagName.trim() }));
+      dispatch(
+        addTag({
+          assetId,
+          tagName: tagName.trim(),
+          position: addToStart ? 'start' : 'end',
+        }),
+      );
     });
 
     return {

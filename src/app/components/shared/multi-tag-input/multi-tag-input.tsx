@@ -78,12 +78,39 @@ export const MultiTagInput = ({
     setInputValue('');
   };
 
+  const handleInputChange = (value: string) => {
+    // If the input contains a comma, split and process the tags
+    if (value.includes(',')) {
+      const parts = value.split(',');
+      const lastPart = parts.pop() || ''; // The part after the last comma becomes the new input
+
+      // Add all complete tags (parts before the last comma)
+      const newTags: string[] = [];
+      parts.forEach((part) => {
+        const trimmedPart = part.trim();
+        if (trimmedPart && !tags.includes(trimmedPart)) {
+          newTags.push(trimmedPart);
+        }
+      });
+
+      // Update tags if we have new ones to add
+      if (newTags.length > 0) {
+        onTagsChange([...tags, ...newTags]);
+      }
+
+      // Set the remaining text as the input value
+      setInputValue(lastPart);
+    } else {
+      setInputValue(value);
+    }
+  };
+
   const removeTag = (tagToRemove: string) => {
     onTagsChange(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && inputValue.trim()) {
+    if ((e.key === 'Enter' || e.key === 'Tab') && inputValue.trim()) {
       e.preventDefault();
       addTag(inputValue);
     } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
@@ -104,7 +131,7 @@ export const MultiTagInput = ({
       ref={containerRef}
       className={`flex w-full cursor-text flex-wrap items-center rounded-2xl border px-1 py-1 inset-shadow-sm transition-colors focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 ${className} ${
         hasFocus ? 'border-sky-500' : 'border-slate-400'
-      } ${isDuplicate ? 'border-rose-400 bg-rose-50 inset-shadow-rose-300' : 'inset-shadow-slate-300'}`}
+      } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300' : 'inset-shadow-slate-300'}`}
       data-container="true"
     >
       {tags.map((tag) => {
@@ -156,7 +183,7 @@ export const MultiTagInput = ({
         ref={inputRef}
         type="text"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => handleInputChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => setHasFocus(true)}
         onBlur={handleInputBlur}

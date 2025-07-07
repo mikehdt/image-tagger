@@ -76,12 +76,29 @@ export const Pagination = ({
         </Link>,
       );
 
-      // Ellipsis if needed
-      if (startPage > 2) {
+      // Ellipsis only if it covers 2 or more pages
+      if (startPage > 3) {
         pages.push(
           <span key="ellipsis-start" className="px-2 py-0.5 text-slate-300">
             &hellip;
           </span>,
+        );
+      } else if (startPage === 3) {
+        // Show page 2 instead of ellipsis
+        pages.push(
+          <Link
+            key="2"
+            href={`${basePath}/2`}
+            prefetch={true}
+            scroll={true}
+            className={`mx-1 rounded px-2 py-0.5 ${
+              currentPage === 2
+                ? 'bg-sky-500 text-white'
+                : 'text-slate-500 hover:bg-sky-100'
+            }`}
+          >
+            2
+          </Link>,
         );
       }
     }
@@ -107,12 +124,29 @@ export const Pagination = ({
 
     // Last page if needed
     if (endPage < totalPages) {
-      // Ellipsis if needed
-      if (endPage < totalPages - 1) {
+      // Ellipsis only if it covers 2 or more pages
+      if (endPage < totalPages - 2) {
         pages.push(
           <span key="ellipsis-end" className="px-2 py-0.5 text-slate-300">
             &hellip;
           </span>,
+        );
+      } else if (endPage === totalPages - 2) {
+        // Show the second-to-last page instead of ellipsis
+        pages.push(
+          <Link
+            key={totalPages - 1}
+            href={`${basePath}/${totalPages - 1}`}
+            prefetch={true}
+            scroll={true}
+            className={`mx-1 rounded px-2 py-0.5 ${
+              currentPage === totalPages - 1
+                ? 'bg-sky-500 text-white'
+                : 'text-slate-500 hover:bg-sky-100'
+            }`}
+          >
+            {totalPages - 1}
+          </Link>,
         );
       }
 

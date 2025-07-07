@@ -15,7 +15,7 @@ type AddTagsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedAssetsCount: number;
-  onAddTag: (tag: string) => void;
+  onAddTag: (tag: string, addToStart?: boolean) => void;
   onClearSelection?: () => void; // Optional callback to clear selection
 };
 
@@ -28,6 +28,7 @@ export const AddTagsModal = ({
 }: AddTagsModalProps) => {
   const [tags, setTags] = useState<string[]>([]);
   const [keepSelection, setKeepSelection] = useState(false);
+  const [addToStart, setAddToStart] = useState(false);
 
   // For duplicate checking, we'll get the current tag from the multitagInput
   // by using an Effect instead of setting state during render
@@ -77,6 +78,7 @@ export const AddTagsModal = ({
     if (!isOpen) {
       setTags([]);
       setCheckTag('');
+      setAddToStart(false);
       lastInputRef.current = '';
       setInputChanged(false);
     }
@@ -85,12 +87,20 @@ export const AddTagsModal = ({
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (tags.length === 0) return;
-    tags.forEach((tag) => {
+
+    // Get valid tags that aren't marked as "all"
+    const validTags = tags.filter((tag) => {
       const tagInfo = tagsStatus.find((t) => t.tag === tag);
-      if (!tagInfo || tagInfo.status !== 'all') {
-        onAddTag(tag);
-      }
+      return !tagInfo || tagInfo.status !== 'all';
     });
+
+    // If adding to start, process tags in reverse order to maintain the original order
+    const tagsToProcess = addToStart ? [...validTags].reverse() : validTags;
+
+    tagsToProcess.forEach((tag) => {
+      onAddTag(tag, addToStart);
+    });
+
     setTags([]);
     if (!keepSelection && onClearSelection) {
       onClearSelection();
@@ -172,7 +182,8 @@ export const AddTagsModal = ({
 
           {tags.length === 0 ? (
             <p className="text-xs text-slate-700">
-              Tags to add to selected assets. Press Enter to add a new tag.
+              Tags to add to selected assets. Press Enter, Tab, or use commas to
+              add new tags.
             </p>
           ) : tagsStatus.some(
               (t) => t.status === 'some' || t.status === 'all',
@@ -198,6 +209,16 @@ export const AddTagsModal = ({
               have them.
             </p>
           )}
+
+          {/* Tag position */}
+          <div className="flex items-center gap-2 pb-2">
+            <Checkbox
+              isSelected={addToStart}
+              onChange={() => setAddToStart((v) => !v)}
+              label="Add new tags to the start"
+              ariaLabel="Add new tags to the start"
+            />
+          </div>
 
           {/* Keep selection checkbox */}
           <div className="flex items-center gap-2 pb-2">

@@ -29,9 +29,15 @@ export const coreReducers = {
 
   addTag: (
     state: ImageAssets,
-    { payload }: PayloadAction<{ assetId: string; tagName: string }>,
+    {
+      payload,
+    }: PayloadAction<{
+      assetId: string;
+      tagName: string;
+      position?: 'start' | 'end';
+    }>,
   ) => {
-    const { assetId, tagName } = payload;
+    const { assetId, tagName, position = 'end' } = payload;
 
     if (tagName.trim() === '') return;
 
@@ -42,7 +48,28 @@ export const coreReducers = {
     // Even if duplicate tags might exist, we'll only allow adding if not already in the list
     // This prevents inadvertently adding more duplicates
     if (!state.images[imageIndex].tagList.includes(tagName)) {
-      state.images[imageIndex].tagList.push(tagName);
+      if (position === 'start') {
+        // Add to the beginning of the list
+        state.images[imageIndex].tagList.unshift(tagName);
+
+        // When adding to start, mark all other existing valid tags as DIRTY
+        // since their positions have shifted (similar to drag/drop behavior)
+        const currentTagStatus = state.images[imageIndex].tagStatus;
+        Object.keys(currentTagStatus).forEach((existingTag) => {
+          // Only mark tags as DIRTY if they are not already TO_ADD
+          if (!hasState(currentTagStatus[existingTag], TagState.TO_ADD)) {
+            currentTagStatus[existingTag] = addState(
+              currentTagStatus[existingTag],
+              TagState.DIRTY,
+            );
+          }
+        });
+      } else {
+        // Add to the end of the list (default behavior)
+        state.images[imageIndex].tagList.push(tagName);
+      }
+
+      // Mark the new tag as TO_ADD
       state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
     }
   },

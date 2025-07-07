@@ -1,4 +1,5 @@
 import {
+  IdentificationIcon,
   MagnifyingGlassIcon,
   SquaresPlusIcon,
   TagIcon,
@@ -33,8 +34,8 @@ export const AssetSelectionControls = () => {
   const handleClearSelection = () => dispatch(clearSelection());
   const handleCloseModal = () => setIsAddTagsModalOpen(false);
 
-  const handleAddTag = (tag: string) => {
-    dispatch(addTagToSelectedAssets(tag));
+  const handleAddTag = (tag: string, addToStart = false) => {
+    dispatch(addTagToSelectedAssets({ tagName: tag, addToStart }));
     setIsAddTagsModalOpen(false);
   };
 
@@ -68,6 +69,13 @@ export const AssetSelectionControls = () => {
 
   return (
     <div className="flex space-x-1 rounded-md bg-slate-100 p-1">
+      <span
+        className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1"
+        title="Assets"
+      >
+        <IdentificationIcon className="w-4 text-slate-400" />
+      </span>
+
       <span className="relative flex items-center border-r border-dotted border-r-slate-400 pr-2">
         <button
           className={`absolute inset-0 top-0.5 bottom-0.5 left-0.5 my-auto flex w-7 cursor-pointer justify-center text-slate-500 hover:text-slate-700 ${isSearchActive ? 'pointer-events-none opacity-0' : 'opacity-100'}`}

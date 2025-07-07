@@ -18,14 +18,14 @@ export const LoadingStatus = ({
     </div>
 
     <div className="ml-1 text-xs font-medium text-slate-500 tabular-nums">
-      {ioState === IoState.SAVING && saveProgress && (
+      {ioState === IoState.SAVING && saveProgress?.total ? (
         <>
           {saveProgress.completed} / {saveProgress.total}
           {saveProgress.failed > 0 &&
             ` (${saveProgress.failed} error${saveProgress.failed !== 1 ? 's' : ''})`}
         </>
-      )}
-      {ioState === IoState.LOADING && loadProgress && (
+      ) : null}
+      {ioState === IoState.LOADING && loadProgress?.total ? (
         <>
           {loadProgress.total > 0
             ? `${loadProgress.completed} / ${loadProgress.total}`
@@ -33,6 +33,12 @@ export const LoadingStatus = ({
           {loadProgress.failed > 0 &&
             ` (${loadProgress.failed} error${loadProgress.failed !== 1 ? 's' : ''})`}
         </>
+      ) : null}
+      {(ioState === IoState.SAVING && !saveProgress?.total) ||
+      (ioState === IoState.LOADING && !loadProgress?.total) ? (
+        <>Preparing...</>
+      ) : (
+        ''
       )}
     </div>
   </>

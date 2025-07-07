@@ -1,14 +1,20 @@
 import {
+  ArrowPathIcon,
   BookmarkSlashIcon,
   BookmarkSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
 import {
+  IoState,
+  loadAllAssets,
   resetAllTags,
   saveAllAssets,
   selectAllImages,
   selectHasModifiedAssets,
+  selectIoState,
+  selectLoadProgress,
+  selectSaveProgress,
 } from '../../store/assets';
 import {
   PaginationSize,
@@ -23,6 +29,7 @@ import { applyFilters } from '../../utils/filter-actions';
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
+import { LoadingStatus } from './components';
 
 type BottomShelfProps = {
   currentPage?: number;
@@ -35,6 +42,11 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const paginationSize = useAppSelector(selectPaginationSize);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
+  // IO state selectors
+  const ioState = useAppSelector(selectIoState);
+  const saveProgress = useAppSelector(selectSaveProgress) || null;
+  const loadProgress = useAppSelector(selectLoadProgress) || null;
+
   // Get filters
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
@@ -42,6 +54,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const filterMode = useAppSelector(selectFilterMode);
 
   // Action handlers
+  const doRefresh = () => dispatch(loadAllAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
 
@@ -64,8 +77,26 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
-        <div className="flex w-1/4 items-center text-xs whitespace-nowrap text-slate-500">
-          <span className="mr-4">
+        <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
+          {ioState === IoState.LOADING || ioState === IoState.SAVING ? (
+            <LoadingStatus
+              ioState={ioState}
+              saveProgress={saveProgress}
+              loadProgress={loadProgress}
+            />
+          ) : (
+            <Button
+              type="button"
+              onClick={doRefresh}
+              size="small"
+              variant="ghost"
+              title="Reload asset list"
+            >
+              <ArrowPathIcon className="w-6" />
+            </Button>
+          )}
+
+          <span>
             {isFiltered && (
               <>
                 {filteredCount} filtered items
@@ -93,8 +124,8 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
         <div className="flex w-1/4 items-center justify-end space-x-2 text-sm">
           <Button
             type="button"
-            variant="ghost"
             size="medium"
+            ghostDisabled
             onClick={cancelAllChanges}
             disabled={!hasModifiedAssets}
             title={
@@ -109,9 +140,9 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
 
           <Button
             type="button"
-            variant="ghost"
             size="medium"
             color="emerald"
+            ghostDisabled
             onClick={saveAllChanges}
             disabled={!hasModifiedAssets}
             title={
