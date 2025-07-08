@@ -1,14 +1,9 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
-import { Checkbox } from '../../../components/shared/checkbox';
 import { IoState, selectSaveProgress } from '../../../store/assets';
 import { selectSearchQuery } from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import {
-  selectAssetIsSelected,
-  toggleAssetSelection,
-} from '../../../store/selection';
+import { useAppSelector } from '../../../store/hooks';
 import { highlightText } from '../../../utils/text-highlight';
 import { Button } from '../../shared/button';
 import { useAssetTags } from '../hooks';
@@ -34,8 +29,6 @@ export const AssetMetadata = ({
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
-  const dispatch = useAppDispatch();
-  const isSelected = useAppSelector(selectAssetIsSelected(assetId));
   const searchQuery = useAppSelector(selectSearchQuery);
   const {
     tagList,
@@ -69,21 +62,13 @@ export const AssetMetadata = ({
 
   return (
     <div
-      className={`flex w-full items-center space-x-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
-        isSelected
-          ? 'border-t-purple-600 bg-purple-100'
-          : hasModifiedTags
-            ? 'border-t-amber-300 bg-amber-100'
-            : 'border-t-slate-300 bg-slate-100'
+      className={`flex w-full items-end space-x-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+        hasModifiedTags
+          ? 'border-t-amber-300 bg-amber-100'
+          : 'border-t-slate-300 bg-slate-100'
       }`}
     >
-      <Checkbox
-        isSelected={isSelected}
-        onChange={() => dispatch(toggleAssetSelection(assetId))}
-        ariaLabel={`Select asset ${assetId}`}
-      />
-
-      <span className="ml-2 inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
+      <span className="inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
         <Button
           type="button"
           color="sky"
@@ -105,7 +90,7 @@ export const AssetMetadata = ({
         </Button>
 
         <span
-          className="cursor-default overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pb-2"
+          className="cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'white 0 1px 0' }}
         >
           {highlightText(assetId, searchQuery)}

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 
 /**
  * Props for the Checkbox component
  */
 interface CheckboxProps {
   isSelected: boolean;
-  onChange: () => void;
+  onChange: (e: SyntheticEvent) => void;
   className?: string;
   tabIndex?: number;
   disabled?: boolean;
@@ -28,8 +28,8 @@ export const Checkbox = ({
   return (
     <label
       className={`inline-flex items-start gap-2 text-sm select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
-      onClick={() => {
-        if (!disabled) onChange();
+      onClick={(e) => {
+        if (!disabled) onChange(e);
       }}
       tabIndex={-1} // prevent double tab stop
     >
@@ -49,14 +49,14 @@ export const Checkbox = ({
           if (disabled) return;
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            onChange();
+            onChange(e);
           }
         }}
       >
         {isSelected && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 text-white"
+            className="h-full w-full text-white"
             viewBox="0 0 20 20"
             fill="currentColor"
           >

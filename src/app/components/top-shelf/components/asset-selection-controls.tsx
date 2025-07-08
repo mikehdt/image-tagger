@@ -125,7 +125,7 @@ export const AssetSelectionControls = () => {
         title="Clear selection"
       >
         <NoSymbolIcon className="w-4" />
-        <span className="ml-2 max-lg:hidden">Clear</span>
+        <span className="ml-2 max-lg:hidden">Assets</span>
       </Button>
 
       <Button

@@ -24,7 +24,7 @@ export function getTagStyles(
 ): TagStyles {
   // Common base classes
   const baseTagClass =
-    'inline-flex cursor-pointer items-center rounded-full border py-1 pr-2 pl-4 transition-all';
+    'inline-flex cursor-pointer items-center rounded-2xl border py-1 pr-2 pl-4 transition-all';
   const baseCountClass =
     'relative -ml-2 mr-1 text-shadow-xs/100 text-shadow-white inline-flex tabular-nums px-1 text-xs';
 
