@@ -12,6 +12,8 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectPaginationSize,
+  selectSearchQuery,
+  selectShowModified,
 } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { applyFilters } from '../utils/filter-actions';
@@ -30,6 +32,8 @@ const PaginatedPageContent = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
+  const showModified = useAppSelector(selectShowModified);
+  const searchQuery = useAppSelector(selectSearchQuery);
 
   // Calculate filtered assets
   const filteredAssets = useMemo(
@@ -40,8 +44,18 @@ const PaginatedPageContent = () => {
         filterSizes,
         filterExtensions,
         filterMode,
+        showModified,
+        searchQuery,
       }),
-    [assets, filterTags, filterSizes, filterExtensions, filterMode],
+    [
+      assets,
+      filterTags,
+      filterSizes,
+      filterExtensions,
+      filterMode,
+      showModified,
+      searchQuery,
+    ],
   );
 
   // Calculate total pages based on filtered results

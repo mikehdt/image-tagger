@@ -23,6 +23,8 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectPaginationSize,
+  selectSearchQuery,
+  selectShowModified,
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { applyFilters } from '../../utils/filter-actions';
@@ -52,6 +54,8 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterMode = useAppSelector(selectFilterMode);
+  const showModified = useAppSelector(selectShowModified);
+  const searchQuery = useAppSelector(selectSearchQuery);
 
   // Action handlers
   const doRefresh = () => dispatch(loadAllAssets());
@@ -67,8 +71,18 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
         filterSizes,
         filterExtensions,
         filterMode,
+        showModified,
+        searchQuery,
       }),
-    [allAssets, filterTags, filterSizes, filterExtensions, filterMode],
+    [
+      allAssets,
+      filterTags,
+      filterSizes,
+      filterExtensions,
+      filterMode,
+      showModified,
+      searchQuery,
+    ],
   );
 
   const filteredCount = filteredAssets.length;
