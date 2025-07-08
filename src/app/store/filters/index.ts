@@ -45,6 +45,8 @@ export const {
   clearExtensionFilters,
   clearFilters,
   setSearchQuery,
+  clearModifiedFilter,
+  resetFilterModeIfNeeded,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice

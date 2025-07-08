@@ -4,7 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 // Define a type for tag status
-export type TagStatus = {
+type TagStatus = {
   tag: string;
   status: 'all' | 'some' | 'none';
 };

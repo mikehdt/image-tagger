@@ -4,18 +4,9 @@ import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { memo, useMemo } from 'react';
 
 import { Asset } from '../components/asset/asset';
-import { selectAllImages } from '../store/assets';
-import {
-  selectFilterExtensions,
-  selectFilterMode,
-  selectFilterSizes,
-  selectFilterTags,
-  selectPaginationSize,
-  selectSearchQuery,
-  selectShowModified,
-} from '../store/filters';
+import { selectFilteredAssets } from '../store/assets';
+import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
-import { applyFilters } from '../utils/filter-actions';
 import { composeDimensions } from '../utils/helpers';
 
 // TODO: Test if this double-memo'ing (see below) is necessary?
@@ -30,44 +21,8 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   // Get pagination size from Redux
   const paginationSize = useAppSelector(selectPaginationSize);
 
-  // Get all data from selectors rather than props
-  const assets = useAppSelector(selectAllImages);
-  const filterTags = useAppSelector(selectFilterTags);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
-  const filterMode = useAppSelector(selectFilterMode);
-  const showModified = useAppSelector(selectShowModified);
-  const searchQuery = useAppSelector(selectSearchQuery);
-
-  // Create Sets from filters for O(1) lookups instead of O(n)
-  const filterSizesSet = useMemo(() => new Set(filterSizes), [filterSizes]);
-  const filterExtensionsSet = useMemo(
-    () => new Set(filterExtensions),
-    [filterExtensions],
-  );
-
-  // Memoize filtered assets so they only recalculate when dependencies change
-  const filteredAssets = useMemo(
-    () =>
-      applyFilters({
-        assets,
-        filterTags,
-        filterSizes,
-        filterExtensions,
-        filterMode,
-        showModified,
-        searchQuery,
-      }),
-    [
-      assets,
-      filterTags,
-      filterSizes,
-      filterExtensions,
-      filterMode,
-      showModified,
-      searchQuery,
-    ],
-  );
+  // Get filtered assets from the selector (this handles all filtering logic)
+  const filteredAssets = useAppSelector(selectFilteredAssets);
 
   // Apply pagination to the filtered assets
   const paginatedAssets = useMemo(() => {
@@ -96,6 +51,10 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     });
     return dimensions;
   }, [paginatedAssets]);
+
+  // Create empty Sets for styling purposes (we're not using this filtering logic anymore)
+  const filterSizesSet = useMemo(() => new Set(), []);
+  const filterExtensionsSet = useMemo(() => new Set(), []);
 
   // Memoize rendered assets to prevent unnecessary re-renders
   const renderedAssets = useMemo(

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import {
   markFilterTagsToDelete,
@@ -6,7 +6,9 @@ import {
 } from '../../store/assets';
 import {
   clearFilters,
+  clearModifiedFilter,
   FilterMode,
+  resetFilterModeIfNeeded,
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
@@ -18,12 +20,12 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { selectSelectedAssetsCount } from '../../store/selection';
 import {
+  AssetSelectionControls,
   FilterIndicators,
   FilterModeControls,
   TagActions,
   TagFilterButton,
 } from './components';
-import { AssetSelectionControls } from './components/asset-selection-controls';
 
 export const TopShelf = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,20 @@ export const TopShelf = () => {
   const handleSetTagFilterMode = (mode: FilterMode) =>
     dispatch(setTagFilterMode(mode));
   const handleToggleModifiedFilter = () => dispatch(toggleModifiedFilter());
+
+  // Effect to automatically clear the modified filter when there are no more modified assets
+  useEffect(() => {
+    if (filterModifiedActive && !hasModifiedAssets) {
+      dispatch(clearModifiedFilter());
+    }
+  }, [filterModifiedActive, hasModifiedAssets, dispatch]);
+
+  // Effect to reset filter mode when selected assets are cleared
+  useEffect(() => {
+    dispatch(
+      resetFilterModeIfNeeded({ hasSelectedAssets: selectedAssetsCount > 0 }),
+    );
+  }, [selectedAssetsCount, dispatch]);
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">

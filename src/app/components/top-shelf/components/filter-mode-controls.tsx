@@ -3,6 +3,8 @@ import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/shared/button';
 import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
 import { FilterMode } from '../../../store/filters';
+import { useAppSelector } from '../../../store/hooks';
+import { selectSelectedAssetsCount } from '../../../store/selection';
 
 interface FilterModeControlsProps {
   filterTagsMode: FilterMode;
@@ -27,14 +29,20 @@ export const FilterModeControls = ({
   toggleModifiedFilter,
   clearFilters,
 }: FilterModeControlsProps) => {
-  // Derive filterSelectionActive within the component
+  // Get selected assets count from Redux
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
+
+  // Derive filter selection active state (for traditional tag/size/extension filters)
   const filterSelectionActive = !!(
     filterTags.length ||
     filterSizes.length ||
     filterExtensions.length
   );
 
-  // Derive filterActive within the component
+  // Check if we have selected assets
+  const hasSelectedAssets = selectedAssetsCount > 0;
+
+  // Derive overall filter active state
   const filterActive = !!(
     filterTags.length ||
     filterSizes.length ||
@@ -50,18 +58,23 @@ export const FilterModeControls = ({
     },
     {
       value: FilterMode.MATCH_ANY,
-      label: 'Match Any',
+      label: 'Any Tags',
       disabled: !filterSelectionActive,
     },
     {
       value: FilterMode.MATCH_ALL,
-      label: 'Match All',
+      label: 'All Tags',
       disabled: !filterSelectionActive,
     },
     {
       value: FilterMode.MATCH_NONE,
-      label: 'Match None',
+      label: 'Exclude Tags',
       disabled: !filterSelectionActive,
+    },
+    {
+      value: FilterMode.SELECTED_ASSETS,
+      label: 'Chosen Assets',
+      disabled: !hasSelectedAssets,
     },
   ];
 
@@ -79,7 +92,11 @@ export const FilterModeControls = ({
         selectedValue={filterTagsMode}
         onChange={setTagFilterMode}
         buttonClassName={`mr-2 ${
-          filterTagsMode !== FilterMode.SHOW_ALL && !filterSelectionActive
+          // Show as disabled if we're in a mode that requires something that's not available
+          (filterTagsMode !== FilterMode.SHOW_ALL &&
+            filterTagsMode !== FilterMode.SELECTED_ASSETS &&
+            !filterSelectionActive) ||
+          (filterTagsMode === FilterMode.SELECTED_ASSETS && !hasSelectedAssets)
             ? 'text-slate-300'
             : ''
         }`}

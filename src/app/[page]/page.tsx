@@ -5,18 +5,9 @@ import { useEffect, useMemo } from 'react';
 
 import { BottomShelf } from '../components/bottom-shelf/bottom-shelf';
 import { TopShelf } from '../components/top-shelf/top-shelf';
-import { selectAllImages } from '../store/assets';
-import {
-  selectFilterExtensions,
-  selectFilterMode,
-  selectFilterSizes,
-  selectFilterTags,
-  selectPaginationSize,
-  selectSearchQuery,
-  selectShowModified,
-} from '../store/filters';
+import { selectFilteredAssets } from '../store/assets';
+import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
-import { applyFilters } from '../utils/filter-actions';
 import { AssetList } from '../views/asset-list';
 
 const PaginatedPageContent = () => {
@@ -24,39 +15,10 @@ const PaginatedPageContent = () => {
   const params = useParams();
   const currentPage = parseInt(params.page as string, 10) || 1;
 
-  const assets = useAppSelector(selectAllImages);
   const paginationSize = useAppSelector(selectPaginationSize);
 
-  // Get filters
-  const filterTags = useAppSelector(selectFilterTags);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
-  const filterMode = useAppSelector(selectFilterMode);
-  const showModified = useAppSelector(selectShowModified);
-  const searchQuery = useAppSelector(selectSearchQuery);
-
-  // Calculate filtered assets
-  const filteredAssets = useMemo(
-    () =>
-      applyFilters({
-        assets,
-        filterTags,
-        filterSizes,
-        filterExtensions,
-        filterMode,
-        showModified,
-        searchQuery,
-      }),
-    [
-      assets,
-      filterTags,
-      filterSizes,
-      filterExtensions,
-      filterMode,
-      showModified,
-      searchQuery,
-    ],
-  );
+  // Get filtered assets directly from the selector (handles all filtering including SELECTED_ASSETS)
+  const filteredAssets = useAppSelector(selectFilteredAssets);
 
   // Calculate total pages based on filtered results
   const totalPages = useMemo(() => {

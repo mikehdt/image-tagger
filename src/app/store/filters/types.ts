@@ -4,6 +4,7 @@ export enum FilterMode {
   MATCH_ANY = 'MatchAny',
   MATCH_ALL = 'MatchAll',
   MATCH_NONE = 'MatchNone',
+  SELECTED_ASSETS = 'SelectedAssets',
 }
 
 export enum PaginationSize {

@@ -69,6 +69,23 @@ export const coreReducers = {
     state.searchQuery = payload;
   },
 
+  clearModifiedFilter: (state: Filters) => {
+    state.showModified = false;
+  },
+
+  // Reset filter mode if it's SELECTED_ASSETS and there are no selected assets
+  resetFilterModeIfNeeded: (
+    state: Filters,
+    { payload }: PayloadAction<{ hasSelectedAssets: boolean }>,
+  ) => {
+    if (
+      state.filterMode === FilterMode.SELECTED_ASSETS &&
+      !payload.hasSelectedAssets
+    ) {
+      state.filterMode = FilterMode.SHOW_ALL;
+    }
+  },
+
   // Update tag filter names when tags are edited
   updateTagFilters: (
     state: Filters,

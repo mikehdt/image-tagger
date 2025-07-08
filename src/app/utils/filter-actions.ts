@@ -16,6 +16,7 @@ export const applyFilters = ({
   filterMode,
   showModified,
   searchQuery,
+  selectedAssets,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
@@ -24,9 +25,12 @@ export const applyFilters = ({
   filterMode: FilterMode;
   showModified?: boolean;
   searchQuery?: string;
+  selectedAssets?: string[];
 }): ImageAssetWithIndex[] => {
   // Handle the case where no filters are active - show everything
+  // BUT not for SELECTED_ASSETS mode, which has its own logic
   if (
+    filterMode !== FilterMode.SELECTED_ASSETS &&
     filterTags.length === 0 &&
     filterSizes.length === 0 &&
     filterExtensions.length === 0 &&
@@ -51,6 +55,41 @@ export const applyFilters = ({
   })) as ImageAssetWithIndex[];
 
   return assetsWithIndex.filter((img: ImageAssetWithIndex) => {
+    // SELECTED_ASSETS mode - only show assets that are selected
+    // Apply search and modified filters to selected assets if needed
+    if (filterMode === FilterMode.SELECTED_ASSETS) {
+      if (!selectedAssets || selectedAssets.length === 0) {
+        return false; // No assets selected, so show nothing
+      }
+
+      // First check if the asset is selected
+      if (!selectedAssets.includes(img.fileId)) {
+        return false;
+      }
+
+      // Apply search filter if provided
+      if (searchQuery && searchQuery.trim() !== '') {
+        const query = searchQuery.trim().toLowerCase();
+        const assetName = img.fileId.toLowerCase();
+        if (!assetName.includes(query)) {
+          return false;
+        }
+      }
+
+      // Apply modified filter if needed
+      if (showModified) {
+        const hasModifiedTags = img.tagList.some(
+          (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
+        );
+        if (!hasModifiedTags) {
+          return false;
+        }
+      }
+
+      return true; // Asset is selected and passes other filters
+    }
+
+    // For all other filter modes, apply the standard logic
     // Apply search filter first (if provided)
     if (searchQuery && searchQuery.trim() !== '') {
       const query = searchQuery.trim().toLowerCase();

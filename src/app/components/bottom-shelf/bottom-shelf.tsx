@@ -3,7 +3,6 @@ import {
   BookmarkSlashIcon,
   BookmarkSquareIcon,
 } from '@heroicons/react/24/outline';
-import { useMemo } from 'react';
 
 import {
   IoState,
@@ -11,23 +10,14 @@ import {
   resetAllTags,
   saveAllAssets,
   selectAllImages,
+  selectFilteredAssets,
   selectHasModifiedAssets,
   selectIoState,
   selectLoadProgress,
   selectSaveProgress,
 } from '../../store/assets';
-import {
-  PaginationSize,
-  selectFilterExtensions,
-  selectFilterMode,
-  selectFilterSizes,
-  selectFilterTags,
-  selectPaginationSize,
-  selectSearchQuery,
-  selectShowModified,
-} from '../../store/filters';
+import { PaginationSize, selectPaginationSize } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { applyFilters } from '../../utils/filter-actions';
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
@@ -49,42 +39,13 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const saveProgress = useAppSelector(selectSaveProgress) || null;
   const loadProgress = useAppSelector(selectLoadProgress) || null;
 
-  // Get filters
-  const filterTags = useAppSelector(selectFilterTags);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
-  const filterMode = useAppSelector(selectFilterMode);
-  const showModified = useAppSelector(selectShowModified);
-  const searchQuery = useAppSelector(selectSearchQuery);
-
   // Action handlers
   const doRefresh = () => dispatch(loadAllAssets());
   const saveAllChanges = () => dispatch(saveAllAssets());
   const cancelAllChanges = () => dispatch(resetAllTags());
 
-  // Calculate filtered assets count
-  const filteredAssets = useMemo(
-    () =>
-      applyFilters({
-        assets: allAssets,
-        filterTags,
-        filterSizes,
-        filterExtensions,
-        filterMode,
-        showModified,
-        searchQuery,
-      }),
-    [
-      allAssets,
-      filterTags,
-      filterSizes,
-      filterExtensions,
-      filterMode,
-      showModified,
-      searchQuery,
-    ],
-  );
-
+  // Get filtered assets directly from the selector
+  const filteredAssets = useAppSelector(selectFilteredAssets);
   const filteredCount = filteredAssets.length;
   const isFiltered = filteredCount !== allAssets.length;
 

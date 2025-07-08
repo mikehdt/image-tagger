@@ -7,7 +7,7 @@ import { ReactNode, SyntheticEvent } from 'react';
  * across the application. Supports multiple color variants, sizes, and states.
  */
 
-export type ButtonColor =
+type ButtonColor =
   | 'slate'
   | 'rose'
   | 'amber'
@@ -15,15 +15,10 @@ export type ButtonColor =
   | 'sky'
   | 'indigo'
   | 'stone';
-export type ButtonSize =
-  | 'small'
-  | 'smallWide'
-  | 'medium'
-  | 'mediumWide'
-  | 'large';
-export type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
+type ButtonSize = 'small' | 'smallWide' | 'medium' | 'mediumWide' | 'large';
+type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
 
-export interface ButtonProps {
+interface ButtonProps {
   children: ReactNode;
   onClick?: (e?: SyntheticEvent) => void;
   onSubmit?: (e?: SyntheticEvent) => void;

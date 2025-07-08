@@ -104,7 +104,7 @@ export const TagActions = ({
           ) : (
             <DocumentMinusIcon className="w-4" />
           )}
-          <span className="ml-2 max-lg:hidden">Toggle</span>
+          <span className="ml-2 max-lg:hidden">Delete</span>
         </Button>
       </div>
 
