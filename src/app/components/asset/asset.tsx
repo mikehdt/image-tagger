@@ -18,8 +18,6 @@ type AssetProps = {
   fileExtension: string;
   assetNumber: number;
   dimensions: ImageDimensions;
-  dimensionsActive: boolean;
-  extensionActive: boolean;
   ioState: IoState;
 };
 
@@ -28,8 +26,6 @@ export const Asset = ({
   fileExtension,
   assetNumber,
   dimensions,
-  dimensionsActive,
-  extensionActive,
   ioState,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
@@ -99,8 +95,6 @@ export const Asset = ({
           assetId={assetId}
           fileExtension={fileExtension}
           dimensions={dimensions}
-          dimensionsActive={dimensionsActive}
-          extensionActive={extensionActive}
           ioState={ioState}
           dimensionsComposed={dimensionsComposed}
           isTagEditing={isTagInteracting}

@@ -8,8 +8,8 @@ import {
 import { useState } from 'react';
 
 import { useAppDispatch } from '@/app/store/hooks';
-
 import { addTagToSelectedAssets, clearSelection } from '@/app/store/selection';
+
 import { Button } from '../../shared/button';
 import { AddTagsModal } from './add-tags-modal';
 import { EditTagsModal } from './edit-tags-modal';

@@ -5,6 +5,7 @@ import { selectFilterSizes, toggleSizeFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions } from '@/app/utils/helpers';
 import { highlightText } from '@/app/utils/text-highlight';
+
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
 

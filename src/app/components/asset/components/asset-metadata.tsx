@@ -2,9 +2,14 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
 import { IoState, selectSaveProgress } from '@/app/store/assets';
-import { selectSearchQuery } from '@/app/store/filters';
+import {
+  selectFilterExtensions,
+  selectFilterSizes,
+  selectSearchQuery,
+} from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import { highlightText } from '@/app/utils/text-highlight';
+
 import { Button } from '../../shared/button';
 import { useAssetTags } from '../hooks';
 
@@ -12,8 +17,6 @@ type AssetMetadataProps = {
   assetId: string;
   fileExtension: string;
   dimensions: { width: number; height: number };
-  dimensionsActive: boolean;
-  extensionActive: boolean;
   ioState: IoState;
   dimensionsComposed: string;
   isTagEditing?: boolean; // True when either editing or adding a tag
@@ -23,13 +26,13 @@ export const AssetMetadata = ({
   assetId,
   fileExtension,
   dimensions,
-  dimensionsActive,
-  extensionActive,
   ioState,
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
   const searchQuery = useAppSelector(selectSearchQuery);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
   const {
     tagList,
     tagsByStatus,
@@ -40,6 +43,10 @@ export const AssetMetadata = ({
   } = useAssetTags(assetId);
 
   const saveProgress = useAppSelector(selectSaveProgress);
+
+  // Calculate pressed states based on filter arrays
+  const dimensionsActive = filterSizes.includes(dimensionsComposed);
+  const extensionActive = filterExtensions.includes(fileExtension);
 
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =

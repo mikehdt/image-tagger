@@ -5,6 +5,7 @@ import {
   selectFilterCount,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+
 import { useFilterList } from '../filter-list-context';
 import { SortDirection } from '../types';
 
