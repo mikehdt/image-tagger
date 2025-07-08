@@ -27,19 +27,19 @@ export const FilterModeControls = ({
   toggleModifiedFilter,
   clearFilters,
 }: FilterModeControlsProps) => {
+  // Derive filterSelectionActive within the component
+  const filterSelectionActive = !!(
+    filterTags.length ||
+    filterSizes.length ||
+    filterExtensions.length
+  );
+
   // Derive filterActive within the component
   const filterActive = !!(
     filterTags.length ||
     filterSizes.length ||
     filterExtensions.length ||
     filterModifiedActive
-  );
-
-  // Derive filterSelectionActive within the component
-  const filterSelectionActive = !!(
-    filterTags.length ||
-    filterSizes.length ||
-    filterExtensions.length
   );
 
   // Create filter mode dropdown items
@@ -85,35 +85,31 @@ export const FilterModeControls = ({
         }`}
       />
 
-      <div className="border-r border-white pr-1">
-        <Button
-          type="button"
-          onClick={toggleModifiedFilter}
-          variant="deep-toggle"
-          isPressed={filterModifiedActive}
-          disabled={!hasModifiedAssets}
-          ghostDisabled={!hasModifiedAssets}
-          size="medium"
-          className="px-2"
-        >
-          Modified
-        </Button>
-      </div>
+      <Button
+        type="button"
+        onClick={toggleModifiedFilter}
+        variant="deep-toggle"
+        isPressed={filterModifiedActive}
+        disabled={!hasModifiedAssets}
+        ghostDisabled={!hasModifiedAssets}
+        size="medium"
+        className="px-2"
+      >
+        Modified
+      </Button>
 
-      <div className="border-l border-slate-300 pl-1">
-        <Button
-          variant="ghost"
-          type="button"
-          onClick={clearFilters}
-          disabled={!filterActive}
-          ghostDisabled={!filterActive}
-          size="medium"
-          className="flex items-center"
-        >
-          <NoSymbolIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Filters</span>
-        </Button>
-      </div>
+      <Button
+        variant="ghost"
+        type="button"
+        onClick={clearFilters}
+        disabled={!filterActive}
+        ghostDisabled={!filterActive}
+        size="medium"
+        className="flex items-center"
+      >
+        <NoSymbolIcon className="w-4" />
+        <span className="ml-2 max-lg:hidden">Filters</span>
+      </Button>
     </div>
   );
 };

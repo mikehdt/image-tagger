@@ -16,11 +16,11 @@ import {
   toggleModifiedFilter,
 } from '../../store/filters';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { clearSelection } from '../../store/selection';
+import { selectSelectedAssetsCount } from '../../store/selection';
 import {
-  FilterActions,
   FilterIndicators,
   FilterModeControls,
+  TagActions,
   TagFilterButton,
 } from './components';
 import { AssetSelectionControls } from './components/asset-selection-controls';
@@ -36,6 +36,7 @@ export const TopShelf = () => {
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterModifiedActive = useAppSelector(selectShowModified);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   // Action handlers
   const handleMarkFilterTagsToDelete = (tags: string[]) =>
@@ -44,12 +45,11 @@ export const TopShelf = () => {
   const handleSetTagFilterMode = (mode: FilterMode) =>
     dispatch(setTagFilterMode(mode));
   const handleToggleModifiedFilter = () => dispatch(toggleModifiedFilter());
-  const handleClearSelection = () => dispatch(clearSelection());
 
   return (
     <div className="fixed top-0 left-0 z-10 w-full bg-white/80 shadow-md backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
-        <AssetSelectionControls />
+        <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
 
         <FilterIndicators
           filterSizes={filterSizes}
@@ -57,10 +57,10 @@ export const TopShelf = () => {
           filterExtensions={filterExtensions}
         />
 
-        <FilterActions
+        <TagActions
           filterTags={filterTags}
+          selectedAssetsCount={selectedAssetsCount}
           markFilterTagsToDelete={handleMarkFilterTagsToDelete}
-          onClearSelection={handleClearSelection}
         />
 
         <FilterModeControls

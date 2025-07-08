@@ -3,24 +3,36 @@ import {
   DocumentPlusIcon,
   PencilIcon,
   SwatchIcon,
+  TagIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
+import { useAppDispatch } from '@/app/store/hooks';
+
+import {
+  addTagToSelectedAssets,
+  clearSelection,
+} from '../../../store/selection';
 import { Button } from '../../shared/button';
+import { AddTagsModal } from './add-tags-modal';
 import { EditTagsModal } from './edit-tags-modal';
 
-interface FilterActionsProps {
+interface TagActionsProps {
   filterTags: string[];
+  selectedAssetsCount: number;
   markFilterTagsToDelete: (tags: string[]) => void;
-  onClearSelection?: () => void;
 }
 
-export const FilterActions = ({
+export const TagActions = ({
   filterTags,
+  selectedAssetsCount,
   markFilterTagsToDelete,
-}: FilterActionsProps) => {
+}: TagActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isToggled, setIsToggled] = useState(false);
+  const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
+
+  const dispatch = useAppDispatch();
 
   const openEditModal = () => {
     if (filterTags.length > 0) {
@@ -33,7 +45,16 @@ export const FilterActions = ({
     setIsToggled(!isToggled);
   };
 
-  const handleOnCloseModal = () => {
+  const handleAddTag = (tag: string, addToStart = false) => {
+    dispatch(addTagToSelectedAssets({ tagName: tag, addToStart }));
+    setIsAddTagsModalOpen(false);
+  };
+
+  const handleClearSelection = () => dispatch(clearSelection());
+
+  const handleOnCloseAddModal = () => setIsAddTagsModalOpen(false);
+
+  const handleOnCloseEditModal = () => {
     setIsEditModalOpen(false);
   };
 
@@ -46,6 +67,19 @@ export const FilterActions = ({
         >
           <SwatchIcon className="w-4 text-slate-400" />
         </span>
+
+        <Button
+          type="button"
+          onClick={() => setIsAddTagsModalOpen(true)}
+          disabled={selectedAssetsCount < 2}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title="Add tags to selected assets"
+        >
+          <TagIcon className="w-4" />
+          <span className="ml-2 max-lg:hidden">Add</span>
+        </Button>
 
         <Button
           type="button"
@@ -74,9 +108,17 @@ export const FilterActions = ({
         </Button>
       </div>
 
+      <AddTagsModal
+        isOpen={isAddTagsModalOpen}
+        onClose={handleOnCloseAddModal}
+        onClearSelection={handleClearSelection}
+        selectedAssetsCount={selectedAssetsCount}
+        onAddTag={handleAddTag}
+      />
+
       <EditTagsModal
         isOpen={isEditModalOpen}
-        onClose={handleOnCloseModal}
+        onClose={handleOnCloseEditModal}
         filterTags={filterTags}
       />
     </>
