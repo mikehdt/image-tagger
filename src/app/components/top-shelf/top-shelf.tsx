@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import {
   markFilterTagsToDelete,
   selectHasModifiedAssets,
-} from '../../store/assets';
+} from '@/app/store/assets';
 import {
   clearFilters,
   clearModifiedFilter,
@@ -16,9 +16,9 @@ import {
   selectShowModified,
   setTagFilterMode,
   toggleModifiedFilter,
-} from '../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectSelectedAssetsCount } from '../../store/selection';
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectSelectedAssetsCount } from '@/app/store/selection';
 import {
   AssetSelectionControls,
   FilterIndicators,

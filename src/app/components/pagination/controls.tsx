@@ -4,8 +4,8 @@ import {
   PaginationSize,
   selectPaginationSize,
   setPaginationSize,
-} from '../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 type PaginationControlsProps = {
   currentPage: number;

@@ -1,10 +1,10 @@
 import { Fragment, ReactNode, useCallback, useEffect, useMemo } from 'react';
 
-import { selectImageSizes } from '../../../store/assets';
-import { selectFilterSizes, toggleSizeFilter } from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { decomposeDimensions } from '../../../utils/helpers';
-import { highlightText } from '../../../utils/text-highlight';
+import { selectImageSizes } from '@/app/store/assets';
+import { selectFilterSizes, toggleSizeFilter } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { decomposeDimensions } from '@/app/utils/helpers';
+import { highlightText } from '@/app/utils/text-highlight';
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
 

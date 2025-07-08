@@ -8,9 +8,9 @@ import {
   saveAsset,
   selectAllTags,
   selectOrderedTagsWithStatus,
-} from '../../../store/assets';
-import { selectFilterTags, toggleTagFilter } from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '@/app/store/assets';
+import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 /**
  * Hook for managing tags for a specific asset

@@ -15,9 +15,10 @@ import {
   selectIoState,
   selectLoadProgress,
   selectSaveProgress,
-} from '../../store/assets';
-import { PaginationSize, selectPaginationSize } from '../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+} from '@/app/store/assets';
+import { PaginationSize, selectPaginationSize } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';

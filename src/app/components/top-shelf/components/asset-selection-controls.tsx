@@ -6,14 +6,14 @@ import {
 } from '@heroicons/react/24/outline';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { selectFilteredAssets } from '../../../store/assets';
-import { selectSearchQuery, setSearchQuery } from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { selectFilteredAssets } from '@/app/store/assets';
+import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   clearSelection,
   selectMultipleAssets,
   selectSelectedAssets,
-} from '../../../store/selection';
+} from '@/app/store/selection';
 import { Button } from '../../shared/button';
 
 export const AssetSelectionControls = ({

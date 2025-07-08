@@ -1,7 +1,7 @@
 import { SyntheticEvent, useCallback } from 'react';
 
-import { addTag, deleteTag, editTag } from '../../../store/assets';
-import { useAppDispatch } from '../../../store/hooks';
+import { addTag, deleteTag, editTag } from '@/app/store/assets';
+import { useAppDispatch } from '@/app/store/hooks';
 
 /**
  * Hook for tag actions (add, delete, edit)

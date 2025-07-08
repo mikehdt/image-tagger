@@ -4,17 +4,17 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { selectAllImages, selectFilteredAssets } from '../../../store/assets';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectSelectedAssets,
   selectSelectedAssetsCount,
-} from '../../../store/selection';
+} from '@/app/store/selection';
 import {
   selectDuplicateTagInfo,
   selectTagCoExistence,
-} from '../../../store/selection/combinedSelectors';
-import { editTagsAcrossAssets } from '../../../store/selection/thunks';
+} from '@/app/store/selection/combinedSelectors';
+import { editTagsAcrossAssets } from '@/app/store/selection/thunks';
 import { Button } from '../../shared/button';
 import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';

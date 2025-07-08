@@ -1,10 +1,10 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useMemo } from 'react';
 
-import { IoState, selectSaveProgress } from '../../../store/assets';
-import { selectSearchQuery } from '../../../store/filters';
-import { useAppSelector } from '../../../store/hooks';
-import { highlightText } from '../../../utils/text-highlight';
+import { IoState, selectSaveProgress } from '@/app/store/assets';
+import { selectSearchQuery } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
+import { highlightText } from '@/app/utils/text-highlight';
 import { Button } from '../../shared/button';
 import { useAssetTags } from '../hooks';
 

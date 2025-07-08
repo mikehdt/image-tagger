@@ -1,10 +1,10 @@
 import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
 
-import { Button } from '../../../components/shared/button';
-import { Dropdown, DropdownItem } from '../../../components/shared/dropdown';
-import { FilterMode } from '../../../store/filters';
-import { useAppSelector } from '../../../store/hooks';
-import { selectSelectedAssetsCount } from '../../../store/selection';
+import { Button } from '@/app/components/shared/button';
+import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import { FilterMode } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 interface FilterModeControlsProps {
   filterTagsMode: FilterMode;

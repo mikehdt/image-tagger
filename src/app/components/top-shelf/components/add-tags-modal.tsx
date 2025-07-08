@@ -4,8 +4,8 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
-import { useAppSelector } from '../../../store/hooks';
-import { selectDuplicateTagInfo } from '../../../store/selection';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectDuplicateTagInfo } from '@/app/store/selection';
 import { Button } from '../../shared/button';
 import { Checkbox } from '../../shared/checkbox/checkbox';
 import { Modal } from '../../shared/modal';

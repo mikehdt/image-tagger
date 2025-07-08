@@ -7,14 +7,14 @@ import {
   saveAsset,
   selectAllTags,
   selectOrderedTagsWithStatus,
-} from '../../../store/assets';
+} from '@/app/store/assets';
 import {
   selectFilterTags,
   toggleExtensionFilter,
   toggleSizeFilter,
   toggleTagFilter,
-} from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 export const useAssetTags = (assetId: string) => {
   const dispatch = useAppDispatch();

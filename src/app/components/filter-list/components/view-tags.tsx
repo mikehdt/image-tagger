@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { selectAllTags } from '../../../store/assets';
-import { selectFilterTags, toggleTagFilter } from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { highlightText } from '../../../utils/text-highlight';
+import { selectAllTags } from '@/app/store/assets';
+import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { highlightText } from '@/app/utils/text-highlight';
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
 

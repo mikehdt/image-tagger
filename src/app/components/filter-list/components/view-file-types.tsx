@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { selectAllExtensions } from '../../../store/assets';
+import { selectAllExtensions } from '@/app/store/assets';
 import {
   selectFilterExtensions,
   toggleExtensionFilter,
-} from '../../../store/filters';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { useFilterList } from '../filter-list-context';
 import { SortDirection, SortType } from '../types';
 

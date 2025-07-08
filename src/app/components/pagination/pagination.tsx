@@ -1,8 +1,8 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 
-import { PaginationSize, selectPaginationSize } from '../../store/filters';
-import { useAppSelector } from '../../store/hooks';
+import { PaginationSize, selectPaginationSize } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
 
 type PaginationProps = {
   currentPage: number;

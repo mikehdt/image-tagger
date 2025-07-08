@@ -1,14 +1,14 @@
 import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
 
+import { ImageDimensions, IoState } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectAssetIsSelected,
   toggleAssetSelection,
 } from '@/app/store/selection';
+import { composeDimensions } from '@/app/utils/helpers';
 
-import { ImageDimensions, IoState } from '../../store/assets';
-import { composeDimensions } from '../../utils/helpers';
 import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging/tagging-manager';
 import { AssetMetadata } from './components';
