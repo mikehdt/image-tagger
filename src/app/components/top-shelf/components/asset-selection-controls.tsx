@@ -4,7 +4,7 @@ import {
   NoSymbolIcon,
   SquaresPlusIcon,
 } from '@heroicons/react/24/outline';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { selectFilteredAssets } from '../../../store/assets';
 import { selectSearchQuery, setSearchQuery } from '../../../store/filters';
@@ -44,6 +44,13 @@ export const AssetSelectionControls = ({
       setIsSearchActive(false);
     }
   };
+
+  // Keep search input visible if there's a search query
+  useEffect(() => {
+    if (searchQuery && !isSearchActive) {
+      setIsSearchActive(true);
+    }
+  }, [searchQuery, isSearchActive]);
 
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
