@@ -180,7 +180,7 @@ export const Button = ({
   const baseStyle = {
     common: `flex items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`,
     normal: 'inset-shadow-xs inset-shadow-white',
-    disabled: 'opacity-40',
+    disabled: 'opacity-60',
     ghost: 'hover:inset-shadow-xs hover:inset-shadow-white',
     pressed: 'inset-shadow-xs inset-shadow-white shadow-sm',
     togglePressed: 'inset-shadow-xs inset-shadow-white shadow-sm',
@@ -208,7 +208,7 @@ export const Button = ({
       styleClasses =
         ghostDisabled || variant === 'ghost'
           ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled}`
-          : `${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
+          : `${baseStyle.disabled} ${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
     }
   } else {
     // Determine styling based on variant and state

@@ -495,10 +495,10 @@ export const EditTagsModal = ({
                 disabled={!hasActiveFilters}
                 label={
                   hasActiveFilters
-                    ? `Only apply tag edits to filtered assets (${filteredAssets.length} assets)`
-                    : 'Only apply tag edits to filtered assets (no filters active)'
+                    ? `Scope tag edits with filtered assets (${filteredAssets.length} asset${filteredAssets.length !== 1 ? 's' : ''})`
+                    : 'Scope tag edits with filtered assets (no filters active)'
                 }
-                ariaLabel="Only apply tag edits to filtered assets"
+                ariaLabel="Scope tag edits with filtered assets"
               />
             </div>
           ) : null}
@@ -511,10 +511,10 @@ export const EditTagsModal = ({
                 disabled={!hasSelectedAssets}
                 label={
                   hasSelectedAssets
-                    ? `Only apply tag edits to selected assets (${selectedAssetsCount} assets)`
-                    : 'Only apply tag edits to selected assets (no assets selected)'
+                    ? `Scope tag edits with selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`
+                    : 'Scope tag edits with selected assets (no assets selected)'
                 }
-                ariaLabel="Only apply tag edits to selected assets"
+                ariaLabel="Scope tag edits with selected assets"
               />
             </div>
           ) : null}
@@ -529,16 +529,16 @@ export const EditTagsModal = ({
                 const intersection = selectedAssets.filter((assetId) =>
                   filteredAssets.some((asset) => asset.fileId === assetId),
                 ).length;
-                return `Changes will apply to ${intersection} assets that are both filtered and selected.`;
+                return `Tag changes will apply to ${intersection} ${intersection === 1 ? 'asset that is' : 'assets that are'} both filtered and selected.`;
               } else if (useFiltered && !useSelected) {
                 // Only filtered constraint active
-                return `Changes will apply to the ${filteredAssets.length} currently filtered assets.`;
+                return `Tag changes will apply to the ${filteredAssets.length} currently filtered ${filteredAssets.length === 1 ? 'asset' : 'assets'}.`;
               } else if (!useFiltered && useSelected) {
                 // Only selected constraint active
-                return `Changes will apply to the ${selectedAssetsCount} selected assets.`;
+                return `Tag changes will apply to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
               } else {
                 // No constraints active
-                return `Changes will apply to all assets that have these tags.`;
+                return `Tag changes will apply to all assets that have these tags regardless of active filters.`;
               }
             })()}
           </p>
@@ -557,6 +557,7 @@ export const EditTagsModal = ({
             <Button
               type="submit"
               disabled={!hasModifiedTags}
+              neutralDisabled
               color="indigo"
               size="mediumWide"
             >
