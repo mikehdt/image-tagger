@@ -18,6 +18,7 @@ import { NoContent } from '../views/no-content';
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const initialLoad = useRef<boolean>(true);
+  const hasCompletedInitialLoad = useRef<boolean>(false); // Track if we've ever completed initial load
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
@@ -51,13 +52,25 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [ioState, dispatch]);
 
+  // Track initial load completion and reset flag if imageCount becomes 0 (crash recovery)
+  useEffect(() => {
+    if (imageCount === 0) {
+      hasCompletedInitialLoad.current = false; // Reset if we somehow lose all images
+    } else if (
+      ioState === IoState.COMPLETE &&
+      !hasCompletedInitialLoad.current
+    ) {
+      hasCompletedInitialLoad.current = true; // Mark initial load as completed
+    }
+  }, [imageCount, ioState]);
+
   // Only show the loading screen if we're loading AND we don't have any assets yet
   // This differentiates between initial load and refresh operations
-  // Also show during COMPLETING state to allow progress bar to reach 100%
+  // For COMPLETING state: only show InitialLoad if we haven't completed initial load yet
   if (
     ioState === IoState.INITIAL ||
     (ioState === IoState.LOADING && imageCount === 0) ||
-    ioState === IoState.COMPLETING
+    (ioState === IoState.COMPLETING && !hasCompletedInitialLoad.current)
   ) {
     return <InitialLoad />;
   }

@@ -33,8 +33,9 @@ export const LoadingStatus = ({
           {loadProgress.total > 0
             ? `${loadProgress.completed} / ${loadProgress.total}`
             : ''}
-          {loadProgress.failed > 0 &&
-            ` (${loadProgress.failed} error${loadProgress.failed !== 1 ? 's' : ''})`}
+          {loadProgress.failed > 0
+            ? ` (${loadProgress.failed} error${loadProgress.failed !== 1 ? 's' : ''})`
+            : ''}
         </>
       ) : null}
       {((ioState === IoState.SAVING || ioState === IoState.COMPLETING) &&

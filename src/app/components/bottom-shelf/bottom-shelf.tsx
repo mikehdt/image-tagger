@@ -71,15 +71,19 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             </Button>
           )}
 
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={
-              paginationSize === PaginationSize.ALL
-                ? 1
-                : Math.ceil(filteredCount / paginationSize)
-            }
-            totalItems={filteredCount}
-          />
+          {ioState !== IoState.LOADING &&
+          ioState !== IoState.SAVING &&
+          ioState !== IoState.COMPLETING ? (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={
+                paginationSize === PaginationSize.ALL
+                  ? 1
+                  : Math.ceil(filteredCount / paginationSize)
+              }
+              totalItems={filteredCount}
+            />
+          ) : null}
         </div>
 
         <div className="flex w-2/4 items-center justify-center">
