@@ -58,6 +58,7 @@ const MyComponent = () => {
 | `minMenuWidth`          | `string`                               | Min width for dropdown menu        |
 | `icon`                  | `ReactNode`                            | Icon to show in button             |
 | `alignRight`            | `boolean`                              | Right-align the dropdown           |
+| `openUpward`            | `boolean`                              | Open the dropdown upward           |
 
 ## Helper Hook
 

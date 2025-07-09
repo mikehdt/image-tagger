@@ -1,5 +1,6 @@
 import { useRouter } from 'next/navigation';
 
+import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
   PaginationSize,
   selectPaginationSize,
@@ -23,13 +24,20 @@ export const PaginationControls = ({
   const dispatch = useAppDispatch();
   const paginationSize = useAppSelector(selectPaginationSize);
 
+  // Define dropdown items for pagination sizes
+  const paginationSizeItems: DropdownItem<PaginationSize>[] = [
+    { value: PaginationSize.FIFTY, label: PaginationSize.FIFTY.toString() },
+    { value: PaginationSize.HUNDRED, label: PaginationSize.HUNDRED.toString() },
+    {
+      value: PaginationSize.TWO_FIFTY,
+      label: PaginationSize.TWO_FIFTY.toString(),
+    },
+    { value: PaginationSize.ALL, label: 'All' },
+  ];
+
   // When pagination size changes, we need to redirect to page 1 if the current page
   // would be outside the new range
-  const handlePaginationSizeChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const newSize = parseInt(e.target.value, 10) as PaginationSize;
-
+  const handlePaginationSizeChange = (newSize: PaginationSize) => {
     // Store the new size in Redux
     dispatch(setPaginationSize(newSize));
 
@@ -59,19 +67,13 @@ export const PaginationControls = ({
       >
         Per page:
       </label>
-      <select
-        id="pagination-size"
-        value={paginationSize}
+      <Dropdown
+        items={paginationSizeItems}
+        selectedValue={paginationSize}
         onChange={handlePaginationSizeChange}
-        className="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-sm inset-shadow-white"
-      >
-        <option value={PaginationSize.FIFTY}>{PaginationSize.FIFTY}</option>
-        <option value={PaginationSize.HUNDRED}>{PaginationSize.HUNDRED}</option>
-        <option value={PaginationSize.TWO_FIFTY}>
-          {PaginationSize.TWO_FIFTY}
-        </option>
-        <option value={PaginationSize.ALL}>All</option>
-      </select>
+        openUpward={true}
+        buttonClassName="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-sm inset-shadow-white"
+      />
     </span>
   );
 };

@@ -34,6 +34,7 @@ interface DropdownProps<T> {
   selectedItemClassName?: string;
   disabledItemClassName?: string;
   alignRight?: boolean;
+  openUpward?: boolean;
 }
 
 /**
@@ -51,6 +52,7 @@ export function Dropdown<T>({
   selectedItemClassName = '',
   disabledItemClassName = '',
   alignRight = false,
+  openUpward = false,
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -202,7 +204,17 @@ export function Dropdown<T>({
           left: alignRight ? 'auto' : `${dropdownPosition.left}px`,
           right: alignRight ? 0 : 'auto',
         }}
-        className={`absolute z-10 mt-1 origin-top-left transform rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg transition-all focus:outline-none ${
+        className={`absolute z-10 min-w-20 transform rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg transition-all focus:outline-none ${
+          openUpward ? 'bottom-full mb-1' : 'mt-1'
+        } ${
+          openUpward
+            ? alignRight
+              ? 'origin-bottom-right'
+              : 'origin-bottom-left'
+            : alignRight
+              ? 'origin-top-right'
+              : 'origin-top-left'
+        } ${
           isOpen
             ? 'scale-100 opacity-100'
             : 'pointer-events-none scale-95 opacity-0'
