@@ -2,6 +2,7 @@ import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import type { ChangeEvent, SyntheticEvent } from 'react';
 import {
   KeyboardEvent,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -24,7 +25,7 @@ type InputTagProps = {
   nonInteractive?: boolean;
 };
 
-export const InputTag = ({
+export const InputTagComponent = ({
   inputValue,
   onInputChange,
   onSubmit,
@@ -229,4 +230,4 @@ export const InputTag = ({
 };
 
 // Memoize the component to prevent unnecessary re-renders
-// export const InputTag = memo(InputTagComponent);
+export const InputTag = memo(InputTagComponent);

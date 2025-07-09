@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { selectHasModifiedAssets } from '@/app/store/assets';
 import {
@@ -22,7 +22,6 @@ import {
 } from './components';
 
 export const TopShelf = () => {
-  const tagButtonRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
 
   // Filter selectors (only keeping ones needed for useEffects)
@@ -75,7 +74,7 @@ export const TopShelf = () => {
           clearFilters={handleClearFilters}
         />
 
-        <TagFilterButton tagButtonRef={tagButtonRef} />
+        <TagFilterButton />
       </div>
     </div>
   );

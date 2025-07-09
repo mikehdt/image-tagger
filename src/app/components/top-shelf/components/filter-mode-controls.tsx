@@ -75,7 +75,7 @@ export const FilterModeControls = ({
     },
     {
       value: FilterMode.SELECTED_ASSETS,
-      label: 'Chosen Assets',
+      label: 'Selected Assets',
       disabled: !hasSelectedAssets,
     },
   ];

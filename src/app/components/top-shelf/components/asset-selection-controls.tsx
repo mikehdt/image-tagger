@@ -90,16 +90,18 @@ export const AssetSelectionControls = ({
         </span>
 
         <span className="relative mr-2 flex items-center">
-          <button
-            className={`absolute inset-0 top-0.5 bottom-0.5 left-0.5 my-auto flex w-7 cursor-pointer justify-center text-slate-500 hover:text-slate-700 ${isSearchActive ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+          <Button
+            className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
+            size="smallSquare"
+            variant="ghost"
             onClick={handleSearchFocus}
           >
-            <MagnifyingGlassIcon className="w-6 p-0.5" />
-          </button>
+            <MagnifyingGlassIcon className="w-5" />
+          </Button>
 
           <input
             ref={searchInputRef}
-            className={`rounded-sm bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
+            className={`rounded-sm border border-white/0 bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
               isSearchActive
                 ? 'w-50 pe-7 opacity-100'
                 : 'pointer-events-none w-7 opacity-0'
@@ -123,35 +125,41 @@ export const AssetSelectionControls = ({
           ) : null}
         </span>
 
-        <Button
-          type="button"
-          onClick={handleAddAllToSelection}
-          disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
-          variant="ghost"
-          color="slate"
-          size="medium"
-          title={
-            allFilteredAssetsSelected
-              ? 'All filtered assets already selected'
-              : 'Add all filtered assets to selection'
-          }
-        >
-          <SquaresPlusIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Select</span>
-        </Button>
+        {!isSearchActive ? (
+          <>
+            <Button
+              type="button"
+              onClick={handleAddAllToSelection}
+              disabled={
+                allFilteredAssetsSelected || filteredAssets.length === 0
+              }
+              variant="ghost"
+              color="slate"
+              size="medium"
+              title={
+                allFilteredAssetsSelected
+                  ? 'All filtered assets already selected'
+                  : 'Add all filtered assets to selection'
+              }
+            >
+              <SquaresPlusIcon className="w-4" />
+              <span className="ml-2 max-lg:hidden">Select</span>
+            </Button>
 
-        <Button
-          type="button"
-          onClick={handleClearSelection}
-          disabled={selectedAssetsCount === 0}
-          variant="ghost"
-          color="slate"
-          size="medium"
-          title="Clear selection"
-        >
-          <NoSymbolIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Assets</span>
-        </Button>
+            <Button
+              type="button"
+              onClick={handleClearSelection}
+              disabled={selectedAssetsCount === 0}
+              variant="ghost"
+              color="slate"
+              size="medium"
+              title="Clear selection"
+            >
+              <NoSymbolIcon className="w-4" />
+              <span className="ml-2 max-lg:hidden">Assets</span>
+            </Button>
+          </>
+        ) : null}
       </div>
 
       <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium tabular-nums">

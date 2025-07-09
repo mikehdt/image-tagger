@@ -1,16 +1,12 @@
 'use client';
 
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { memo, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Asset } from '../components/asset/asset';
 import { selectFilteredAssets } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
-
-// TODO: Test if this double-memo'ing (see below) is necessary?
-// Create a memoized Asset component to prevent unnecessary re-renders
-const MemoizedAsset = memo(Asset);
 
 type AssetListProps = {
   currentPage?: number;
@@ -46,22 +42,16 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const renderedAssets = useMemo(
     () =>
       paginatedAssets.map(
-        ({ fileId, fileExtension, dimensions, ioState, originalIndex }) => {
-          // Use the originalIndex which represents the asset's position in the global store
-          // This is already 1-based for display purposes
-          const globalItemNumber = originalIndex;
-
-          return (
-            <MemoizedAsset
-              key={fileId}
-              assetId={fileId}
-              assetNumber={globalItemNumber}
-              fileExtension={fileExtension}
-              dimensions={dimensions}
-              ioState={ioState}
-            />
-          );
-        },
+        ({ fileId, fileExtension, dimensions, ioState, originalIndex }) => (
+          <Asset
+            key={fileId}
+            assetId={fileId}
+            assetNumber={originalIndex}
+            fileExtension={fileExtension}
+            dimensions={dimensions}
+            ioState={ioState}
+          />
+        ),
       ),
     [paginatedAssets],
   );

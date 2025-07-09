@@ -1,15 +1,13 @@
 import { QueueListIcon } from '@heroicons/react/24/outline';
-import { RefObject, useCallback, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 
 import { FilterList } from '../../filter-list/filter-list';
 import { PersistentFilterProvider } from '../../filter-list/persistent-filter-context';
 import { Button } from '../../shared/button';
 
-interface TagFilterButtonProps {
-  tagButtonRef: RefObject<HTMLDivElement | null>;
-}
+const TagFilterButtonComponent = () => {
+  const tagButtonRef = useRef<HTMLDivElement>(null);
 
-export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
 
   const onToggleTagPanel = useCallback(
@@ -43,3 +41,5 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
     </div>
   );
 };
+
+export const TagFilterButton = memo(TagFilterButtonComponent);

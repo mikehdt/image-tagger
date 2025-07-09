@@ -31,6 +31,7 @@ export const setupExtraReducers = (
     state.loadProgress = {
       total: 0, // Start with 0 until we get the real count from the client
       completed: 0,
+      failed: 0,
     };
   });
 

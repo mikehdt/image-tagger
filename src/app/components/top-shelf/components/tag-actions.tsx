@@ -5,7 +5,7 @@ import {
   SwatchIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { markFilterTagsToDelete } from '@/app/store/assets';
 import { selectFilterTags } from '@/app/store/filters';
@@ -20,7 +20,7 @@ interface TagActionsProps {
   selectedAssetsCount: number;
 }
 
-export const TagActions = ({ selectedAssetsCount }: TagActionsProps) => {
+const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isToggled, setIsToggled] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
@@ -134,3 +134,5 @@ export const TagActions = ({ selectedAssetsCount }: TagActionsProps) => {
     </>
   );
 };
+
+export const TagActions = memo(TagActionsComponent);

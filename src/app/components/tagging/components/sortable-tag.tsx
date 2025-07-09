@@ -1,7 +1,7 @@
 // External imports
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { SyntheticEvent } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import { memo, useRef } from 'react';
 
 import { useTaggingContext } from '../tagging-context';
@@ -90,29 +90,51 @@ const SortableTagComponent = ({
   };
 
   // Handler for input value changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    // Update via context
-    handleEditValueChange(newValue);
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      // Update via context
+      handleEditValueChange(newValue);
+    },
+    [handleEditValueChange],
+  );
 
   // Handler for saving edits
-  const handleSaveEdit = (e: SyntheticEvent) => {
-    e.stopPropagation();
-    saveEditingTag(e);
-  };
+  const handleSaveEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      saveEditingTag(e);
+    },
+    [saveEditingTag],
+  );
 
   // Handler for canceling edits
-  const handleCancelEdit = (e: SyntheticEvent) => {
-    e.stopPropagation();
-    cancelEditingTag(e);
-  };
+  const handleCancelEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      cancelEditingTag(e);
+    },
+    [cancelEditingTag],
+  );
 
   // Handler for starting edit mode
-  const handleStartEdit = (e: SyntheticEvent) => {
-    e.stopPropagation();
-    startEditingTag(tagName);
-  };
+  const onHandleStartEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      startEditingTag(tagName);
+    },
+    [startEditingTag, tagName],
+  );
+
+  const onHandleToggleTag = useCallback(
+    (e: SyntheticEvent) => handleToggleTag(e, tagName),
+    [handleToggleTag, tagName],
+  );
+
+  const onHandleDeleteTag = useCallback(
+    (e: SyntheticEvent) => handleDeleteTag(e, tagName),
+    [handleDeleteTag, tagName],
+  );
 
   return (
     <div
@@ -143,9 +165,9 @@ const SortableTagComponent = ({
           highlight={isHighlighted(tagName)}
           fade={fade}
           nonInteractive={nonInteractive}
-          onToggleTag={(e) => handleToggleTag(e, tagName)}
-          onDeleteTag={(e) => handleDeleteTag(e, tagName)}
-          onStartEdit={handleStartEdit}
+          onToggleTag={onHandleToggleTag}
+          onDeleteTag={onHandleDeleteTag}
+          onStartEdit={onHandleStartEdit}
           isDraggable={!isEditing}
         />
       )}
@@ -153,22 +175,4 @@ const SortableTagComponent = ({
   );
 };
 
-// Custom equality function for SortableTag - ensure we re-render when props change
-const areSortableTagsEqual = (
-  prevProps: SortableTagProps,
-  nextProps: SortableTagProps,
-) => {
-  return (
-    prevProps.id === nextProps.id &&
-    prevProps.tagName === nextProps.tagName &&
-    prevProps.tagState === nextProps.tagState &&
-    prevProps.count === nextProps.count &&
-    prevProps.fade === nextProps.fade &&
-    prevProps.nonInteractive === nextProps.nonInteractive
-    // Functions references come from context now
-  );
-};
-
-const MemoizedSortableTag = memo(SortableTagComponent, areSortableTagsEqual);
-
-export { MemoizedSortableTag as SortableTag };
+export const SortableTag = memo(SortableTagComponent);

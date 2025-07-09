@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import {
   selectFilterExtensions,
   selectFilterSizes,
@@ -5,7 +7,7 @@ import {
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 
-export const FilterIndicators = () => {
+const FilterIndicatorsComponent = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterTags = useAppSelector(selectFilterTags);
   const filterExtensions = useAppSelector(selectFilterExtensions);
@@ -49,3 +51,5 @@ export const FilterIndicators = () => {
     </div>
   );
 };
+
+export const FilterIndicators = memo(FilterIndicatorsComponent);

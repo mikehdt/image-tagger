@@ -15,7 +15,13 @@ type ButtonColor =
   | 'sky'
   | 'indigo'
   | 'stone';
-type ButtonSize = 'small' | 'smallWide' | 'medium' | 'mediumWide' | 'large';
+type ButtonSize =
+  | 'small'
+  | 'smallSquare'
+  | 'smallWide'
+  | 'medium'
+  | 'mediumWide'
+  | 'large';
 type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
 
 interface ButtonProps {
@@ -42,6 +48,7 @@ interface ButtonProps {
 
 const sizeStyles: Record<ButtonSize, string> = {
   small: 'px-1 py-0.5',
+  smallSquare: 'px-0.5',
   smallWide: 'px-2 py-0.5',
   medium: 'px-2 py-1',
   mediumWide: 'px-4 py-1',

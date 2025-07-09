@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { memo, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -21,7 +21,7 @@ type AssetProps = {
   ioState: IoState;
 };
 
-export const Asset = ({
+export const AssetComponent = ({
   assetId,
   fileExtension,
   assetNumber,
@@ -105,3 +105,5 @@ export const Asset = ({
     </div>
   );
 };
+
+export const Asset = memo(AssetComponent);
