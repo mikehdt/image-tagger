@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import {
   clearExtensionFilters,
   clearSizeFilters,
@@ -22,7 +24,7 @@ export const FilterControls = () => {
   const dispatch = useAppDispatch();
   const filterCount = useAppSelector(selectFilterCount);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     // Dispatch clear filters action based on active view
     if (activeView === 'tag') {
       dispatch(clearTagFilters());
@@ -34,7 +36,18 @@ export const FilterControls = () => {
     // Clear search term and reset selected index
     setSearchTerm('');
     setSelectedIndex(-1);
-  };
+  }, [activeView, dispatch, setSearchTerm, setSelectedIndex]);
+
+  const handleSortType = useCallback(
+    () => setSortType(getSortOptions().nextType),
+    [getSortOptions, setSortType],
+  );
+
+  const handleSortDirection = useCallback(() => {
+    const newDirection: SortDirection =
+      sortDirection === 'asc' ? 'desc' : 'asc';
+    setSortDirection(newDirection);
+  }, [setSortDirection, sortDirection]);
 
   const isButtonDisabled =
     (activeView === 'tag' && filterCount.tags === 0) ||
@@ -44,7 +57,7 @@ export const FilterControls = () => {
   return (
     <>
       <button
-        onClick={() => setSortType(getSortOptions().nextType)}
+        onClick={handleSortType}
         className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
         title="Toggle sort type"
       >
@@ -52,11 +65,7 @@ export const FilterControls = () => {
       </button>
 
       <button
-        onClick={() => {
-          const newDirection: SortDirection =
-            sortDirection === 'asc' ? 'desc' : 'asc';
-          setSortDirection(newDirection);
-        }}
+        onClick={handleSortDirection}
         className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
         title="Toggle sort direction"
       >

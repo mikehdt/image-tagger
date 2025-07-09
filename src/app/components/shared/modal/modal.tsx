@@ -1,6 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 import { useModalPortal } from './modal-provider';
@@ -48,6 +54,11 @@ export const Modal = ({
       }
     },
     [isOpen, onClose],
+  );
+
+  const handleStopPropagation = useCallback(
+    (e: SyntheticEvent) => e.stopPropagation(),
+    [],
   );
 
   // This effect handles the modal open/close animation state
@@ -154,7 +165,7 @@ export const Modal = ({
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-4 scale-95 opacity-0'
             } ${className}`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleStopPropagation}
           >
             {/* Close button */}
             <button

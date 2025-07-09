@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useCallback, useMemo, useState } from 'react';
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -45,21 +45,23 @@ export const Asset = ({
     setImageZoom((prev) => !prev);
   }, []);
 
+  const onToggleAssetSelection = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      dispatch(toggleAssetSelection(assetId));
+    },
+    [assetId, dispatch],
+  );
+
   return (
     <div className="mb-4 flex w-full overflow-hidden rounded-lg border border-slate-300 max-md:flex-col">
       <div
         className={`flex cursor-pointer flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          dispatch(toggleAssetSelection(assetId));
-        }}
+        onClick={onToggleAssetSelection}
       >
         <Checkbox
           isSelected={isSelected}
-          onChange={(e) => {
-            e.stopPropagation();
-            dispatch(toggleAssetSelection(assetId));
-          }}
+          onChange={onToggleAssetSelection}
           ariaLabel={`Select asset ${assetId}`}
         />
 

@@ -3,8 +3,9 @@ import {
   MagnifyingGlassIcon,
   NoSymbolIcon,
   SquaresPlusIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
 import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
@@ -31,20 +32,28 @@ export const AssetSelectionControls = ({
 
   const handleClearSelection = () => dispatch(clearSelection());
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(setSearchQuery(e.target.value));
-  };
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch(setSearchQuery(e.target.value));
+    },
+    [dispatch],
+  );
 
-  const handleSearchFocus = () => {
+  const handleSearchClear = useCallback(() => {
+    dispatch(setSearchQuery(''));
+    searchInputRef.current?.focus();
+  }, [dispatch]);
+
+  const handleSearchFocus = useCallback(() => {
     setIsSearchActive(true);
     searchInputRef.current?.focus();
-  };
+  }, []);
 
-  const handleSearchBlur = () => {
+  const handleSearchBlur = useCallback(() => {
     if (!searchQuery) {
       setIsSearchActive(false);
     }
-  };
+  }, [searchQuery]);
 
   // Get filtered assets directly from the selector
   const filteredCount = filteredAssets.length; // TODO: Check for active filters instead of just the length
@@ -90,9 +99,9 @@ export const AssetSelectionControls = ({
 
           <input
             ref={searchInputRef}
-            className={`rounded-sm px-2 py-1 text-sm transition-all ${
+            className={`rounded-sm bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
               isSearchActive
-                ? 'w-40 opacity-100'
+                ? 'w-50 pe-7 opacity-100'
                 : 'pointer-events-none w-7 opacity-0'
             }`}
             placeholder="Find by asset name..."
@@ -100,6 +109,18 @@ export const AssetSelectionControls = ({
             onChange={handleSearchChange}
             onBlur={handleSearchBlur}
           />
+
+          {isSearchActive ? (
+            <span
+              // In edit mode, the cancel button should always be active regardless of input value
+              className={`absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white`}
+              onClick={handleSearchClear}
+              tabIndex={0}
+              title="Clear search"
+            >
+              <XMarkIcon />
+            </span>
+          ) : null}
         </span>
 
         <Button
@@ -133,12 +154,12 @@ export const AssetSelectionControls = ({
         </Button>
       </div>
 
-      <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium text-slate-400 tabular-nums">
-        <span>
-          S: {selectedAssetsCount} / {allAssets.length}
+      <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium tabular-nums">
+        <span className="text-purple-400" title="Selected assets">
+          {selectedAssetsCount} / {allAssets.length}
         </span>
-        <span>
-          F: {filteredCount} / {allAssets.length}
+        <span className="text-emerald-400" title="Filtered assets">
+          {filteredCount} / {allAssets.length}
         </span>
       </span>
     </>

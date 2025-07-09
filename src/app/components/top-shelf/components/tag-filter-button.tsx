@@ -1,5 +1,5 @@
 import { QueueListIcon } from '@heroicons/react/24/outline';
-import { RefObject, useState } from 'react';
+import { RefObject, useCallback, useState } from 'react';
 
 import { FilterList } from '../../filter-list/filter-list';
 import { PersistentFilterProvider } from '../../filter-list/persistent-filter-context';
@@ -12,13 +12,20 @@ interface TagFilterButtonProps {
 export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
 
+  const onToggleTagPanel = useCallback(
+    () => setIsTagPanelOpen(!isTagPanelOpen),
+    [isTagPanelOpen],
+  );
+
+  const onCloseTagPanel = useCallback(() => setIsTagPanelOpen(false), []);
+
   return (
     <div className="relative" ref={tagButtonRef}>
       <Button
         variant="toggle"
         size="large"
         isPressed={isTagPanelOpen}
-        onClick={() => setIsTagPanelOpen(!isTagPanelOpen)}
+        onClick={onToggleTagPanel}
         title="Show tag summary"
       >
         <QueueListIcon className="w-4" />
@@ -29,7 +36,7 @@ export const TagFilterButton = ({ tagButtonRef }: TagFilterButtonProps) => {
       <PersistentFilterProvider>
         <FilterList
           isOpen={isTagPanelOpen}
-          onClose={() => setIsTagPanelOpen(false)}
+          onClose={onCloseTagPanel}
           containerRef={tagButtonRef}
         />
       </PersistentFilterProvider>

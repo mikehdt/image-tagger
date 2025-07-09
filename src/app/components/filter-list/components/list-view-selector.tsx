@@ -11,6 +11,7 @@ export const ViewSelector = () => {
     setSelectedIndex,
     onClose,
   } = useFilterList();
+
   const handleViewChange = (view: FilterView) => {
     setActiveView(view);
     setSearchTerm('');

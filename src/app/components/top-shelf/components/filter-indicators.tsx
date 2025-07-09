@@ -1,14 +1,14 @@
-interface FilterIndicatorsProps {
-  filterSizes: string[];
-  filterTags: string[];
-  filterExtensions: string[];
-}
+import {
+  selectFilterExtensions,
+  selectFilterSizes,
+  selectFilterTags,
+} from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
 
-export const FilterIndicators = ({
-  filterSizes,
-  filterTags,
-  filterExtensions,
-}: FilterIndicatorsProps) => {
+export const FilterIndicators = () => {
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterTags = useAppSelector(selectFilterTags);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
   const noFilters =
     !filterSizes.length && !filterTags.length && !filterExtensions.length;
 

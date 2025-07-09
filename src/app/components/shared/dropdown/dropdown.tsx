@@ -1,5 +1,11 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 /**
  * Dropdown Item interface - defines the structure of each dropdown option
@@ -162,11 +168,13 @@ export function Dropdown<T>({
     }
   };
 
+  const handleClick = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
         className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${

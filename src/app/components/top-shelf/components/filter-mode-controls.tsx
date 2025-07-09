@@ -2,35 +2,37 @@ import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
-import { FilterMode } from '@/app/store/filters';
+import {
+  FilterMode,
+  selectFilterExtensions,
+  selectFilterMode,
+  selectFilterSizes,
+  selectFilterTags,
+} from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 interface FilterModeControlsProps {
-  filterTagsMode: FilterMode;
   filterModifiedActive: boolean;
   hasModifiedAssets: boolean;
-  filterTags: string[];
-  filterSizes: string[];
-  filterExtensions: string[];
   setTagFilterMode: (mode: FilterMode) => void;
   toggleModifiedFilter: () => void;
   clearFilters: () => void;
 }
 
 export const FilterModeControls = ({
-  filterTagsMode,
   filterModifiedActive,
   hasModifiedAssets,
-  filterTags,
-  filterSizes,
-  filterExtensions,
   setTagFilterMode,
   toggleModifiedFilter,
   clearFilters,
 }: FilterModeControlsProps) => {
-  // Get selected assets count from Redux
+  // Get selectors from Redux
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
+  const filterTagsMode = useAppSelector(selectFilterMode);
+  const filterTags = useAppSelector(selectFilterTags);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
 
   // Derive filter selection active state (for traditional tag/size/extension filters)
   const filterSelectionActive = !!(

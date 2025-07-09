@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React, { SyntheticEvent, useCallback } from 'react';
 
 /**
  * Props for the Checkbox component
@@ -25,12 +25,17 @@ export const Checkbox = ({
   ariaLabel,
   label,
 }: CheckboxProps) => {
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      if (!disabled) onChange(e);
+    },
+    [disabled, onChange],
+  );
+
   return (
     <label
       className={`inline-flex items-start gap-2 text-sm select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
-      onClick={(e) => {
-        if (!disabled) onChange(e);
-      }}
+      onClick={onClick}
       tabIndex={-1} // prevent double tab stop
     >
       <div

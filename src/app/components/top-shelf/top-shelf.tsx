@@ -1,18 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import {
-  markFilterTagsToDelete,
-  selectHasModifiedAssets,
-} from '@/app/store/assets';
+import { selectHasModifiedAssets } from '@/app/store/assets';
 import {
   clearFilters,
   clearModifiedFilter,
   FilterMode,
   resetFilterModeIfNeeded,
-  selectFilterExtensions,
-  selectFilterMode,
-  selectFilterSizes,
-  selectFilterTags,
   selectShowModified,
   setTagFilterMode,
   toggleModifiedFilter,
@@ -32,22 +25,24 @@ export const TopShelf = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
 
-  // Filter selectors
-  const filterTagsMode = useAppSelector(selectFilterMode);
-  const filterTags = useAppSelector(selectFilterTags);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
+  // Filter selectors (only keeping ones needed for useEffects)
   const filterModifiedActive = useAppSelector(selectShowModified);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   // Action handlers
-  const handleMarkFilterTagsToDelete = (tags: string[]) =>
-    dispatch(markFilterTagsToDelete(tags));
-  const handleClearFilters = () => dispatch(clearFilters());
-  const handleSetTagFilterMode = (mode: FilterMode) =>
-    dispatch(setTagFilterMode(mode));
-  const handleToggleModifiedFilter = () => dispatch(toggleModifiedFilter());
+  const handleClearFilters = useCallback(
+    () => dispatch(clearFilters()),
+    [dispatch],
+  );
+  const handleSetTagFilterMode = useCallback(
+    (mode: FilterMode) => dispatch(setTagFilterMode(mode)),
+    [dispatch],
+  );
+  const handleToggleModifiedFilter = useCallback(
+    () => dispatch(toggleModifiedFilter()),
+    [dispatch],
+  );
 
   // Effect to automatically clear the modified filter when there are no more modified assets
   useEffect(() => {
@@ -68,25 +63,13 @@ export const TopShelf = () => {
       <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
         <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
 
-        <FilterIndicators
-          filterSizes={filterSizes}
-          filterTags={filterTags}
-          filterExtensions={filterExtensions}
-        />
+        <FilterIndicators />
 
-        <TagActions
-          filterTags={filterTags}
-          selectedAssetsCount={selectedAssetsCount}
-          markFilterTagsToDelete={handleMarkFilterTagsToDelete}
-        />
+        <TagActions selectedAssetsCount={selectedAssetsCount} />
 
         <FilterModeControls
-          filterTagsMode={filterTagsMode}
           filterModifiedActive={filterModifiedActive}
           hasModifiedAssets={hasModifiedAssets}
-          filterTags={filterTags}
-          filterSizes={filterSizes}
-          filterExtensions={filterExtensions}
           setTagFilterMode={handleSetTagFilterMode}
           toggleModifiedFilter={handleToggleModifiedFilter}
           clearFilters={handleClearFilters}

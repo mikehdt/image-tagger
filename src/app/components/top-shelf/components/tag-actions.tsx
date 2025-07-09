@@ -5,9 +5,11 @@ import {
   SwatchIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { useAppDispatch } from '@/app/store/hooks';
+import { markFilterTagsToDelete } from '@/app/store/assets';
+import { selectFilterTags } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { addTagToSelectedAssets, clearSelection } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
@@ -15,45 +17,56 @@ import { AddTagsModal } from './add-tags-modal';
 import { EditTagsModal } from './edit-tags-modal';
 
 interface TagActionsProps {
-  filterTags: string[];
   selectedAssetsCount: number;
-  markFilterTagsToDelete: (tags: string[]) => void;
 }
 
-export const TagActions = ({
-  filterTags,
-  selectedAssetsCount,
-  markFilterTagsToDelete,
-}: TagActionsProps) => {
+export const TagActions = ({ selectedAssetsCount }: TagActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isToggled, setIsToggled] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
 
   const dispatch = useAppDispatch();
+  const filterTags = useAppSelector(selectFilterTags);
 
-  const openEditModal = () => {
+  const handleMarkFilterTagsToDelete = useCallback(
+    (tags: string[]) => dispatch(markFilterTagsToDelete(tags)),
+    [dispatch],
+  );
+
+  const openAddModel = useCallback(() => setIsAddTagsModalOpen(true), []);
+
+  const openEditModal = useCallback(() => {
     if (filterTags.length > 0) {
       setIsEditModalOpen(true);
     }
-  };
+  }, [filterTags.length]);
 
-  const toggleFilterTagsDelete = () => {
-    markFilterTagsToDelete(filterTags);
+  const toggleFilterTagsDelete = useCallback(() => {
+    handleMarkFilterTagsToDelete(filterTags);
     setIsToggled(!isToggled);
-  };
+  }, [filterTags, isToggled, handleMarkFilterTagsToDelete]);
 
-  const handleAddTag = (tag: string, addToStart = false) => {
-    dispatch(addTagToSelectedAssets({ tagName: tag, addToStart }));
-    setIsAddTagsModalOpen(false);
-  };
+  const handleAddTag = useCallback(
+    (tag: string, addToStart = false) => {
+      dispatch(addTagToSelectedAssets({ tagName: tag, addToStart }));
+      setIsAddTagsModalOpen(false);
+    },
+    [dispatch],
+  );
 
-  const handleClearSelection = () => dispatch(clearSelection());
+  const handleClearSelection = useCallback(
+    () => dispatch(clearSelection()),
+    [dispatch],
+  );
 
-  const handleOnCloseAddModal = () => setIsAddTagsModalOpen(false);
+  const handleOnCloseAddModal = useCallback(
+    () => setIsAddTagsModalOpen(false),
+    [],
+  );
 
-  const handleOnCloseEditModal = () => {
+  const handleOnCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
-  };
+  }, []);
 
   return (
     <>
@@ -67,7 +80,7 @@ export const TagActions = ({
 
         <Button
           type="button"
-          onClick={() => setIsAddTagsModalOpen(true)}
+          onClick={openAddModel}
           disabled={selectedAssetsCount < 2}
           variant="ghost"
           color="slate"

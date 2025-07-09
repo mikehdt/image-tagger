@@ -1,5 +1,5 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { IoState, selectSaveProgress } from '@/app/store/assets';
 import {
@@ -67,6 +67,33 @@ export const AssetMetadata = ({
     [tagList, tagsByStatus, ioState],
   );
 
+  const handleToggleSize = useCallback(
+    () => toggleSize(dimensionsComposed),
+    [dimensionsComposed, toggleSize],
+  );
+
+  const handleToggleExtension = useCallback(
+    () => toggleExtension(fileExtension),
+    [fileExtension, toggleExtension],
+  );
+
+  const handleCancelAction = useCallback(() => {
+    // Extra guard to prevent clicking during tag editing
+    if (isTagEditing || isSaving) {
+      return;
+    }
+    cancelAction();
+  }, [cancelAction, isSaving, isTagEditing]);
+
+  const handleSaveAction = useCallback(() => {
+    // Extra guard to prevent clicking during tag editing
+    if (isTagEditing || isSaving) {
+      return;
+    }
+
+    saveAction();
+  }, [isSaving, isTagEditing, saveAction]);
+
   return (
     <div
       className={`flex w-full items-end space-x-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
@@ -81,7 +108,7 @@ export const AssetMetadata = ({
           color="sky"
           size="smallWide"
           isPressed={dimensionsActive}
-          onClick={() => toggleSize(dimensionsComposed)}
+          onClick={handleToggleSize}
         >
           {dimensions.width}&times;{dimensions.height}
         </Button>
@@ -91,7 +118,7 @@ export const AssetMetadata = ({
           color="stone"
           size="smallWide"
           isPressed={extensionActive}
-          onClick={() => toggleExtension(fileExtension)}
+          onClick={handleToggleExtension}
         >
           {fileExtension}
         </Button>
@@ -109,13 +136,7 @@ export const AssetMetadata = ({
           <Button
             color="stone"
             size="medium"
-            onClick={() => {
-              // Extra guard to prevent clicking during tag editing
-              if (isTagEditing || isSaving) {
-                return;
-              }
-              cancelAction();
-            }}
+            onClick={handleCancelAction}
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
@@ -125,14 +146,7 @@ export const AssetMetadata = ({
           <Button
             color="emerald"
             size="medium"
-            onClick={() => {
-              // Extra guard to prevent clicking during tag editing
-              if (isTagEditing || isSaving) {
-                return;
-              }
-
-              saveAction();
-            }}
+            onClick={handleSaveAction}
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
