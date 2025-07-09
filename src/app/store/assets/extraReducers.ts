@@ -4,6 +4,7 @@ import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
 import {
   clearLoadErrors,
   clearSaveErrors,
+  completeAfterDelay,
   loadAllAssets,
   resetAllTags,
   saveAllAssets,
@@ -36,11 +37,23 @@ export const setupExtraReducers = (
   });
 
   builder.addCase(loadAllAssets.fulfilled, (state, action) => {
-    state.ioState = IoState.COMPLETE;
-    state.ioMessage = undefined;
-    state.images = action.payload;
-    // Clear the load progress
-    state.loadProgress = undefined;
+    // If we have progress data and it shows completion, transition to COMPLETING state first
+    if (
+      state.loadProgress &&
+      state.loadProgress.total > 0 &&
+      state.loadProgress.completed >= state.loadProgress.total
+    ) {
+      state.ioState = IoState.COMPLETING;
+      state.ioMessage = undefined;
+      state.images = action.payload;
+      // Keep progress data briefly to show 100% completion
+    } else {
+      // If no progress tracking (e.g., small datasets), go directly to complete
+      state.ioState = IoState.COMPLETE;
+      state.ioMessage = undefined;
+      state.images = action.payload;
+      state.loadProgress = undefined;
+    }
   });
 
   builder.addCase(loadAllAssets.rejected, (state, action) => {
@@ -93,7 +106,17 @@ export const setupExtraReducers = (
   });
 
   builder.addCase(saveAllAssets.fulfilled, (state, action) => {
-    state.ioState = IoState.COMPLETE;
+    // If we have progress data and it shows completion, transition to COMPLETING state first
+    if (
+      state.saveProgress &&
+      state.saveProgress.total > 0 &&
+      state.saveProgress.completed >= state.saveProgress.total
+    ) {
+      state.ioState = IoState.COMPLETING;
+    } else {
+      // If no progress tracking (e.g., small datasets), go directly to complete
+      state.ioState = IoState.COMPLETE;
+    }
 
     // Apply batch updates to assets if results are provided
     if (action.payload.results && action.payload.results.length > 0) {
@@ -118,8 +141,10 @@ export const setupExtraReducers = (
       state.ioMessage += `, ${action.payload.errorCount} errors`;
     }
 
-    // Clear the progress tracking
-    state.saveProgress = undefined;
+    // Don't clear progress yet if we're in COMPLETING state - let the completion action handle it
+    if (state.ioState === IoState.COMPLETE) {
+      state.saveProgress = undefined;
+    }
   });
 
   builder.addCase(saveAllAssets.rejected, (state, action) => {
@@ -172,5 +197,24 @@ export const setupExtraReducers = (
       state.saveProgress.failed = 0;
       state.saveProgress.errors = undefined;
     }
+  });
+
+  // Add completion delay handlers
+  builder.addCase(completeAfterDelay.pending, () => {
+    // State remains COMPLETING during the delay
+  });
+
+  builder.addCase(completeAfterDelay.fulfilled, (state) => {
+    // Transition to final complete state and clear progress data
+    state.ioState = IoState.COMPLETE;
+    state.loadProgress = undefined;
+    state.saveProgress = undefined;
+  });
+
+  builder.addCase(completeAfterDelay.rejected, (state) => {
+    // Fallback to complete state if delay fails for any reason
+    state.ioState = IoState.COMPLETE;
+    state.loadProgress = undefined;
+    state.saveProgress = undefined;
   });
 };

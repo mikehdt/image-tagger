@@ -1,6 +1,21 @@
 // Async thunk actions
 import { createAction, createAsyncThunk } from '@reduxjs/toolkit';
 
+// Action to handle delayed completion transition (250ms delay to show 100% progress)
+export const completeAfterDelay = createAsyncThunk<void, void>(
+  'assets/completeAfterDelay',
+  async () => {
+    return new Promise<void>((resolve) => {
+      // Use requestAnimationFrame to ensure we wait for the next frame first
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          resolve();
+        }, 350);
+      });
+    });
+  },
+);
+
 // Import removed since DEFAULT_BATCH_SIZE is now used through helpers
 import {
   AssetTagOperation,

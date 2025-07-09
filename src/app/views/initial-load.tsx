@@ -24,7 +24,7 @@ export const InitialLoad = () => {
         <div className="mt-4 w-full">
           <div className="relative h-5 w-full overflow-hidden rounded-full bg-slate-200">
             <div
-              className="flex h-5 items-center justify-end rounded-full bg-emerald-500 transition-all duration-700 ease-out"
+              className="flex h-5 items-center justify-end rounded-full bg-emerald-500 transition-all duration-300 ease-out"
               style={{ width: `${progressPercentage}%` }}
             >
               {progressPercentage >= 10 && (

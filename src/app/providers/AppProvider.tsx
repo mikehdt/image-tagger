@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
+  completeAfterDelay,
   IoState,
   loadAllAssets,
   selectImageCount,
@@ -43,11 +44,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [ioState, router]);
 
+  // Auto-trigger completion delay when state becomes COMPLETING
+  useEffect(() => {
+    if (ioState === IoState.COMPLETING) {
+      dispatch(completeAfterDelay());
+    }
+  }, [ioState, dispatch]);
+
   // Only show the loading screen if we're loading AND we don't have any assets yet
   // This differentiates between initial load and refresh operations
+  // Also show during COMPLETING state to allow progress bar to reach 100%
   if (
     ioState === IoState.INITIAL ||
-    (ioState === IoState.LOADING && imageCount === 0)
+    (ioState === IoState.LOADING && imageCount === 0) ||
+    ioState === IoState.COMPLETING
   ) {
     return <InitialLoad />;
   }

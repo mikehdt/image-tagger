@@ -3,6 +3,7 @@ export enum IoState {
   INITIAL = 'Initial',
   LOADING = 'Loading',
   SAVING = 'Saving',
+  COMPLETING = 'Completing', // Brief state to show 100% progress before transitioning to complete
   COMPLETE = 'Complete',
   ERROR = 'IoError',
 }
