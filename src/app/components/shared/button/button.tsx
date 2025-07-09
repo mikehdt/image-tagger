@@ -20,8 +20,8 @@ type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
 
 interface ButtonProps {
   children: ReactNode;
-  onClick?: (e?: SyntheticEvent) => void;
-  onSubmit?: (e?: SyntheticEvent) => void;
+  onClick?: (e: SyntheticEvent) => void;
+  onSubmit?: (e: SyntheticEvent) => void;
   type?: 'button' | 'submit';
   disabled?: boolean;
   className?: string;
@@ -168,17 +168,17 @@ export const Button = ({
   neutralDisabled = false,
   ...props
 }: ButtonProps) => {
-  const handleClick = () => {
+  const handleClick = (e: SyntheticEvent) => {
     if (disabled) return;
     if (type === 'submit' && onSubmit) {
-      onSubmit();
+      onSubmit(e);
     } else if (onClick) {
-      onClick();
+      onClick(e);
     }
   };
 
   const baseStyle = {
-    common: `flex items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`,
+    common: `flex justify-center items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`,
     normal: 'inset-shadow-xs inset-shadow-white',
     disabled: 'opacity-60',
     ghost: 'hover:inset-shadow-xs hover:inset-shadow-white',

@@ -6,7 +6,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { selectFilteredAssets } from '@/app/store/assets';
+import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
 import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -45,6 +45,10 @@ export const AssetSelectionControls = ({
       setIsSearchActive(false);
     }
   };
+
+  // Get filtered assets directly from the selector
+  const filteredCount = filteredAssets.length; // TODO: Check for active filters instead of just the length
+  const allAssets = useAppSelector(selectAllImages);
 
   // Keep search input visible if there's a search query
   useEffect(() => {
@@ -129,8 +133,13 @@ export const AssetSelectionControls = ({
         </Button>
       </div>
 
-      <span className="cursor-default rounded-full border border-slate-300 px-2 text-xs font-medium text-slate-400 tabular-nums">
-        {selectedAssetsCount}
+      <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium text-slate-400 tabular-nums">
+        <span>
+          S: {selectedAssetsCount} / {allAssets.length}
+        </span>
+        <span>
+          F: {filteredCount} / {allAssets.length}
+        </span>
       </span>
     </>
   );

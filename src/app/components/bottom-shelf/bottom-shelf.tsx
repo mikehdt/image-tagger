@@ -9,7 +9,6 @@ import {
   loadAllAssets,
   resetAllTags,
   saveAllAssets,
-  selectAllImages,
   selectFilteredAssets,
   selectHasModifiedAssets,
   selectIoState,
@@ -31,7 +30,6 @@ type BottomShelfProps = {
 
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const dispatch = useAppDispatch();
-  const allAssets = useAppSelector(selectAllImages);
   const paginationSize = useAppSelector(selectPaginationSize);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
@@ -48,7 +46,6 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   // Get filtered assets directly from the selector
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const filteredCount = filteredAssets.length;
-  const isFiltered = filteredCount !== allAssets.length;
 
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
@@ -71,16 +68,6 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
               <ArrowPathIcon className="w-6" />
             </Button>
           )}
-
-          <span>
-            {isFiltered && (
-              <>
-                {filteredCount} filtered items
-                <br />
-              </>
-            )}
-            {allAssets.length} items total
-          </span>
 
           <PaginationControls
             currentPage={currentPage}

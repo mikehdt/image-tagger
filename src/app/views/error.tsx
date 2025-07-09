@@ -24,26 +24,21 @@ export const Error = ({ onReload }: ErrorProps) => {
         An I/O error occurred
       </h1>
 
-      <p className="mt-4 w-full">
-        <Button
-          onClick={handleRetry}
-          color="sky"
-          size="mediumWide"
-          className="min-w-30"
-        >
+      <p className="mt-4 flex w-full justify-center">
+        <Button onClick={handleRetry} size="mediumWide">
           Retry
         </Button>
       </p>
 
-      {errorMessage && (
-        <p className="mt-2 w-full text-rose-500">{String(errorMessage)}</p>
-      )}
+      {errorMessage ? (
+        <p className="mt-4 w-full text-rose-500">{String(errorMessage)}</p>
+      ) : null}
 
-      {loadProgress && (
-        <p className="mt-2 w-full text-xs text-slate-500 tabular-nums">
+      {loadProgress ? (
+        <p className="mt-4 w-full text-xs text-slate-500 tabular-nums">
           {loadProgress.completed} / {loadProgress.total}
         </p>
-      )}
+      ) : null}
     </div>
   );
 };

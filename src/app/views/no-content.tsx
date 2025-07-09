@@ -3,6 +3,8 @@
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import type { SyntheticEvent } from 'react';
 
+import { Button } from '../components/shared/button';
+
 type NoContentProps = { onReload: () => void };
 
 export const NoContent = ({ onReload }: NoContentProps) => {
@@ -19,13 +21,11 @@ export const NoContent = ({ onReload }: NoContentProps) => {
         No assets were found
       </h1>
 
-      <a
-        href="#"
-        onClick={doReload}
-        className="rounded-sm bg-slate-200 px-4 py-1 transition-colors hover:bg-slate-400 hover:text-white"
-      >
-        Refresh
-      </a>
+      <p className="mt-4 flex w-full justify-center">
+        <Button onClick={doReload} size="mediumWide">
+          Refresh
+        </Button>
+      </p>
     </div>
   );
 };

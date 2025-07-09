@@ -96,6 +96,15 @@ export const editTagsAcrossAssets = createAsyncThunk(
     const modifiedAssetCount: Record<string, number> = {};
     const tagsToDelete: string[] = [];
 
+    // Create a snapshot of the original asset state to avoid interference between operations
+    const originalAssetState = new Map(
+      allAssets.map((asset) => [asset.fileId, [...asset.tagList]]),
+    );
+
+    // Track which assets have already had a tag renamed to each target name
+    // This prevents multiple tags from being renamed to the same value in the same asset
+    const assetRenamedTargets = new Map<string, Set<string>>();
+
     // Process each tag update
     tagUpdates.forEach(({ oldTagName, newTagName, operation }) => {
       // Skip empty or unchanged tags
@@ -104,21 +113,54 @@ export const editTagsAcrossAssets = createAsyncThunk(
       }
 
       if (operation === 'DELETE') {
-        // Collect tags to be marked for deletion
-        tagsToDelete.push(oldTagName);
+        // For DELETE operations, check if this is a duplicate prevention delete
+        // (when newTagName != oldTagName, it means this tag was intended to be renamed
+        // but is being deleted due to duplicate detection)
+        if (newTagName.trim() !== oldTagName) {
+          // This is a duplicate prevention delete - handle it like a rename that creates duplicates
+          allAssets.forEach((asset) => {
+            if (asset.tagList.includes(oldTagName)) {
+              dispatch(
+                deleteTag({
+                  assetId: asset.fileId,
+                  tagName: oldTagName,
+                }),
+              );
+
+              // Count modifications
+              modifiedAssetCount[oldTagName] =
+                (modifiedAssetCount[oldTagName] || 0) + 1;
+            }
+          });
+        } else {
+          // Regular delete operation - collect tags to be marked for deletion
+          tagsToDelete.push(oldTagName);
+        }
         return;
       }
 
       // Handle RENAME operations
       if (operation === 'RENAME') {
+        const trimmedNewName = newTagName.trim();
+
         // Find all assets with this tag
         allAssets.forEach((asset) => {
           if (asset.tagList.includes(oldTagName)) {
-            // Check if the asset already has the new tag
-            if (asset.tagList.includes(newTagName.trim())) {
-              // Asset already has the target tag, so:
-              // Don't rename - just mark the original tag for deletion (TO_DELETE)
-              // The existing target tag stays unchanged
+            // Initialize tracking for this asset if needed
+            if (!assetRenamedTargets.has(asset.fileId)) {
+              assetRenamedTargets.set(asset.fileId, new Set());
+            }
+            const assetTargets = assetRenamedTargets.get(asset.fileId)!;
+
+            // Check against the ORIGINAL asset state for existing duplicates
+            const originalTags = originalAssetState.get(asset.fileId) || [];
+            const originallyHadTarget = originalTags.includes(trimmedNewName);
+
+            // Check if we've already renamed another tag to this target in this operation
+            const alreadyRenamedToTarget = assetTargets.has(trimmedNewName);
+
+            if (originallyHadTarget || alreadyRenamedToTarget) {
+              // Mark the ORIGINAL tag for deletion, not the target
               dispatch(
                 deleteTag({
                   assetId: asset.fileId,
@@ -126,14 +168,16 @@ export const editTagsAcrossAssets = createAsyncThunk(
                 }),
               );
             } else {
-              // Normal rename - asset doesn't have the target tag
               dispatch(
                 editTag({
                   assetId: asset.fileId,
                   oldTagName,
-                  newTagName: newTagName.trim(),
+                  newTagName: trimmedNewName,
                 }),
               );
+
+              // Track that we've renamed a tag to this target in this asset
+              assetTargets.add(trimmedNewName);
             }
 
             // Count modifications

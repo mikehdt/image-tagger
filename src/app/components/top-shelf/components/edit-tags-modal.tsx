@@ -57,7 +57,7 @@ const processTagUpdatesWithDuplicateHandling = (
     if (status === 'all') {
       result.push({
         oldTagName: originalTag,
-        newTagName: originalTag, // Keep original name
+        newTagName: trimmedValue, // Pass the intended target name
         operation: 'DELETE',
       });
       return;
@@ -65,10 +65,11 @@ const processTagUpdatesWithDuplicateHandling = (
 
     // Check if this new name has already been used by a previous tag (precedence rule)
     if (usedNewNames.has(trimmedValue)) {
-      // This tag loses precedence - mark for deletion but keep original name
+      // This tag loses precedence - mark for deletion but pass the intended new name
+      // so the thunk can handle the duplicate logic properly
       result.push({
         oldTagName: originalTag,
-        newTagName: originalTag, // Keep original name
+        newTagName: trimmedValue, // Pass the intended target name, not the original
         operation: 'DELETE',
       });
       return;
