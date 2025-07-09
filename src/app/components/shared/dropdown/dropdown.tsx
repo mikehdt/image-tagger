@@ -177,7 +177,7 @@ export function Dropdown<T>({
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
           isOpen
             ? 'bg-white shadow-sm'
             : 'bg-white shadow-sm hover:bg-slate-200'
@@ -191,7 +191,7 @@ export function Dropdown<T>({
             : selectedItem?.label}
         </span>
         <ChevronDownIcon
-          className={`ml-1 h-3 w-3 transition-transform ${
+          className={`ml-2 h-3 w-3 transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

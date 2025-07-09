@@ -47,13 +47,16 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const filteredCount = filteredAssets.length;
 
+  const ioInProgress =
+    ioState === IoState.LOADING ||
+    ioState === IoState.SAVING ||
+    ioState === IoState.COMPLETING;
+
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
-          {ioState === IoState.LOADING ||
-          ioState === IoState.SAVING ||
-          ioState === IoState.COMPLETING ? (
+          {ioInProgress ? (
             <LoadingStatus
               ioState={ioState}
               saveProgress={saveProgress}
@@ -71,9 +74,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             </Button>
           )}
 
-          {ioState !== IoState.LOADING &&
-          ioState !== IoState.SAVING &&
-          ioState !== IoState.COMPLETING ? (
+          {!ioInProgress ? (
             <PaginationControls
               currentPage={currentPage}
               totalPages={
@@ -96,7 +97,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             size="medium"
             ghostDisabled
             onClick={cancelAllChanges}
-            disabled={!hasModifiedAssets}
+            disabled={!hasModifiedAssets || ioInProgress}
             title={
               hasModifiedAssets
                 ? 'Cancel all tag changes'
@@ -114,7 +115,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             ghostDisabled
             neutralDisabled
             onClick={saveAllChanges}
-            disabled={!hasModifiedAssets}
+            disabled={!hasModifiedAssets || ioInProgress}
             title={
               hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
             }
