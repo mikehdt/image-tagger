@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions } from '@/app/utils/helpers';
 import { highlightText } from '@/app/utils/text-highlight';
 
-import { useFilterList } from '../filter-list-context';
+import { useOptimizedFilterContext } from '../optimized-filter-context';
 import { SortDirection, SortType } from '../types';
 
 /**
@@ -301,7 +301,7 @@ export const SizesView = () => {
     updateListLength,
     selectedIndex,
     inputRef,
-  } = useFilterList();
+  } = useOptimizedFilterContext();
 
   // Filter and sort sizes based on search term and sort settings
   const filteredSizes = useMemo(() => {

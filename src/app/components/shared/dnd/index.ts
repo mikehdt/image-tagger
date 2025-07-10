@@ -6,5 +6,6 @@
  */
 
 // Core drag and drop functionality
+export * from './hooks/use-optimized-sortable';
 export * from './hooks/use-sortable';
 export * from './sortable-provider';

@@ -1,6 +1,6 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-import { useFilterList } from '../filter-list-context';
+import { useOptimizedFilterContext } from '../optimized-filter-context';
 import { FilterView } from '../types';
 
 export const ViewSelector = () => {
@@ -10,7 +10,7 @@ export const ViewSelector = () => {
     setSearchTerm,
     setSelectedIndex,
     onClose,
-  } = useFilterList();
+  } = useOptimizedFilterContext();
 
   const handleViewChange = (view: FilterView) => {
     setActiveView(view);

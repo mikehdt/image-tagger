@@ -8,7 +8,7 @@ import {
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { useFilterList } from '../filter-list-context';
+import { useOptimizedFilterContext } from '../optimized-filter-context';
 import { SortDirection } from '../types';
 
 export const FilterControls = () => {
@@ -20,7 +20,7 @@ export const FilterControls = () => {
     setSearchTerm,
     setSelectedIndex,
     getSortOptions,
-  } = useFilterList();
+  } = useOptimizedFilterContext();
   const dispatch = useAppDispatch();
   const filterCount = useAppSelector(selectFilterCount);
 

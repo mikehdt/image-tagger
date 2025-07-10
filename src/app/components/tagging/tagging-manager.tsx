@@ -1,9 +1,9 @@
 import { DragEndEvent } from '@dnd-kit/core';
 
-import { SortableProvider, useSortable } from '../shared/dnd';
-import { TagList } from './components';
+import { SortableProvider, useOptimizedSortable } from '../shared/dnd';
+import { OptimizedTagList } from './components/optimized-tag-list';
 import { useAssetTags } from './hooks';
-import { TaggingProvider } from './tagging-context';
+import { OptimizedTaggingProvider } from './optimized-tagging-context';
 
 /**
  * TaggingManager - A comprehensive component that connects asset data with tagging functionality
@@ -41,7 +41,10 @@ export const TaggingManager = ({
   } = useAssetTags(assetId);
 
   // Set up sortable functionality for the tags
-  const { sensors, handleDragEnd } = useSortable(tagList, reorderAssetTags);
+  const { sensors, handleDragEnd } = useOptimizedSortable(
+    tagList,
+    reorderAssetTags,
+  );
 
   // Handle the drag end event for tag reordering
   const onDragEnd = (event: DragEndEvent) => {
@@ -50,25 +53,25 @@ export const TaggingManager = ({
 
   return (
     <div className={className}>
-      <SortableProvider
-        items={tagList}
-        sensors={sensors}
-        onDragEnd={onDragEnd}
-        strategy="rect"
-        id={`taglist-${assetId}`}
+      <OptimizedTaggingProvider
+        assetId={assetId}
+        tagList={tagList}
+        tagsByStatus={tagsByStatus}
+        globalTagList={globalTagList}
+        filterTagsSet={filterTagsSet}
+        toggleTag={toggleTag}
+        onTagEditingChange={onTagEditingChange}
       >
-        <TaggingProvider
-          assetId={assetId}
-          tagList={tagList}
-          tagsByStatus={tagsByStatus}
-          globalTagList={globalTagList}
-          filterTagsSet={filterTagsSet}
-          toggleTag={toggleTag}
-          onTagEditingChange={onTagEditingChange}
+        <SortableProvider
+          items={tagList}
+          sensors={sensors}
+          onDragEnd={onDragEnd}
+          strategy="rect"
+          id={`taglist-${assetId}`}
         >
-          <TagList />
-        </TaggingProvider>
-      </SortableProvider>
+          <OptimizedTagList />
+        </SortableProvider>
+      </OptimizedTaggingProvider>
     </div>
   );
 };
