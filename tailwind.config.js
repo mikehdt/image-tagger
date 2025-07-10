@@ -12,6 +12,9 @@ module.exports = {
         mono: ['var(--font-geist-mono)', 'monospace'],
       },
     },
+    transitionDuration: {
+      DEFAULT: '200ms',
+    },
   },
   plugins: [],
 };

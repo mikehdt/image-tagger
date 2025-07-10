@@ -1,16 +1,9 @@
-import {
-  ArrowPathIcon,
-  BookmarkSlashIcon,
-  BookmarkSquareIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 import {
   IoState,
   loadAllAssets,
-  resetAllTags,
-  saveAllAssets,
   selectFilteredAssets,
-  selectHasModifiedAssets,
   selectIoState,
   selectLoadProgress,
   selectSaveProgress,
@@ -22,6 +15,7 @@ import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
 import { LoadingStatus } from './components';
+import { IoActions } from './components/io-actions';
 
 type BottomShelfProps = {
   currentPage?: number;
@@ -31,7 +25,6 @@ type BottomShelfProps = {
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const dispatch = useAppDispatch();
   const paginationSize = useAppSelector(selectPaginationSize);
-  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
   // IO state selectors
   const ioState = useAppSelector(selectIoState);
@@ -40,8 +33,6 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
 
   // Action handlers
   const doRefresh = () => dispatch(loadAllAssets());
-  const saveAllChanges = () => dispatch(saveAllAssets());
-  const cancelAllChanges = () => dispatch(resetAllTags());
 
   // Get filtered assets directly from the selector
   const filteredAssets = useAppSelector(selectFilteredAssets);
@@ -92,37 +83,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
         </div>
 
         <div className="flex w-1/4 items-center justify-end space-x-2 text-sm">
-          <Button
-            type="button"
-            size="medium"
-            ghostDisabled
-            onClick={cancelAllChanges}
-            disabled={!hasModifiedAssets || ioInProgress}
-            title={
-              hasModifiedAssets
-                ? 'Cancel all tag changes'
-                : 'No changes to cancel'
-            }
-          >
-            <BookmarkSlashIcon className="w-4" />
-            <span className="ml-1 max-lg:hidden">Cancel All</span>
-          </Button>
-
-          <Button
-            type="button"
-            size="medium"
-            color="emerald"
-            ghostDisabled
-            neutralDisabled
-            onClick={saveAllChanges}
-            disabled={!hasModifiedAssets || ioInProgress}
-            title={
-              hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
-            }
-          >
-            <BookmarkSquareIcon className="w-4" />
-            <span className="ml-1 max-lg:hidden">Save All</span>
-          </Button>
+          <IoActions ioInProgress={ioInProgress} />
         </div>
       </div>
     </div>
