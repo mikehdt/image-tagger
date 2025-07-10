@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo } from 'react';
 
 import { selectImageSizes } from '@/app/store/assets';
 import { selectFilterSizes, toggleSizeFilter } from '@/app/store/filters';
@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions } from '@/app/utils/helpers';
 import { highlightText } from '@/app/utils/text-highlight';
 
-import { useOptimizedFilterContext } from '../optimized-filter-context';
+import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
 
 /**
@@ -301,7 +301,7 @@ export const SizesView = () => {
     updateListLength,
     selectedIndex,
     inputRef,
-  } = useOptimizedFilterContext();
+  } = useFilterContext();
 
   // Filter and sort sizes based on search term and sort settings
   const filteredSizes = useMemo(() => {

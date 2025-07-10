@@ -1,7 +1,7 @@
 import { QueueListIcon } from '@heroicons/react/24/outline';
 import { memo, useCallback, useRef, useState } from 'react';
 
-import { OptimizedFilterList } from '../../filter-list/optimized-filter-list';
+import { FilterList } from '../../filter-list/filter-list';
 import { Button } from '../../shared/button';
 
 const TagFilterButtonComponent = () => {
@@ -30,7 +30,7 @@ const TagFilterButtonComponent = () => {
         <span className="ml-2 max-lg:hidden">Filters</span>
       </Button>
 
-      <OptimizedFilterList
+      <FilterList
         isOpen={isTagPanelOpen}
         onClose={onCloseTagPanel}
         containerRef={tagButtonRef}

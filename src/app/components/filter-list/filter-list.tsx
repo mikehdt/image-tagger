@@ -8,7 +8,7 @@ import {
   TagsView,
   ViewSelector,
 } from './components';
-import { FilterListProvider, useFilterList } from './filter-list-context';
+import { FilterProvider, useFilterContext } from './filter-context';
 import { SearchProvider } from './search-context';
 import { FilterListProps } from './types';
 
@@ -17,19 +17,18 @@ export const FilterList = ({
   onClose,
   containerRef,
 }: FilterListProps) => {
-  // Use the provider pattern to share state with all children
   return (
-    <FilterListProvider
+    <FilterProvider
       isOpen={isOpen}
       onClose={onClose}
       containerRef={containerRef}
     >
       <FilterPanel />
-    </FilterListProvider>
+    </FilterProvider>
   );
 };
 
-// This component represents the panel itself and uses the context
+// This component represents the panel itself and uses the  context
 const FilterPanel = () => {
   const {
     position,
@@ -40,17 +39,26 @@ const FilterPanel = () => {
     setSearchTerm,
     inputRef,
     handleKeyDown,
-    isOpen, // We use isOpen directly from context
-  } = useFilterList();
+    isOpen,
+  } = useFilterContext();
 
-  // We're simplifying to match the dropdown behavior
-  // We'll use absolute positioning with calculated position adjustment
+  // Simplified positioning logic
   const [panelPosition, setPanelPosition] = useState({ right: true, left: 0 });
+
+  const [renderList, setRenderList] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRenderList(true);
+    } else if (!isOpen && renderList) {
+      setTimeout(() => setRenderList(false), 150);
+    }
+  }, [isOpen, renderList]);
 
   // Calculate position when the panel opens or its positioning changes
   useEffect(() => {
     if (isOpen && isPositioned) {
-      // Use right alignment by default (similar to dropdown's alignRight)
+      // Use right alignment by default
       let useRightAlignment = true;
       let leftPosition = 0;
 
@@ -67,7 +75,7 @@ const FilterPanel = () => {
     }
   }, [isOpen, isPositioned, position]);
 
-  // Focus the search input when the panel opens and search is available
+  // Focus the search input when the panel opens
   useEffect(() => {
     if (
       isOpen &&
@@ -75,12 +83,9 @@ const FilterPanel = () => {
       inputRef.current &&
       activeView !== 'filetype'
     ) {
-      // Use requestAnimationFrame to focus after the next paint
-      // This ensures the panel is fully rendered and visible
       const frameId = requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
-
       return () => cancelAnimationFrame(frameId);
     }
   }, [isOpen, isPositioned, inputRef, activeView]);
@@ -91,7 +96,7 @@ const FilterPanel = () => {
       style={{
         right: panelPosition.right ? 0 : 'auto',
         left: panelPosition.right ? 'auto' : `${panelPosition.left}px`,
-        minWidth: '256px', // 16rem = 256px (w-64)
+        minWidth: '256px',
       }}
       className={`absolute z-20 mt-1 flex max-h-[80vh] w-64 origin-top-right flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg transition-all duration-150 ease-in-out ${
         isOpen
@@ -99,38 +104,42 @@ const FilterPanel = () => {
           : 'pointer-events-none scale-95 opacity-0'
       }`}
     >
-      <div className="inline-flex w-full items-center bg-slate-100 p-2">
-        <ViewSelector />
-      </div>
+      {renderList ? (
+        <>
+          <div className="inline-flex w-full items-center bg-slate-100 p-2">
+            <ViewSelector />
+          </div>
 
-      <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
-        <FilterControls />
-      </div>
+          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
+            <FilterControls />
+          </div>
 
-      {/* Only show search box for tag and size views, not for filetype view */}
-      {activeView !== 'filetype' && (
-        <div className="relative inline-flex bg-slate-50 px-2 pb-2">
-          <SearchProvider
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            inputRef={inputRef}
-            handleKeyDown={handleKeyDown}
-            activeView={activeView}
-          >
-            <SearchInput />
-          </SearchProvider>
-        </div>
-      )}
+          {/* Only show search box for tag and size views */}
+          {activeView !== 'filetype' && (
+            <div className="relative inline-flex bg-slate-50 px-2 pb-2">
+              <SearchProvider
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                inputRef={inputRef}
+                handleKeyDown={handleKeyDown}
+                activeView={activeView}
+              >
+                <SearchInput />
+              </SearchProvider>
+            </div>
+          )}
 
-      <div className="overflow-y-auto border-t border-slate-200">
-        {activeView === 'tag' ? (
-          <TagsView />
-        ) : activeView === 'size' ? (
-          <SizesView />
-        ) : (
-          <FiletypesView />
-        )}
-      </div>
+          <div className="overflow-y-auto border-t border-slate-200">
+            {activeView === 'tag' ? (
+              <TagsView />
+            ) : activeView === 'size' ? (
+              <SizesView />
+            ) : (
+              <FiletypesView />
+            )}
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

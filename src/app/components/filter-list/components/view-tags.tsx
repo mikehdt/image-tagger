@@ -5,7 +5,7 @@ import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { highlightText } from '@/app/utils/text-highlight';
 
-import { useOptimizedFilterContext } from '../optimized-filter-context';
+import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
 
 // Get sort options for the tags view
@@ -59,7 +59,7 @@ export const TagsView = () => {
     updateListLength,
     selectedIndex,
     inputRef,
-  } = useOptimizedFilterContext();
+  } = useFilterContext();
 
   // Filter and sort tags based on search term and sort settings
   const filteredTags = useMemo(() => {

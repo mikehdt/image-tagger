@@ -7,7 +7,7 @@ import {
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { useOptimizedFilterContext } from '../optimized-filter-context';
+import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
 
 // Get sort options for the filetypes view
@@ -55,7 +55,7 @@ export const FiletypesView = () => {
   const activeExtensions = useAppSelector(selectFilterExtensions);
 
   const { sortType, sortDirection, updateListLength, selectedIndex } =
-    useOptimizedFilterContext();
+    useFilterContext();
 
   // Get extension data from store
   const extensionList = useMemo(() => {

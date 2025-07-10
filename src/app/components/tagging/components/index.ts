@@ -1,3 +1,2 @@
-export { OptimizedSortableTag } from './optimized-sortable-tag';
-export { OptimizedTagList } from './optimized-tag-list';
+export { SortableTag } from './sortable-tag';
 export { TagList } from './tag-list';

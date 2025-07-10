@@ -20,7 +20,6 @@ FilterList                 # Main container for filter functionality
 
 ## Hook Dependencies
 
-- useFilterState - Manages filter panel state (sort, search, view selection)
 - useKeyboardNavigation - Handles keyboard interaction for accessibility
 - usePanelPosition - Calculates and manages panel positioning
 - useOutsideClick - Detects clicks outside the panel for closing

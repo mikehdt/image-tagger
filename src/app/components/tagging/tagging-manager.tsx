@@ -1,9 +1,9 @@
 import { DragEndEvent } from '@dnd-kit/core';
 
-import { SortableProvider, useOptimizedSortable } from '../shared/dnd';
-import { OptimizedTagList } from './components/optimized-tag-list';
+import { SortableProvider, useSortable } from '../shared/dnd';
+import { TagList } from './components/tag-list';
 import { useAssetTags } from './hooks';
-import { OptimizedTaggingProvider } from './optimized-tagging-context';
+import { TaggingProvider } from './tagging-context';
 
 /**
  * TaggingManager - A comprehensive component that connects asset data with tagging functionality
@@ -41,10 +41,7 @@ export const TaggingManager = ({
   } = useAssetTags(assetId);
 
   // Set up sortable functionality for the tags
-  const { sensors, handleDragEnd } = useOptimizedSortable(
-    tagList,
-    reorderAssetTags,
-  );
+  const { sensors, handleDragEnd } = useSortable(tagList, reorderAssetTags);
 
   // Handle the drag end event for tag reordering
   const onDragEnd = (event: DragEndEvent) => {
@@ -53,7 +50,7 @@ export const TaggingManager = ({
 
   return (
     <div className={className}>
-      <OptimizedTaggingProvider
+      <TaggingProvider
         assetId={assetId}
         tagList={tagList}
         tagsByStatus={tagsByStatus}
@@ -69,9 +66,9 @@ export const TaggingManager = ({
           strategy="rect"
           id={`taglist-${assetId}`}
         >
-          <OptimizedTagList />
+          <TagList />
         </SortableProvider>
-      </OptimizedTaggingProvider>
+      </TaggingProvider>
     </div>
   );
 };

@@ -16,7 +16,7 @@ import {
 } from './hooks';
 import { FilterListProps, FilterView, SortDirection, SortType } from './types';
 
-interface OptimizedFilterContextType {
+interface FilterContextType {
   // Panel visibility and positioning
   isOpen: boolean;
   position: { top: number; left: number };
@@ -52,11 +52,9 @@ interface OptimizedFilterContextType {
   };
 }
 
-const OptimizedFilterContext = createContext<
-  OptimizedFilterContextType | undefined
->(undefined);
+const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
-export const OptimizedFilterProvider = ({
+export const FilterProvider = ({
   children,
   isOpen,
   onClose,
@@ -86,7 +84,7 @@ export const OptimizedFilterProvider = ({
   // Get current sort settings based on active view
   const currentSort = sortSettings[activeView];
 
-  // Optimized sort setters that update the correct view settings
+  //  sort setters that update the correct view settings
   const setSortDirection = useCallback(
     (direction: SortDirection) => {
       setSortSettings((prev) => ({
@@ -207,22 +205,20 @@ export const OptimizedFilterProvider = ({
   );
 
   return (
-    <OptimizedFilterContext.Provider value={contextValue}>
+    <FilterContext.Provider value={contextValue}>
       {children}
-    </OptimizedFilterContext.Provider>
+    </FilterContext.Provider>
   );
 };
 
 // Hook for consuming the context
-export const useOptimizedFilterContext = () => {
-  const context = useContext(OptimizedFilterContext);
+export const useFilterContext = () => {
+  const context = useContext(FilterContext);
   if (context === undefined) {
-    throw new Error(
-      'useOptimizedFilterContext must be used within an OptimizedFilterProvider',
-    );
+    throw new Error('useFilterContext must be used within an FilterProvider');
   }
   return context;
 };
 
 // For backwards compatibility
-export const useFilterList = useOptimizedFilterContext;
+export const useFilterList = useFilterContext;

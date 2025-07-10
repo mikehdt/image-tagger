@@ -11,17 +11,19 @@ import { Tag } from './tag';
 type SortableTagProps = {
   id: string;
   tagName: string;
-  fade?: boolean;
-  nonInteractive?: boolean;
-  tagState?: number;
-  count?: number;
+  fade: boolean;
+  nonInteractive: boolean;
+  tagState: number;
+  count: number;
 };
 
 const SortableTagComponent = ({
   id,
   tagName,
-  fade = false,
-  nonInteractive = false,
+  fade,
+  nonInteractive,
+  tagState,
+  count,
 }: SortableTagProps) => {
   const {
     isTagBeingEdited,
@@ -34,8 +36,6 @@ const SortableTagComponent = ({
     handleDeleteTag,
     handleToggleTag,
     isHighlighted,
-    tagsByStatus,
-    globalTagList,
   } = useTaggingContext();
 
   const isEditing = isTagBeingEdited(tagName);
@@ -49,7 +49,7 @@ const SortableTagComponent = ({
     isDragging,
   } = useSortable({
     id,
-    // Use custom animation settings optimized for flex-wrap layout
+    // Use custom animation settings  for flex-wrap layout
     animateLayoutChanges: ({
       isSorting,
       isDragging,
@@ -160,8 +160,8 @@ const SortableTagComponent = ({
       ) : (
         <Tag
           tagName={tagName}
-          tagState={tagsByStatus[tagName] || 0}
-          count={globalTagList[tagName] || 0}
+          tagState={tagState}
+          count={count}
           highlight={isHighlighted(tagName)}
           fade={fade}
           nonInteractive={nonInteractive}
