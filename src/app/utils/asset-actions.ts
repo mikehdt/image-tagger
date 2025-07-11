@@ -14,15 +14,66 @@ import {
 
 const dataPath = './public/assets';
 
+/**
+ * Helper function to detect duplicate fileIds and return filtered results
+ * @param files Array of image filenames
+ * @returns Object with unique files and any duplicate warnings
+ */
+const detectDuplicateFileIds = (
+  files: string[],
+): {
+  uniqueFiles: string[];
+  duplicateWarnings: string[];
+} => {
+  const fileIdMap = new Map<string, string[]>();
+
+  // Group files by their fileId (filename without extension)
+  files.forEach((file) => {
+    const fileId = file.substring(0, file.lastIndexOf('.'));
+    if (!fileIdMap.has(fileId)) {
+      fileIdMap.set(fileId, []);
+    }
+    fileIdMap.get(fileId)!.push(file);
+  });
+
+  const uniqueFiles: string[] = [];
+  const duplicateWarnings: string[] = [];
+
+  // Process each group and identify duplicates
+  fileIdMap.forEach((filesGroup, fileId) => {
+    if (filesGroup.length > 1) {
+      duplicateWarnings.push(
+        `Duplicate fileId "${fileId}" found in files: ${filesGroup.join(', ')}. Using: ${filesGroup[0]}`,
+      );
+      uniqueFiles.push(filesGroup[0]); // Use the first file found
+    } else {
+      uniqueFiles.push(filesGroup[0]);
+    }
+  });
+
+  return { uniqueFiles, duplicateWarnings };
+};
+
 // Returns just a list of image files without processing them
 export const getImageFileList = async (): Promise<string[]> => {
   const dir = path.resolve(dataPath);
 
   const filenames = fs.readdirSync(dir);
 
-  return filenames.filter(
+  const imageFiles = filenames.filter(
     (file) => path.extname(file) === '.png' || path.extname(file) === '.jpg',
   );
+
+  // Check for duplicate fileIds (same base name with different extensions)
+  const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(imageFiles);
+
+  // Log warnings if any duplicates were found
+  if (duplicateWarnings.length > 0) {
+    console.warn('File naming conflicts detected:');
+    duplicateWarnings.forEach((warning) => console.warn(warning));
+  }
+
+  return uniqueFiles;
 };
 
 /**
@@ -33,20 +84,37 @@ export const getImageFileList = async (): Promise<string[]> => {
 export const getMultipleImageAssetDetails = async (
   files: string[],
 ): Promise<{ assets: ImageAsset[]; errors: string[] }> => {
+  // Check for duplicate fileIds and get filtered files
+  const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(files);
+
+  // Convert duplicate warnings to error format for return
+  const duplicateErrors = duplicateWarnings.map(
+    (warning) => `FILE_NAMING_CONFLICT: ${warning}`,
+  );
+
+  // Log warnings about duplicates
+  if (duplicateWarnings.length > 0) {
+    console.warn('File naming conflicts detected in batch processing:');
+    duplicateWarnings.forEach((warning) => console.warn(warning));
+  }
+
   const results = await Promise.allSettled(
-    files.map((file) => getImageAssetDetails(file)),
+    uniqueFiles.map((file) => getImageAssetDetails(file)),
   );
 
   const assets: ImageAsset[] = [];
-  const errors: string[] = [];
+  const errors: string[] = [...duplicateErrors]; // Start with duplicate errors
 
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       assets.push(result.value);
     } else {
       // Store the filename for failed loads
-      errors.push(files[index]);
-      console.error(`Failed to load asset ${files[index]}:`, result.reason);
+      errors.push(uniqueFiles[index]);
+      console.error(
+        `Failed to load asset ${uniqueFiles[index]}:`,
+        result.reason,
+      );
     }
   });
 
