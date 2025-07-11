@@ -25,11 +25,6 @@ export const Pagination = ({
   const renderPaginationButtons = () => {
     const pages: React.ReactNode[] = [];
 
-    // If there's only one page, don't show pagination
-    // if (totalPages <= 1) {
-    //   return pages;
-    // }
-
     // Previous page button
     const prevPage = Math.max(1, currentPage - 1);
     pages.push(

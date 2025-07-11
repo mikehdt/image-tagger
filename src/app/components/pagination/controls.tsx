@@ -1,3 +1,4 @@
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
@@ -10,7 +11,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 type PaginationControlsProps = {
   currentPage: number;
-  totalPages: number;
   totalItems: number;
   basePath?: string;
 };
@@ -26,13 +26,35 @@ export const PaginationControls = ({
 
   // Define dropdown items for pagination sizes
   const paginationSizeItems: DropdownItem<PaginationSize>[] = [
-    { value: PaginationSize.FIFTY, label: PaginationSize.FIFTY.toString() },
-    { value: PaginationSize.HUNDRED, label: PaginationSize.HUNDRED.toString() },
     {
-      value: PaginationSize.TWO_FIFTY,
-      label: PaginationSize.TWO_FIFTY.toString(),
+      value: PaginationSize.TWENTY_FIVE,
+      label: PaginationSize.TWENTY_FIVE.toString(),
     },
-    { value: PaginationSize.ALL, label: 'All' },
+    { value: PaginationSize.FIFTY, label: PaginationSize.FIFTY.toString() },
+    {
+      value: PaginationSize.ONE_HUNDRED,
+      label: PaginationSize.ONE_HUNDRED.toString(),
+    },
+    {
+      value: PaginationSize.TWO_HUNDRED,
+      label: PaginationSize.TWO_HUNDRED.toString(),
+    },
+    {
+      value: PaginationSize.ALL,
+      label: (
+        <span className="flex justify-between">
+          All
+          {totalItems > 500 ? (
+            <ExclamationTriangleIcon
+              className="w-4 text-amber-700"
+              title="Caution! A high amount of items will perform slowly"
+            />
+          ) : (
+            ''
+          )}
+        </span>
+      ),
+    },
   ];
 
   // When pagination size changes, we need to redirect to page 1 if the current page

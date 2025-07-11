@@ -8,9 +8,10 @@ export enum FilterMode {
 }
 
 export enum PaginationSize {
+  TWENTY_FIVE = 25,
   FIFTY = 50,
-  HUNDRED = 100,
-  TWO_FIFTY = 250,
+  ONE_HUNDRED = 100,
+  TWO_HUNDRED = 200,
   ALL = -1,
 }
 

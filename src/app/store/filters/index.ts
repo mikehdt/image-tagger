@@ -9,7 +9,7 @@ const initialState: Filters = {
   filterTags: [],
   filterSizes: [],
   filterExtensions: [],
-  paginationSize: PaginationSize.HUNDRED,
+  paginationSize: PaginationSize.ONE_HUNDRED,
   showModified: false,
   searchQuery: '',
 };
