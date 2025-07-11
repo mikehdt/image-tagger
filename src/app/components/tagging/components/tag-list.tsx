@@ -1,5 +1,4 @@
-import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { SyntheticEvent } from 'react';
+import { memo, SyntheticEvent } from 'react';
 
 import { useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';
@@ -32,26 +31,20 @@ export const TagList = ({ className = '' }: TagListProps) => {
   return (
     <div className={className}>
       <div className="relative flex flex-wrap">
-        <SortableContext
-          items={tagList}
-          strategy={rectSortingStrategy}
-          id="taglist-content"
-        >
-          {tagList.map((tagName: string) => {
-            const props = tagProps[tagName];
-            return (
-              <SortableTag
-                key={`tag-${tagName}`}
-                id={tagName}
-                tagName={tagName}
-                fade={props.fade}
-                nonInteractive={props.nonInteractive}
-                tagState={props.tagState}
-                count={props.count}
-              />
-            );
-          })}
-        </SortableContext>
+        {tagList.map((tagName: string) => {
+          const props = tagProps[tagName];
+          return (
+            <SortableTag
+              key={`tag-${tagName}`}
+              id={tagName}
+              tagName={tagName}
+              fade={props.fade}
+              nonInteractive={props.nonInteractive}
+              tagState={props.tagState}
+              count={props.count}
+            />
+          );
+        })}
       </div>
 
       <div

@@ -7,31 +7,29 @@ import {
   useTagStateWithCallback,
 } from './hooks';
 
-// Split contexts for better performance
-type TagDataContextType = {
+// Combined context type
+type TaggingContextType = {
+  // Data
   tagList: string[];
   tagsByStatus: Record<string, number>;
   globalTagList: Record<string, number>;
   filterTagsSet: Set<string>;
-};
 
-type TagStateContextType = {
+  // State
   newTagInput: string;
   editTagValue: string;
   editingTagName: string;
   isEditing: boolean;
   setNewTagInput: (value: string) => void;
-};
 
-type TagCalculationsContextType = {
+  // Calculations
   isDuplicate: (tagName: string) => boolean;
   isTagBeingEdited: (tagName: string) => boolean;
   shouldFade: (tagName: string) => boolean;
   isTagInteractive: (tagName: string) => boolean;
   isHighlighted: (tagName: string) => boolean;
-};
 
-type TagActionsContextType = {
+  // Actions
   startEditingTag: (tagName: string) => void;
   cancelEditingTag: (e?: SyntheticEvent) => void;
   saveEditingTag: (e?: SyntheticEvent) => void;
@@ -41,10 +39,8 @@ type TagActionsContextType = {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleCancelAdd: (e: SyntheticEvent) => void;
   handleToggleTag: (e: SyntheticEvent, tagName: string) => void;
-};
 
-// New type for pre-calculated tag props
-type TagPropsContextType = {
+  // Pre-calculated props
   tagProps: Record<
     string,
     {
@@ -57,21 +53,9 @@ type TagPropsContextType = {
   >;
 };
 
-const TagDataContext = createContext<TagDataContextType | undefined>(undefined);
-const TagStateContext = createContext<TagStateContextType | undefined>(
-  undefined,
-);
-const TagCalculationsContext = createContext<
-  TagCalculationsContextType | undefined
->(undefined);
-const TagActionsContext = createContext<TagActionsContextType | undefined>(
-  undefined,
-);
-const TagPropsContext = createContext<TagPropsContextType | undefined>(
-  undefined,
-);
+const TaggingContext = createContext<TaggingContextType | undefined>(undefined);
 
-//  provider that splits concerns
+//  provider that combines all concerns
 export const TaggingProvider = ({
   children,
   assetId,
@@ -123,35 +107,9 @@ export const TaggingProvider = ({
     toggleTag,
   });
 
-  // Memoize each context value separately to minimize re-renders
-  const tagDataValue = useMemo(
-    () => ({
-      tagList,
-      tagsByStatus,
-      globalTagList,
-      filterTagsSet,
-    }),
-    [tagList, tagsByStatus, globalTagList, filterTagsSet],
-  );
-
-  const tagStateValue = useMemo(
-    () => ({
-      newTagInput,
-      editTagValue,
-      editingTagName,
-      isEditing,
-      setNewTagInput,
-    }),
-    [newTagInput, editTagValue, editingTagName, isEditing, setNewTagInput],
-  );
-
-  const calculationsValue = useMemo(() => calculations, [calculations]);
-
-  const actionsValue = useMemo(() => actions, [actions]);
-
   // Pre-calculate all tag props to avoid function calls in render loop
-  const tagPropsValue = useMemo(() => {
-    const tagProps: Record<
+  const tagProps = useMemo(() => {
+    const props: Record<
       string,
       {
         fade: boolean;
@@ -163,7 +121,7 @@ export const TaggingProvider = ({
     > = {};
 
     tagList.forEach((tagName) => {
-      tagProps[tagName] = {
+      props[tagName] = {
         fade: calculations.shouldFade(tagName),
         nonInteractive: !calculations.isTagInteractive(tagName),
         tagState: tagsByStatus[tagName] || 0,
@@ -172,78 +130,62 @@ export const TaggingProvider = ({
       };
     });
 
-    return { tagProps };
+    return props;
   }, [tagList, calculations, tagsByStatus, globalTagList]);
 
+  // Combine all values into a single context value
+  const contextValue = useMemo(
+    () => ({
+      // Data
+      tagList,
+      tagsByStatus,
+      globalTagList,
+      filterTagsSet,
+
+      // State
+      newTagInput,
+      editTagValue,
+      editingTagName,
+      isEditing,
+      setNewTagInput,
+
+      // Calculations
+      ...calculations,
+
+      // Actions
+      ...actions,
+
+      // Pre-calculated props
+      tagProps,
+    }),
+    [
+      tagList,
+      tagsByStatus,
+      globalTagList,
+      filterTagsSet,
+      newTagInput,
+      editTagValue,
+      editingTagName,
+      isEditing,
+      setNewTagInput,
+      calculations,
+      actions,
+      tagProps,
+    ],
+  );
+
   return (
-    <TagDataContext.Provider value={tagDataValue}>
-      <TagStateContext.Provider value={tagStateValue}>
-        <TagCalculationsContext.Provider value={calculationsValue}>
-          <TagActionsContext.Provider value={actionsValue}>
-            <TagPropsContext.Provider value={tagPropsValue}>
-              {children}
-            </TagPropsContext.Provider>
-          </TagActionsContext.Provider>
-        </TagCalculationsContext.Provider>
-      </TagStateContext.Provider>
-    </TagDataContext.Provider>
+    <TaggingContext.Provider value={contextValue}>
+      {children}
+    </TaggingContext.Provider>
   );
 };
 
-// Hooks for accessing specific contexts
-export const useTagData = () => {
-  const context = useContext(TagDataContext);
-  if (context === undefined) {
-    throw new Error('useTagData must be used within a TaggingProvider');
-  }
-  return context;
-};
-
-export const useTagState = () => {
-  const context = useContext(TagStateContext);
-  if (context === undefined) {
-    throw new Error('useTagState must be used within a TaggingProvider');
-  }
-  return context;
-};
-
-export const useTagCalculations = () => {
-  const context = useContext(TagCalculationsContext);
-  if (context === undefined) {
-    throw new Error('useTagCalculations must be used within a TaggingProvider');
-  }
-  return context;
-};
-
-export const useTagActions = () => {
-  const context = useContext(TagActionsContext);
-  if (context === undefined) {
-    throw new Error('useTagActions must be used within a TaggingProvider');
-  }
-  return context;
-};
-
-export const useTagProps = () => {
-  const context = useContext(TagPropsContext);
-  if (context === undefined) {
-    throw new Error('useTagProps must be used within a TaggingProvider');
-  }
-  return context;
-};
-
-// Composite hook for backwards compatibility
+// Hooks for accessing the unified context
 export const useTaggingContext = () => {
-  const data = useTagData();
-  const state = useTagState();
-  const calculations = useTagCalculations();
-  const actions = useTagActions();
-  const props = useTagProps();
-
-  return {
-    ...data,
-    ...state,
-    ...calculations,
-    ...actions,
-    ...props,
-  };
+  const context = useContext(TaggingContext);
+  if (context === undefined) {
+    throw new Error('useTaggingContext must be used within a TaggingProvider');
+  }
+  return context;
 };

@@ -10,10 +10,10 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useCallback } from 'react';
 
 /**
- * Optimized sortable hook that doesn't maintain local state
+ * Sortable hook that doesn't maintain local state
  * This reduces unnecessary re-renders by letting dnd-kit handle the optimistic updates
  */
-export const useOptimizedSortable = <T extends UniqueIdentifier>(
+export const useSortable = <T extends UniqueIdentifier>(
   items: T[],
   onItemsReordered: (oldIndex: number, newIndex: number) => void,
 ) => {

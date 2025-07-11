@@ -21,7 +21,7 @@ type AssetProps = {
   ioState: IoState;
 };
 
-export const AssetComponent = ({
+const AssetComponent = ({
   assetId,
   fileExtension,
   assetNumber,

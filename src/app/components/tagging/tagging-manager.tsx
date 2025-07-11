@@ -1,8 +1,8 @@
-import { DragEndEvent } from '@dnd-kit/core';
+import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 
-import { SortableProvider, useSortable } from '../shared/dnd';
-import { TagList } from './components/tag-list';
-import { useAssetTags } from './hooks';
+import { TagList } from './components';
+import { useAssetTags, useSortable } from './hooks';
 import { TaggingProvider } from './tagging-context';
 
 /**
@@ -17,7 +17,6 @@ import { TaggingProvider } from './tagging-context';
  */
 interface TaggingManagerProps {
   assetId: string;
-  className?: string;
   onTagEditingChange?: (isEditing: boolean) => void;
 }
 
@@ -27,7 +26,6 @@ interface TaggingManagerProps {
  */
 export const TaggingManager = ({
   assetId,
-  className = '',
   onTagEditingChange,
 }: TaggingManagerProps) => {
   // Get tag data for this specific asset
@@ -49,26 +47,28 @@ export const TaggingManager = ({
   };
 
   return (
-    <div className={className}>
-      <TaggingProvider
-        assetId={assetId}
-        tagList={tagList}
-        tagsByStatus={tagsByStatus}
-        globalTagList={globalTagList}
-        filterTagsSet={filterTagsSet}
-        toggleTag={toggleTag}
-        onTagEditingChange={onTagEditingChange}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={onDragEnd}
+    >
+      <SortableContext
+        items={tagList}
+        strategy={rectSortingStrategy}
+        id={`taglist-${assetId}`}
       >
-        <SortableProvider
-          items={tagList}
-          sensors={sensors}
-          onDragEnd={onDragEnd}
-          strategy="rect"
-          id={`taglist-${assetId}`}
+        <TaggingProvider
+          assetId={assetId}
+          tagList={tagList}
+          tagsByStatus={tagsByStatus}
+          globalTagList={globalTagList}
+          filterTagsSet={filterTagsSet}
+          toggleTag={toggleTag}
+          onTagEditingChange={onTagEditingChange}
         >
           <TagList />
-        </SortableProvider>
-      </TaggingProvider>
-    </div>
+        </TaggingProvider>
+      </SortableContext>
+    </DndContext>
   );
 };

@@ -10,6 +10,11 @@ import {
 } from 'react';
 
 import {
+  getFiletypeSortOptions,
+  getSizeSortOptions,
+  getTagSortOptions,
+} from './components';
+import {
   useKeyboardNavigation,
   useOutsideClick,
   usePanelPosition,
@@ -112,27 +117,24 @@ export const FilterProvider = ({
 
   // Get sort options for current view
   const getSortOptions = useCallback(() => {
-    // Import these functions at the top if they're not already imported
-    const getters = {
-      tag: () => ({
-        typeLabel: 'Count',
-        directionLabel: 'High to Low',
-        nextType: 'alpha' as SortType,
-      }),
-      size: () => ({
-        typeLabel: 'Count',
-        directionLabel: 'High to Low',
-        nextType: 'alpha' as SortType,
-      }),
-      filetype: () => ({
-        typeLabel: 'Count',
-        directionLabel: 'High to Low',
-        nextType: 'alpha' as SortType,
-      }),
-    };
+    const sortType = currentSort.type;
+    const sortDirection = currentSort.direction;
 
-    return getters[activeView]();
-  }, [activeView]);
+    switch (activeView) {
+      case 'tag':
+        return getTagSortOptions(sortType, sortDirection);
+      case 'size':
+        return getSizeSortOptions(sortType, sortDirection);
+      case 'filetype':
+        return getFiletypeSortOptions(sortType, sortDirection);
+      default:
+        return {
+          typeLabel: 'Count',
+          directionLabel: 'High to Low',
+          nextType: 'count' as SortType,
+        };
+    }
+  }, [activeView, currentSort.type, currentSort.direction]);
 
   // Keyboard navigation
   const { handleKeyDown } = useKeyboardNavigation(
@@ -219,6 +221,3 @@ export const useFilterContext = () => {
   }
   return context;
 };
-
-// For backwards compatibility
-export const useFilterList = useFilterContext;

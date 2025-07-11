@@ -25,7 +25,7 @@ type InputTagProps = {
   nonInteractive?: boolean;
 };
 
-export const InputTagComponent = ({
+const InputTagComponent = ({
   inputValue,
   onInputChange,
   onSubmit,
@@ -94,6 +94,32 @@ export const InputTagComponent = ({
       }
     },
     [inputValue, onSubmit, onCancel, isDuplicate, nonInteractive, mode],
+  );
+
+  const onCancelAdd = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      if (inputValue.trim() !== '' && !nonInteractive) onCancel(e);
+    },
+    [inputValue, nonInteractive, onCancel],
+  );
+
+  const onClickEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      if (inputValue.trim() !== '' && !isDuplicate && !nonInteractive)
+        onSubmit(e);
+    },
+    [inputValue, isDuplicate, nonInteractive, onSubmit],
+  );
+
+  const onCancelEdit = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      // Always call onCancel directly in edit mode, regardless of input value
+      if (!nonInteractive) onCancel(e);
+    },
+    [nonInteractive, onCancel],
   );
 
   // Calculate the width based on input length (between min and max width)
@@ -181,10 +207,7 @@ export const InputTagComponent = ({
                 ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
                 : 'pointer-events-none text-slate-300 opacity-0'
             }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (inputValue.trim() !== '' && !nonInteractive) onCancel(e);
-            }}
+            onClick={onCancelAdd}
             tabIndex={nonInteractive || inputValue.trim() === '' ? -1 : 0}
             title="Cancel"
           >
@@ -199,11 +222,7 @@ export const InputTagComponent = ({
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
                 : 'cursor-not-allowed text-slate-300'
             } rounded-full p-0.5`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (inputValue.trim() !== '' && !isDuplicate && !nonInteractive)
-                onSubmit(e);
-            }}
+            onClick={onClickEdit}
             tabIndex={isDuplicate || nonInteractive ? -1 : 0}
             title={isDuplicate ? 'Tag name already exists' : 'Save tag'}
           >
@@ -213,11 +232,7 @@ export const InputTagComponent = ({
           <span
             // In edit mode, the cancel button should always be active regardless of input value
             className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${!nonInteractive ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white' : 'cursor-not-allowed text-slate-400'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              // Always call onCancel directly in edit mode, regardless of input value
-              if (!nonInteractive) onCancel(e);
-            }}
+            onClick={onCancelEdit}
             tabIndex={nonInteractive ? -1 : 0}
             title={isDuplicate ? 'Cancel (duplicate tag)' : 'Cancel'}
           >
