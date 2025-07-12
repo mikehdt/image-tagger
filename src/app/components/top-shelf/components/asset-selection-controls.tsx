@@ -17,6 +17,7 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
+import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
 export const AssetSelectionControls = ({
   selectedAssetsCount,
@@ -81,15 +82,11 @@ export const AssetSelectionControls = ({
 
   return (
     <>
-      <div className="flex space-x-1 rounded-md bg-slate-100 p-1">
-        <span
-          className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1"
-          title="Assets"
-        >
-          <IdentificationIcon className="w-4 text-slate-400" />
-        </span>
-
-        <span className="relative mr-2 flex items-center">
+      <ResponsiveToolbarGroup
+        icon={<IdentificationIcon className="w-4" />}
+        title="Asset Selection"
+      >
+        <span className="relative flex items-center md:mr-2">
           <Button
             className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
             size="smallSquare"
@@ -160,7 +157,7 @@ export const AssetSelectionControls = ({
             </Button>
           </>
         ) : null}
-      </div>
+      </ResponsiveToolbarGroup>
 
       <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium tabular-nums">
         <span className="text-purple-400" title="Selected assets">

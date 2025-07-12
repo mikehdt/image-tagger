@@ -125,7 +125,7 @@ export const ResponsiveToolbarGroup = ({
       {/* Large screen: inactive icon + inline actions */}
       <div className="flex items-center space-x-1 rounded-md bg-slate-100 px-1 py-1 md:flex">
         <span
-          className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 max-md:hidden"
+          className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 text-slate-400 max-md:hidden"
           title={title}
         >
           {icon}

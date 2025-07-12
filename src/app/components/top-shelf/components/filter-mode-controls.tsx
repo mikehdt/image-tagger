@@ -12,6 +12,8 @@ import {
 import { useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
+import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+
 interface FilterModeControlsProps {
   filterModifiedActive: boolean;
   hasModifiedAssets: boolean;
@@ -81,19 +83,15 @@ export const FilterModeControls = ({
   ];
 
   return (
-    <div className="inline-flex items-center rounded-md bg-slate-100 p-1">
-      <span
-        className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 text-slate-400"
-        title="Filters"
-      >
-        <FunnelIcon className="w-4" />
-      </span>
-
+    <ResponsiveToolbarGroup
+      icon={<FunnelIcon className="w-4" />}
+      title="Tag Actions"
+    >
       <Dropdown
         items={filterModeItems}
         selectedValue={filterTagsMode}
         onChange={setTagFilterMode}
-        buttonClassName={`mr-2 ${
+        buttonClassName={
           // Show as disabled if we're in a mode that requires something that's not available
           (filterTagsMode !== FilterMode.SHOW_ALL &&
             filterTagsMode !== FilterMode.SELECTED_ASSETS &&
@@ -101,7 +99,7 @@ export const FilterModeControls = ({
           (filterTagsMode === FilterMode.SELECTED_ASSETS && !hasSelectedAssets)
             ? 'text-slate-300'
             : ''
-        }`}
+        }
       />
 
       <Button
@@ -112,7 +110,6 @@ export const FilterModeControls = ({
         disabled={!hasModifiedAssets}
         ghostDisabled={!hasModifiedAssets}
         size="medium"
-        className="px-2"
       >
         Modified
       </Button>
@@ -129,6 +126,6 @@ export const FilterModeControls = ({
         <NoSymbolIcon className="w-4" />
         <span className="ml-2 max-lg:hidden">Filters</span>
       </Button>
-    </div>
+    </ResponsiveToolbarGroup>
   );
 };
