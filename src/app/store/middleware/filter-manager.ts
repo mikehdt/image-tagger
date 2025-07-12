@@ -3,7 +3,8 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { saveAllAssets, saveAsset } from '../assets/actions';
+import { deleteTag } from '../assets';
+import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
   clearExtensionFilters,
@@ -33,7 +34,10 @@ const shouldClearFilters = (state: RootState): boolean => {
   }
 
   // Only proceed if we're in the complete state
-  if (assets.ioState !== IoState.COMPLETE) {
+  if (
+    assets.ioState !== IoState.COMPLETE &&
+    assets.ioState !== IoState.COMPLETING
+  ) {
     return false;
   }
 
@@ -58,7 +62,11 @@ const findInvalidTagFilters = (state: RootState): string[] => {
   const { assets, filters } = state;
 
   // Quick return if no tag filters or not in complete state
-  if (filters.filterTags.length === 0 || assets.ioState !== IoState.COMPLETE) {
+  if (
+    filters.filterTags.length === 0 ||
+    (assets.ioState !== IoState.COMPLETE &&
+      assets.ioState !== IoState.COMPLETING)
+  ) {
     return [];
   }
 
@@ -79,7 +87,11 @@ const findInvalidSizeFilters = (state: RootState): string[] => {
   const { assets, filters } = state;
 
   // Quick return if no size filters or not in complete state
-  if (filters.filterSizes.length === 0 || assets.ioState !== IoState.COMPLETE) {
+  if (
+    filters.filterSizes.length === 0 ||
+    (assets.ioState !== IoState.COMPLETE &&
+      assets.ioState !== IoState.COMPLETING)
+  ) {
     return [];
   }
 
@@ -102,7 +114,8 @@ const findInvalidExtensionFilters = (state: RootState): string[] => {
   // Quick return if no extension filters or not in complete state
   if (
     filters.filterExtensions.length === 0 ||
-    assets.ioState !== IoState.COMPLETE
+    (assets.ioState !== IoState.COMPLETE &&
+      assets.ioState !== IoState.COMPLETING)
   ) {
     return [];
   }
@@ -120,9 +133,75 @@ const findInvalidExtensionFilters = (state: RootState): string[] => {
 };
 
 /**
- * Check if we need to reset filter mode to SHOW_ALL
- * (when no filters are active)
+ * Clean up invalid filters regardless of current filter mode
+ * This is more comprehensive than shouldClearFilters as it works
+ * even when the current filter mode doesn't actually apply filters
  */
+const cleanupInvalidFilters = (
+  state: RootState,
+  listenerApi: {
+    dispatch: (action: { type: string; payload?: unknown }) => void;
+  },
+): boolean => {
+  const { assets } = state;
+
+  // Only proceed if we're in the complete or completing state (data is stable)
+  if (
+    assets.ioState !== IoState.COMPLETE &&
+    assets.ioState !== IoState.COMPLETING
+  ) {
+    return false;
+  }
+
+  let hasChanges = false;
+
+  // Check for invalid tag filters
+  const invalidTagFilters = findInvalidTagFilters(state);
+  if (invalidTagFilters.length > 0) {
+    // If all tag filters are invalid, clear them all at once
+    if (invalidTagFilters.length === state.filters.filterTags.length) {
+      listenerApi.dispatch(clearTagFilters());
+    } else {
+      // Otherwise remove them one by one
+      invalidTagFilters.forEach((tag) => {
+        listenerApi.dispatch(toggleTagFilter(tag));
+      });
+    }
+    hasChanges = true;
+  }
+
+  // Check for invalid size filters
+  const invalidSizeFilters = findInvalidSizeFilters(state);
+  if (invalidSizeFilters.length > 0) {
+    // If all size filters are invalid, clear them all at once
+    if (invalidSizeFilters.length === state.filters.filterSizes.length) {
+      listenerApi.dispatch(clearSizeFilters());
+    } else {
+      // Otherwise remove them one by one
+      invalidSizeFilters.forEach((size) => {
+        listenerApi.dispatch(toggleSizeFilter(size));
+      });
+    }
+    hasChanges = true;
+  }
+
+  // Check for invalid extension filters
+  const invalidExtFilters = findInvalidExtensionFilters(state);
+  if (invalidExtFilters.length > 0) {
+    // If all extension filters are invalid, clear them all at once
+    if (invalidExtFilters.length === state.filters.filterExtensions.length) {
+      listenerApi.dispatch(clearExtensionFilters());
+    } else {
+      // Otherwise remove them one by one
+      invalidExtFilters.forEach((ext) => {
+        listenerApi.dispatch(toggleExtensionFilter(ext));
+      });
+    }
+    hasChanges = true;
+  }
+
+  return hasChanges;
+};
 const shouldResetFilterMode = (state: RootState): boolean => {
   const { filters } = state;
 
@@ -138,70 +217,48 @@ export const filterManagerMiddleware = createListenerMiddleware();
 
 // Add a listener that checks after save operations if we need to clear filters
 filterManagerMiddleware.startListening({
-  matcher: isAnyOf(saveAllAssets.fulfilled, saveAsset.fulfilled),
-  effect: async (_action, listenerApi) => {
+  matcher: isAnyOf(
+    saveAllAssets.fulfilled,
+    saveAsset.fulfilled,
+    // completeAfterDelay.fulfilled, // Not needed - saveAllAssets.fulfilled handles it
+  ),
+  effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 
-    // First check if all filters need to be cleared
-    if (shouldClearFilters(state)) {
-      console.log('No filtered results remain after save - clearing filters');
+    // Always run the comprehensive cleanup function first to remove invalid filters
+    const hasChanges = cleanupInvalidFilters(state, listenerApi);
+
+    // After cleanup, get the updated state and check if we should clear ALL remaining filters
+    const updatedState = listenerApi.getState() as RootState;
+
+    // Check if all remaining filters should be cleared (no results after cleanup)
+    if (shouldClearFilters(updatedState)) {
       listenerApi.dispatch(clearFilters());
       return;
     }
 
-    // If specific tag filters are no longer valid, remove them
-    const invalidTagFilters = findInvalidTagFilters(state);
-    if (invalidTagFilters.length > 0) {
-      console.log('Removing invalid tag filters:', invalidTagFilters);
-
-      // If all tag filters are invalid, clear them all at once
-      if (invalidTagFilters.length === state.filters.filterTags.length) {
-        listenerApi.dispatch(clearTagFilters());
-      } else {
-        // Otherwise remove them one by one
-        invalidTagFilters.forEach((tag) => {
-          listenerApi.dispatch(toggleTagFilter(tag));
-        });
-      }
+    // If we made changes but didn't clear all filters, check if we need to reset the filter mode
+    if (hasChanges && shouldResetFilterMode(updatedState)) {
+      listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
     }
+  },
+});
 
-    // If specific size filters are no longer valid, remove them
-    const invalidSizeFilters = findInvalidSizeFilters(state);
-    if (invalidSizeFilters.length > 0) {
-      console.log('Removing invalid size filters:', invalidSizeFilters);
+// Add a listener that checks after asset loading operations to clean up invalid filters
+filterManagerMiddleware.startListening({
+  matcher: isAnyOf(loadAllAssets.fulfilled),
+  effect: async (_action, listenerApi) => {
+    const state = listenerApi.getState() as RootState;
 
-      // If all size filters are invalid, clear them all at once
-      if (invalidSizeFilters.length === state.filters.filterSizes.length) {
-        listenerApi.dispatch(clearSizeFilters());
-      } else {
-        // Otherwise remove them one by one
-        invalidSizeFilters.forEach((size) => {
-          listenerApi.dispatch(toggleSizeFilter(size));
-        });
-      }
-    }
-
-    // If specific extension filters are no longer valid, remove them
-    const invalidExtFilters = findInvalidExtensionFilters(state);
-    if (invalidExtFilters.length > 0) {
-      console.log('Removing invalid extension filters:', invalidExtFilters);
-
-      // If all extension filters are invalid, clear them all at once
-      if (invalidExtFilters.length === state.filters.filterExtensions.length) {
-        listenerApi.dispatch(clearExtensionFilters());
-      } else {
-        // Otherwise remove them one by one
-        invalidExtFilters.forEach((ext) => {
-          listenerApi.dispatch(toggleExtensionFilter(ext));
-        });
-      }
-    }
+    // Use the comprehensive cleanup function to remove any invalid filters
+    const hasChanges = cleanupInvalidFilters(state, listenerApi);
 
     // After removing invalid filters, check if we need to reset the filter mode
-    const updatedState = listenerApi.getState() as RootState;
-    if (shouldResetFilterMode(updatedState)) {
-      console.log('No active filters - resetting filter mode to SHOW_ALL');
-      listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+    if (hasChanges) {
+      const updatedState = listenerApi.getState() as RootState;
+      if (shouldResetFilterMode(updatedState)) {
+        listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+      }
     }
   },
 });
@@ -223,10 +280,34 @@ filterManagerMiddleware.startListening({
 
     // Check if we need to reset the filter mode after a filter toggle action
     if (shouldResetFilterMode(state)) {
-      console.log(
-        'No active filters after toggle - resetting filter mode to SHOW_ALL',
-      );
       listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+    }
+  },
+});
+
+// Add a listener for immediate tag deletions (TO_ADD tags)
+filterManagerMiddleware.startListening({
+  actionCreator: deleteTag,
+  effect: async (action, listenerApi) => {
+    const { tagName } = action.payload;
+    const state = listenerApi.getState() as RootState;
+
+    // Check if this deleted tag was in the current filters
+    if (state.filters.filterTags.includes(tagName)) {
+      // Check if this tag still exists in any asset after the deletion
+      const tagStillExists = state.assets.images.some((img) =>
+        img.tagList.includes(tagName),
+      );
+
+      if (!tagStillExists) {
+        listenerApi.dispatch(toggleTagFilter(tagName));
+
+        // After removing the filter, check if we need to reset filter mode
+        const updatedState = listenerApi.getState() as RootState;
+        if (shouldResetFilterMode(updatedState)) {
+          listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+        }
+      }
     }
   },
 });

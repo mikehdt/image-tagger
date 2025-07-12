@@ -4,7 +4,7 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
+import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectSelectedAssets,
@@ -121,12 +121,12 @@ export const EditTagsModal = ({
 
   // Get filtered assets for the checkbox logic
   const filteredAssets = useAppSelector(selectFilteredAssets);
-  const allAssets = useAppSelector(selectAllImages);
+  const allAssetsLength = useAppSelector(selectImageCount);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   // Check if any filters are currently applied
-  const hasActiveFilters = filteredAssets.length !== allAssets.length;
+  const hasActiveFilters = filteredAssets.length !== allAssetsLength;
   const hasSelectedAssets = selectedAssetsCount > 0;
 
   // For duplicate checking - used to track tag changes

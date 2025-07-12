@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
+import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -27,6 +27,7 @@ export const AssetSelectionControls = ({
   const dispatch = useAppDispatch();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const searchQuery = useAppSelector(selectSearchQuery);
@@ -41,31 +42,84 @@ export const AssetSelectionControls = ({
   );
 
   const handleSearchClear = useCallback(() => {
+    // Clear any pending blur timeout
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
     dispatch(setSearchQuery(''));
-    searchInputRef.current?.focus();
+    // Add a small delay to let animations complete before closing (helps with Firefox jumping)
+    setTimeout(() => {
+      setIsSearchActive(false);
+    }, 100);
   }, [dispatch]);
 
   const handleSearchFocus = useCallback(() => {
+    // Clear any pending blur timeout when focusing
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
     setIsSearchActive(true);
-    searchInputRef.current?.focus();
+
+    // Find and focus the visible input (handles responsive design with duplicate inputs)
+    setTimeout(() => {
+      const allInputs = document.querySelectorAll(
+        'input[data-search-input="asset-name"]',
+      );
+
+      const visibleInput = Array.from(allInputs).find((element) => {
+        const inp = element as HTMLInputElement;
+        const styles = getComputedStyle(inp);
+        return (
+          inp.offsetWidth > 0 && inp.offsetHeight > 0 && styles.opacity !== '0'
+        );
+      }) as HTMLInputElement | undefined;
+
+      if (visibleInput) {
+        visibleInput.focus();
+      }
+    }, 100);
   }, []);
 
   const handleSearchBlur = useCallback(() => {
-    if (!searchQuery) {
+    // Add a slight delay before closing the search to allow for re-focusing
+    blurTimeoutRef.current = setTimeout(() => {
       setIsSearchActive(false);
+    }, 250);
+  }, []);
+
+  const handleInputFocus = useCallback(() => {
+    // Cancel any pending blur timeout when input is focused
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
     }
-  }, [searchQuery]);
+  }, []);
+
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Escape') {
+        setIsSearchActive(false);
+        // Blur the input to remove focus
+        e.currentTarget.blur();
+      }
+    },
+    [],
+  );
 
   // Get filtered assets directly from the selector
   const filteredCount = filteredAssets.length; // TODO: Check for active filters instead of just the length
-  const allAssets = useAppSelector(selectAllImages);
+  const allAssetsCount = useAppSelector(selectImageCount);
 
-  // Keep search input visible if there's a search query
+  // Cleanup timeout on unmount
   useEffect(() => {
-    if (searchQuery && !isSearchActive) {
-      setIsSearchActive(true);
-    }
-  }, [searchQuery, isSearchActive]);
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
@@ -86,11 +140,12 @@ export const AssetSelectionControls = ({
         icon={<IdentificationIcon className="w-4" />}
         title="Asset Selection"
       >
-        <span className="relative flex items-center md:mr-2">
+        <span className="relative flex items-center">
           <Button
             className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
             size="smallSquare"
             variant="ghost"
+            isPressed={searchQuery.length > 0 && !isSearchActive}
             onClick={handleSearchFocus}
           >
             <MagnifyingGlassIcon className="w-5" />
@@ -98,6 +153,7 @@ export const AssetSelectionControls = ({
 
           <input
             ref={searchInputRef}
+            data-search-input="asset-name"
             className={`rounded-sm border border-white/0 bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
               isSearchActive
                 ? 'w-50 pe-7 opacity-100'
@@ -107,6 +163,8 @@ export const AssetSelectionControls = ({
             value={searchQuery}
             onChange={handleSearchChange}
             onBlur={handleSearchBlur}
+            onFocus={handleInputFocus}
+            onKeyDown={handleInputKeyDown}
           />
 
           {isSearchActive ? (
@@ -122,49 +180,53 @@ export const AssetSelectionControls = ({
           ) : null}
         </span>
 
-        {!isSearchActive ? (
-          <>
-            <Button
-              type="button"
-              onClick={handleAddAllToSelection}
-              disabled={
-                allFilteredAssetsSelected || filteredAssets.length === 0
-              }
-              variant="ghost"
-              color="slate"
-              size="medium"
-              title={
-                allFilteredAssetsSelected
-                  ? 'All filtered assets already selected'
-                  : 'Add all filtered assets to selection'
-              }
-            >
-              <SquaresPlusIcon className="w-4" />
-              <span className="ml-2 max-lg:hidden">Select</span>
-            </Button>
+        <Button
+          type="button"
+          onClick={handleAddAllToSelection}
+          disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title={
+            allFilteredAssetsSelected
+              ? 'All filtered assets already selected'
+              : filteredAssets.length === allAssetsCount
+                ? 'Add all assets to selection'
+                : 'Add all filtered assets to selection'
+          }
+        >
+          <SquaresPlusIcon className="w-4" />
+          <span
+            className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
+          >
+            {filteredAssets.length === allAssetsCount ? 'All' : 'Select'}
+          </span>
+        </Button>
 
-            <Button
-              type="button"
-              onClick={handleClearSelection}
-              disabled={selectedAssetsCount === 0}
-              variant="ghost"
-              color="slate"
-              size="medium"
-              title="Clear selection"
-            >
-              <NoSymbolIcon className="w-4" />
-              <span className="ml-2 max-lg:hidden">Assets</span>
-            </Button>
-          </>
-        ) : null}
+        <Button
+          type="button"
+          onClick={handleClearSelection}
+          disabled={selectedAssetsCount === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title="Clear selection"
+        >
+          <NoSymbolIcon className="w-4" />
+          <span
+            className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
+          >
+            Assets
+          </span>
+        </Button>
       </ResponsiveToolbarGroup>
 
       <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium tabular-nums">
         <span className="text-purple-400" title="Selected assets">
-          {selectedAssetsCount} / {allAssets.length}
+          {selectedAssetsCount} / {allAssetsCount}
         </span>
         <span className="text-emerald-400" title="Filtered assets">
-          {filteredCount} / {allAssets.length}
+          {filteredCount} / {allAssetsCount}
         </span>
       </span>
     </>
