@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, SyntheticEvent } from 'react';
+import { KeyboardEventHandler, ReactNode, Ref, SyntheticEvent } from 'react';
 
 /**
  * Shared button component that provides consistent styling and behavior
@@ -28,10 +28,12 @@ interface ButtonProps {
   children: ReactNode;
   onClick?: (e: SyntheticEvent) => void;
   onSubmit?: (e: SyntheticEvent) => void;
+  onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   type?: 'button' | 'submit';
   disabled?: boolean;
   className?: string;
   title?: string;
+  ref?: Ref<HTMLButtonElement>;
 
   // Styling props
   color?: ButtonColor;
@@ -163,6 +165,7 @@ export const Button = ({
   children,
   onClick,
   onSubmit,
+  onKeyDown,
   type = 'button',
   disabled = false,
   className = '',
@@ -173,6 +176,7 @@ export const Button = ({
   isPressed = false,
   ghostDisabled = false,
   neutralDisabled = false,
+  ref,
   ...props
 }: ButtonProps) => {
   const handleClick = (e: SyntheticEvent) => {
@@ -214,7 +218,7 @@ export const Button = ({
     } else {
       styleClasses =
         ghostDisabled || variant === 'ghost'
-          ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled}`
+          ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled} ${isPressed ? colorConfig.pressed : ''}`
           : `${baseStyle.disabled} ${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
     }
   } else {
@@ -233,7 +237,7 @@ export const Button = ({
         break;
 
       case 'ghost':
-        styleClasses = `${baseStyle.ghost} ${colorConfig.ghost}`;
+        styleClasses = `${baseStyle.ghost} ${colorConfig.ghost} ${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''}`;
         break;
 
       default:
@@ -251,11 +255,13 @@ export const Button = ({
     <button
       type={type}
       onClick={handleClick}
+      onKeyDown={onKeyDown}
       disabled={disabled}
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : undefined}
       className={allClasses}
       title={title}
+      ref={ref}
       {...props}
     >
       {children}

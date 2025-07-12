@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { addTagToSelectedAssets, clearSelection } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
+import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { AddTagsModal } from './add-tags-modal';
 import { EditTagsModal } from './edit-tags-modal';
 
@@ -70,14 +71,10 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
 
   return (
     <>
-      <div className="flex items-center space-x-1 rounded-md bg-slate-100 px-1 py-1">
-        <span
-          className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1"
-          title="Tag Actions"
-        >
-          <SwatchIcon className="w-4 text-slate-400" />
-        </span>
-
+      <ResponsiveToolbarGroup
+        icon={<SwatchIcon className="w-4 text-slate-400" />}
+        title="Tag Actions"
+      >
         <Button
           type="button"
           onClick={openAddModel}
@@ -116,7 +113,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           )}
           <span className="ml-2 max-lg:hidden">Delete</span>
         </Button>
-      </div>
+      </ResponsiveToolbarGroup>
 
       <AddTagsModal
         isOpen={isAddTagsModalOpen}
