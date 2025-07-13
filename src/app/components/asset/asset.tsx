@@ -8,6 +8,7 @@ import {
   toggleAssetSelection,
 } from '@/app/store/selection';
 import { composeDimensions } from '@/app/utils/helpers';
+import { getCurrentProjectPath, getImageUrl } from '@/app/utils/image-utils';
 
 import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging/tagging-manager';
@@ -40,6 +41,13 @@ const AssetComponent = ({
     () => composeDimensions(dimensions),
     [dimensions],
   );
+
+  // Get the image URL for the current project
+  const imageUrl = useMemo(() => {
+    const projectPath = getCurrentProjectPath();
+    const fileName = `${assetId}.${fileExtension}`;
+    return getImageUrl(fileName, projectPath || undefined);
+  }, [assetId, fileExtension]);
 
   const toggleImageZoom = useCallback(() => {
     setImageZoom((prev) => !prev);
@@ -77,7 +85,7 @@ const AssetComponent = ({
         >
           <Image
             className={`h-auto w-auto object-contain ${!imageZoom && 'max-h-64'}`}
-            src={`/assets/${assetId}.${fileExtension}`}
+            src={imageUrl}
             width={dimensions.width}
             height={dimensions.height}
             alt=""

@@ -1,4 +1,8 @@
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowLeftCircleIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 import {
   IoState,
@@ -8,7 +12,6 @@ import {
   selectLoadProgress,
   selectSaveProgress,
 } from '@/app/store/assets';
-import { PaginationSize, selectPaginationSize } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 import { PaginationControls } from '../pagination/controls';
@@ -24,7 +27,7 @@ type BottomShelfProps = {
 
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const dispatch = useAppDispatch();
-  const paginationSize = useAppSelector(selectPaginationSize);
+  const router = useRouter();
 
   // IO state selectors
   const ioState = useAppSelector(selectIoState);
@@ -32,7 +35,25 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const loadProgress = useAppSelector(selectLoadProgress) || null;
 
   // Action handlers
-  const doRefresh = () => dispatch(loadAllAssets());
+  const doRefresh = () => {
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    if (selectedProject) {
+      dispatch(
+        loadAllAssets({
+          maintainIoState: false, // Show loading state when user manually refreshes
+          projectPath: selectedProject,
+        }),
+      );
+    } else {
+      // No project selected, redirect to project list
+      router.push('/');
+    }
+  };
+
+  const handleBackToProjects = () => {
+    // Just navigate back - project list will handle clearing state
+    router.push('/');
+  };
 
   // Get filtered assets directly from the selector
   const filteredAssets = useAppSelector(selectFilteredAssets);
@@ -47,6 +68,14 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
     <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
+          <Button
+            variant="ghost"
+            onClick={handleBackToProjects}
+            title="Back to project selection"
+          >
+            <ArrowLeftCircleIcon className="w-6" />
+          </Button>
+
           {ioInProgress ? (
             <LoadingStatus
               ioState={ioState}
@@ -68,11 +97,6 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
           {!ioInProgress ? (
             <PaginationControls
               currentPage={currentPage}
-              totalPages={
-                paginationSize === PaginationSize.ALL
-                  ? 1
-                  : Math.ceil(filteredCount / paginationSize)
-              }
               totalItems={filteredCount}
             />
           ) : null}

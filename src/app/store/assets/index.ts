@@ -9,6 +9,8 @@ const initialState: ImageAssets = {
   ioState: IoState.INITIAL,
   ioMessage: undefined,
   images: [],
+  projectName: undefined,
+  projectPath: undefined,
 };
 
 const assetsSlice = createSlice({
@@ -24,12 +26,16 @@ const assetsSlice = createSlice({
     selectImageCount: (state) => state.images.length,
     selectSaveProgress: (state) => state.saveProgress,
     selectLoadProgress: (state) => state.loadProgress,
+    selectProjectName: (state) => state.projectName,
+    selectProjectPath: (state) => state.projectPath,
   },
 });
 
 // Main exports for slice
 export const { reducer: assetsReducer } = assetsSlice;
 export const {
+  setProjectInfo,
+  resetAssetsState,
   addTag,
   editTag,
   deleteTag,
@@ -46,6 +52,8 @@ export const {
   selectImageCount,
   selectSaveProgress,
   selectLoadProgress,
+  selectProjectName,
+  selectProjectPath,
 } = assetsSlice.selectors;
 
 // Main exports for assets module

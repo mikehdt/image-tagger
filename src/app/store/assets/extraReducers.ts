@@ -67,8 +67,9 @@ export const setupExtraReducers = (
   // Saving
   builder.addCase(saveAsset.pending, (state, action) => {
     const { arg } = action.meta;
+    const fileId = typeof arg === 'string' ? arg : arg.fileId;
 
-    const imageIndex = state.images.findIndex((item) => item.fileId === arg);
+    const imageIndex = state.images.findIndex((item) => item.fileId === fileId);
 
     state.images[imageIndex].ioState = IoState.SAVING;
     state.ioState = IoState.SAVING;

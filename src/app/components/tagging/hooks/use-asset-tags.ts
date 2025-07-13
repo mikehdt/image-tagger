@@ -118,7 +118,13 @@ export const useAssetTags = (assetId: string) => {
 
   // Function to save asset changes
   const saveAssetChanges = useCallback(() => {
-    dispatch(saveAsset(assetId));
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    dispatch(
+      saveAsset({
+        fileId: assetId,
+        projectPath: selectedProject || undefined,
+      }),
+    );
   }, [dispatch, assetId]);
 
   // Function to reset asset changes

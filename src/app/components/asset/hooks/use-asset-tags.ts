@@ -90,7 +90,13 @@ export const useAssetTags = (assetId: string) => {
   );
 
   const saveAction = useCallback(() => {
-    dispatch(saveAsset(assetId));
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    dispatch(
+      saveAsset({
+        fileId: assetId,
+        projectPath: selectedProject || undefined,
+      }),
+    );
   }, [dispatch, assetId]);
 
   const cancelAction = useCallback(() => {

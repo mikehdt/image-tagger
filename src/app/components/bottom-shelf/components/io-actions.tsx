@@ -17,7 +17,10 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
 
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
-  const saveAllChanges = () => dispatch(saveAllAssets());
+  const saveAllChanges = () => {
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    dispatch(saveAllAssets({ projectPath: selectedProject || undefined }));
+  };
   const cancelAllChanges = () => dispatch(resetAllTags());
 
   return (

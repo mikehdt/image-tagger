@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
@@ -9,6 +9,7 @@ import {
   loadAllAssets,
   selectImageCount,
   selectIoState,
+  setProjectInfo,
 } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { Error } from '../views/error';
@@ -17,26 +18,67 @@ import { NoContent } from '../views/no-content';
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const initialLoad = useRef<boolean>(true);
   const hasCompletedInitialLoad = useRef<boolean>(false); // Track if we've ever completed initial load
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
 
-  // Load assets only once on initial mount
+  // Only load assets when we're on a page route (not root)
+  const shouldLoadAssets = pathname !== '/';
+
+  // Initialize project info from session storage on mount
+  useEffect(() => {
+    if (shouldLoadAssets && typeof window !== 'undefined') {
+      const selectedProject = sessionStorage.getItem('selectedProject');
+      if (selectedProject) {
+        // Extract project name from path
+        const projectName =
+          selectedProject.split(/[/\\]/).pop() || 'Unknown Project';
+        dispatch(setProjectInfo({ name: projectName, path: selectedProject }));
+      } else {
+        // No project selected but we're on a page route - redirect to project selector
+        router.push('/');
+        return;
+      }
+    }
+  }, [shouldLoadAssets, dispatch, router]);
+
+  // Load assets only once on initial mount and only if we're on a page route
   const loadImageAssets = useCallback(
     async (_args?: { maintainIoState: boolean }) => {
-      dispatch(loadAllAssets(_args));
+      // Only load if we should load assets (i.e., on a page route)
+      if (shouldLoadAssets) {
+        // Get the selected project path from sessionStorage
+        const selectedProject = sessionStorage.getItem('selectedProject');
+
+        // Only proceed if there's actually a project selected
+        if (selectedProject) {
+          dispatch(
+            loadAllAssets({
+              maintainIoState: _args?.maintainIoState ?? false,
+              projectPath: selectedProject,
+            }),
+          );
+        }
+        // If no project is selected, the [page] route will handle redirecting to project list
+      }
     },
-    [dispatch],
+    [dispatch, shouldLoadAssets],
   );
 
   useEffect(() => {
-    if (initialLoad.current) {
+    if (initialLoad.current && shouldLoadAssets) {
       loadImageAssets();
       initialLoad.current = false;
     }
-  }, [loadImageAssets]);
+    // Reset initial load flag when switching back to project selector
+    if (!shouldLoadAssets) {
+      initialLoad.current = true;
+      hasCompletedInitialLoad.current = false;
+    }
+  }, [loadImageAssets, shouldLoadAssets]);
 
   // Redirect to root on I/O error
   useEffect(() => {
@@ -63,6 +105,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       hasCompletedInitialLoad.current = true; // Mark initial load as completed
     }
   }, [imageCount, ioState]);
+
+  // Only show the loading/error/no-content screens when we're on a page route
+  // On the root route, just show the children (project selector)
+  if (!shouldLoadAssets) {
+    return children;
+  }
 
   // Only show the loading screen if we're loading AND we don't have any assets yet
   // This differentiates between initial load and refresh operations

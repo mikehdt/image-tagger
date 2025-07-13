@@ -56,11 +56,11 @@ export const clearLoadErrors = createAction('assets/clearLoadErrors');
 
 export const loadAllAssets = createAsyncThunk<
   ImageAsset[],
-  { maintainIoState: boolean } | undefined
->('assets/loadAllAssets', async (_options, { dispatch }) => {
+  { maintainIoState?: boolean; projectPath?: string } | undefined
+>('assets/loadAllAssets', async (options, { dispatch }) => {
   try {
     // First, get the list of image files (fast operation)
-    const imageFiles = await getImageFileList();
+    const imageFiles = await getImageFileList(options?.projectPath);
 
     // Initialize progress tracking when we know the total and clear any previous errors
     const totalFiles = imageFiles.length;
@@ -94,7 +94,10 @@ export const loadAllAssets = createAsyncThunk<
       imageFiles,
       // Process a batch of files
       async (batch) => {
-        const { assets, errors } = await getMultipleImageAssetDetails(batch);
+        const { assets, errors } = await getMultipleImageAssetDetails(
+          batch,
+          options?.projectPath,
+        );
         // Update error count and track failed files for this batch
         if (errors.length > 0) {
           failedCount += errors.length;
@@ -109,7 +112,7 @@ export const loadAllAssets = createAsyncThunk<
       // Fallback for individual processing
       async (file) => {
         try {
-          return await getImageAssetDetails(file);
+          return await getImageAssetDetails(file, options?.projectPath);
         } catch (error) {
           console.error(`Failed to process file ${file}:`, error);
           failedCount++;
@@ -131,9 +134,9 @@ export const loadAllAssets = createAsyncThunk<
 
 export const saveAsset = createAsyncThunk<
   SaveAssetResult,
-  string,
+  { fileId: string; projectPath?: string },
   { state: { assets: ImageAssets } }
->('assets/saveAsset', async (fileId: string, { getState }) => {
+>('assets/saveAsset', async ({ fileId, projectPath }, { getState }) => {
   const {
     assets: { images },
   } = getState();
@@ -150,7 +153,7 @@ export const saveAsset = createAsyncThunk<
   // Create flattened tags for disk storage
   const flattenedTags = createFlattenedTags(updateTags);
 
-  const success = await saveAssetTags(fileId, flattenedTags);
+  const success = await saveAssetTags(fileId, flattenedTags, projectPath);
 
   if (success) {
     // Create a clean tag status object with helper function
@@ -166,9 +169,9 @@ export const saveAsset = createAsyncThunk<
 // Save all assets with modified tags
 export const saveAllAssets = createAsyncThunk<
   { savedCount: number; errorCount?: number; results?: Array<SaveAssetResult> },
-  void,
+  { projectPath?: string } | undefined,
   { state: { assets: ImageAssets } }
->('assets/saveAllAssets', async (_, { getState, dispatch }) => {
+>('assets/saveAllAssets', async (options, { getState, dispatch }) => {
   const {
     assets: { images },
   } = getState();
@@ -222,7 +225,10 @@ export const saveAllAssets = createAsyncThunk<
       writeOperations,
       // Process a batch of operations
       async (batch) => {
-        const { results, errors } = await saveMultipleAssetTags(batch);
+        const { results, errors } = await saveMultipleAssetTags(
+          batch,
+          options?.projectPath,
+        );
         // Add any errors to our tracking
         if (errors.length > 0) {
           failedFiles.push(...errors);
@@ -240,6 +246,7 @@ export const saveAllAssets = createAsyncThunk<
         const success = await saveAssetTags(
           operation.fileId,
           operation.composedTags,
+          options?.projectPath,
         );
         if (!success) {
           failedFiles.push(operation.fileId);

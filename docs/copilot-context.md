@@ -11,7 +11,7 @@ An image tagging application that allows users to:
 
 ## Data Structure
 
-- Images are placed in a folder `public/assets`
+- Images are loaded from a folder picked from the folder selector page
 - Each image has an associated `.txt` file with comma-separated tags
 - File structure pattern: `image.jpg` and `image.txt` in the same directory
 - UI state is managed in memory and not persisted between sessions

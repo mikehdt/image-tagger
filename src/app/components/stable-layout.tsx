@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
 import { selectFilteredAssets } from '../store/assets';
@@ -12,7 +12,11 @@ import { TopShelf } from './top-shelf/top-shelf';
 export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const currentPage = parseInt(params.page as string, 10) || 1;
+
+  // Don't show shelves on the project selection page (root path)
+  const showShelves = pathname !== '/';
 
   const paginationSize = useAppSelector(selectPaginationSize);
   const filteredAssets = useAppSelector(selectFilteredAssets);
@@ -40,9 +44,11 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <main className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 py-20">
-      <TopShelf />
+      {showShelves && <TopShelf />}
       {children}
-      <BottomShelf currentPage={currentPage} totalPages={totalPages} />
+      {showShelves && (
+        <BottomShelf currentPage={currentPage} totalPages={totalPages} />
+      )}
     </main>
   );
 };

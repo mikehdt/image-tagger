@@ -12,7 +12,17 @@ import {
   TagState,
 } from '../store/assets';
 
-const dataPath = './public/assets';
+const defaultDataPath = './public/assets';
+
+/**
+ * Get the current data path - either from provided project path or default
+ */
+const getCurrentDataPath = (projectPath?: string): string => {
+  if (projectPath) {
+    return projectPath;
+  }
+  return defaultDataPath;
+};
 
 /**
  * Helper function to detect duplicate fileIds and return filtered results
@@ -55,8 +65,10 @@ const detectDuplicateFileIds = (
 };
 
 // Returns just a list of image files without processing them
-export const getImageFileList = async (): Promise<string[]> => {
-  const dir = path.resolve(dataPath);
+export const getImageFileList = async (
+  projectPath?: string,
+): Promise<string[]> => {
+  const dir = path.resolve(getCurrentDataPath(projectPath));
 
   const filenames = fs.readdirSync(dir);
 
@@ -79,10 +91,12 @@ export const getImageFileList = async (): Promise<string[]> => {
 /**
  * Process multiple image files at once and return their asset data
  * @param files Array of files to process
+ * @param projectPath Optional project path, uses default if not provided
  * @returns Array of image assets and tracking of failed files
  */
 export const getMultipleImageAssetDetails = async (
   files: string[],
+  projectPath?: string,
 ): Promise<{ assets: ImageAsset[]; errors: string[] }> => {
   // Check for duplicate fileIds and get filtered files
   const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(files);
@@ -99,7 +113,7 @@ export const getMultipleImageAssetDetails = async (
   }
 
   const results = await Promise.allSettled(
-    uniqueFiles.map((file) => getImageAssetDetails(file)),
+    uniqueFiles.map((file) => getImageAssetDetails(file, projectPath)),
   );
 
   const assets: ImageAsset[] = [];
@@ -124,12 +138,16 @@ export const getMultipleImageAssetDetails = async (
 // Process a single image file and return its asset data
 export const getImageAssetDetails = async (
   file: string,
+  projectPath?: string,
 ): Promise<ImageAsset> => {
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
+  const currentDataPath = getCurrentDataPath(projectPath);
 
   // @ts-expect-error ReadableStream.from being weird
-  const stream = ReadableStream.from(createReadStream(`${dataPath}/${file}`));
+  const stream = ReadableStream.from(
+    createReadStream(`${currentDataPath}/${file}`),
+  );
 
   const dimensions = (await imageDimensionsFromStream(
     stream,
@@ -140,9 +158,9 @@ export const getImageAssetDetails = async (
 
   try {
     // Check if the tag file exists first before trying to read it
-    if (fs.existsSync(`${dataPath}/${fileId}.txt`)) {
+    if (fs.existsSync(`${currentDataPath}/${fileId}.txt`)) {
       const tagContent = fs
-        .readFileSync(`${dataPath}/${fileId}.txt`, 'utf8')
+        .readFileSync(`${currentDataPath}/${fileId}.txt`, 'utf8')
         .trim();
 
       // Only process if the file has actual content
@@ -183,9 +201,11 @@ export const getImageAssetDetails = async (
 export const saveAssetTags = async (
   fileId: string,
   composedTags: string,
+  projectPath?: string,
 ): Promise<boolean> => {
   try {
-    fs.writeFileSync(`${dataPath}/${fileId}.txt`, composedTags);
+    const currentDataPath = getCurrentDataPath(projectPath);
+    fs.writeFileSync(`${currentDataPath}/${fileId}.txt`, composedTags);
     return true;
   } catch (err) {
     console.error('Disk I/O error:', err);
@@ -202,20 +222,23 @@ export interface AssetTagOperation {
 /**
  * Write multiple tag sets to disk in a single operation
  * @param operations Array of tag write operations to perform
+ * @param projectPath Optional project path, uses default if not provided
  * @returns Result object with success flag, individual results, and list of failed files
  */
 export const saveMultipleAssetTags = async (
   operations: AssetTagOperation[],
+  projectPath?: string,
 ): Promise<{
   success: boolean;
   results: { fileId: string; success: boolean }[];
   errors: string[]; // Add list of failed files
 }> => {
   // Process all operations in parallel
+  const currentDataPath = getCurrentDataPath(projectPath);
   const results = await Promise.all(
     operations.map(async ({ fileId, composedTags }) => {
       try {
-        fs.writeFileSync(`${dataPath}/${fileId}.txt`, composedTags);
+        fs.writeFileSync(`${currentDataPath}/${fileId}.txt`, composedTags);
         return { fileId, success: true };
       } catch (err) {
         console.error(`Disk I/O error for ${fileId}:`, err);

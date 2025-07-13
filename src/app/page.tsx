@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
+import { ProjectList } from './views/project-list';
 
 export default function Home() {
-  // Redirect from the root (/) to /1
-  redirect('/1');
+  // Show project selection instead of redirecting to /1
+  return <ProjectList />;
 }

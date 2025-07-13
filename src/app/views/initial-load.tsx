@@ -2,11 +2,12 @@
 
 import { CubeIcon } from '@heroicons/react/24/outline';
 
-import { selectLoadProgress } from '../store/assets';
+import { selectLoadProgress, selectProjectName } from '../store/assets';
 import { useAppSelector } from '../store/hooks';
 
 export const InitialLoad = () => {
   const loadProgress = useAppSelector(selectLoadProgress);
+  const projectName = useAppSelector(selectProjectName);
 
   // Calculate progress percentage safely
   const progressPercentage =
@@ -18,7 +19,9 @@ export const InitialLoad = () => {
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
       <CubeIcon className="w-full max-w-80 text-slate-500" />
 
-      <h1 className="mt-4 w-full text-xl text-slate-500">Loading&hellip;</h1>
+      <h1 className="mt-4 w-full text-xl text-slate-500">
+        Loading{projectName ? ` ${projectName}` : ''}&hellip;
+      </h1>
 
       {loadProgress ? (
         <div className="mt-4 w-full">
