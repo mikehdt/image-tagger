@@ -28,9 +28,10 @@ export const applyFilters = ({
   selectedAssets?: string[];
 }): ImageAssetWithIndex[] => {
   // Handle the case where no filters are active - show everything
-  // BUT not for SELECTED_ASSETS mode, which has its own logic
+  // BUT not for SELECTED_ASSETS or TAGLESS modes, which have their own logic
   if (
     filterMode !== FilterMode.SELECTED_ASSETS &&
+    filterMode !== FilterMode.TAGLESS &&
     filterTags.length === 0 &&
     filterSizes.length === 0 &&
     filterExtensions.length === 0 &&
@@ -123,9 +124,9 @@ export const applyFilters = ({
       filterExtensions.length === 0 ||
       filterExtensionsSet.has(img.fileExtension);
 
-    // For all MATCH modes, if there are no tag filters but we have size/extension filters,
+    // For all MATCH modes (except TAGLESS), if there are no tag filters but we have size/extension filters,
     // just apply the size/extension filters
-    if (filterTags.length === 0) {
+    if (filterTags.length === 0 && filterMode !== FilterMode.TAGLESS) {
       return sizeMatches && extensionMatches;
     }
 
@@ -152,6 +153,18 @@ export const applyFilters = ({
 
       // Size and extension filters are still combined with AND logic
       return noTagMatches && sizeMatches && extensionMatches;
+    }
+
+    // TAGLESS mode - asset must have no tags at all and meet size/extension criteria
+    if (filterMode === FilterMode.TAGLESS) {
+      // Check if the asset has no tags (considering only tags not marked for deletion)
+      const activeTags = img.tagList.filter(
+        (tag) => !hasState(img.tagStatus[tag], TagState.TO_DELETE),
+      );
+      const hasNoTags = activeTags.length === 0;
+
+      // Size and extension filters are still combined with AND logic
+      return hasNoTags && sizeMatches && extensionMatches;
     }
 
     // This should never happen if using enum correctly

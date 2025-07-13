@@ -5,6 +5,7 @@ export enum FilterMode {
   MATCH_ALL = 'MatchAll',
   MATCH_NONE = 'MatchNone',
   SELECTED_ASSETS = 'SelectedAssets',
+  TAGLESS = 'Tagless',
 }
 
 export enum PaginationSize {

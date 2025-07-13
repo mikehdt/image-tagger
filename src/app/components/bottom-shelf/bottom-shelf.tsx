@@ -73,8 +73,9 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             variant="ghost"
             onClick={handleBackToProjects}
             title="Back to project selection"
+            disabled={ioInProgress}
           >
-            <ArrowLeftCircleIcon className="w-6 text-slate-500" />
+            <ArrowLeftCircleIcon className="w-6" />
           </Button>
 
           {ioInProgress ? (
@@ -91,7 +92,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
               variant="ghost"
               title="Reload asset list"
             >
-              <ArrowPathIcon className="w-6 text-slate-500" />
+              <ArrowPathIcon className="w-6" />
             </Button>
           )}
 

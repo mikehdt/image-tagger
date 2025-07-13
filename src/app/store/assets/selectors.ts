@@ -83,6 +83,20 @@ export const selectHasModifiedAssets = createSelector(
   },
 );
 
+// Custom selector to check if any assets have no tags
+export const selectHasTaglessAssets = createSelector(
+  [selectAllImages],
+  (images) => {
+    // Check if any asset has no tags (excluding tags marked for deletion)
+    return images.some((asset: ImageAsset) => {
+      const activeTags = asset.tagList.filter(
+        (tag: string) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
+      );
+      return activeTags.length === 0;
+    });
+  },
+);
+
 // Using selectSaveProgress and selectLoadProgress from the slice
 
 export const selectAllExtensions = createSelector(

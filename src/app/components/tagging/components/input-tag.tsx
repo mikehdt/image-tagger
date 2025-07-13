@@ -78,17 +78,17 @@ const InputTagComponent = ({
         }
       } else {
         // Add mode behavior
-        if (
-          e.key === 'Enter' &&
-          inputValue.trim() !== '' &&
-          !isDuplicate &&
-          !nonInteractive
-        ) {
-          onSubmit(e);
+        if (e.key === 'Enter' && inputValue.trim() !== '' && !nonInteractive) {
+          if (!isDuplicate) {
+            onSubmit(e);
+          } else {
+            // Clear the field when trying to add a duplicate
+            onCancel(e);
+          }
         } else if (e.key === 'Escape' && !nonInteractive) {
           onCancel(e);
         } else if (e.key === 'Enter') {
-          // Prevent form submission on empty/duplicate in add mode
+          // Prevent form submission on empty input in add mode
           e.preventDefault();
         }
       }
@@ -186,17 +186,19 @@ const InputTagComponent = ({
         <>
           <span
             className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
-              inputValue.trim() !== '' && !isDuplicate && !nonInteractive
+              inputValue.trim() !== '' && !nonInteractive
                 ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
                 : 'pointer-events-none text-slate-300 opacity-0'
             }`}
             onClick={
-              inputValue.trim() !== '' && !isDuplicate && !nonInteractive
-                ? onSubmit
+              inputValue.trim() !== '' && !nonInteractive
+                ? isDuplicate
+                  ? onCancel
+                  : onSubmit
                 : undefined
             }
-            tabIndex={nonInteractive || isDuplicate ? -1 : 0}
-            title={isDuplicate ? 'Tag already exists' : 'Add tag'}
+            tabIndex={nonInteractive ? -1 : 0}
+            title={isDuplicate ? 'Clear duplicate tag' : 'Add tag'}
           >
             <PlusIcon />
           </span>

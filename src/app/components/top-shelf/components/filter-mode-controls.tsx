@@ -2,6 +2,7 @@ import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import { selectHasTaglessAssets } from '@/app/store/assets';
 import {
   FilterMode,
   selectFilterExtensions,
@@ -35,6 +36,7 @@ export const FilterModeControls = ({
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
 
   // Derive filter selection active state (for traditional tag/size/extension filters)
   const filterSelectionActive = !!(
@@ -80,6 +82,11 @@ export const FilterModeControls = ({
       label: 'Selected Assets',
       disabled: !hasSelectedAssets,
     },
+    {
+      value: FilterMode.TAGLESS,
+      label: 'Tagless',
+      disabled: !hasTaglessAssets,
+    },
   ];
 
   return (
@@ -95,8 +102,11 @@ export const FilterModeControls = ({
           // Show as disabled if we're in a mode that requires something that's not available
           (filterTagsMode !== FilterMode.SHOW_ALL &&
             filterTagsMode !== FilterMode.SELECTED_ASSETS &&
+            filterTagsMode !== FilterMode.TAGLESS &&
             !filterSelectionActive) ||
-          (filterTagsMode === FilterMode.SELECTED_ASSETS && !hasSelectedAssets)
+          (filterTagsMode === FilterMode.SELECTED_ASSETS &&
+            !hasSelectedAssets) ||
+          (filterTagsMode === FilterMode.TAGLESS && !hasTaglessAssets)
             ? 'text-slate-300'
             : ''
         }
