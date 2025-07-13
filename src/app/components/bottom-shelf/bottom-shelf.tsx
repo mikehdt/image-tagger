@@ -69,11 +69,12 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
           <Button
+            size="small"
             variant="ghost"
             onClick={handleBackToProjects}
             title="Back to project selection"
           >
-            <ArrowLeftCircleIcon className="w-6" />
+            <ArrowLeftCircleIcon className="w-6 text-slate-500" />
           </Button>
 
           {ioInProgress ? (
@@ -90,7 +91,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
               variant="ghost"
               title="Reload asset list"
             >
-              <ArrowPathIcon className="w-6" />
+              <ArrowPathIcon className="w-6 text-slate-500" />
             </Button>
           )}
 

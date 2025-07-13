@@ -13,7 +13,7 @@ An image tagging application that allows users to:
 
 - Images are loaded from a folder picked from the folder selector page
 - Each image has an associated `.txt` file with comma-separated tags
-- File structure pattern: `image.jpg` and `image.txt` in the same directory
+- File structure pattern: `image.jpg` and `image.txt` in the same directory (supports .jpg, .jpeg, .png, .webp)
 - UI state is managed in memory and not persisted between sessions
 
 ## Core Features

@@ -3,11 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Hardcoded projects folder path - update this to your projects directory
-// Examples:
-// Windows: 'C:\\Users\\YourUsername\\Pictures\\ImageProjects'
-// macOS/Linux: '/Users/YourUsername/Pictures/ImageProjects'
-const PROJECTS_FOLDER = '';
+import { isSupportedImageExtension, PROJECTS_FOLDER } from '@/app/constants';
 
 type Project = {
   name: string;
@@ -42,10 +38,8 @@ export const getProjectList = async (): Promise<Project[]> => {
         try {
           // Count image files in the project folder
           const projectFiles = fs.readdirSync(projectPath);
-          imageCount = projectFiles.filter(
-            (file) =>
-              path.extname(file).toLowerCase() === '.jpg' ||
-              path.extname(file).toLowerCase() === '.png',
+          imageCount = projectFiles.filter((file) =>
+            isSupportedImageExtension(path.extname(file)),
           ).length;
         } catch (error) {
           console.warn(`Error reading project folder ${projectPath}:`, error);

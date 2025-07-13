@@ -3,6 +3,8 @@ import path from 'node:path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import { getImageMimeType } from '@/app/constants';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
@@ -40,7 +42,7 @@ export async function GET(
 
     // Determine content type based on file extension
     const ext = path.extname(resolvedPath).toLowerCase();
-    const contentType = ext === '.png' ? 'image/png' : 'image/jpeg';
+    const contentType = getImageMimeType(ext);
 
     // Read and return the file
     const fileBuffer = fs.readFileSync(resolvedPath);

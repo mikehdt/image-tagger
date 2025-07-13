@@ -5,6 +5,8 @@ import path from 'node:path';
 
 import { imageDimensionsFromStream } from 'image-dimensions';
 
+import { isSupportedImageExtension } from '@/app/constants';
+
 import {
   type ImageAsset,
   ImageDimensions,
@@ -12,17 +14,11 @@ import {
   TagState,
 } from '../store/assets';
 
-const defaultDataPath = './public/assets';
-
 /**
  * Get the current data path - either from provided project path or default
  */
-const getCurrentDataPath = (projectPath?: string): string => {
-  if (projectPath) {
-    return projectPath;
-  }
-  return defaultDataPath;
-};
+const getCurrentDataPath = (projectPath?: string): string =>
+  projectPath ? projectPath : '';
 
 /**
  * Helper function to detect duplicate fileIds and return filtered results
@@ -72,8 +68,8 @@ export const getImageFileList = async (
 
   const filenames = fs.readdirSync(dir);
 
-  const imageFiles = filenames.filter(
-    (file) => path.extname(file) === '.png' || path.extname(file) === '.jpg',
+  const imageFiles = filenames.filter((file) =>
+    isSupportedImageExtension(path.extname(file)),
   );
 
   // Check for duplicate fileIds (same base name with different extensions)

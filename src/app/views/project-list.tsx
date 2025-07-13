@@ -1,6 +1,6 @@
 'use client';
 
-import { FolderIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -116,7 +116,7 @@ export const ProjectList = () => {
       <FolderIcon className="mb-6 h-24 w-24 text-slate-500" />
       <h1 className="mb-8 text-2xl text-slate-700">Select a Project</h1>
 
-      <div className="w-full max-w-md space-y-3">
+      <div className="mb-8 w-full max-w-md space-y-3">
         {projects.map((project) => (
           <Button
             key={project.path}
@@ -140,6 +140,10 @@ export const ProjectList = () => {
           </Button>
         ))}
       </div>
+
+      <Button onClick={loadProjects} size="mediumWide">
+        Refresh List
+      </Button>
     </div>
   );
 };
