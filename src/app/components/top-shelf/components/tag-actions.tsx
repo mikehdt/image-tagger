@@ -85,7 +85,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           title="Add tags to selected assets"
         >
           <TagIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Add</span>
+          <span className="ml-2 max-xl:hidden">Add</span>
         </Button>
 
         <Button
@@ -96,7 +96,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           title="Edit selected tags"
         >
           <PencilIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Edit</span>
+          <span className="ml-2 max-xl:hidden">Edit</span>
         </Button>
 
         <Button
@@ -111,7 +111,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           ) : (
             <DocumentMinusIcon className="w-4" />
           )}
-          <span className="ml-2 max-lg:hidden">Delete</span>
+          <span className="ml-2 max-xl:hidden">Delete</span>
         </Button>
       </ResponsiveToolbarGroup>
 

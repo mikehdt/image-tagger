@@ -1,13 +1,21 @@
 'use client';
 
 import { CubeIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
-import { selectLoadProgress, selectProjectName } from '../store/assets';
+import {
+  selectLoadProgress,
+  selectProjectName,
+  selectProjectPath,
+  selectProjectThumbnail,
+} from '../store/assets';
 import { useAppSelector } from '../store/hooks';
 
 export const InitialLoad = () => {
   const loadProgress = useAppSelector(selectLoadProgress);
   const projectName = useAppSelector(selectProjectName);
+  const projectPath = useAppSelector(selectProjectPath);
+  const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
   // Calculate progress percentage safely
   const progressPercentage =
@@ -17,7 +25,21 @@ export const InitialLoad = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
-      <CubeIcon className="w-full max-w-80 text-slate-500" />
+      <div className="relative">
+        {projectThumbnail && projectPath ? (
+          <span className="absolute top-0 right-0 bottom-0 left-0 m-auto flex h-21 w-21 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white">
+            <Image
+              src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectPath=${encodeURIComponent(projectPath)}&isProjectInfo=true`}
+              alt={projectName || 'Project'}
+              width={80}
+              height={80}
+              className="h-full w-full object-cover"
+            />
+          </span>
+        ) : null}
+
+        <CubeIcon className="w-full max-w-80 text-slate-500" />
+      </div>
 
       <h1 className="mt-4 w-full text-xl text-slate-500">
         Loading{projectName ? ` ${projectName}` : ''}&hellip;

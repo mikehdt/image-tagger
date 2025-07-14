@@ -28,6 +28,7 @@ const assetsSlice = createSlice({
     selectLoadProgress: (state) => state.loadProgress,
     selectProjectName: (state) => state.projectName,
     selectProjectPath: (state) => state.projectPath,
+    selectProjectThumbnail: (state) => state.projectThumbnail,
   },
 });
 
@@ -54,6 +55,7 @@ export const {
   selectLoadProgress,
   selectProjectName,
   selectProjectPath,
+  selectProjectThumbnail,
 } = assetsSlice.selectors;
 
 // Main exports for assets module

@@ -8,10 +8,13 @@ export const coreReducers = {
   // Set project information
   setProjectInfo: (
     state: ImageAssets,
-    { payload }: PayloadAction<{ name: string; path: string }>,
+    {
+      payload,
+    }: PayloadAction<{ name: string; path: string; thumbnail?: string }>,
   ) => {
     state.projectName = payload.name;
     state.projectPath = payload.path;
+    state.projectThumbnail = payload.thumbnail;
   },
 
   // Reset assets to initial state (useful when switching projects)
@@ -23,6 +26,7 @@ export const coreReducers = {
     state.saveProgress = undefined;
     state.projectName = undefined;
     state.projectPath = undefined;
+    state.projectThumbnail = undefined;
   },
 
   markFilterTagsToDelete: (

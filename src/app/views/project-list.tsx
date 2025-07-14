@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowPathIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { FolderIcon, StarIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -15,6 +16,10 @@ type Project = {
   name: string;
   path: string;
   imageCount?: number;
+  title?: string;
+  color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
+  thumbnail?: string;
+  featured?: boolean;
 };
 
 export const ProjectList = () => {
@@ -31,7 +36,7 @@ export const ProjectList = () => {
 
       // Call server action to get project list
       const projectData = await getProjectList();
-      setProjects(projectData);
+      setProjects(projectData.filter((project) => project?.imageCount));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load projects');
     } finally {
@@ -45,28 +50,53 @@ export const ProjectList = () => {
     dispatch(clearFilters());
     dispatch(clearSelection());
     sessionStorage.removeItem('selectedProject');
+    sessionStorage.removeItem('selectedProjectTitle');
+    sessionStorage.removeItem('selectedProjectThumbnail');
 
     // Then load the project list
     loadProjects();
   }, [loadProjects, dispatch]);
   const handleProjectSelect = useCallback(
     (projectPath: string) => {
-      // Extract project name from path (last folder in the path)
+      // Find the selected project to get its title
+      const selectedProject = projects.find(
+        (project) => project.path === projectPath,
+      );
       const projectName = projectPath.split(/[/\\]/).pop() || 'Unknown Project';
+      const projectTitle = selectedProject?.title || projectName;
 
-      // Set project information in Redux
-      dispatch(setProjectInfo({ name: projectName, path: projectPath }));
+      // Set project information in Redux (use title for display)
+      dispatch(
+        setProjectInfo({
+          name: projectTitle,
+          path: projectPath,
+          thumbnail: selectedProject?.thumbnail,
+        }),
+      );
 
-      // Store the selected project path and navigate to page 1
+      // Store the selected project path, title, and thumbnail for session persistence
       sessionStorage.setItem('selectedProject', projectPath);
+      sessionStorage.setItem('selectedProjectTitle', projectTitle);
+      if (selectedProject?.thumbnail) {
+        sessionStorage.setItem(
+          'selectedProjectThumbnail',
+          selectedProject.thumbnail,
+        );
+      } else {
+        sessionStorage.removeItem('selectedProjectThumbnail');
+      }
       router.push('/1');
     },
-    [router, dispatch],
+    [router, dispatch, projects],
   );
+
+  // Separate projects into featured and regular
+  const featuredProjects = projects.filter((project) => project.featured);
+  const regularProjects = projects.filter((project) => !project.featured);
 
   if (loading) {
     return (
-      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
+      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
         <FolderIcon className="w-full max-w-80 text-slate-500" />
         <h1 className="mt-4 w-full text-xl text-slate-500">
           Loading projects&hellip;
@@ -77,7 +107,7 @@ export const ProjectList = () => {
 
   if (error) {
     return (
-      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
+      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
         <FolderIcon className="w-full max-w-80 text-slate-500" />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
           Error loading projects
@@ -94,7 +124,7 @@ export const ProjectList = () => {
 
   if (projects.length === 0) {
     return (
-      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
+      <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
         <FolderIcon className="w-full max-w-80 text-slate-500" />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
           No projects found
@@ -112,38 +142,118 @@ export const ProjectList = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-col items-center px-4 py-20">
+    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-col items-center px-4">
       <FolderIcon className="mb-6 h-24 w-24 text-slate-500" />
+
       <h1 className="mb-8 text-2xl text-slate-700">Select a Project</h1>
 
-      <div className="mb-8 w-full max-w-md space-y-3">
-        {projects.map((project) => (
-          <Button
-            key={project.path}
-            onClick={() => handleProjectSelect(project.path)}
-            size="large"
-            className="w-full justify-start p-4 text-left"
-          >
-            <div className="flex w-full items-center">
-              <FolderIcon className="mr-3 h-5 w-5 text-slate-500" />
-              <div className="flex min-w-0 flex-1 items-center justify-between">
-                <div className="truncate font-medium text-slate-900">
-                  {project.name}
-                </div>
-                {project.imageCount !== undefined && (
-                  <div className="text-sm text-slate-500 tabular-nums">
-                    {project.imageCount} images
+      <div className="w-full max-w-md">
+        {featuredProjects.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-2 flex items-center border-b border-b-slate-200 pb-1 text-lg font-semibold text-slate-700">
+              <span className="mr-2 flex items-center justify-center rounded-full border border-amber-300 bg-amber-200 p-1.5 text-amber-700 inset-shadow-sm inset-shadow-amber-50">
+                <StarIcon className="w-4" />
+              </span>
+              Featured Projects
+            </h2>
+            <div className="space-y-3">
+              {featuredProjects.map((project) => (
+                <Button
+                  key={project.path}
+                  onClick={() => handleProjectSelect(project.path)}
+                  size="large"
+                  color={project.color || 'slate'}
+                  className="w-full justify-start p-4 text-left"
+                >
+                  <div className="flex w-full items-center">
+                    <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
+                      {project.thumbnail ? (
+                        <Image
+                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectPath=${encodeURIComponent(project.path)}&isProjectInfo=true`}
+                          alt={project.title || project.name}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <FolderIcon className="h-5 w-5 text-slate-500" />
+                      )}
+                    </span>
+
+                    <div className="flex min-w-0 flex-1 items-center justify-between">
+                      <div className="truncate font-medium text-slate-900">
+                        {project.title || project.name}
+                      </div>
+                      {project.imageCount !== undefined && (
+                        <div className="text-sm text-slate-500 tabular-nums">
+                          {project.imageCount} images
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+                </Button>
+              ))}
             </div>
-          </Button>
-        ))}
+          </div>
+        )}
+
+        {regularProjects.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-2 flex items-center border-b border-b-slate-200 pb-1 text-lg font-semibold text-slate-700">
+              <span className="mr-2 flex items-center justify-center rounded-full border border-slate-300 bg-slate-200 p-1.5 text-slate-700 inset-shadow-sm inset-shadow-slate-50">
+                <FolderIcon className="w-4" />
+              </span>
+              {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
+            </h2>
+            <div className="space-y-3">
+              {regularProjects.map((project) => (
+                <Button
+                  key={project.path}
+                  onClick={() => handleProjectSelect(project.path)}
+                  size="large"
+                  color={project.color || 'slate'}
+                  className="w-full justify-start p-4 text-left"
+                >
+                  <div className="flex w-full items-center">
+                    <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
+                      {project.thumbnail ? (
+                        <Image
+                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectPath=${encodeURIComponent(project.path)}&isProjectInfo=true`}
+                          alt={project.title || project.name}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <FolderIcon className="h-5 w-5 text-slate-500" />
+                      )}
+                    </span>
+
+                    <div className="flex min-w-0 flex-1 items-center justify-between">
+                      <div className="truncate font-medium text-slate-900">
+                        {project.title || project.name}
+                      </div>
+                      {project.imageCount !== undefined && (
+                        <div className="text-sm text-slate-500 tabular-nums">
+                          {project.imageCount} images
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <Button onClick={loadProjects} size="mediumWide">
         Refresh List
       </Button>
+
+      <p className="mt-4 text-sm text-slate-500">
+        Note: project folders with no images are not shown
+      </p>
     </div>
   );
 };

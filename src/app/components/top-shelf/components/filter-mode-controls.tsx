@@ -1,4 +1,9 @@
-import { FunnelIcon, NoSymbolIcon } from '@heroicons/react/24/outline';
+import {
+  CubeIcon,
+  CubeTransparentIcon,
+  FunnelIcon,
+  NoSymbolIcon,
+} from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
@@ -121,7 +126,12 @@ export const FilterModeControls = ({
         ghostDisabled={!hasModifiedAssets}
         size="medium"
       >
-        Modified
+        {filterModifiedActive ? (
+          <CubeIcon className="w-4" />
+        ) : (
+          <CubeTransparentIcon className="w-4" />
+        )}
+        <span className="ml-2 max-lg:hidden">Modified</span>
       </Button>
 
       <Button

@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   // Allow images from our API route
   images: {
     domains: ['localhost'],
+    minimumCacheTTL: 60, // Minimum cache time, in seconds
     unoptimized: true, // Disable Next.js image optimization for local files
     // writeToCacheDir: false,
   },

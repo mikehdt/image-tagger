@@ -17,6 +17,9 @@ export const SUPPORTED_IMAGE_EXTENSIONS = [
   '.webp',
 ] as const;
 
+// Project info folder name (contains project.json and thumbnail images)
+export const PROJECT_INFO_FOLDER = '_info';
+
 // MIME type mapping for supported image extensions
 export const IMAGE_MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',

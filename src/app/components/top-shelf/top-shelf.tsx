@@ -16,9 +16,9 @@ import { selectSelectedAssetsCount } from '@/app/store/selection';
 import {
   AssetSelectionControls,
   FilterIndicators,
+  FilterListButton,
   FilterModeControls,
   TagActions,
-  TagFilterButton,
 } from './components';
 
 export const TopShelf = () => {
@@ -74,7 +74,7 @@ export const TopShelf = () => {
           clearFilters={handleClearFilters}
         />
 
-        <TagFilterButton />
+        <FilterListButton />
       </div>
     </div>
   );

@@ -33,10 +33,24 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (shouldLoadAssets && typeof window !== 'undefined') {
       const selectedProject = sessionStorage.getItem('selectedProject');
       if (selectedProject) {
-        // Extract project name from path
+        // Get stored project title or fallback to extracted name from path
+        const storedProjectTitle = sessionStorage.getItem(
+          'selectedProjectTitle',
+        );
+        const storedProjectThumbnail = sessionStorage.getItem(
+          'selectedProjectThumbnail',
+        );
         const projectName =
           selectedProject.split(/[/\\]/).pop() || 'Unknown Project';
-        dispatch(setProjectInfo({ name: projectName, path: selectedProject }));
+        const projectTitle = storedProjectTitle || projectName;
+
+        dispatch(
+          setProjectInfo({
+            name: projectTitle,
+            path: selectedProject,
+            thumbnail: storedProjectThumbnail || undefined,
+          }),
+        );
       } else {
         // No project selected but we're on a page route - redirect to project selector
         router.push('/');

@@ -4,7 +4,7 @@ import { memo, useCallback, useRef, useState } from 'react';
 import { FilterList } from '../../filter-list/filter-list';
 import { Button } from '../../shared/button';
 
-const TagFilterButtonComponent = () => {
+const FilterListButtonComponent = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
 
   const [isTagPanelOpen, setIsTagPanelOpen] = useState<boolean>(false);
@@ -27,7 +27,7 @@ const TagFilterButtonComponent = () => {
       >
         <QueueListIcon className="w-4" />
 
-        <span className="ml-2 max-lg:hidden">Filters</span>
+        <span className="ml-2 max-lg:hidden">List</span>
       </Button>
 
       <FilterList
@@ -39,4 +39,4 @@ const TagFilterButtonComponent = () => {
   );
 };
 
-export const TagFilterButton = memo(TagFilterButtonComponent);
+export const FilterListButton = memo(FilterListButtonComponent);

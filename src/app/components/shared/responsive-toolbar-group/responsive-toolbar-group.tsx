@@ -149,7 +149,7 @@ export const ResponsiveToolbarGroup = ({
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Container with icon and children */}
-      <div className="flex items-center space-x-1 rounded-md bg-slate-100 px-1 py-1">
+      <div className="flex items-center rounded-md bg-slate-100 px-1 py-1">
         {/* Desktop: inactive icon with border */}
         <span
           className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 text-slate-400 max-md:hidden"
