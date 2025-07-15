@@ -98,6 +98,7 @@ export const FilterModeControls = ({
     <ResponsiveToolbarGroup
       icon={<FunnelIcon className="w-4" />}
       title="Tag Actions"
+      position="right"
     >
       <Dropdown
         items={filterModeItems}

@@ -14,8 +14,9 @@ const FilterIndicatorsComponent = () => {
   const noFilters =
     !filterSizes.length && !filterTags.length && !filterExtensions.length;
 
+  // TODO: Revisit the `!` to remove it if Tailwind uses gap instead of *+*
   return (
-    <div className="ml-auto flex min-h-9 cursor-default flex-col items-center justify-center overflow-hidden rounded-md bg-slate-50 text-center text-xs leading-3 tabular-nums">
+    <div className="!ml-auto flex min-h-9 cursor-default flex-col items-center justify-center overflow-hidden rounded-md bg-slate-50 text-center text-xs leading-3 tabular-nums">
       {noFilters ? (
         <span className="px-2 text-slate-300" title="Active size filters">
           &ndash;

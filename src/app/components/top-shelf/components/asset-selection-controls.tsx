@@ -139,6 +139,7 @@ export const AssetSelectionControls = ({
       <ResponsiveToolbarGroup
         icon={<IdentificationIcon className="w-4" />}
         title="Asset Selection"
+        position="left"
       >
         <span className="relative flex items-center">
           <Button

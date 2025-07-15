@@ -74,6 +74,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
       <ResponsiveToolbarGroup
         icon={<SwatchIcon className="w-4" />}
         title="Tag Actions"
+        position="center"
       >
         <Button
           type="button"

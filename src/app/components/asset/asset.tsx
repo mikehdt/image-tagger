@@ -78,7 +78,9 @@ const AssetComponent = ({
         <span className="text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
           {assetNumber}
 
-          <span className="mb-4 text-slate-300">{filteredIndex}</span>
+          {assetNumber !== filteredIndex ? (
+            <span className="mb-4 text-slate-300">{filteredIndex}</span>
+          ) : null}
         </span>
       </div>
 
