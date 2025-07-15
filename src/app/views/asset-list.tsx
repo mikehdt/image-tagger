@@ -42,18 +42,29 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const renderedAssets = useMemo(
     () =>
       paginatedAssets.map(
-        ({ fileId, fileExtension, dimensions, ioState, originalIndex }) => (
-          <Asset
-            key={fileId}
-            assetId={fileId}
-            assetNumber={originalIndex}
-            fileExtension={fileExtension}
-            dimensions={dimensions}
-            ioState={ioState}
-          />
-        ),
+        (
+          { fileId, fileExtension, dimensions, ioState, originalIndex },
+          index,
+        ) => {
+          // Calculate the filtered index based on current page and position in filtered results
+          const start =
+            (currentPage - 1) * (paginationSize === -1 ? 0 : paginationSize);
+          const filteredIndex = start + index + 1; // 1-based index for display
+
+          return (
+            <Asset
+              key={fileId}
+              assetId={fileId}
+              assetNumber={originalIndex}
+              filteredIndex={filteredIndex}
+              fileExtension={fileExtension}
+              dimensions={dimensions}
+              ioState={ioState}
+            />
+          );
+        },
       ),
-    [paginatedAssets],
+    [paginatedAssets, currentPage, paginationSize],
   );
 
   return filteredAssets.length ? (

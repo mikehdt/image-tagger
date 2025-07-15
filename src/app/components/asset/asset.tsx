@@ -18,6 +18,7 @@ type AssetProps = {
   assetId: string;
   fileExtension: string;
   assetNumber: number;
+  filteredIndex: number;
   dimensions: ImageDimensions;
   ioState: IoState;
 };
@@ -26,6 +27,7 @@ const AssetComponent = ({
   assetId,
   fileExtension,
   assetNumber,
+  filteredIndex,
   dimensions,
   ioState,
 }: AssetProps) => {
@@ -73,8 +75,10 @@ const AssetComponent = ({
           ariaLabel={`Select asset ${assetId}`}
         />
 
-        <span className="rounded-full text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
+        <span className="text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
           {assetNumber}
+
+          <span className="mb-4 text-slate-300">{filteredIndex}</span>
         </span>
       </div>
 
