@@ -122,7 +122,7 @@ export const FiletypesView = () => {
           id={`tag-${item.ext}`}
           key={item.ext}
           onClick={() => handleToggle(item.ext)}
-          className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+          className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
             index === selectedIndex
               ? item.isActive
                 ? 'bg-stone-200'

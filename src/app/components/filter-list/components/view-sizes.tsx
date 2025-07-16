@@ -102,7 +102,7 @@ const SizeVisualizer = ({
 
   return (
     <div
-      className={`border ${
+      className={`border transition-colors ${
         isActive ? 'border-sky-500 bg-sky-200' : 'border-slate-300 bg-slate-50'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
@@ -277,12 +277,12 @@ const SizeInfo = ({
           <span className="text-slate-500">{item.ratio}</span>
           <span className="mx-1 text-slate-300">•</span>
           <span className="text-slate-500">{item.type}</span>
-          {item.pixelCount > 100000 && (
+          {item.pixelCount > 100000 ? (
             <>
               <span className="mx-1 text-slate-300">•</span>
               <span className="text-slate-500">{item.formattedMP}</span>
             </>
-          )}
+          ) : null}
         </div>
       </>
     );
@@ -470,7 +470,7 @@ export const SizesView = () => {
           id={`size-${item.dimensions}`}
           key={item.dimensions}
           onClick={() => handleToggle(item.dimensions)}
-          className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
+          className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
             index === selectedIndex
               ? item.isActive
                 ? 'bg-sky-200'

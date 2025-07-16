@@ -181,8 +181,14 @@ export const ProjectList = () => {
                     </span>
 
                     <div className="flex min-w-0 flex-1 items-center justify-between">
-                      <div className="truncate font-medium text-slate-900">
-                        {project.title || project.name}
+                      <div className="flex flex-wrap font-medium text-slate-900">
+                        <span className="w-full truncate">
+                          {project.title || project.name}
+                        </span>
+
+                        <span className="w-full text-xs text-black/40">
+                          {project.name}
+                        </span>
                       </div>
                       {project.imageCount !== undefined && (
                         <div className="text-sm text-slate-500 tabular-nums">
@@ -230,8 +236,14 @@ export const ProjectList = () => {
                     </span>
 
                     <div className="flex min-w-0 flex-1 items-center justify-between">
-                      <div className="truncate font-medium text-slate-900">
-                        {project.title || project.name}
+                      <div className="flex flex-wrap font-medium text-slate-900">
+                        <span className="w-full truncate">
+                          {project.title || project.name}
+                        </span>
+
+                        <span className="w-full text-xs text-black/40">
+                          {project.name}
+                        </span>
                       </div>
                       {project.imageCount !== undefined && (
                         <div className="text-sm text-slate-500 tabular-nums">

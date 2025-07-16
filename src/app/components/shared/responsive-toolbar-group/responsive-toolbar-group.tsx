@@ -49,6 +49,7 @@ export const ResponsiveToolbarGroup = ({
   useEffect(() => {
     const checkIsMobile = () => {
       const isMobileView = window.innerWidth < 768; // md breakpoint
+
       setIsMobile(isMobileView);
 
       // Close popover when switching to desktop
@@ -63,7 +64,7 @@ export const ResponsiveToolbarGroup = ({
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
-  }, [isPopoverOpen]);
+  }, [isPopoverOpen, isMobile]);
 
   // Close popover when clicking outside or pressing Escape
   useEffect(() => {

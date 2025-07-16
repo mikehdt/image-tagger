@@ -3,7 +3,7 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { deleteTag } from '../assets';
+import { deleteTag, editTag } from '../assets';
 import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
@@ -274,6 +274,7 @@ filterManagerMiddleware.startListening({
     clearSizeFilters,
     clearExtensionFilters,
     clearFilters,
+    editTag,
   ),
   effect: async (_action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
@@ -303,6 +304,39 @@ filterManagerMiddleware.startListening({
         listenerApi.dispatch(toggleTagFilter(tagName));
 
         // After removing the filter, check if we need to reset filter mode
+        const updatedState = listenerApi.getState() as RootState;
+        if (shouldResetFilterMode(updatedState)) {
+          listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+        }
+      }
+    }
+  },
+});
+
+// Add a listener for tag edits to update filters when the old tag no longer exists
+filterManagerMiddleware.startListening({
+  actionCreator: editTag,
+  effect: async (action, listenerApi) => {
+    const { oldTagName, newTagName } = action.payload;
+    const state = listenerApi.getState() as RootState;
+
+    // Check if the old tag was in the current filters
+    if (state.filters.filterTags.includes(oldTagName)) {
+      // Check if the old tag still exists in any asset after the edit
+      const oldTagStillExists = state.assets.images.some((img) =>
+        img.tagList.includes(oldTagName),
+      );
+
+      // If the old tag no longer exists anywhere, replace it with the new tag in filters
+      if (!oldTagStillExists) {
+        // Remove the old tag from filters
+        listenerApi.dispatch(toggleTagFilter(oldTagName));
+        // Add the new tag to filters (only if it's not already there)
+        if (!state.filters.filterTags.includes(newTagName)) {
+          listenerApi.dispatch(toggleTagFilter(newTagName));
+        }
+
+        // After updating filters, check if we need to reset filter mode
         const updatedState = listenerApi.getState() as RootState;
         if (shouldResetFilterMode(updatedState)) {
           listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
