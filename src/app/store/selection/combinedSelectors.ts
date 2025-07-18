@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { selectAllImages } from '../assets';
+import { selectFilterTags } from '../filters';
 import { selectSelectedAssets } from '../selection';
 
 /**
@@ -74,3 +75,29 @@ export const selectTagCoExistence = (
       assetsWithBothTags: assetsWithBothTags.length,
     };
   });
+
+/**
+ * Selector to get assets that have at least one of the selected tags
+ * @returns Array of assets that contain at least one selected tag
+ */
+export const selectAssetsWithSelectedTags = createSelector(
+  [selectAllImages, selectFilterTags],
+  (allImages, filterTags) => {
+    if (filterTags.length === 0) {
+      return [];
+    }
+
+    return allImages.filter((asset) =>
+      asset.tagList.some((tag) => filterTags.includes(tag)),
+    );
+  },
+);
+
+/**
+ * Selector to get the count of assets that have at least one selected tag
+ * @returns Number of assets that contain at least one selected tag
+ */
+export const selectAssetsWithSelectedTagsCount = createSelector(
+  [selectAssetsWithSelectedTags],
+  (assetsWithSelectedTags) => assetsWithSelectedTags.length,
+);

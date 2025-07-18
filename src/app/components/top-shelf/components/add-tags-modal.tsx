@@ -4,8 +4,13 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
+import { selectFilterTags } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
-import { selectDuplicateTagInfo } from '@/app/store/selection';
+import {
+  selectAssetsWithSelectedTags,
+  selectDuplicateTagInfo,
+  selectSelectedAssets,
+} from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
 import { Checkbox } from '../../shared/checkbox/checkbox';
@@ -16,7 +21,12 @@ type AddTagsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   selectedAssetsCount: number;
-  onAddTag: (tag: string, addToStart?: boolean) => void;
+  onAddTag: (
+    tag: string,
+    addToStart?: boolean,
+    onlySelectedAssets?: boolean,
+    onlyFilteredAssets?: boolean,
+  ) => void;
   onClearSelection?: () => void; // Optional callback to clear selection
 };
 
@@ -30,6 +40,29 @@ export const AddTagsModal = ({
   const [tags, setTags] = useState<string[]>([]);
   const [keepSelection, setKeepSelection] = useState(false);
   const [addToStart, setAddToStart] = useState(false);
+
+  // New state for dual selection mode
+  const [applyToSelectedAssets, setApplyToSelectedAssets] = useState(false);
+  const [applyToAssetsWithSelectedTags, setApplyToAssetsWithSelectedTags] =
+    useState(false);
+
+  // Get data for dual selection logic
+  const filterTags = useAppSelector(selectFilterTags);
+  const selectedAssets = useAppSelector(selectSelectedAssets);
+  const assetsWithSelectedTags = useAppSelector(selectAssetsWithSelectedTags);
+
+  // Check state conditions
+  const hasSelectedAssets = selectedAssetsCount > 0;
+  const hasSelectedTags = filterTags.length > 0;
+  const assetsWithSelectedTagsCount = assetsWithSelectedTags.length;
+
+  // Calculate the intersection count for summary display
+  const intersectionCount =
+    hasSelectedAssets && hasSelectedTags
+      ? assetsWithSelectedTags.filter((asset) =>
+          selectedAssets.includes(asset.fileId),
+        ).length
+      : 0;
 
   // For duplicate checking, we'll get the current tag from the multitagInput
   // by using an Effect instead of setting state during render
@@ -85,9 +118,43 @@ export const AddTagsModal = ({
     }
   }, [isOpen]);
 
+  // Initialize checkboxes based on what selections are available
+  useEffect(() => {
+    if (isOpen) {
+      // Set defaults based on what's available
+      if (hasSelectedAssets && !hasSelectedTags) {
+        // Only assets selected - apply to selected assets
+        setApplyToSelectedAssets(true);
+        setApplyToAssetsWithSelectedTags(false);
+      } else if (!hasSelectedAssets && hasSelectedTags) {
+        // Only tags selected - apply to assets with selected tags
+        setApplyToSelectedAssets(false);
+        setApplyToAssetsWithSelectedTags(true);
+      } else if (hasSelectedAssets && hasSelectedTags) {
+        // Both available - let user choose, default to both
+        setApplyToSelectedAssets(true);
+        setApplyToAssetsWithSelectedTags(true);
+      } else {
+        // Neither available - shouldn't happen but handle gracefully
+        setApplyToSelectedAssets(false);
+        setApplyToAssetsWithSelectedTags(false);
+      }
+    }
+  }, [isOpen, hasSelectedAssets, hasSelectedTags]);
+
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (tags.length === 0) return;
+
+    // Check that at least one constraint is selected when both are available
+    if (
+      hasSelectedAssets &&
+      hasSelectedTags &&
+      !applyToSelectedAssets &&
+      !applyToAssetsWithSelectedTags
+    ) {
+      return; // Don't submit if no constraints are selected
+    }
 
     // Get valid tags that aren't marked as "all"
     const validTags = tags.filter((tag) => {
@@ -99,7 +166,12 @@ export const AddTagsModal = ({
     const tagsToProcess = addToStart ? [...validTags].reverse() : validTags;
 
     tagsToProcess.forEach((tag) => {
-      onAddTag(tag, addToStart);
+      onAddTag(
+        tag,
+        addToStart,
+        applyToSelectedAssets,
+        applyToAssetsWithSelectedTags,
+      );
     });
 
     setTags([]);
@@ -153,7 +225,42 @@ export const AddTagsModal = ({
     const status = tagsStatus.find((t) => t.tag === tag)?.status;
     return status !== 'all';
   });
+
+  // Check if we have valid input
   const hasNoValidTags = tags.length === 0 || validTags.length === 0;
+
+  // Check if at least one constraint is selected when both are available
+  const hasInvalidConstraints =
+    hasSelectedAssets &&
+    hasSelectedTags &&
+    !applyToSelectedAssets &&
+    !applyToAssetsWithSelectedTags;
+
+  const isFormInvalid = hasNoValidTags || hasInvalidConstraints;
+
+  // Calculate the summary message for how many assets will be affected
+  const getSummaryMessage = () => {
+    if (hasSelectedAssets && hasSelectedTags) {
+      // Dual selection mode
+      if (applyToSelectedAssets && applyToAssetsWithSelectedTags) {
+        // Both constraints: intersection
+        return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and have selected tags.`;
+      } else if (applyToSelectedAssets) {
+        // Only selected assets
+        return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
+      } else if (applyToAssetsWithSelectedTags) {
+        // Only assets with selected tags
+        return `Tags will be added to ${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'} with selected tags.`;
+      }
+    } else if (hasSelectedAssets) {
+      // Only assets selected
+      return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
+    } else if (hasSelectedTags) {
+      // Only tags selected
+      return `Tags will be added to ${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'} with selected tags.`;
+    }
+    return '';
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
@@ -161,12 +268,30 @@ export const AddTagsModal = ({
         {/* Title */}
         <h2 className="text-2xl font-semibold text-slate-700">Add Tags</h2>
 
-        {/* Selected assets count */}
-        <p className="text-sm text-slate-500">
-          Adding tags to{' '}
-          <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
-          {selectedAssetsCount === 1 ? 'asset' : 'assets'}.
-        </p>
+        {/* Selected assets/tags count and description */}
+        {hasSelectedAssets && hasSelectedTags ? (
+          <p className="text-sm text-slate-500">
+            Choose where to add tags:{' '}
+            <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
+            {selectedAssetsCount === 1 ? 'asset' : 'assets'} and/or{' '}
+            <span className="font-medium">{assetsWithSelectedTagsCount}</span>{' '}
+            assets with selected tags.
+          </p>
+        ) : hasSelectedAssets ? (
+          <p className="text-sm text-slate-500">
+            Adding tags to{' '}
+            <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
+            {selectedAssetsCount === 1 ? 'asset' : 'assets'}.
+          </p>
+        ) : hasSelectedTags ? (
+          <p className="text-sm text-slate-500">
+            Adding tags to{' '}
+            <span className="font-medium">{assetsWithSelectedTagsCount}</span>{' '}
+            assets with selected tags.
+          </p>
+        ) : (
+          <p className="text-sm text-slate-500">No assets or tags selected.</p>
+        )}
 
         {/* Tag input form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -221,6 +346,46 @@ export const AddTagsModal = ({
             />
           </div>
 
+          {/* Constraint checkboxes - only show when both assets and tags are available */}
+          {hasSelectedAssets && hasSelectedTags ? (
+            <>
+              <div className="flex items-center gap-2 pb-2">
+                <Checkbox
+                  isSelected={applyToSelectedAssets}
+                  onChange={() =>
+                    setApplyToSelectedAssets(!applyToSelectedAssets)
+                  }
+                  label={`Add to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Add tags to selected assets"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pb-2">
+                <Checkbox
+                  isSelected={applyToAssetsWithSelectedTags}
+                  onChange={() =>
+                    setApplyToAssetsWithSelectedTags(
+                      !applyToAssetsWithSelectedTags,
+                    )
+                  }
+                  label={`Add to assets with selected tags (${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Add tags to assets with selected tags"
+                />
+              </div>
+
+              {hasInvalidConstraints && (
+                <p className="text-xs text-red-600">
+                  Select at least one option above to proceed.
+                </p>
+              )}
+            </>
+          ) : null}
+
+          {/* Summary of how many assets will be affected - show for all cases */}
+          {!hasInvalidConstraints && (
+            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+          )}
+
           {/* Keep selection checkbox */}
           <div className="flex items-center gap-2 pb-2">
             <Checkbox
@@ -244,7 +409,7 @@ export const AddTagsModal = ({
 
             <Button
               type="submit"
-              disabled={hasNoValidTags}
+              disabled={isFormInvalid}
               neutralDisabled
               color="amber"
               size="mediumWide"

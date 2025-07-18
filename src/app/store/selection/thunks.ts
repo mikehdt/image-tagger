@@ -4,6 +4,7 @@ import { addTag, deleteTag, editTag, markFilterTagsToDelete } from '../assets';
 import { selectFilteredAssets } from '../assets';
 import { updateTagFilters } from '../filters';
 import { RootState } from '../index';
+import { selectAssetsWithSelectedTags } from './combinedSelectors';
 
 /**
  * Thunk action to add a tag to all selected assets
@@ -221,6 +222,85 @@ export const editTagsAcrossAssets = createAsyncThunk(
         totalChangedTags > 0
           ? `Updated ${totalChangedTags} tags across ${totalChangedAssets} assets`
           : 'No tags were changed',
+    };
+  },
+);
+
+/**
+ * Enhanced thunk action to add a tag to assets based on dual selection logic
+ * Supports adding to selected assets, assets with selected tags, or both
+ */
+export const addTagToAssetsWithDualSelection = createAsyncThunk(
+  'selection/addTagToAssetsWithDualSelection',
+  async (
+    {
+      tagName,
+      addToStart = false,
+      applyToSelectedAssets = false,
+      applyToAssetsWithSelectedTags = false,
+      onlyFilteredAssets = false,
+    }: {
+      tagName: string;
+      addToStart?: boolean;
+      applyToSelectedAssets?: boolean;
+      applyToAssetsWithSelectedTags?: boolean;
+      onlyFilteredAssets?: boolean;
+    },
+    { getState, dispatch },
+  ) => {
+    const state = getState() as RootState;
+
+    // Get the final assets based on constraints
+    let finalAssets: string[] = [];
+
+    if (applyToSelectedAssets && applyToAssetsWithSelectedTags) {
+      // Both constraints: intersection of selected assets AND assets with selected tags
+      const selectedAssetIds = new Set(state.selection.selectedAssets);
+      const assetsWithSelectedTags = selectAssetsWithSelectedTags(state);
+
+      finalAssets = assetsWithSelectedTags
+        .filter((asset) => selectedAssetIds.has(asset.fileId))
+        .map((asset) => asset.fileId);
+    } else if (applyToSelectedAssets) {
+      // Only selected assets constraint
+      finalAssets = [...state.selection.selectedAssets];
+    } else if (applyToAssetsWithSelectedTags) {
+      // Only assets with selected tags constraint
+      const assetsWithSelectedTags = selectAssetsWithSelectedTags(state);
+      finalAssets = assetsWithSelectedTags.map((asset) => asset.fileId);
+    }
+
+    // Further filter by filtered assets if constraint is active
+    if (onlyFilteredAssets) {
+      const filteredAssets = selectFilteredAssets(state);
+      const filteredAssetIds = new Set(
+        filteredAssets.map((asset) => asset.fileId),
+      );
+      finalAssets = finalAssets.filter((assetId) =>
+        filteredAssetIds.has(assetId),
+      );
+    }
+
+    // Check if we have assets and a valid tag
+    if (!finalAssets.length || !tagName.trim()) {
+      return { success: false, message: 'No assets available or invalid tag' };
+    }
+
+    // For each final asset, dispatch an addTag action
+    finalAssets.forEach((assetId) => {
+      dispatch(
+        addTag({
+          assetId,
+          tagName: tagName.trim(),
+          position: addToStart ? 'start' : 'end',
+        }),
+      );
+    });
+
+    return {
+      success: true,
+      count: finalAssets.length,
+      message: `Added tag "${tagName}" to ${finalAssets.length} assets`,
     };
   },
 );

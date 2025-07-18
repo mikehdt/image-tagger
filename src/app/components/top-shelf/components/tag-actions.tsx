@@ -10,7 +10,11 @@ import { memo, useCallback, useState } from 'react';
 import { markFilterTagsToDelete } from '@/app/store/assets';
 import { selectFilterTags } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { addTagToSelectedAssets, clearSelection } from '@/app/store/selection';
+import {
+  addTagToAssetsWithDualSelection,
+  clearSelection,
+} from '@/app/store/selection';
+import { selectAssetsWithSelectedTagsCount } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
@@ -28,6 +32,13 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
 
   const dispatch = useAppDispatch();
   const filterTags = useAppSelector(selectFilterTags);
+  const assetsWithSelectedTagsCount = useAppSelector(
+    selectAssetsWithSelectedTagsCount,
+  );
+
+  // Determine if Add Tags button should be enabled
+  // Enable if we have selected assets OR if we have selected tags
+  const canAddTags = selectedAssetsCount > 0 || filterTags.length > 0;
 
   const handleMarkFilterTagsToDelete = useCallback(
     (tags: string[]) => dispatch(markFilterTagsToDelete(tags)),
@@ -48,8 +59,20 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
   }, [filterTags, isToggled, handleMarkFilterTagsToDelete]);
 
   const handleAddTag = useCallback(
-    (tag: string, addToStart = false) => {
-      dispatch(addTagToSelectedAssets({ tagName: tag, addToStart }));
+    (
+      tag: string,
+      addToStart = false,
+      applyToSelectedAssets = false,
+      applyToAssetsWithSelectedTags = false,
+    ) => {
+      dispatch(
+        addTagToAssetsWithDualSelection({
+          tagName: tag,
+          addToStart,
+          applyToSelectedAssets,
+          applyToAssetsWithSelectedTags,
+        }),
+      );
       setIsAddTagsModalOpen(false);
     },
     [dispatch],
@@ -79,11 +102,19 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
         <Button
           type="button"
           onClick={openAddModel}
-          disabled={selectedAssetsCount < 2}
+          disabled={!canAddTags}
           variant="ghost"
           color="slate"
           size="medium"
-          title="Add tags to selected assets"
+          title={
+            selectedAssetsCount > 0 && filterTags.length > 0
+              ? `Add tags to selected assets or assets with selected tags`
+              : selectedAssetsCount > 0
+                ? `Add tags to ${selectedAssetsCount} selected assets`
+                : filterTags.length > 0
+                  ? `Add tags to ${assetsWithSelectedTagsCount} assets with selected tags`
+                  : 'Select assets or tags to add new tags'
+          }
         >
           <TagIcon className="w-4" />
           <span className="ml-2 max-xl:hidden">Add</span>
