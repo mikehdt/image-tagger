@@ -10,6 +10,7 @@ import {
 } from '@/app/store/assets';
 import {
   selectFilterTags,
+  toggleBucketFilter,
   toggleExtensionFilter,
   toggleSizeFilter,
   toggleTagFilter,
@@ -110,6 +111,13 @@ export const useAssetTags = (assetId: string) => {
     [dispatch],
   );
 
+  const toggleBucket = useCallback(
+    (bucketDimensions: string) => {
+      dispatch(toggleBucketFilter(bucketDimensions));
+    },
+    [dispatch],
+  );
+
   const toggleExtension = useCallback(
     (extension: string) => {
       dispatch(toggleExtensionFilter(extension));
@@ -128,6 +136,7 @@ export const useAssetTags = (assetId: string) => {
     saveAction,
     cancelAction,
     toggleSize,
+    toggleBucket,
     toggleExtension,
   };
 };

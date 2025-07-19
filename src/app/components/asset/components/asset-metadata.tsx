@@ -1,8 +1,13 @@
-import { BookmarkIcon } from '@heroicons/react/24/outline';
+import {
+  ArchiveBoxIcon,
+  BookmarkIcon,
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
 import { useCallback, useMemo } from 'react';
 
 import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
 import {
+  selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSizes,
   selectSearchQuery,
@@ -39,11 +44,13 @@ export const AssetMetadata = ({
 }: AssetMetadataProps) => {
   const searchQuery = useAppSelector(selectSearchQuery);
   const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const {
     tagList,
     tagsByStatus,
     toggleSize,
+    toggleBucket,
     toggleExtension,
     saveAction,
     cancelAction,
@@ -53,6 +60,8 @@ export const AssetMetadata = ({
 
   // Calculate pressed states based on filter arrays
   const dimensionsActive = filterSizes.includes(dimensionsComposed);
+  const bucketComposed = `${bucket.width}×${bucket.height}`;
+  const bucketActive = filterBuckets.includes(bucketComposed);
   const extensionActive = filterExtensions.includes(fileExtension);
 
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
@@ -77,6 +86,11 @@ export const AssetMetadata = ({
   const handleToggleSize = useCallback(
     () => toggleSize(dimensionsComposed),
     [dimensionsComposed, toggleSize],
+  );
+
+  const handleToggleBucket = useCallback(
+    () => toggleBucket(bucketComposed),
+    [bucketComposed, toggleBucket],
   );
 
   const handleToggleExtension = useCallback(
@@ -117,7 +131,19 @@ export const AssetMetadata = ({
           isPressed={dimensionsActive}
           onClick={handleToggleSize}
         >
+          <PhotoIcon className="mr-1 w-4" />
           {dimensions.width}&times;{dimensions.height}
+        </Button>
+
+        <Button
+          type="button"
+          color="slate"
+          size="smallWide"
+          isPressed={bucketActive}
+          onClick={handleToggleBucket}
+        >
+          <ArchiveBoxIcon className="mr-1 w-4" />
+          {bucket.width}&times;{bucket.height}
         </Button>
 
         <Button
@@ -133,11 +159,11 @@ export const AssetMetadata = ({
         <Checkbox
           isSelected={showCropVisualization}
           onChange={() => onToggleCropVisualization(!showCropVisualization)}
-          label={`Show bucket ${bucket.width}×${bucket.height}`}
+          label={`Show cropping`}
         />
 
         <span
-          className="cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"
+          className="ml-2 cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'white 0 1px 0' }}
         >
           {highlightText(assetId, searchQuery)}
