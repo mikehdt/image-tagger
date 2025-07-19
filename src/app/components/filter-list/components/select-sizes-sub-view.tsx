@@ -1,5 +1,7 @@
 import { useFilterContext } from '../filter-context';
-import { SizeSubView } from '../types';
+import { SizeSubViewType } from '../types';
+import { BucketsView } from './view-buckets';
+import { SizesView } from './view-sizes';
 
 export const SizeSubViewSelector = () => {
   const {
@@ -11,7 +13,7 @@ export const SizeSubViewSelector = () => {
     inputRef,
   } = useFilterContext();
 
-  const handleSubViewChange = (subView: SizeSubView) => {
+  const handleSubViewChange = (subView: SizeSubViewType) => {
     setSizeSubView(subView);
     // Clear search and reset selection when switching sub-views
     setSearchTerm('');
@@ -56,4 +58,11 @@ export const SizeSubViewSelector = () => {
       </button>
     </div>
   );
+};
+
+// Component render
+export const SizeSubView = () => {
+  const { sizeSubView } = useFilterContext();
+
+  return sizeSubView === 'dimensions' ? <SizesView /> : <BucketsView />;
 };

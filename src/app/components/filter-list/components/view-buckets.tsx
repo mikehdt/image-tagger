@@ -91,9 +91,7 @@ const BucketVisualizer = ({
   return (
     <div
       className={`border transition-colors ${
-        isActive
-          ? 'border-purple-500 bg-purple-200'
-          : 'border-slate-300 bg-slate-50'
+        isActive ? 'border-sky-500 bg-sky-200' : 'border-slate-300 bg-slate-50'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
     />
@@ -253,14 +251,14 @@ export const BucketsView = () => {
           id={`bucket-${item.name}`}
           key={item.name}
           onClick={() => handleToggle(item.name)}
-          className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+          className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
             index === selectedIndex
               ? item.isActive
-                ? 'bg-purple-200'
-                : 'bg-purple-100'
+                ? 'bg-sky-200'
+                : 'bg-sky-100'
               : item.isActive
-                ? 'bg-purple-100'
-                : 'hover:bg-purple-50'
+                ? 'bg-sky-100'
+                : 'hover:bg-sky-50'
           }`}
         >
           <div className="mr-2 flex w-10 justify-center">
@@ -270,17 +268,13 @@ export const BucketsView = () => {
             />
           </div>
 
-          <div className="flex flex-1 flex-col">
-            <div className="flex items-center justify-between tabular-nums">
-              <span className="text-slate-800">
-                {searchTerm
-                  ? highlightText(item.name, searchTerm, normalizeBucketText)
-                  : item.name}
-              </span>
-              <span className="ml-auto text-xs text-slate-500">
-                {item.count}
-              </span>
-            </div>
+          <div className="flex flex-1 items-center justify-between tabular-nums">
+            <span className="text-slate-800">
+              {searchTerm
+                ? highlightText(item.name, searchTerm, normalizeBucketText)
+                : item.name}
+            </span>
+            <span className="ml-auto text-xs text-slate-500">{item.count}</span>
           </div>
         </li>
       ))}

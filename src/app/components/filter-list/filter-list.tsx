@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
 import {
-  DimensionsView,
   FileView,
   FilterControls,
   SearchInput,
+  SizeSubView,
   SizeSubViewSelector,
   TagsView,
   ViewSelector,
@@ -141,7 +141,7 @@ const FilterPanel = () => {
             {activeView === 'tag' ? (
               <TagsView />
             ) : activeView === 'size' ? (
-              <DimensionsView />
+              <SizeSubView />
             ) : (
               <FileView />
             )}

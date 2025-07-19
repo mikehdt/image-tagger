@@ -1,4 +1,4 @@
-import { memo, SyntheticEvent } from 'react';
+import { SyntheticEvent } from 'react';
 
 import { useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';

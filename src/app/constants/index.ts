@@ -9,19 +9,14 @@ export const DEFAULT_BATCH_SIZE = 48;
 // macOS/Linux: '/Users/YourUsername/Pictures/ImageProjects'
 export const PROJECTS_FOLDER = '';
 
-// Supported image file extensions (including the dot)
-export const SUPPORTED_IMAGE_EXTENSIONS = [
-  '.jpg',
-  '.jpeg',
-  '.png',
-  '.webp',
-] as const;
-
 // Project info folder name (contains project.json and thumbnail images)
 export const PROJECT_INFO_FOLDER = '_info';
 
+// Supported image file extensions (including the dot)
+const SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'] as const;
+
 // MIME type mapping for supported image extensions
-export const IMAGE_MIME_TYPES: Record<string, string> = {
+const IMAGE_MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',

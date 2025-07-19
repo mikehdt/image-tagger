@@ -470,7 +470,7 @@ export const SizesView = () => {
           id={`size-${item.dimensions}`}
           key={item.dimensions}
           onClick={() => handleToggle(item.dimensions)}
-          className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+          className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
             index === selectedIndex
               ? item.isActive
                 ? 'bg-sky-200'

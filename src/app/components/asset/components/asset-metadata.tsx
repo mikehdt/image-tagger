@@ -64,6 +64,11 @@ export const AssetMetadata = ({
   const bucketActive = filterBuckets.includes(bucketComposed);
   const extensionActive = filterExtensions.includes(fileExtension);
 
+  // Determine if cropping would occur (when aspect ratios don't match)
+  const imageAspectRatio = dimensions.width / dimensions.height;
+  const bucketAspectRatio = bucket.width / bucket.height;
+  const wouldCrop = Math.abs(imageAspectRatio - bucketAspectRatio) > 0;
+
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =
     saveProgress &&
@@ -156,11 +161,15 @@ export const AssetMetadata = ({
           {fileExtension}
         </Button>
 
-        <Checkbox
-          isSelected={showCropVisualization}
-          onChange={() => onToggleCropVisualization(!showCropVisualization)}
-          label={`Show cropping`}
-        />
+        {wouldCrop ? (
+          <Checkbox
+            isSelected={showCropVisualization}
+            onChange={() => onToggleCropVisualization(!showCropVisualization)}
+            label={`Show cropping`}
+          />
+        ) : (
+          <span className="text-slate-400">Not cropped</span>
+        )}
 
         <span
           className="ml-2 cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"

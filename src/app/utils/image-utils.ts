@@ -118,17 +118,17 @@ export const calculateKohyaBucket = (
 };
 
 /**
- * Convenience functions for specific Stable Diffusion versions
+ * Examples of convenience functions for specific Stable Diffusion versions
  */
-export const calculateSD15Bucket = (imageWidth: number, imageHeight: number) =>
-  calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SD15);
+// export const calculateSD15Bucket = (imageWidth: number, imageHeight: number) =>
+//   calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SD15);
 
-export const calculateSDXL768Bucket = (
-  imageWidth: number,
-  imageHeight: number,
-) => calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SDXL_768);
+// export const calculateSDXL768Bucket = (
+//   imageWidth: number,
+//   imageHeight: number,
+// ) => calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SDXL_768);
 
-export const calculateSDXL1024Bucket = (
-  imageWidth: number,
-  imageHeight: number,
-) => calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SDXL_1024);
+// export const calculateSDXL1024Bucket = (
+//   imageWidth: number,
+//   imageHeight: number,
+// ) => calculateKohyaBucket(imageWidth, imageHeight, KOHYA_CONFIGS.SDXL_1024);

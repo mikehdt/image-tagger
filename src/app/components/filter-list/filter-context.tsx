@@ -23,7 +23,7 @@ import {
 import {
   FilterListProps,
   FilterView,
-  SizeSubView,
+  SizeSubViewType,
   SortDirection,
   SortType,
 } from './types';
@@ -41,8 +41,8 @@ interface FilterContextType {
   setActiveView: (view: FilterView) => void;
 
   // Size sub-view state (for when activeView is 'size')
-  sizeSubView: SizeSubView;
-  setSizeSubView: (subView: SizeSubView) => void;
+  sizeSubView: SizeSubViewType;
+  setSizeSubView: (subView: SizeSubViewType) => void;
 
   // Current sort settings (derived from active view)
   sortDirection: SortDirection;
@@ -83,10 +83,19 @@ export const FilterProvider = ({
 
   // Persistent state for view and sort settings
   const [activeView, setActiveView] = useState<FilterView>('tag');
-  const [sizeSubView, setSizeSubView] = useState<SizeSubView>('dimensions');
+  const [sizeSubView, setSizeSubView] = useState<SizeSubViewType>('dimensions');
   const [sortSettings, setSortSettings] = useState({
     tag: { type: 'count' as SortType, direction: 'desc' as SortDirection },
-    size: { type: 'count' as SortType, direction: 'desc' as SortDirection },
+    size: {
+      dimensions: {
+        type: 'count' as SortType,
+        direction: 'desc' as SortDirection,
+      },
+      buckets: {
+        type: 'count' as SortType,
+        direction: 'desc' as SortDirection,
+      },
+    },
     filetype: { type: 'count' as SortType, direction: 'desc' as SortDirection },
   });
 
@@ -98,28 +107,55 @@ export const FilterProvider = ({
   // Panel positioning
   const { position, isPositioned } = usePanelPosition(isOpen, containerRef);
 
-  // Get current sort settings based on active view
-  const currentSort = sortSettings[activeView];
+  // Get current sort settings based on active view and sub-view
+  const currentSort = useMemo(() => {
+    if (activeView === 'size') {
+      return sortSettings[activeView][sizeSubView];
+    }
+    return sortSettings[activeView];
+  }, [activeView, sizeSubView, sortSettings]);
 
   //  sort setters that update the correct view settings
   const setSortDirection = useCallback(
     (direction: SortDirection) => {
-      setSortSettings((prev) => ({
-        ...prev,
-        [activeView]: { ...prev[activeView], direction },
-      }));
+      setSortSettings((prev) => {
+        if (activeView === 'size') {
+          return {
+            ...prev,
+            size: {
+              ...prev.size,
+              [sizeSubView]: { ...prev.size[sizeSubView], direction },
+            },
+          };
+        }
+        return {
+          ...prev,
+          [activeView]: { ...prev[activeView], direction },
+        };
+      });
     },
-    [activeView],
+    [activeView, sizeSubView],
   );
 
   const setSortType = useCallback(
     (type: SortType) => {
-      setSortSettings((prev) => ({
-        ...prev,
-        [activeView]: { ...prev[activeView], type },
-      }));
+      setSortSettings((prev) => {
+        if (activeView === 'size') {
+          return {
+            ...prev,
+            size: {
+              ...prev.size,
+              [sizeSubView]: { ...prev.size[sizeSubView], type },
+            },
+          };
+        }
+        return {
+          ...prev,
+          [activeView]: { ...prev[activeView], type },
+        };
+      });
     },
-    [activeView],
+    [activeView, sizeSubView],
   );
 
   // Update list length

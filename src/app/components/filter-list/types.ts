@@ -12,7 +12,7 @@ export type SortDirection = 'asc' | 'desc';
 export type FilterView = 'tag' | 'size' | 'filetype';
 
 // Define sub-view types for size view
-export type SizeSubView = 'dimensions' | 'buckets';
+export type SizeSubViewType = 'dimensions' | 'buckets';
 
 // Base props for the filter list component
 export interface FilterListProps {
