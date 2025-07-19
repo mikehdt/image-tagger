@@ -73,17 +73,17 @@ export const FilterModeControls = ({
     },
     {
       value: FilterMode.MATCH_ANY,
-      label: 'Any Tags',
+      label: 'Match Any',
       disabled: !filterSelectionActive,
     },
     {
       value: FilterMode.MATCH_ALL,
-      label: 'All Tags',
+      label: 'Match All',
       disabled: !filterSelectionActive,
     },
     {
       value: FilterMode.MATCH_NONE,
-      label: 'Exclude Tags',
+      label: 'Exclude Filters',
       disabled: !filterSelectionActive,
     },
     {

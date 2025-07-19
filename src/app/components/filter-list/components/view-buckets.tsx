@@ -9,6 +9,15 @@ import { highlightText } from '@/app/utils/text-highlight';
 import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
 
+/**
+ * Normalization function for buckets - replaces × with x for matching
+ * @param text The text to normalize
+ * @returns Normalized text
+ */
+const normalizeBucketText = (text: string): string => {
+  return text.replace('×', 'x');
+};
+
 // Get sort options for the buckets view (simplified compared to image sizes)
 export const getBucketSortOptions = (
   sortType: SortType,
@@ -264,7 +273,9 @@ export const BucketsView = () => {
           <div className="flex flex-1 flex-col">
             <div className="flex items-center justify-between tabular-nums">
               <span className="text-slate-800">
-                {searchTerm ? highlightText(item.name, searchTerm) : item.name}
+                {searchTerm
+                  ? highlightText(item.name, searchTerm, normalizeBucketText)
+                  : item.name}
               </span>
               <span className="ml-auto text-xs text-slate-500">
                 {item.count}

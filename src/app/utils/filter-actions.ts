@@ -131,35 +131,79 @@ export const applyFilters = ({
       filterExtensions.length === 0 ||
       filterExtensionsSet.has(img.fileExtension);
 
-    // For all MATCH modes (except TAGLESS), if there are no tag filters but we have size/bucket/extension filters,
-    // just apply the size/bucket/extension filters
-    if (filterTags.length === 0 && filterMode !== FilterMode.TAGLESS) {
-      return sizeMatches && bucketMatches && extensionMatches;
-    }
-
     // MATCH_ALL mode - asset must have ALL selected tags and meet size/bucket/extension criteria
     if (filterMode === FilterMode.MATCH_ALL) {
-      // Every selected tag must be present in the asset's tags
-      const allTagsMatch = filterTags.every((tag) => img.tagList.includes(tag));
+      // For MATCH_ALL, everything must match (intersection)
+      const allTagsMatch =
+        filterTags.length === 0 ||
+        filterTags.every((tag) => img.tagList.includes(tag));
       return allTagsMatch && sizeMatches && bucketMatches && extensionMatches;
     }
 
-    // MATCH_ANY mode - asset must have ANY selected tag and meet size/bucket/extension criteria
+    // MATCH_ANY mode - asset must match ANY of the selected filters (tags, sizes, buckets, or extensions)
     if (filterMode === FilterMode.MATCH_ANY) {
-      // At least one selected tag must be present in the asset's tags
-      const anyTagMatches = filterTags.some((tag) => img.tagList.includes(tag));
+      // If no filters are selected, show all assets
+      if (
+        filterTags.length === 0 &&
+        filterSizes.length === 0 &&
+        filterBuckets.length === 0 &&
+        filterExtensions.length === 0
+      ) {
+        return true;
+      }
 
-      // Size, bucket, and extension filters are still combined with AND logic
-      return anyTagMatches && sizeMatches && bucketMatches && extensionMatches;
+      // Check if ANY of the filter criteria match
+      const anyTagMatches =
+        filterTags.length > 0 &&
+        filterTags.some((tag) => img.tagList.includes(tag));
+      const anySizeMatches =
+        filterSizes.length > 0 && filterSizesSet.has(dimensionsComposed);
+      const anyBucketMatches =
+        filterBuckets.length > 0 && filterBucketsSet.has(bucketComposed);
+      const anyExtensionMatches =
+        filterExtensions.length > 0 &&
+        filterExtensionsSet.has(img.fileExtension);
+
+      // Return true if ANY of the filter types match (union logic)
+      return (
+        anyTagMatches ||
+        anySizeMatches ||
+        anyBucketMatches ||
+        anyExtensionMatches
+      );
     }
 
-    // MATCH_NONE mode - asset must have NONE of the selected tags and meet size/bucket/extension criteria
+    // MATCH_NONE mode - asset must match NONE of the selected filters (exclude any matches)
     if (filterMode === FilterMode.MATCH_NONE) {
-      // None of the selected tags can be present in the asset's tags
-      const noTagMatches = !filterTags.some((tag) => img.tagList.includes(tag));
+      // If no filters are selected, show all assets
+      if (
+        filterTags.length === 0 &&
+        filterSizes.length === 0 &&
+        filterBuckets.length === 0 &&
+        filterExtensions.length === 0
+      ) {
+        return true;
+      }
 
-      // Size, bucket, and extension filters are still combined with AND logic
-      return noTagMatches && sizeMatches && bucketMatches && extensionMatches;
+      // Check if ANY of the filter criteria match (we want to exclude these)
+      const anyTagMatches =
+        filterTags.length > 0 &&
+        filterTags.some((tag) => img.tagList.includes(tag));
+      const anySizeMatches =
+        filterSizes.length > 0 && filterSizesSet.has(dimensionsComposed);
+      const anyBucketMatches =
+        filterBuckets.length > 0 && filterBucketsSet.has(bucketComposed);
+      const anyExtensionMatches =
+        filterExtensions.length > 0 &&
+        filterExtensionsSet.has(img.fileExtension);
+
+      // Return true only if NONE of the filter types match (exclude logic)
+      return !(
+        anyTagMatches ||
+        anySizeMatches ||
+        anyBucketMatches ||
+        anyExtensionMatches
+      );
     }
 
     // TAGLESS mode - asset must have no tags at all and meet size/bucket/extension criteria
