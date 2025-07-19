@@ -1,7 +1,7 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useCallback, useMemo } from 'react';
 
-import { IoState, selectSaveProgress } from '@/app/store/assets';
+import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
 import {
   selectFilterExtensions,
   selectFilterSizes,
@@ -17,6 +17,7 @@ type AssetMetadataProps = {
   assetId: string;
   fileExtension: string;
   dimensions: { width: number; height: number };
+  bucket: KohyaBucket;
   ioState: IoState;
   dimensionsComposed: string;
   isTagEditing?: boolean; // True when either editing or adding a tag
@@ -26,6 +27,7 @@ export const AssetMetadata = ({
   assetId,
   fileExtension,
   dimensions,
+  bucket,
   ioState,
   dimensionsComposed,
   isTagEditing = false,
@@ -122,6 +124,10 @@ export const AssetMetadata = ({
         >
           {fileExtension}
         </Button>
+
+        <span>
+          Bucket: {bucket.width}×{bucket.height}
+        </span>
 
         <span
           className="cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { memo, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 
-import { ImageDimensions, IoState } from '@/app/store/assets';
+import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectAssetIsSelected,
@@ -20,6 +20,7 @@ type AssetProps = {
   assetNumber: number;
   filteredIndex: number;
   dimensions: ImageDimensions;
+  bucket: KohyaBucket;
   ioState: IoState;
 };
 
@@ -29,6 +30,7 @@ const AssetComponent = ({
   assetNumber,
   filteredIndex,
   dimensions,
+  bucket,
   ioState,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
@@ -111,6 +113,7 @@ const AssetComponent = ({
           assetId={assetId}
           fileExtension={fileExtension}
           dimensions={dimensions}
+          bucket={bucket}
           ioState={ioState}
           dimensionsComposed={dimensionsComposed}
           isTagEditing={isTagInteracting}

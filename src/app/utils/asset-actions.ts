@@ -13,6 +13,7 @@ import {
   IoState,
   TagState,
 } from '../store/assets';
+import { calculateKohyaBucket, KOHYA_CONFIGS } from './image-utils';
 
 /**
  * Get the current data path - either from provided project path or default
@@ -149,6 +150,13 @@ export const getImageAssetDetails = async (
     stream,
   )) as ImageDimensions;
 
+  // Calculate Kohya bucket for this image (using SDXL 1024 settings)
+  const bucket = calculateKohyaBucket(
+    dimensions.width,
+    dimensions.height,
+    KOHYA_CONFIGS.SDXL_1024,
+  );
+
   let tagStatus: { [key: string]: TagState } = {};
   let tagList: string[] = [];
 
@@ -188,6 +196,7 @@ export const getImageAssetDetails = async (
     fileId,
     fileExtension,
     dimensions,
+    bucket,
     tagStatus,
     tagList,
     savedTagList: [...tagList], // Make a copy of the initial tag list

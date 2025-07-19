@@ -43,7 +43,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     () =>
       paginatedAssets.map(
         (
-          { fileId, fileExtension, dimensions, ioState, originalIndex },
+          { fileId, fileExtension, dimensions, bucket, ioState, originalIndex },
           index,
         ) => {
           // Calculate the filtered index based on current page and position in filtered results
@@ -59,6 +59,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
               filteredIndex={filteredIndex}
               fileExtension={fileExtension}
               dimensions={dimensions}
+              bucket={bucket}
               ioState={ioState}
             />
           );

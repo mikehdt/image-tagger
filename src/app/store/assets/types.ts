@@ -21,11 +21,18 @@ export type ImageDimensions = {
   height: number;
 };
 
+export type KohyaBucket = {
+  width: number;
+  height: number;
+  aspectRatio: number;
+};
+
 export type ImageAsset = {
   ioState: Extract<IoState, IoState.SAVING | IoState.COMPLETE>;
   fileId: string;
   fileExtension: string;
   dimensions: ImageDimensions;
+  bucket: KohyaBucket;
   tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
   tagList: string[];
   savedTagList: string[]; // Original tag order from last save
