@@ -12,6 +12,7 @@ export const applyFilters = ({
   assets,
   filterTags,
   filterSizes,
+  filterBuckets,
   filterExtensions,
   filterMode,
   showModified,
@@ -21,6 +22,7 @@ export const applyFilters = ({
   assets: ImageAsset[];
   filterTags: string[];
   filterSizes: string[];
+  filterBuckets: string[];
   filterExtensions: string[];
   filterMode: FilterMode;
   showModified?: boolean;
@@ -34,6 +36,7 @@ export const applyFilters = ({
     filterMode !== FilterMode.TAGLESS &&
     filterTags.length === 0 &&
     filterSizes.length === 0 &&
+    filterBuckets.length === 0 &&
     filterExtensions.length === 0 &&
     !showModified &&
     (!searchQuery || searchQuery.trim() === '')
@@ -45,8 +48,9 @@ export const applyFilters = ({
     })) as ImageAssetWithIndex[];
   }
 
-  // Create a Set for faster lookups when checking dimensions and extensions
+  // Create a Set for faster lookups when checking dimensions, buckets, and extensions
   const filterSizesSet = new Set(filterSizes);
+  const filterBucketsSet = new Set(filterBuckets);
   const filterExtensionsSet = new Set(filterExtensions);
 
   // Map assets to include their original index (1-based for display)
@@ -116,46 +120,49 @@ export const applyFilters = ({
       return true; // Show everything that passed the modified filter check (if any)
     }
 
-    // For MATCH modes, apply standard dimension and extension filters
+    // For MATCH modes, apply standard dimension, bucket, and extension filters
     const dimensionsComposed = composeDimensions(img.dimensions);
+    const bucketComposed = `${img.bucket.width}×${img.bucket.height}`;
     const sizeMatches =
       filterSizes.length === 0 || filterSizesSet.has(dimensionsComposed);
+    const bucketMatches =
+      filterBuckets.length === 0 || filterBucketsSet.has(bucketComposed);
     const extensionMatches =
       filterExtensions.length === 0 ||
       filterExtensionsSet.has(img.fileExtension);
 
-    // For all MATCH modes (except TAGLESS), if there are no tag filters but we have size/extension filters,
-    // just apply the size/extension filters
+    // For all MATCH modes (except TAGLESS), if there are no tag filters but we have size/bucket/extension filters,
+    // just apply the size/bucket/extension filters
     if (filterTags.length === 0 && filterMode !== FilterMode.TAGLESS) {
-      return sizeMatches && extensionMatches;
+      return sizeMatches && bucketMatches && extensionMatches;
     }
 
-    // MATCH_ALL mode - asset must have ALL selected tags and meet size/extension criteria
+    // MATCH_ALL mode - asset must have ALL selected tags and meet size/bucket/extension criteria
     if (filterMode === FilterMode.MATCH_ALL) {
       // Every selected tag must be present in the asset's tags
       const allTagsMatch = filterTags.every((tag) => img.tagList.includes(tag));
-      return allTagsMatch && sizeMatches && extensionMatches;
+      return allTagsMatch && sizeMatches && bucketMatches && extensionMatches;
     }
 
-    // MATCH_ANY mode - asset must have ANY selected tag and meet size/extension criteria
+    // MATCH_ANY mode - asset must have ANY selected tag and meet size/bucket/extension criteria
     if (filterMode === FilterMode.MATCH_ANY) {
       // At least one selected tag must be present in the asset's tags
       const anyTagMatches = filterTags.some((tag) => img.tagList.includes(tag));
 
-      // Size and extension filters are still combined with AND logic
-      return anyTagMatches && sizeMatches && extensionMatches;
+      // Size, bucket, and extension filters are still combined with AND logic
+      return anyTagMatches && sizeMatches && bucketMatches && extensionMatches;
     }
 
-    // MATCH_NONE mode - asset must have NONE of the selected tags and meet size/extension criteria
+    // MATCH_NONE mode - asset must have NONE of the selected tags and meet size/bucket/extension criteria
     if (filterMode === FilterMode.MATCH_NONE) {
       // None of the selected tags can be present in the asset's tags
       const noTagMatches = !filterTags.some((tag) => img.tagList.includes(tag));
 
-      // Size and extension filters are still combined with AND logic
-      return noTagMatches && sizeMatches && extensionMatches;
+      // Size, bucket, and extension filters are still combined with AND logic
+      return noTagMatches && sizeMatches && bucketMatches && extensionMatches;
     }
 
-    // TAGLESS mode - asset must have no tags at all and meet size/extension criteria
+    // TAGLESS mode - asset must have no tags at all and meet size/bucket/extension criteria
     if (filterMode === FilterMode.TAGLESS) {
       // Check if the asset has no tags (considering only tags not marked for deletion)
       const activeTags = img.tagList.filter(
@@ -163,8 +170,8 @@ export const applyFilters = ({
       );
       const hasNoTags = activeTags.length === 0;
 
-      // Size and extension filters are still combined with AND logic
-      return hasNoTags && sizeMatches && extensionMatches;
+      // Size, bucket, and extension filters are still combined with AND logic
+      return hasNoTags && sizeMatches && bucketMatches && extensionMatches;
     }
 
     // This should never happen if using enum correctly

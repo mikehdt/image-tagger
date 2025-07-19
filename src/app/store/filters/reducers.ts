@@ -34,6 +34,10 @@ export const coreReducers = {
     state.filterSizes = toggleFilter(state.filterSizes, payload);
   },
 
+  toggleBucketFilter: (state: Filters, { payload }: PayloadAction<string>) => {
+    state.filterBuckets = toggleFilter(state.filterBuckets, payload);
+  },
+
   toggleExtensionFilter: (
     state: Filters,
     { payload }: PayloadAction<string>,
@@ -53,6 +57,10 @@ export const coreReducers = {
     state.filterSizes = [];
   },
 
+  clearBucketFilters: (state: Filters) => {
+    state.filterBuckets = [];
+  },
+
   clearExtensionFilters: (state: Filters) => {
     state.filterExtensions = [];
   },
@@ -60,6 +68,7 @@ export const coreReducers = {
   clearFilters: (state: Filters) => {
     state.filterTags = [];
     state.filterSizes = [];
+    state.filterBuckets = [];
     state.filterExtensions = [];
     state.showModified = false;
     state.searchQuery = '';

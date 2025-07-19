@@ -10,6 +10,7 @@ import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { selectHasTaglessAssets } from '@/app/store/assets';
 import {
   FilterMode,
+  selectFilterBuckets,
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
@@ -40,13 +41,15 @@ export const FilterModeControls = ({
   const filterTagsMode = useAppSelector(selectFilterMode);
   const filterTags = useAppSelector(selectFilterTags);
   const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
 
-  // Derive filter selection active state (for traditional tag/size/extension filters)
+  // Derive filter selection active state (for traditional tag/size/bucket/extension filters)
   const filterSelectionActive = !!(
     filterTags.length ||
     filterSizes.length ||
+    filterBuckets.length ||
     filterExtensions.length
   );
 
@@ -57,6 +60,7 @@ export const FilterModeControls = ({
   const filterActive = !!(
     filterTags.length ||
     filterSizes.length ||
+    filterBuckets.length ||
     filterExtensions.length ||
     filterModifiedActive
   );

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
 import {
+  clearBucketFilters,
   clearExtensionFilters,
   clearSizeFilters,
   clearTagFilters,
@@ -14,6 +15,7 @@ import { SortDirection } from '../types';
 export const FilterControls = () => {
   const {
     activeView,
+    sizeSubView,
     sortDirection,
     setSortType,
     setSortDirection,
@@ -29,14 +31,19 @@ export const FilterControls = () => {
     if (activeView === 'tag') {
       dispatch(clearTagFilters());
     } else if (activeView === 'size') {
-      dispatch(clearSizeFilters());
+      // For size view, clear based on sub-view
+      if (sizeSubView === 'dimensions') {
+        dispatch(clearSizeFilters());
+      } else {
+        dispatch(clearBucketFilters());
+      }
     } else {
       dispatch(clearExtensionFilters());
     }
     // Clear search term and reset selected index
     setSearchTerm('');
     setSelectedIndex(-1);
-  }, [activeView, dispatch, setSearchTerm, setSelectedIndex]);
+  }, [activeView, sizeSubView, dispatch, setSearchTerm, setSelectedIndex]);
 
   const handleSortType = useCallback(
     () => setSortType(getSortOptions().nextType),

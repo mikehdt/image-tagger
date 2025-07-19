@@ -11,6 +11,9 @@ export type SortDirection = 'asc' | 'desc';
 // Define view types
 export type FilterView = 'tag' | 'size' | 'filetype';
 
+// Define sub-view types for size view
+export type SizeSubView = 'dimensions' | 'buckets';
+
 // Base props for the filter list component
 export interface FilterListProps {
   isOpen: boolean;

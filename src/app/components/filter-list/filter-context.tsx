@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import {
+  getBucketSortOptions,
   getFiletypeSortOptions,
   getSizeSortOptions,
   getTagSortOptions,
@@ -19,7 +20,13 @@ import {
   useOutsideClick,
   usePanelPosition,
 } from './hooks';
-import { FilterListProps, FilterView, SortDirection, SortType } from './types';
+import {
+  FilterListProps,
+  FilterView,
+  SizeSubView,
+  SortDirection,
+  SortType,
+} from './types';
 
 interface FilterContextType {
   // Panel visibility and positioning
@@ -32,6 +39,10 @@ interface FilterContextType {
   // Persistent filter state (combines both providers)
   activeView: FilterView;
   setActiveView: (view: FilterView) => void;
+
+  // Size sub-view state (for when activeView is 'size')
+  sizeSubView: SizeSubView;
+  setSizeSubView: (subView: SizeSubView) => void;
 
   // Current sort settings (derived from active view)
   sortDirection: SortDirection;
@@ -72,6 +83,7 @@ export const FilterProvider = ({
 
   // Persistent state for view and sort settings
   const [activeView, setActiveView] = useState<FilterView>('tag');
+  const [sizeSubView, setSizeSubView] = useState<SizeSubView>('dimensions');
   const [sortSettings, setSortSettings] = useState({
     tag: { type: 'count' as SortType, direction: 'desc' as SortDirection },
     size: { type: 'count' as SortType, direction: 'desc' as SortDirection },
@@ -124,7 +136,12 @@ export const FilterProvider = ({
       case 'tag':
         return getTagSortOptions(sortType, sortDirection);
       case 'size':
-        return getSizeSortOptions(sortType, sortDirection);
+        // Use different sort options based on sub-view
+        if (sizeSubView === 'buckets') {
+          return getBucketSortOptions(sortType, sortDirection);
+        } else {
+          return getSizeSortOptions(sortType, sortDirection);
+        }
       case 'filetype':
         return getFiletypeSortOptions(sortType, sortDirection);
       default:
@@ -134,7 +151,7 @@ export const FilterProvider = ({
           nextType: 'count' as SortType,
         };
     }
-  }, [activeView, currentSort.type, currentSort.direction]);
+  }, [activeView, sizeSubView, currentSort.type, currentSort.direction]);
 
   // Keyboard navigation
   const { handleKeyDown } = useKeyboardNavigation(
@@ -171,6 +188,8 @@ export const FilterProvider = ({
       onClose,
       activeView,
       setActiveView: handleViewChange,
+      sizeSubView,
+      setSizeSubView,
       sortDirection: currentSort.direction,
       setSortDirection,
       sortType: currentSort.type,
@@ -192,6 +211,7 @@ export const FilterProvider = ({
       onClose,
       activeView,
       handleViewChange,
+      sizeSubView,
       currentSort.direction,
       currentSort.type,
       setSortDirection,

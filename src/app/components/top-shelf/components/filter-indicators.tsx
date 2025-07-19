@@ -1,6 +1,7 @@
 import { memo } from 'react';
 
 import {
+  selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSizes,
   selectFilterTags,
@@ -9,10 +10,14 @@ import { useAppSelector } from '@/app/store/hooks';
 
 const FilterIndicatorsComponent = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterTags = useAppSelector(selectFilterTags);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const noFilters =
-    !filterSizes.length && !filterTags.length && !filterExtensions.length;
+    !filterSizes.length &&
+    !filterBuckets.length &&
+    !filterTags.length &&
+    !filterExtensions.length;
 
   // TODO: Revisit the `!` to remove it if Tailwind uses gap instead of *+*
   return (
@@ -29,6 +34,15 @@ const FilterIndicatorsComponent = () => {
           title="Active size filters"
         >
           {filterSizes.length || '–'}
+        </span>
+      )}
+
+      {filterBuckets.length > 0 && (
+        <span
+          className="bg-purple-100 px-2 text-purple-500 inset-shadow-xs inset-shadow-purple-300"
+          title="Active bucket filters"
+        >
+          {filterBuckets.length || '–'}
         </span>
       )}
 

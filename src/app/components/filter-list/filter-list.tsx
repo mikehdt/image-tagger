@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 
 import {
+  DimensionsView,
   FileView,
   FilterControls,
   SearchInput,
-  SizesView,
+  SizeSubViewSelector,
   TagsView,
   ViewSelector,
 } from './components';
@@ -110,12 +111,19 @@ const FilterPanel = () => {
             <ViewSelector />
           </div>
 
+          {/* Show size sub-view selector when size view is active */}
+          {activeView === 'size' && (
+            <div className="border-t border-slate-200 bg-slate-100 p-2">
+              <SizeSubViewSelector />
+            </div>
+          )}
+
           <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
             <FilterControls />
           </div>
 
           {/* Only show search box for tag and size views */}
-          {activeView !== 'filetype' && (
+          {(activeView === 'tag' || activeView === 'size') && (
             <div className="relative inline-flex bg-slate-50 px-2 pb-2">
               <SearchProvider
                 searchTerm={searchTerm}
@@ -133,7 +141,7 @@ const FilterPanel = () => {
             {activeView === 'tag' ? (
               <TagsView />
             ) : activeView === 'size' ? (
-              <SizesView />
+              <DimensionsView />
             ) : (
               <FileView />
             )}

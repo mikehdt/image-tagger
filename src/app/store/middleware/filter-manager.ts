@@ -7,6 +7,7 @@ import { deleteTag, editTag } from '../assets';
 import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
+  clearBucketFilters,
   clearExtensionFilters,
   clearFilters,
   clearSizeFilters,
@@ -14,6 +15,7 @@ import {
   FilterMode,
   selectHasActiveFilters,
   setTagFilterMode,
+  toggleBucketFilter,
   toggleExtensionFilter,
   toggleModifiedFilter,
   toggleSizeFilter,
@@ -46,6 +48,7 @@ const shouldClearFilters = (state: RootState): boolean => {
     assets: assets.images,
     filterTags: filters.filterTags,
     filterSizes: filters.filterSizes,
+    filterBuckets: filters.filterBuckets,
     filterExtensions: filters.filterExtensions,
     filterMode: filters.filterMode,
     showModified: filters.showModified,
@@ -103,6 +106,34 @@ const findInvalidSizeFilters = (state: RootState): string[] => {
 
   // Find size filters that no longer exist in any asset
   return filters.filterSizes.filter((size) => !allExistingSizes.has(size));
+};
+
+/**
+ * Check if there are any bucket filters that no longer match any images
+ */
+const findInvalidBucketFilters = (state: RootState): string[] => {
+  const { assets, filters } = state;
+
+  // Quick return if no bucket filters or not in complete state
+  if (
+    filters.filterBuckets.length === 0 ||
+    (assets.ioState !== IoState.COMPLETE &&
+      assets.ioState !== IoState.COMPLETING)
+  ) {
+    return [];
+  }
+
+  // Get all unique buckets that exist in the current assets
+  const allExistingBuckets = new Set<string>();
+  assets.images.forEach((img) => {
+    const bucketKey = `${img.bucket.width}×${img.bucket.height}`;
+    allExistingBuckets.add(bucketKey);
+  });
+
+  // Find bucket filters that no longer exist in any asset
+  return filters.filterBuckets.filter(
+    (bucket) => !allExistingBuckets.has(bucket),
+  );
 };
 
 /**
@@ -180,6 +211,21 @@ const cleanupInvalidFilters = (
       // Otherwise remove them one by one
       invalidSizeFilters.forEach((size) => {
         listenerApi.dispatch(toggleSizeFilter(size));
+      });
+    }
+    hasChanges = true;
+  }
+
+  // Check for invalid bucket filters
+  const invalidBucketFilters = findInvalidBucketFilters(state);
+  if (invalidBucketFilters.length > 0) {
+    // If all bucket filters are invalid, clear them all at once
+    if (invalidBucketFilters.length === state.filters.filterBuckets.length) {
+      listenerApi.dispatch(clearBucketFilters());
+    } else {
+      // Otherwise remove them one by one
+      invalidBucketFilters.forEach((bucket) => {
+        listenerApi.dispatch(toggleBucketFilter(bucket));
       });
     }
     hasChanges = true;

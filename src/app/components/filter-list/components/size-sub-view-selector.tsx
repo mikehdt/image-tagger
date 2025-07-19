@@ -1,0 +1,59 @@
+import { useFilterContext } from '../filter-context';
+import { SizeSubView } from '../types';
+
+export const SizeSubViewSelector = () => {
+  const {
+    sizeSubView,
+    setSizeSubView,
+    setSearchTerm,
+    setSelectedIndex,
+    setSortType,
+    inputRef,
+  } = useFilterContext();
+
+  const handleSubViewChange = (subView: SizeSubView) => {
+    setSizeSubView(subView);
+    // Clear search and reset selection when switching sub-views
+    setSearchTerm('');
+    setSelectedIndex(-1);
+
+    // Reset sort to 'count' when switching to buckets (since buckets don't support megapixels, etc.)
+    if (subView === 'buckets') {
+      setSortType('count');
+    }
+
+    // Focus the search input after a short delay to ensure it's rendered
+    requestAnimationFrame(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    });
+  };
+
+  return (
+    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300">
+      <button
+        type="button"
+        onClick={() => handleSubViewChange('dimensions')}
+        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+          sizeSubView === 'dimensions'
+            ? 'bg-white shadow-sm'
+            : 'hover:bg-slate-300'
+        }`}
+      >
+        Images
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSubViewChange('buckets')}
+        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
+          sizeSubView === 'buckets'
+            ? 'bg-white shadow-sm'
+            : 'hover:bg-slate-300'
+        }`}
+      >
+        Buckets
+      </button>
+    </div>
+  );
+};

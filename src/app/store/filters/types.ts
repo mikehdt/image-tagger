@@ -20,6 +20,7 @@ export type Filters = {
   filterMode: FilterMode;
   filterTags: string[];
   filterSizes: string[];
+  filterBuckets: string[];
   filterExtensions: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
@@ -29,6 +30,7 @@ export type Filters = {
 export type FilterCount = {
   tags: number;
   sizes: number;
+  buckets: number;
   extensions: number;
   total: number;
 };
