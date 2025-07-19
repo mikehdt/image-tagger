@@ -11,6 +11,7 @@ import { useAppSelector } from '@/app/store/hooks';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
+import { Checkbox } from '../../shared/checkbox';
 import { useAssetTags } from '../hooks';
 
 type AssetMetadataProps = {
@@ -21,6 +22,8 @@ type AssetMetadataProps = {
   ioState: IoState;
   dimensionsComposed: string;
   isTagEditing?: boolean; // True when either editing or adding a tag
+  showCropVisualization: boolean;
+  onToggleCropVisualization: (show: boolean) => void;
 };
 
 export const AssetMetadata = ({
@@ -31,6 +34,8 @@ export const AssetMetadata = ({
   ioState,
   dimensionsComposed,
   isTagEditing = false,
+  showCropVisualization,
+  onToggleCropVisualization,
 }: AssetMetadataProps) => {
   const searchQuery = useAppSelector(selectSearchQuery);
   const filterSizes = useAppSelector(selectFilterSizes);
@@ -125,9 +130,11 @@ export const AssetMetadata = ({
           {fileExtension}
         </Button>
 
-        <span>
-          Bucket: {bucket.width}×{bucket.height}
-        </span>
+        <Checkbox
+          isSelected={showCropVisualization}
+          onChange={() => onToggleCropVisualization(!showCropVisualization)}
+          label={`Show bucket ${bucket.width}×${bucket.height}`}
+        />
 
         <span
           className="cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"

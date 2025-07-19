@@ -12,7 +12,7 @@ import { getCurrentProjectPath, getImageUrl } from '@/app/utils/image-utils';
 
 import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging/tagging-manager';
-import { AssetMetadata } from './components';
+import { AssetMetadata, CropVisualization } from './components';
 
 type AssetProps = {
   assetId: string;
@@ -34,6 +34,8 @@ const AssetComponent = ({
   ioState,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
+  const [showCropVisualization, setShowCropVisualization] =
+    useState<boolean>(false);
   // Track if any tag is currently being edited or added
   const [isTagInteracting, setIsTagInteracting] = useState<boolean>(false);
 
@@ -91,13 +93,20 @@ const AssetComponent = ({
           className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-slate-300 transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
           onClick={toggleImageZoom}
         >
-          <Image
-            className={`h-auto w-auto object-contain ${!imageZoom && 'max-h-64'}`}
-            src={imageUrl}
-            width={dimensions.width}
-            height={dimensions.height}
-            alt=""
-          />
+          <span className="relative object-contain">
+            <Image
+              className={`h-auto w-auto ${!imageZoom && 'max-h-64'}`}
+              src={imageUrl}
+              width={dimensions.width}
+              height={dimensions.height}
+              alt=""
+            />
+            <CropVisualization
+              dimensions={dimensions}
+              bucket={bucket}
+              isVisible={showCropVisualization}
+            />
+          </span>
         </div>
 
         <div
@@ -117,6 +126,8 @@ const AssetComponent = ({
           ioState={ioState}
           dimensionsComposed={dimensionsComposed}
           isTagEditing={isTagInteracting}
+          showCropVisualization={showCropVisualization}
+          onToggleCropVisualization={setShowCropVisualization}
         />
       </div>
     </div>
