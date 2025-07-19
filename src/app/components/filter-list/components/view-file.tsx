@@ -49,7 +49,7 @@ export const getFiletypeSortOptions = (
   };
 };
 
-export const FiletypesView = () => {
+export const FileView = () => {
   const dispatch = useAppDispatch();
   const allExtensions = useAppSelector(selectAllExtensions);
   const activeExtensions = useAppSelector(selectFilterExtensions);

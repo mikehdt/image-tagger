@@ -48,7 +48,7 @@ export const ViewSelector = () => {
               : 'hover:bg-slate-300'
           }`}
         >
-          Filetype
+          File
         </button>
       </div>
 
