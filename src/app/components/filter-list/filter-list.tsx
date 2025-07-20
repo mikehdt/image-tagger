@@ -113,10 +113,12 @@ const FilterPanel = () => {
 
           {/* Show size sub-view selector when size view is active */}
           {activeView === 'size' && (
-            <div className="border-t border-slate-200 bg-slate-100 p-2">
+            <div className="bg-slate-100 p-2 pt-0">
               <SizeSubViewSelector />
             </div>
           )}
+
+          {/* Show file sub-view selector here... */}
 
           <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
             <FilterControls />

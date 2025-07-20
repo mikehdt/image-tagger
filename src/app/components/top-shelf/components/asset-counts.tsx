@@ -1,0 +1,40 @@
+import { memo } from 'react';
+
+import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import { selectHasActiveFilters } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
+
+interface AssetCountsProps {
+  selectedAssetsCount: number;
+}
+
+const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
+  const filteredAssets = useAppSelector(selectFilteredAssets);
+  const filtersActive = useAppSelector(selectHasActiveFilters);
+  const allAssetsCount = useAppSelector(selectImageCount);
+
+  const filteredCount = filteredAssets.length;
+
+  return (
+    <div className="flex items-center space-x-2 border-l border-l-slate-400 pl-2 text-xs font-medium tabular-nums">
+      {selectedAssetsCount > 0 ? (
+        <div className="flex items-center space-x-1">
+          <span className="text-purple-500">{selectedAssetsCount}</span>
+          <span className="text-slate-400">selected</span>
+        </div>
+      ) : null}
+      {filtersActive ? (
+        <div className="flex items-center space-x-1">
+          <span className="text-emerald-500">{filteredCount}</span>
+          <span className="text-slate-400">filtered</span>
+        </div>
+      ) : null}
+      <div className="flex items-center space-x-1">
+        <span className="text-slate-700">{allAssetsCount}</span>
+        <span className="text-slate-400">images total</span>
+      </div>
+    </div>
+  );
+};
+
+export const AssetCounts = memo(AssetCountsComponent);

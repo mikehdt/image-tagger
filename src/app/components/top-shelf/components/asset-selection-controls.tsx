@@ -109,7 +109,6 @@ export const AssetSelectionControls = ({
   );
 
   // Get filtered assets directly from the selector
-  const filteredCount = filteredAssets.length; // TODO: Check for active filters instead of just the length
   const allAssetsCount = useAppSelector(selectImageCount);
 
   // Cleanup timeout on unmount
@@ -135,101 +134,92 @@ export const AssetSelectionControls = ({
   };
 
   return (
-    <>
-      <ResponsiveToolbarGroup
-        icon={<IdentificationIcon className="w-4" />}
-        title="Asset Selection"
-        position="left"
-      >
-        <span className="relative flex items-center">
-          <Button
-            className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
-            size="smallSquare"
-            variant="ghost"
-            isPressed={searchQuery.length > 0 && !isSearchActive}
-            onClick={handleSearchFocus}
-          >
-            <MagnifyingGlassIcon className="w-5" />
-          </Button>
-
-          <input
-            ref={searchInputRef}
-            data-search-input="asset-name"
-            className={`rounded-sm border border-white/0 bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
-              isSearchActive
-                ? 'w-50 pe-7 opacity-100'
-                : 'pointer-events-none w-7 opacity-0'
-            }`}
-            placeholder="Find by asset name..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onBlur={handleSearchBlur}
-            onFocus={handleInputFocus}
-            onKeyDown={handleInputKeyDown}
-          />
-
-          {isSearchActive ? (
-            <span
-              // In edit mode, the cancel button should always be active regardless of input value
-              className={`absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white`}
-              onClick={handleSearchClear}
-              tabIndex={0}
-              title="Clear search"
-            >
-              <XMarkIcon />
-            </span>
-          ) : null}
-        </span>
-
+    <ResponsiveToolbarGroup
+      icon={<IdentificationIcon className="w-4" />}
+      title="Asset Selection"
+      position="left"
+    >
+      <span className="relative flex items-center">
         <Button
-          type="button"
-          onClick={handleAddAllToSelection}
-          disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+          className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
+          size="smallSquare"
           variant="ghost"
-          color="slate"
-          size="medium"
-          title={
-            allFilteredAssetsSelected
-              ? 'All filtered assets already selected'
-              : filteredAssets.length === allAssetsCount
-                ? 'Add all assets to selection'
-                : 'Add all filtered assets to selection'
-          }
+          isPressed={searchQuery.length > 0 && !isSearchActive}
+          onClick={handleSearchFocus}
         >
-          <SquaresPlusIcon className="w-4" />
-          <span
-            className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
-          >
-            {filteredAssets.length === allAssetsCount ? 'All' : 'Select'}
-          </span>
+          <MagnifyingGlassIcon className="w-5" />
         </Button>
 
-        <Button
-          type="button"
-          onClick={handleClearSelection}
-          disabled={selectedAssetsCount === 0}
-          variant="ghost"
-          color="slate"
-          size="medium"
-          title="Clear selection"
-        >
-          <NoSymbolIcon className="w-4" />
-          <span
-            className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
-          >
-            Assets
-          </span>
-        </Button>
-      </ResponsiveToolbarGroup>
+        <input
+          ref={searchInputRef}
+          data-search-input="asset-name"
+          className={`rounded-sm border border-white/0 bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
+            isSearchActive
+              ? 'w-50 pe-7 opacity-100'
+              : 'pointer-events-none w-7 opacity-0'
+          }`}
+          placeholder="Find by asset name..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onBlur={handleSearchBlur}
+          onFocus={handleInputFocus}
+          onKeyDown={handleInputKeyDown}
+        />
 
-      <span className="flex cursor-default flex-col rounded-md bg-slate-50 px-2 text-right text-xs font-medium tabular-nums">
-        <span className="text-purple-400" title="Selected assets">
-          {selectedAssetsCount} / {allAssetsCount}
-        </span>
-        <span className="text-emerald-400" title="Filtered assets">
-          {filteredCount} / {allAssetsCount}
-        </span>
+        {isSearchActive ? (
+          <span
+            // In edit mode, the cancel button should always be active regardless of input value
+            className={`absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white`}
+            onClick={handleSearchClear}
+            tabIndex={0}
+            title="Clear search"
+          >
+            <XMarkIcon />
+          </span>
+        ) : null}
       </span>
-    </>
+
+      <Button
+        type="button"
+        onClick={handleAddAllToSelection}
+        disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+        variant="ghost"
+        color="slate"
+        size="medium"
+        title={
+          allFilteredAssetsSelected
+            ? 'All filtered assets already selected'
+            : filteredAssets.length === allAssetsCount
+              ? 'Add all assets to selection'
+              : 'Add all filtered assets to selection'
+        }
+      >
+        <SquaresPlusIcon className="w-4" />
+        <span
+          className={`ml-2 max-xl:hidden ${isSearchActive ? 'hidden' : ''}`}
+        >
+          {filteredAssets.length === allAssetsCount
+            ? 'Select All'
+            : 'Select Filtered'}
+        </span>
+      </Button>
+
+      <Button
+        type="button"
+        onClick={handleClearSelection}
+        disabled={selectedAssetsCount === 0}
+        variant="ghost"
+        color="slate"
+        size="medium"
+        title="Clear selection"
+      >
+        <NoSymbolIcon className="w-4" />
+        <span
+          className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
+        >
+          Assets
+        </span>
+      </Button>
+    </ResponsiveToolbarGroup>
   );
 };

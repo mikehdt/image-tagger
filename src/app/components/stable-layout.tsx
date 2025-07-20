@@ -43,7 +43,7 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   }, [currentPage, totalPages, router]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-400 items-center justify-items-center px-4 py-20">
+    <main className="mx-auto min-h-screen max-w-400 px-4 pt-30 pb-20">
       {showShelves && <TopShelf />}
       {children}
       {showShelves && (

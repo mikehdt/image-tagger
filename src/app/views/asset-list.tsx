@@ -72,7 +72,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     renderedAssets
   ) : (
     <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
-      <CubeTransparentIcon className="h-12 w-12" />
+      <CubeTransparentIcon className="h-24 w-24" />
       <h1 className="mt-4 mb-4 w-full text-xl">
         No results match your filters
       </h1>
