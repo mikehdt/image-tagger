@@ -244,7 +244,7 @@ export const AddTagsModal = ({
       // Dual selection mode
       if (applyToSelectedAssets && applyToAssetsWithSelectedTags) {
         // Both constraints: intersection
-        return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and have selected tags.`;
+        return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and ${intersectionCount === 1 ? 'has' : 'have'} selected tags.`;
       } else if (applyToSelectedAssets) {
         // Only selected assets
         return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
@@ -337,7 +337,7 @@ export const AddTagsModal = ({
           )}
 
           {/* Tag position */}
-          <div className="flex items-center gap-2 pb-2">
+          <div className="flex items-center">
             <Checkbox
               isSelected={addToStart}
               onChange={() => setAddToStart((v) => !v)}
@@ -346,21 +346,31 @@ export const AddTagsModal = ({
             />
           </div>
 
+          {/* Keep selection checkbox */}
+          <div className="flex items-center">
+            <Checkbox
+              isSelected={keepSelection}
+              onChange={() => setKeepSelection((v) => !v)}
+              label="Keep asset selection after adding new tags"
+              ariaLabel="Keep asset selection after adding new tags"
+            />
+          </div>
+
           {/* Constraint checkboxes - only show when both assets and tags are available */}
           {hasSelectedAssets && hasSelectedTags ? (
             <>
-              <div className="flex items-center gap-2 pb-2">
+              <div className="flex items-center border-t border-t-slate-300 pt-4">
                 <Checkbox
                   isSelected={applyToSelectedAssets}
                   onChange={() =>
                     setApplyToSelectedAssets(!applyToSelectedAssets)
                   }
-                  label={`Add to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Add tags to selected assets"
+                  label={`Scope to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Scope tags to selected assets"
                 />
               </div>
 
-              <div className="flex items-center gap-2 pb-2">
+              <div className="flex items-center">
                 <Checkbox
                   isSelected={applyToAssetsWithSelectedTags}
                   onChange={() =>
@@ -368,8 +378,8 @@ export const AddTagsModal = ({
                       !applyToAssetsWithSelectedTags,
                     )
                   }
-                  label={`Add to assets with selected tags (${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Add tags to assets with selected tags"
+                  label={`Scope to assets with selected tags (${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Scope tags to assets with selected tags"
                 />
               </div>
 
@@ -385,16 +395,6 @@ export const AddTagsModal = ({
           {!hasInvalidConstraints && (
             <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
           )}
-
-          {/* Keep selection checkbox */}
-          <div className="flex items-center gap-2 pb-2">
-            <Checkbox
-              isSelected={keepSelection}
-              onChange={() => setKeepSelection((v) => !v)}
-              label="Keep asset selection after adding new tags"
-              ariaLabel="Keep asset selection after adding new tags"
-            />
-          </div>
 
           {/* Action buttons */}
           <div className="flex justify-end space-x-2 pt-2">

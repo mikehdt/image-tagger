@@ -18,22 +18,22 @@ const FilterIndicatorsInfoComponent = () => {
     {
       count: filterSizes.length,
       label: filterSizes.length === 1 ? 'size' : 'sizes',
-      color: 'sky',
+      color: 'bg-sky-50 border-sky-300 text-sky-600',
     },
     {
       count: filterBuckets.length,
       label: filterBuckets.length === 1 ? 'bucket' : 'buckets',
-      color: 'sky',
+      color: 'bg-sky-50 border-sky-300 text-sky-600',
     },
     {
       count: filterTags.length,
       label: filterTags.length === 1 ? 'tag' : 'tags',
-      color: 'emerald',
+      color: 'bg-emerald-50 border-emerald-300 text-emerald-600',
     },
     {
       count: filterExtensions.length,
       label: filterExtensions.length === 1 ? 'type' : 'types',
-      color: 'stone',
+      color: 'bg-stone-50 border-stone-300 text-stone-600',
     },
   ].filter((filter) => filter.count > 0);
 
@@ -46,21 +46,13 @@ const FilterIndicatorsInfoComponent = () => {
   }
 
   return (
-    <div className="flex items-center space-x-3 text-xs">
+    <div className="flex items-center space-x-2 text-xs">
       {activeFilters.map((filter) => (
-        <div key={filter.label} className="flex items-center space-x-1">
-          <div
-            className={`flex h-5 w-5 items-center justify-center rounded text-xs font-medium tabular-nums ${
-              filter.color === 'sky'
-                ? 'bg-sky-100 text-sky-600'
-                : filter.color === 'emerald'
-                  ? 'bg-emerald-100 text-emerald-600'
-                  : 'bg-stone-100 text-stone-600'
-            }`}
-          >
-            {filter.count}
-          </div>
-          <span className="font-medium text-slate-600">{filter.label}</span>
+        <div
+          key={filter.label}
+          className={`flex items-center rounded-full border px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums ${filter.color}`}
+        >
+          {filter.count} {filter.label}
         </div>
       ))}
     </div>

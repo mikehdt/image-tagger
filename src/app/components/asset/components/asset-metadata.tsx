@@ -16,7 +16,6 @@ import { useAppSelector } from '@/app/store/hooks';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
-import { Checkbox } from '../../shared/checkbox';
 import { useAssetTags } from '../hooks';
 
 type AssetMetadataProps = {
@@ -27,8 +26,6 @@ type AssetMetadataProps = {
   ioState: IoState;
   dimensionsComposed: string;
   isTagEditing?: boolean; // True when either editing or adding a tag
-  showCropVisualization: boolean;
-  onToggleCropVisualization: (show: boolean) => void;
 };
 
 export const AssetMetadata = ({
@@ -39,8 +36,6 @@ export const AssetMetadata = ({
   ioState,
   dimensionsComposed,
   isTagEditing = false,
-  showCropVisualization,
-  onToggleCropVisualization,
 }: AssetMetadataProps) => {
   const searchQuery = useAppSelector(selectSearchQuery);
   const filterSizes = useAppSelector(selectFilterSizes);
@@ -63,11 +58,6 @@ export const AssetMetadata = ({
   const bucketComposed = `${bucket.width}×${bucket.height}`;
   const bucketActive = filterBuckets.includes(bucketComposed);
   const extensionActive = filterExtensions.includes(fileExtension);
-
-  // Determine if cropping would occur (when aspect ratios don't match)
-  const imageAspectRatio = dimensions.width / dimensions.height;
-  const bucketAspectRatio = bucket.width / bucket.height;
-  const wouldCrop = Math.abs(imageAspectRatio - bucketAspectRatio) > 0;
 
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =
@@ -135,6 +125,7 @@ export const AssetMetadata = ({
           size="smallWide"
           isPressed={dimensionsActive}
           onClick={handleToggleSize}
+          title="Image dimensions"
         >
           <PhotoIcon className="mr-1 w-4" />
           {dimensions.width}&times;{dimensions.height}
@@ -146,6 +137,7 @@ export const AssetMetadata = ({
           size="smallWide"
           isPressed={bucketActive}
           onClick={handleToggleBucket}
+          title="Bucket dimensions"
         >
           <ArchiveBoxIcon className="mr-1 w-4" />
           {bucket.width}&times;{bucket.height}
@@ -160,16 +152,6 @@ export const AssetMetadata = ({
         >
           {fileExtension}
         </Button>
-
-        {wouldCrop ? (
-          <Checkbox
-            isSelected={showCropVisualization}
-            onChange={() => onToggleCropVisualization(!showCropVisualization)}
-            label={`Show cropping`}
-          />
-        ) : (
-          <span className="text-slate-400">Not cropped</span>
-        )}
 
         <span
           className="ml-2 cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"

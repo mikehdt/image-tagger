@@ -3,13 +3,13 @@
 import { CubeIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
+import { selectLoadProgress } from '../store/assets';
+import { useAppSelector } from '../store/hooks';
 import {
-  selectLoadProgress,
   selectProjectName,
   selectProjectPath,
   selectProjectThumbnail,
-} from '../store/assets';
-import { useAppSelector } from '../store/hooks';
+} from '../store/project';
 
 export const InitialLoad = () => {
   const loadProgress = useAppSelector(selectLoadProgress);

@@ -5,18 +5,6 @@ import { ImageAssets, IoState, TagState } from './types';
 import { addState, hasState, removeState, toggleState } from './utils';
 
 export const coreReducers = {
-  // Set project information
-  setProjectInfo: (
-    state: ImageAssets,
-    {
-      payload,
-    }: PayloadAction<{ name: string; path: string; thumbnail?: string }>,
-  ) => {
-    state.projectName = payload.name;
-    state.projectPath = payload.path;
-    state.projectThumbnail = payload.thumbnail;
-  },
-
   // Reset assets to initial state (useful when switching projects)
   resetAssetsState: (state: ImageAssets) => {
     state.ioState = IoState.INITIAL;
@@ -24,9 +12,6 @@ export const coreReducers = {
     state.images = [];
     state.loadProgress = undefined;
     state.saveProgress = undefined;
-    state.projectName = undefined;
-    state.projectPath = undefined;
-    state.projectThumbnail = undefined;
   },
 
   markFilterTagsToDelete: (

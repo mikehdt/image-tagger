@@ -5,3 +5,4 @@ export { FilterListButton } from './filter-list-button';
 export { FilterModeControls } from './filter-mode-controls';
 export { ProjectInfo } from './project-info';
 export { TagActions } from './tag-actions';
+export { ViewButtons } from './view-buttons';

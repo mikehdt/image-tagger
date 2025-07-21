@@ -4,12 +4,9 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '../components/shared/button';
-import {
-  selectIoMessage,
-  selectLoadProgress,
-  selectProjectName,
-} from '../store/assets';
+import { selectIoMessage, selectLoadProgress } from '../store/assets';
 import { useAppSelector } from '../store/hooks';
+import { selectProjectName } from '../store/project';
 
 type ErrorProps = { onReload: (_args?: { maintainIoState: boolean }) => void };
 

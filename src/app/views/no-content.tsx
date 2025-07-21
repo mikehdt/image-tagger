@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import type { SyntheticEvent } from 'react';
 
 import { Button } from '../components/shared/button';
-import { selectProjectName } from '../store/assets';
 import { useAppSelector } from '../store/hooks';
+import { selectProjectName } from '../store/project';
 
 type NoContentProps = { onReload: () => void };
 

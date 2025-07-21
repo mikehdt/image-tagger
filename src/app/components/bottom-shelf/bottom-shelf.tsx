@@ -65,7 +65,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
     ioState === IoState.COMPLETING;
 
   return (
-    <div className="fixed bottom-0 left-0 z-10 w-full bg-white/80 inset-shadow-sm backdrop-blur-md">
+    <div className="fixed bottom-0 left-0 z-10 w-full border-t border-t-white/50 bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
         <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
           <Button

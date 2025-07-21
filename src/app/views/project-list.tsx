@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '../components/shared/button';
-import { resetAssetsState, setProjectInfo } from '../store/assets';
+import { resetAssetsState } from '../store/assets';
 import { clearFilters } from '../store/filters';
 import { useAppDispatch } from '../store/hooks';
+import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection } from '../store/selection';
 import { getProjectList } from '../utils/project-actions';
 
@@ -47,6 +48,7 @@ export const ProjectList = () => {
   useEffect(() => {
     // Clear all old project data when returning to project selection
     dispatch(resetAssetsState());
+    dispatch(resetProjectState());
     dispatch(clearFilters());
     dispatch(clearSelection());
     sessionStorage.removeItem('selectedProject');

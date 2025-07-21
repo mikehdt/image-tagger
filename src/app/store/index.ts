@@ -7,6 +7,7 @@ import {
 import { assetsReducer } from './assets';
 import { filtersReducer } from './filters';
 import { filterManagerMiddleware } from './middleware/filter-manager';
+import { projectReducer } from './project';
 import selectionReducer from './selection/reducers';
 
 export const makeStore = () => {
@@ -15,6 +16,7 @@ export const makeStore = () => {
     reducer: {
       assets: assetsReducer,
       filters: filtersReducer,
+      project: projectReducer,
       selection: selectionReducer,
     },
     middleware: (getDefaultMiddleware) =>

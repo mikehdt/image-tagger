@@ -16,6 +16,7 @@ type ButtonColor =
   | 'indigo'
   | 'stone';
 type ButtonSize =
+  | 'minimum'
   | 'small'
   | 'smallSquare'
   | 'smallWide'
@@ -49,6 +50,7 @@ interface ButtonProps {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
+  minimum: '',
   small: 'px-1 py-0.5',
   smallSquare: 'px-0.5',
   smallWide: 'px-2 py-0.5',

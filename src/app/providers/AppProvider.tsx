@@ -9,9 +9,9 @@ import {
   loadAllAssets,
   selectImageCount,
   selectIoState,
-  setProjectInfo,
 } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setProjectInfo } from '../store/project';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
 import { NoContent } from '../views/no-content';

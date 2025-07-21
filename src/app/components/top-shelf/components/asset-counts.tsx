@@ -17,22 +17,24 @@ const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
 
   return (
     <div className="flex items-center space-x-2 border-l border-l-slate-400 pl-2 text-xs font-medium tabular-nums">
-      {selectedAssetsCount > 0 ? (
-        <div className="flex items-center space-x-1">
-          <span className="text-purple-500">{selectedAssetsCount}</span>
-          <span className="text-slate-400">selected</span>
-        </div>
-      ) : null}
+      <div className="flex items-center space-x-1">
+        <span className="text-slate-600">{allAssetsCount}</span>
+        <span className="text-slate-400">images total</span>
+      </div>
+
       {filtersActive ? (
-        <div className="flex items-center space-x-1">
-          <span className="text-emerald-500">{filteredCount}</span>
+        <div className="flex items-center space-x-1 border-l border-l-slate-300 pl-2">
+          <span className="text-emerald-600">{filteredCount}</span>
           <span className="text-slate-400">filtered</span>
         </div>
       ) : null}
-      <div className="flex items-center space-x-1">
-        <span className="text-slate-700">{allAssetsCount}</span>
-        <span className="text-slate-400">images total</span>
-      </div>
+
+      {selectedAssetsCount > 0 ? (
+        <div className="flex items-center space-x-1 border-l border-l-slate-300 pl-2">
+          <span className="text-purple-600">{selectedAssetsCount}</span>
+          <span className="text-slate-400">selected</span>
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -2,12 +2,12 @@ import { CubeIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { memo } from 'react';
 
+import { useAppSelector } from '@/app/store/hooks';
 import {
   selectProjectName,
   selectProjectPath,
   selectProjectThumbnail,
-} from '@/app/store/assets';
-import { useAppSelector } from '@/app/store/hooks';
+} from '@/app/store/project';
 
 const ProjectInfoComponent = () => {
   const projectName = useAppSelector(selectProjectName);

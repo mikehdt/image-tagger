@@ -169,7 +169,7 @@ export const AssetSelectionControls = ({
         {isSearchActive ? (
           <span
             // In edit mode, the cancel button should always be active regardless of input value
-            className={`absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white`}
+            className="absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white"
             onClick={handleSearchClear}
             tabIndex={0}
             title="Clear search"

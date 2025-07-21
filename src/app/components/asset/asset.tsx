@@ -1,8 +1,17 @@
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { memo, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import {
+  memo,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectShowCropVisualization } from '@/app/store/project';
 import {
   selectAssetIsSelected,
   toggleAssetSelection,
@@ -10,6 +19,7 @@ import {
 import { composeDimensions } from '@/app/utils/helpers';
 import { getCurrentProjectPath, getImageUrl } from '@/app/utils/image-utils';
 
+import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging/tagging-manager';
 import { AssetMetadata, CropVisualization } from './components';
@@ -34,13 +44,32 @@ const AssetComponent = ({
   ioState,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
-  const [showCropVisualization, setShowCropVisualization] =
-    useState<boolean>(false);
   // Track if any tag is currently being edited or added
   const [isTagInteracting, setIsTagInteracting] = useState<boolean>(false);
+  // Local override for crop visualization - resets when global state changes
+  const [localCropOverride, setLocalCropOverride] = useState<boolean | null>(
+    null,
+  );
 
   const dispatch = useAppDispatch();
   const isSelected = useAppSelector(selectAssetIsSelected(assetId));
+  const globalShowCropVisualization = useAppSelector(
+    selectShowCropVisualization,
+  );
+
+  // Reset local override when global state changes
+  useEffect(() => {
+    setLocalCropOverride(null);
+  }, [globalShowCropVisualization]);
+
+  // Determine effective crop visualization state (local override takes precedence)
+  const showCropVisualization =
+    localCropOverride ?? globalShowCropVisualization;
+
+  // Determine if cropping would occur (when aspect ratios don't match)
+  const imageAspectRatio = dimensions.width / dimensions.height;
+  const bucketAspectRatio = bucket.width / bucket.height;
+  const wouldCrop = Math.abs(imageAspectRatio - bucketAspectRatio) > 0;
 
   // Memoize the composed dimensions so it's not recreated on every render
   const dimensionsComposed = useMemo(
@@ -67,12 +96,22 @@ const AssetComponent = ({
     [assetId, dispatch],
   );
 
+  const onToggleLocalCropVisualization = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setLocalCropOverride((prev) =>
+        prev === null ? !globalShowCropVisualization : !prev,
+      );
+    },
+    [globalShowCropVisualization],
+  );
+
   return (
     <div
       className={`mb-4 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
     >
       <div
-        className={`flex cursor-pointer flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
+        className={`flex cursor-pointer flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
         onClick={onToggleAssetSelection}
       >
         <Checkbox
@@ -80,6 +119,23 @@ const AssetComponent = ({
           onChange={onToggleAssetSelection}
           ariaLabel={`Select asset ${assetId}`}
         />
+
+        {wouldCrop && (
+          <Button
+            size="minimum"
+            variant="ghost"
+            color={isSelected ? 'indigo' : 'slate'}
+            isPressed={showCropVisualization}
+            onClick={onToggleLocalCropVisualization}
+            title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualization for this asset`}
+          >
+            {showCropVisualization ? (
+              <EyeSlashIcon className="h-4 w-4" />
+            ) : (
+              <EyeIcon className="h-4 w-4" />
+            )}
+          </Button>
+        )}
 
         <span className="text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
           {assetNumber}
@@ -128,8 +184,6 @@ const AssetComponent = ({
           ioState={ioState}
           dimensionsComposed={dimensionsComposed}
           isTagEditing={isTagInteracting}
-          showCropVisualization={showCropVisualization}
-          onToggleCropVisualization={setShowCropVisualization}
         />
       </div>
     </div>
