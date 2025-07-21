@@ -1,7 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit';
 
+import { applyFilters } from '../../utils/filter-actions';
 import { selectAllImages } from '../assets';
-import { selectFilterTags } from '../filters';
+import {
+  FilterMode,
+  selectFilterTags,
+  selectHasActiveFilters,
+} from '../filters';
 import { selectSelectedAssets } from '../selection';
 
 /**
@@ -94,10 +99,41 @@ export const selectAssetsWithSelectedTags = createSelector(
 );
 
 /**
- * Selector to get the count of assets that have at least one selected tag
- * @returns Number of assets that contain at least one selected tag
+ * Enhanced selector to get assets that match any active filters (unified filtering approach)
+ * This considers tags, sizes, buckets, extensions, and modified state
+ * Uses the existing applyFilters logic but in MATCH_ANY mode for union behavior
+ * @returns Array of assets that match at least one active filter criterion
  */
-export const selectAssetsWithSelectedTagsCount = createSelector(
-  [selectAssetsWithSelectedTags],
-  (assetsWithSelectedTags) => assetsWithSelectedTags.length,
+export const selectAssetsWithActiveFilters = createSelector(
+  [selectAllImages, (state) => state.filters],
+  (allImages, filters) => {
+    // If no filters are active, return empty array
+    const hasActiveFilters = selectHasActiveFilters({ filters });
+    if (!hasActiveFilters) {
+      return [];
+    }
+
+    // Use the existing applyFilters function with MATCH_ANY mode
+    // This ensures consistency with the main filtering logic
+    return applyFilters({
+      assets: allImages,
+      filterTags: filters.filterTags,
+      filterSizes: filters.filterSizes,
+      filterBuckets: filters.filterBuckets,
+      filterExtensions: filters.filterExtensions,
+      filterMode: FilterMode.MATCH_ANY, // Use MATCH_ANY for union behavior
+      showModified: filters.showModified,
+      searchQuery: '', // No search query for this selector
+      selectedAssets: [], // No asset selection constraint
+    });
+  },
+);
+
+/**
+ * Selector to get the count of assets with active filters
+ * @returns Number of assets that match at least one active filter criterion
+ */
+export const selectAssetsWithActiveFiltersCount = createSelector(
+  [selectAssetsWithActiveFilters],
+  (assetsWithActiveFilters) => assetsWithActiveFilters.length,
 );

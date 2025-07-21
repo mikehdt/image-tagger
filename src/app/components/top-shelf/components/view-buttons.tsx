@@ -24,16 +24,11 @@ export const ViewButtons = () => {
       title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
     >
       {showCropVisualization ? (
-        <>
-          <EyeSlashIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Hide Crops</span>
-        </>
+        <EyeSlashIcon className="w-4" />
       ) : (
-        <>
-          <EyeIcon className="w-4" />
-          <span className="ml-2 max-lg:hidden">Show Crops</span>
-        </>
+        <EyeIcon className="w-4" />
       )}
+      <span className="ml-2 max-lg:hidden">Cropping</span>
     </Button>
   );
 };

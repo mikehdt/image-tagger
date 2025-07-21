@@ -34,21 +34,15 @@ const projectSlice = createSlice({
 
 // Main exports for slice
 export const { reducer: projectReducer } = projectSlice;
-export const {
-  setProjectInfo,
-  resetProjectState,
-  toggleCropVisualization,
-  setCropVisualization,
-} = projectSlice.actions;
+export const { setProjectInfo, resetProjectState, toggleCropVisualization } =
+  projectSlice.actions;
 
 // Export the selectors from the slice
 export const {
   selectProjectName,
   selectProjectPath,
   selectProjectThumbnail,
-  selectProjectInfo,
   selectShowCropVisualization,
-  selectProjectConfig,
 } = projectSlice.selectors;
 
 // Main exports for project module

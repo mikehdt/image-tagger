@@ -8,13 +8,13 @@ import {
 import { memo, useCallback, useState } from 'react';
 
 import { markFilterTagsToDelete } from '@/app/store/assets';
-import { selectFilterTags } from '@/app/store/filters';
+import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   addTagToAssetsWithDualSelection,
   clearSelection,
 } from '@/app/store/selection';
-import { selectAssetsWithSelectedTagsCount } from '@/app/store/selection/combinedSelectors';
+import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
@@ -32,13 +32,14 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
 
   const dispatch = useAppDispatch();
   const filterTags = useAppSelector(selectFilterTags);
-  const assetsWithSelectedTagsCount = useAppSelector(
-    selectAssetsWithSelectedTagsCount,
+  const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const assetsWithActiveFiltersCount = useAppSelector(
+    selectAssetsWithActiveFiltersCount,
   );
 
   // Determine if Add Tags button should be enabled
-  // Enable if we have selected assets OR if we have selected tags
-  const canAddTags = selectedAssetsCount > 0 || filterTags.length > 0;
+  // Enable if we have selected assets OR if we have any active filters
+  const canAddTags = selectedAssetsCount > 0 || hasActiveFilters;
 
   const handleMarkFilterTagsToDelete = useCallback(
     (tags: string[]) => dispatch(markFilterTagsToDelete(tags)),
@@ -63,14 +64,14 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
       tag: string,
       addToStart = false,
       applyToSelectedAssets = false,
-      applyToAssetsWithSelectedTags = false,
+      applyToAssetsWithActiveFilters = false,
     ) => {
       dispatch(
         addTagToAssetsWithDualSelection({
           tagName: tag,
           addToStart,
           applyToSelectedAssets,
-          applyToAssetsWithSelectedTags,
+          applyToAssetsWithActiveFilters,
         }),
       );
       setIsAddTagsModalOpen(false);
@@ -107,13 +108,13 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           color="slate"
           size="medium"
           title={
-            selectedAssetsCount > 0 && filterTags.length > 0
-              ? `Add tags to selected assets or assets with selected tags`
+            selectedAssetsCount > 0 && hasActiveFilters
+              ? `Add tags to selected assets or assets with active filters`
               : selectedAssetsCount > 0
                 ? `Add tags to ${selectedAssetsCount} selected assets`
-                : filterTags.length > 0
-                  ? `Add tags to ${assetsWithSelectedTagsCount} assets with selected tags`
-                  : 'Select assets or tags to add new tags'
+                : hasActiveFilters
+                  ? `Add tags to ${assetsWithActiveFiltersCount} assets with active filters`
+                  : 'Select assets or apply filters to add new tags'
           }
         >
           <TagIcon className="w-4" />

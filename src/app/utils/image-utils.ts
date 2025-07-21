@@ -29,7 +29,7 @@ export const getCurrentProjectPath = (): string | null => {
 /**
  * Kohya SS model configurations for different Stable Diffusion versions
  */
-export type KohyaConfig = {
+type KohyaConfig = {
   targetResolution: number; // Base resolution (e.g., 512, 768, 1024)
   stepSize: number; // Increment size (typically 64)
   minSize: number; // Minimum bucket dimension

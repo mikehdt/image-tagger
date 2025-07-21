@@ -4,10 +4,10 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 
-import { selectFilterTags } from '@/app/store/filters';
+import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import {
-  selectAssetsWithSelectedTags,
+  selectAssetsWithActiveFilters,
   selectDuplicateTagInfo,
   selectSelectedAssets,
 } from '@/app/store/selection';
@@ -43,23 +43,22 @@ export const AddTagsModal = ({
 
   // New state for dual selection mode
   const [applyToSelectedAssets, setApplyToSelectedAssets] = useState(false);
-  const [applyToAssetsWithSelectedTags, setApplyToAssetsWithSelectedTags] =
+  const [applyToAssetsWithActiveFilters, setApplyToAssetsWithActiveFilters] =
     useState(false);
 
   // Get data for dual selection logic
-  const filterTags = useAppSelector(selectFilterTags);
+  const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const selectedAssets = useAppSelector(selectSelectedAssets);
-  const assetsWithSelectedTags = useAppSelector(selectAssetsWithSelectedTags);
+  const assetsWithActiveFilters = useAppSelector(selectAssetsWithActiveFilters);
 
   // Check state conditions
   const hasSelectedAssets = selectedAssetsCount > 0;
-  const hasSelectedTags = filterTags.length > 0;
-  const assetsWithSelectedTagsCount = assetsWithSelectedTags.length;
+  const assetsWithActiveFiltersCount = assetsWithActiveFilters.length;
 
   // Calculate the intersection count for summary display
   const intersectionCount =
-    hasSelectedAssets && hasSelectedTags
-      ? assetsWithSelectedTags.filter((asset) =>
+    hasSelectedAssets && hasActiveFilters
+      ? assetsWithActiveFilters.filter((asset) =>
           selectedAssets.includes(asset.fileId),
         ).length
       : 0;
@@ -122,25 +121,25 @@ export const AddTagsModal = ({
   useEffect(() => {
     if (isOpen) {
       // Set defaults based on what's available
-      if (hasSelectedAssets && !hasSelectedTags) {
+      if (hasSelectedAssets && !hasActiveFilters) {
         // Only assets selected - apply to selected assets
         setApplyToSelectedAssets(true);
-        setApplyToAssetsWithSelectedTags(false);
-      } else if (!hasSelectedAssets && hasSelectedTags) {
-        // Only tags selected - apply to assets with selected tags
+        setApplyToAssetsWithActiveFilters(false);
+      } else if (!hasSelectedAssets && hasActiveFilters) {
+        // Only filters active - apply to assets with active filters
         setApplyToSelectedAssets(false);
-        setApplyToAssetsWithSelectedTags(true);
-      } else if (hasSelectedAssets && hasSelectedTags) {
+        setApplyToAssetsWithActiveFilters(true);
+      } else if (hasSelectedAssets && hasActiveFilters) {
         // Both available - let user choose, default to both
         setApplyToSelectedAssets(true);
-        setApplyToAssetsWithSelectedTags(true);
+        setApplyToAssetsWithActiveFilters(true);
       } else {
         // Neither available - shouldn't happen but handle gracefully
         setApplyToSelectedAssets(false);
-        setApplyToAssetsWithSelectedTags(false);
+        setApplyToAssetsWithActiveFilters(false);
       }
     }
-  }, [isOpen, hasSelectedAssets, hasSelectedTags]);
+  }, [isOpen, hasSelectedAssets, hasActiveFilters]);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -149,9 +148,9 @@ export const AddTagsModal = ({
     // Check that at least one constraint is selected when both are available
     if (
       hasSelectedAssets &&
-      hasSelectedTags &&
+      hasActiveFilters &&
       !applyToSelectedAssets &&
-      !applyToAssetsWithSelectedTags
+      !applyToAssetsWithActiveFilters
     ) {
       return; // Don't submit if no constraints are selected
     }
@@ -170,7 +169,7 @@ export const AddTagsModal = ({
         tag,
         addToStart,
         applyToSelectedAssets,
-        applyToAssetsWithSelectedTags,
+        applyToAssetsWithActiveFilters,
       );
     });
 
@@ -232,32 +231,32 @@ export const AddTagsModal = ({
   // Check if at least one constraint is selected when both are available
   const hasInvalidConstraints =
     hasSelectedAssets &&
-    hasSelectedTags &&
+    hasActiveFilters &&
     !applyToSelectedAssets &&
-    !applyToAssetsWithSelectedTags;
+    !applyToAssetsWithActiveFilters;
 
   const isFormInvalid = hasNoValidTags || hasInvalidConstraints;
 
   // Calculate the summary message for how many assets will be affected
   const getSummaryMessage = () => {
-    if (hasSelectedAssets && hasSelectedTags) {
+    if (hasSelectedAssets && hasActiveFilters) {
       // Dual selection mode
-      if (applyToSelectedAssets && applyToAssetsWithSelectedTags) {
+      if (applyToSelectedAssets && applyToAssetsWithActiveFilters) {
         // Both constraints: intersection
-        return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and ${intersectionCount === 1 ? 'has' : 'have'} selected tags.`;
+        return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and ${intersectionCount === 1 ? 'matches' : 'match'} active filters.`;
       } else if (applyToSelectedAssets) {
         // Only selected assets
         return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
-      } else if (applyToAssetsWithSelectedTags) {
-        // Only assets with selected tags
-        return `Tags will be added to ${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'} with selected tags.`;
+      } else if (applyToAssetsWithActiveFilters) {
+        // Only assets with active filters
+        return `Tags will be added to ${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'} with active filters.`;
       }
     } else if (hasSelectedAssets) {
       // Only assets selected
       return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
-    } else if (hasSelectedTags) {
-      // Only tags selected
-      return `Tags will be added to ${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'} with selected tags.`;
+    } else if (hasActiveFilters) {
+      // Only filters active
+      return `Tags will be added to ${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'} with active filters.`;
     }
     return '';
   };
@@ -268,14 +267,14 @@ export const AddTagsModal = ({
         {/* Title */}
         <h2 className="text-2xl font-semibold text-slate-700">Add Tags</h2>
 
-        {/* Selected assets/tags count and description */}
-        {hasSelectedAssets && hasSelectedTags ? (
+        {/* Selected assets/filters count and description */}
+        {hasSelectedAssets && hasActiveFilters ? (
           <p className="text-sm text-slate-500">
             Choose where to add tags:{' '}
             <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
             {selectedAssetsCount === 1 ? 'asset' : 'assets'} and/or{' '}
-            <span className="font-medium">{assetsWithSelectedTagsCount}</span>{' '}
-            assets with selected tags.
+            <span className="font-medium">{assetsWithActiveFiltersCount}</span>{' '}
+            assets with active filters.
           </p>
         ) : hasSelectedAssets ? (
           <p className="text-sm text-slate-500">
@@ -283,14 +282,16 @@ export const AddTagsModal = ({
             <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
             {selectedAssetsCount === 1 ? 'asset' : 'assets'}.
           </p>
-        ) : hasSelectedTags ? (
+        ) : hasActiveFilters ? (
           <p className="text-sm text-slate-500">
             Adding tags to{' '}
-            <span className="font-medium">{assetsWithSelectedTagsCount}</span>{' '}
-            assets with selected tags.
+            <span className="font-medium">{assetsWithActiveFiltersCount}</span>{' '}
+            assets with active filters.
           </p>
         ) : (
-          <p className="text-sm text-slate-500">No assets or tags selected.</p>
+          <p className="text-sm text-slate-500">
+            No assets or filters selected.
+          </p>
         )}
 
         {/* Tag input form */}
@@ -356,8 +357,8 @@ export const AddTagsModal = ({
             />
           </div>
 
-          {/* Constraint checkboxes - only show when both assets and tags are available */}
-          {hasSelectedAssets && hasSelectedTags ? (
+          {/* Constraint checkboxes - only show when both assets and active filters are available */}
+          {hasSelectedAssets && hasActiveFilters ? (
             <>
               <div className="flex items-center border-t border-t-slate-300 pt-4">
                 <Checkbox
@@ -372,14 +373,14 @@ export const AddTagsModal = ({
 
               <div className="flex items-center">
                 <Checkbox
-                  isSelected={applyToAssetsWithSelectedTags}
+                  isSelected={applyToAssetsWithActiveFilters}
                   onChange={() =>
-                    setApplyToAssetsWithSelectedTags(
-                      !applyToAssetsWithSelectedTags,
+                    setApplyToAssetsWithActiveFilters(
+                      !applyToAssetsWithActiveFilters,
                     )
                   }
-                  label={`Scope to assets with selected tags (${assetsWithSelectedTagsCount} ${assetsWithSelectedTagsCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Scope tags to assets with selected tags"
+                  label={`Scope to assets with active filters (${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Scope tags to assets with active filters"
                 />
               </div>
 
