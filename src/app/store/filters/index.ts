@@ -2,7 +2,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { coreReducers } from './reducers';
-import { FilterMode, Filters, PaginationSize } from './types';
+import {
+  FilterMode,
+  Filters,
+  PaginationSize,
+  SortDirection,
+  SortType,
+} from './types';
 
 const initialState: Filters = {
   filterMode: FilterMode.SHOW_ALL,
@@ -13,6 +19,8 @@ const initialState: Filters = {
   paginationSize: PaginationSize.ONE_HUNDRED,
   showModified: false,
   searchQuery: '',
+  sortType: SortType.NAME,
+  sortDirection: SortDirection.ASC,
 };
 
 const filtersSlice = createSlice({
@@ -29,6 +37,8 @@ const filtersSlice = createSlice({
     selectPaginationSize: (state) => state.paginationSize,
     selectShowModified: (state) => state.showModified,
     selectSearchQuery: (state) => state.searchQuery,
+    selectSortType: (state) => state.sortType,
+    selectSortDirection: (state) => state.sortDirection,
   },
 });
 
@@ -51,6 +61,9 @@ export const {
   setSearchQuery,
   clearModifiedFilter,
   resetFilterModeIfNeeded,
+  setSortType,
+  setSortDirection,
+  toggleSortDirection,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice
@@ -63,6 +76,8 @@ export const {
   selectPaginationSize,
   selectShowModified,
   selectSearchQuery,
+  selectSortType,
+  selectSortDirection,
 } = filtersSlice.selectors;
 
 // Main exports for filters module

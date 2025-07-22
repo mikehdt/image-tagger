@@ -127,6 +127,8 @@ export const selectFilteredAssets = createSelector(
     (state: RootState) => state.filters.showModified,
     (state: RootState) => state.filters.searchQuery,
     (state: RootState) => state.selection.selectedAssets,
+    (state: RootState) => state.filters.sortType,
+    (state: RootState) => state.filters.sortDirection,
   ],
   (
     assets,
@@ -138,6 +140,8 @@ export const selectFilteredAssets = createSelector(
     showModified,
     searchQuery,
     selectedAssets,
+    sortType,
+    sortDirection,
   ) => {
     return applyFilters({
       assets,
@@ -149,6 +153,8 @@ export const selectFilteredAssets = createSelector(
       showModified,
       searchQuery,
       selectedAssets,
+      sortType,
+      sortDirection,
     });
   },
 );

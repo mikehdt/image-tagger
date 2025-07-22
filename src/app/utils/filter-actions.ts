@@ -1,6 +1,6 @@
 import { type ImageAsset, TagState } from '../store/assets';
 import { hasState } from '../store/assets/utils';
-import { FilterMode } from '../store/filters';
+import { FilterMode, SortDirection, SortType } from '../store/filters';
 import { composeDimensions } from './helpers';
 
 // Define an interface that extends ImageAsset with originalIndex
@@ -18,6 +18,8 @@ export const applyFilters = ({
   showModified,
   searchQuery,
   selectedAssets,
+  sortType,
+  sortDirection,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
@@ -28,6 +30,8 @@ export const applyFilters = ({
   showModified?: boolean;
   searchQuery?: string;
   selectedAssets?: string[];
+  sortType?: SortType;
+  sortDirection?: SortDirection;
 }): ImageAssetWithIndex[] => {
   // Handle the case where no filters are active - show everything
   // BUT not for SELECTED_ASSETS or TAGLESS modes, which have their own logic
@@ -42,10 +46,18 @@ export const applyFilters = ({
     (!searchQuery || searchQuery.trim() === '')
   ) {
     // Add originalIndex to each asset (1-based for display)
-    return assets.map((asset, index) => ({
+    const assetsWithIndex = assets.map((asset, index) => ({
       ...asset,
       originalIndex: index + 1,
     })) as ImageAssetWithIndex[];
+
+    // Apply sorting even when no filters are active
+    return applySorting(
+      assetsWithIndex,
+      sortType,
+      sortDirection,
+      selectedAssets,
+    );
   }
 
   // Create a Set for faster lookups when checking dimensions, buckets, and extensions
@@ -59,7 +71,7 @@ export const applyFilters = ({
     originalIndex: index + 1,
   })) as ImageAssetWithIndex[];
 
-  return assetsWithIndex.filter((img: ImageAssetWithIndex) => {
+  const filteredAssets = assetsWithIndex.filter((img: ImageAssetWithIndex) => {
     // SELECTED_ASSETS mode - only show assets that are selected
     // Apply search and modified filters to selected assets if needed
     if (filterMode === FilterMode.SELECTED_ASSETS) {
@@ -221,5 +233,68 @@ export const applyFilters = ({
     // This should never happen if using enum correctly
     console.error('Unknown filter mode:', filterMode);
     return false;
+  });
+
+  // Apply sorting to the filtered results
+  return applySorting(filteredAssets, sortType, sortDirection, selectedAssets);
+};
+
+/**
+ * Apply sorting to an array of assets
+ */
+const applySorting = (
+  assets: ImageAssetWithIndex[],
+  sortType?: SortType,
+  sortDirection?: SortDirection,
+  selectedAssets?: string[],
+): ImageAssetWithIndex[] => {
+  if (!sortType || !sortDirection) {
+    return assets; // Return unsorted if no sort parameters
+  }
+
+  const selectedSet = new Set(selectedAssets || []);
+  const direction = sortDirection === SortDirection.ASC ? 1 : -1;
+
+  return [...assets].sort((a, b) => {
+    let comparison = 0;
+
+    switch (sortType) {
+      case SortType.NAME:
+        comparison = a.fileId.localeCompare(b.fileId);
+        break;
+
+      case SortType.IMAGE_SIZE:
+        // Sort by image dimensions (width first, then height) to match size view logic
+        if (a.dimensions.width !== b.dimensions.width) {
+          comparison = a.dimensions.width - b.dimensions.width;
+        } else {
+          comparison = a.dimensions.height - b.dimensions.height;
+        }
+        break;
+
+      case SortType.BUCKET_SIZE:
+        // Sort by bucket dimensions (width first, then height) to match bucket view logic
+        if (a.bucket.width !== b.bucket.width) {
+          comparison = a.bucket.width - b.bucket.width;
+        } else {
+          comparison = a.bucket.height - b.bucket.height;
+        }
+        break;
+
+      case SortType.SELECTED:
+        // Sort selected assets first
+        const aSelected = selectedSet.has(a.fileId);
+        const bSelected = selectedSet.has(b.fileId);
+        if (aSelected && !bSelected) comparison = -1;
+        else if (!aSelected && bSelected) comparison = 1;
+        else comparison = 0;
+        break;
+
+      default:
+        comparison = 0;
+        break;
+    }
+
+    return comparison * direction;
   });
 };

@@ -1,7 +1,13 @@
 // Core reducers for the filters slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { FilterMode, Filters, PaginationSize } from './types';
+import {
+  FilterMode,
+  Filters,
+  PaginationSize,
+  SortDirection,
+  SortType,
+} from './types';
 import { toggleFilter } from './utils';
 
 export const coreReducers = {
@@ -76,6 +82,24 @@ export const coreReducers = {
 
   setSearchQuery: (state: Filters, { payload }: PayloadAction<string>) => {
     state.searchQuery = payload;
+  },
+
+  setSortType: (state: Filters, { payload }: PayloadAction<SortType>) => {
+    state.sortType = payload;
+  },
+
+  setSortDirection: (
+    state: Filters,
+    { payload }: PayloadAction<SortDirection>,
+  ) => {
+    state.sortDirection = payload;
+  },
+
+  toggleSortDirection: (state: Filters) => {
+    state.sortDirection =
+      state.sortDirection === SortDirection.ASC
+        ? SortDirection.DESC
+        : SortDirection.ASC;
   },
 
   clearModifiedFilter: (state: Filters) => {

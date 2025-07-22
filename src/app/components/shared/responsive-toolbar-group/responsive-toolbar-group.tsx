@@ -270,7 +270,7 @@ export const ResponsiveToolbarGroup = ({
                     ? 'origin-top-left'
                     : position === 'right'
                       ? 'origin-top-right'
-                      : 'origin-top'
+                      : 'origin-[0_0]'
                 } ${
                   isPopoverOpen
                     ? 'scale-100 opacity-100'

@@ -1,4 +1,5 @@
 import {
+  ArrowsUpDownIcon,
   IdentificationIcon,
   MagnifyingGlassIcon,
   NoSymbolIcon,
@@ -8,7 +9,16 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
-import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
+import {
+  selectSearchQuery,
+  selectSortDirection,
+  selectSortType,
+  setSearchQuery,
+  setSortType,
+  SortDirection,
+  SortType,
+  toggleSortDirection,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   clearSelection,
@@ -17,7 +27,30 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
+import { Dropdown, DropdownItem } from '../../shared/dropdown';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+
+/**
+ * Get the appropriate sort direction label based on sort type
+ */
+const getSortDirectionLabel = (
+  sortType: SortType,
+  sortDirection: SortDirection,
+): string => {
+  const isAsc = sortDirection === SortDirection.ASC;
+
+  switch (sortType) {
+    case SortType.NAME:
+      return isAsc ? 'A-Z' : 'Z-A';
+    case SortType.IMAGE_SIZE:
+    case SortType.BUCKET_SIZE:
+      return isAsc ? '0-9' : '9-0';
+    case SortType.SELECTED:
+      return isAsc ? '✓' : '○'; // ✓ for selected first, ○ for unselected first
+    default:
+      return isAsc ? 'A-Z' : 'Z-A';
+  }
+};
 
 export const AssetSelectionControls = ({
   selectedAssetsCount,
@@ -31,8 +64,21 @@ export const AssetSelectionControls = ({
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const searchQuery = useAppSelector(selectSearchQuery);
+  const sortType = useAppSelector(selectSortType);
+  const sortDirection = useAppSelector(selectSortDirection);
 
   const handleClearSelection = () => dispatch(clearSelection());
+
+  const handleSortTypeChange = useCallback(
+    (newSortType: SortType) => {
+      dispatch(setSortType(newSortType));
+    },
+    [dispatch],
+  );
+
+  const handleToggleSortDirection = useCallback(() => {
+    dispatch(toggleSortDirection());
+  }, [dispatch]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,15 +179,62 @@ export const AssetSelectionControls = ({
     dispatch(selectMultipleAssets(assetIds));
   };
 
+  // Create sort type dropdown items
+  const sortTypeItems: DropdownItem<SortType>[] = [
+    {
+      value: SortType.NAME,
+      label: 'Name',
+    },
+    {
+      value: SortType.IMAGE_SIZE,
+      label: 'Image Size',
+    },
+    {
+      value: SortType.BUCKET_SIZE,
+      label: 'Bucket Size',
+    },
+    {
+      value: SortType.SELECTED,
+      label: 'Selected',
+      disabled: selectedAssetsCount === 0,
+    },
+  ];
+
   return (
     <ResponsiveToolbarGroup
       icon={<IdentificationIcon className="w-4" />}
       title="Asset Selection"
       position="left"
     >
-      <span className="relative flex items-center">
+      <Dropdown
+        items={sortTypeItems}
+        selectedValue={sortType}
+        onChange={handleSortTypeChange}
+        buttonClassName={
+          sortType === SortType.SELECTED && selectedAssetsCount === 0
+            ? 'text-slate-300'
+            : ''
+        }
+      />
+
+      <span className="mr-0! border-r border-r-white pr-1">
         <Button
-          className={`absolute top-0.5 bottom-0.5 left-0.5 my-auto h-7 w-7 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
+          type="button"
+          onClick={handleToggleSortDirection}
+          variant="ghost"
+          size="medium"
+          title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
+        >
+          <ArrowsUpDownIcon className="w-4" />
+          <span className="ml-1 max-xl:hidden">
+            {getSortDirectionLabel(sortType, sortDirection)}
+          </span>
+        </Button>
+      </span>
+
+      <span className="relative flex items-center border-l border-l-slate-300 pl-1">
+        <Button
+          className={`absolute top-0.5 bottom-0.5 left-1 my-auto h-7 w-7 px-1 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
           size="smallSquare"
           variant="ghost"
           isPressed={searchQuery.length > 0 && !isSearchActive}
@@ -178,7 +271,6 @@ export const AssetSelectionControls = ({
           </span>
         ) : null}
       </span>
-
       <Button
         type="button"
         onClick={handleAddAllToSelection}
@@ -203,7 +295,6 @@ export const AssetSelectionControls = ({
             : 'Select Filtered'}
         </span>
       </Button>
-
       <Button
         type="button"
         onClick={handleClearSelection}
