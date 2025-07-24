@@ -17,6 +17,7 @@ import {
   selectSortDirection,
   selectSortType,
   setSearchQuery,
+  setSortDirection,
   setSortType,
   SortDirection,
   SortType,
@@ -85,6 +86,8 @@ export const AssetSelectionControls = ({
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {
       dispatch(setSortType(newSortType));
+      // Reset sort direction to ascending (default) when changing sort type
+      dispatch(setSortDirection(SortDirection.ASC));
     },
     [dispatch],
   );

@@ -140,11 +140,14 @@ export const getImageAssetDetails = async (
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
   const currentDataPath = getCurrentDataPath(projectPath);
+  const fullFilePath = `${currentDataPath}/${file}`;
+
+  // Get file stats for last modified time
+  const stats = fs.statSync(fullFilePath);
+  const lastModified = Math.floor(stats.mtime.getTime() / 1000); // Unix timestamp in seconds
 
   // @ts-expect-error ReadableStream.from being weird
-  const stream = ReadableStream.from(
-    createReadStream(`${currentDataPath}/${file}`),
-  );
+  const stream = ReadableStream.from(createReadStream(fullFilePath));
 
   const dimensions = (await imageDimensionsFromStream(
     stream,
@@ -200,6 +203,7 @@ export const getImageAssetDetails = async (
     tagStatus,
     tagList,
     savedTagList: [...tagList], // Make a copy of the initial tag list
+    lastModified,
   };
 };
 

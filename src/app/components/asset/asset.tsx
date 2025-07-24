@@ -32,6 +32,7 @@ type AssetProps = {
   dimensions: ImageDimensions;
   bucket: KohyaBucket;
   ioState: IoState;
+  lastModified: number;
 };
 
 const AssetComponent = ({
@@ -42,6 +43,7 @@ const AssetComponent = ({
   dimensions,
   bucket,
   ioState,
+  lastModified,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   // Track if any tag is currently being edited or added
@@ -77,12 +79,16 @@ const AssetComponent = ({
     [dimensions],
   );
 
-  // Get the image URL for the current project
+  // Get the image URL for the current project with cache busting
   const imageUrl = useMemo(() => {
     const projectPath = getCurrentProjectPath();
     const fileName = `${assetId}.${fileExtension}`;
-    return getImageUrl(fileName, projectPath || undefined);
-  }, [assetId, fileExtension]);
+    const baseUrl = getImageUrl(fileName, projectPath || undefined);
+
+    // Properly append cache-busting parameter
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}t=${lastModified}`;
+  }, [assetId, fileExtension, lastModified]);
 
   const toggleImageZoom = useCallback(() => {
     setImageZoom((prev) => !prev);

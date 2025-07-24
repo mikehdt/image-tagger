@@ -36,6 +36,7 @@ export type ImageAsset = {
   tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
   tagList: string[];
   savedTagList: string[]; // Original tag order from last save
+  lastModified: number; // Unix timestamp for cache busting
 };
 
 export type SaveProgress = {
