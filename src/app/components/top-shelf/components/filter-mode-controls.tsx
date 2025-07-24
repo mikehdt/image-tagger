@@ -149,7 +149,6 @@ export const FilterModeControls = ({
         className="flex items-center"
       >
         <NoSymbolIcon className="w-4" />
-        <span className="ml-2 max-lg:hidden">Filters</span>
       </Button>
     </ResponsiveToolbarGroup>
   );

@@ -1,5 +1,8 @@
 import {
-  ArrowsUpDownIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  EyeIcon,
+  EyeSlashIcon,
   IdentificationIcon,
   MagnifyingGlassIcon,
   NoSymbolIcon,
@@ -20,6 +23,10 @@ import {
   toggleSortDirection,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import {
+  selectShowCropVisualization,
+  toggleCropVisualization,
+} from '@/app/store/project';
 import {
   clearSelection,
   selectMultipleAssets,
@@ -66,6 +73,12 @@ export const AssetSelectionControls = ({
   const searchQuery = useAppSelector(selectSearchQuery);
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
+
+  const showCropVisualization = useAppSelector(selectShowCropVisualization);
+
+  const handleToggleCropVisualization = () => {
+    dispatch(toggleCropVisualization());
+  };
 
   const handleClearSelection = () => dispatch(clearSelection());
 
@@ -206,6 +219,23 @@ export const AssetSelectionControls = ({
       title="Asset Selection"
       position="left"
     >
+      <Button
+        variant="ghost"
+        color="slate"
+        size="medium"
+        onClick={handleToggleCropVisualization}
+        isPressed={showCropVisualization}
+        title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
+      >
+        {showCropVisualization ? (
+          <EyeSlashIcon className="w-4" />
+        ) : (
+          <EyeIcon className="w-4" />
+        )}
+      </Button>
+
+      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
+
       <Dropdown
         items={sortTypeItems}
         selectedValue={sortType}
@@ -217,25 +247,30 @@ export const AssetSelectionControls = ({
         }
       />
 
-      <span className="mr-0! border-r border-r-white pr-1">
-        <Button
-          type="button"
-          onClick={handleToggleSortDirection}
-          variant="ghost"
-          size="medium"
-          title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
-        >
-          <ArrowsUpDownIcon className="w-4" />
-          <span className="ml-1 max-xl:hidden">
-            {getSortDirectionLabel(sortType, sortDirection)}
-          </span>
-        </Button>
-      </span>
+      <Button
+        type="button"
+        onClick={handleToggleSortDirection}
+        variant="ghost"
+        size="medium"
+        title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
+      >
+        {sortDirection === SortDirection.ASC ? (
+          <ArrowUpIcon className="w-4" />
+        ) : (
+          <ArrowDownIcon className="w-4" />
+        )}
 
-      <span className="relative flex items-center border-l border-l-slate-300 pl-1">
+        <span className="ml-1 max-xl:hidden">
+          {getSortDirectionLabel(sortType, sortDirection)}
+        </span>
+      </Button>
+
+      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
+
+      <span className="relative flex items-center">
         <Button
-          className={`absolute top-0.5 bottom-0.5 left-1 my-auto h-7 w-7 px-1 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
-          size="smallSquare"
+          className={`absolute top-0.5 bottom-0.5 my-auto px-1 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
+          size="small"
           variant="ghost"
           isPressed={searchQuery.length > 0 && !isSearchActive}
           onClick={handleSearchFocus}
@@ -271,46 +306,47 @@ export const AssetSelectionControls = ({
           </span>
         ) : null}
       </span>
-      <Button
-        type="button"
-        onClick={handleAddAllToSelection}
-        disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
-        variant="ghost"
-        color="slate"
-        size="medium"
-        title={
-          allFilteredAssetsSelected
-            ? 'All filtered assets already selected'
-            : filteredAssets.length === allAssetsCount
-              ? 'Add all assets to selection'
-              : 'Add all filtered assets to selection'
-        }
-      >
-        <SquaresPlusIcon className="w-4" />
-        <span
-          className={`ml-2 max-xl:hidden ${isSearchActive ? 'hidden' : ''}`}
-        >
-          {filteredAssets.length === allAssetsCount
-            ? 'Select All'
-            : 'Select Filtered'}
-        </span>
-      </Button>
-      <Button
-        type="button"
-        onClick={handleClearSelection}
-        disabled={selectedAssetsCount === 0}
-        variant="ghost"
-        color="slate"
-        size="medium"
-        title="Clear selection"
-      >
-        <NoSymbolIcon className="w-4" />
-        <span
-          className={`ml-2 max-lg:hidden ${isSearchActive ? 'hidden' : ''}`}
-        >
-          Assets
-        </span>
-      </Button>
+
+      {!isSearchActive ? (
+        <>
+          <Button
+            type="button"
+            onClick={handleAddAllToSelection}
+            disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+            variant="ghost"
+            color="slate"
+            size="medium"
+            title={
+              allFilteredAssetsSelected
+                ? 'All filtered assets already selected'
+                : filteredAssets.length === allAssetsCount
+                  ? 'Add all assets to selection'
+                  : 'Add all filtered assets to selection'
+            }
+          >
+            <SquaresPlusIcon className="w-4" />
+            <span
+              className={`ml-2 max-xl:hidden ${isSearchActive ? 'hidden' : ''}`}
+            >
+              {filteredAssets.length === allAssetsCount
+                ? 'Select All'
+                : 'Select Filtered'}
+            </span>
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleClearSelection}
+            disabled={selectedAssetsCount === 0}
+            variant="ghost"
+            color="slate"
+            size="medium"
+            title="Clear selection"
+          >
+            <NoSymbolIcon className="w-4" />
+          </Button>
+        </>
+      ) : null}
     </ResponsiveToolbarGroup>
   );
 };

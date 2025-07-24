@@ -13,6 +13,7 @@ import {
   selectSearchQuery,
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
+import { selectProjectPath } from '@/app/store/project';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
@@ -38,6 +39,7 @@ export const AssetMetadata = ({
   isTagEditing = false,
 }: AssetMetadataProps) => {
   const searchQuery = useAppSelector(selectSearchQuery);
+  const projectPath = useAppSelector(selectProjectPath);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
@@ -92,6 +94,21 @@ export const AssetMetadata = ({
     () => toggleExtension(fileExtension),
     [fileExtension, toggleExtension],
   );
+
+  const handleCopyAssetPath = useCallback(async () => {
+    if (!projectPath) return;
+
+    // Determine the correct path separator based on the project path
+    const separator = projectPath.includes('\\') ? '\\' : '/';
+    const fullPath = `${projectPath}${separator}${assetId}.${fileExtension}`;
+
+    try {
+      await navigator.clipboard.writeText(fullPath);
+      // Could add a toast notification here in the future
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+    }
+  }, [projectPath, assetId, fileExtension]);
 
   const handleCancelAction = useCallback(() => {
     // Extra guard to prevent clicking during tag editing
@@ -154,8 +171,10 @@ export const AssetMetadata = ({
         </Button>
 
         <span
-          className="ml-2 cursor-default self-center overflow-hidden overflow-ellipsis text-slate-500 max-sm:order-1 max-sm:w-full max-sm:pt-2"
+          className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-slate-500 transition-colors hover:text-slate-700 max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'white 0 1px 0' }}
+          onClick={handleCopyAssetPath}
+          title="Click to copy full file path"
         >
           {highlightText(assetId, searchQuery)}
         </span>

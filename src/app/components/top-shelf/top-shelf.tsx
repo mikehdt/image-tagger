@@ -21,7 +21,6 @@ import {
   FilterModeControls,
   ProjectInfo,
   TagActions,
-  ViewButtons,
 } from './components';
 
 export const TopShelf = () => {
@@ -75,10 +74,8 @@ export const TopShelf = () => {
       </div>
       <div className="border-t border-t-white/50 bg-white/80 shadow-md backdrop-blur-md">
         <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
-          <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
-
           <div className="mr-auto!">
-            <ViewButtons />
+            <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
           </div>
 
           <TagActions selectedAssetsCount={selectedAssetsCount} />
