@@ -17,6 +17,7 @@ import { selectProjectPath } from '@/app/store/project';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
+import { useToast } from '../../shared/toast';
 import { useAssetTags } from '../hooks';
 
 type AssetMetadataProps = {
@@ -52,6 +53,8 @@ export const AssetMetadata = ({
     saveAction,
     cancelAction,
   } = useAssetTags(assetId);
+
+  const { showToast } = useToast();
 
   const saveProgress = useAppSelector(selectSaveProgress);
 
@@ -104,11 +107,12 @@ export const AssetMetadata = ({
 
     try {
       await navigator.clipboard.writeText(fullPath);
-      // Could add a toast notification here in the future
+      showToast('File path copied to clipboard');
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+      showToast('Failed to copy file path');
     }
-  }, [projectPath, assetId, fileExtension]);
+  }, [projectPath, assetId, fileExtension, showToast]);
 
   const handleCancelAction = useCallback(() => {
     // Extra guard to prevent clicking during tag editing

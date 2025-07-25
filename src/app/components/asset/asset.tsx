@@ -126,7 +126,7 @@ const AssetComponent = ({
           ariaLabel={`Select asset ${assetId}`}
         />
 
-        {wouldCrop && (
+        {wouldCrop ? (
           <Button
             size="minimum"
             variant="ghost"
@@ -141,6 +141,11 @@ const AssetComponent = ({
               <EyeIcon className="h-4 w-4" />
             )}
           </Button>
+        ) : (
+          <EyeIcon
+            className="h-4 w-4 self-center opacity-50"
+            title="Image shape and crop shape are identical"
+          />
         )}
 
         <span className="text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
