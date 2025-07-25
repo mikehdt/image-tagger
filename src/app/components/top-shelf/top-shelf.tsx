@@ -60,7 +60,7 @@ export const TopShelf = () => {
   }, [selectedAssetsCount, dispatch]);
 
   return (
-    <div className="fixed top-0 left-0 z-10 w-full">
+    <div className="fixed top-0 left-0 z-20 w-full">
       <div className="border-b border-b-slate-300/50 bg-white/90 shadow-xs shadow-slate-300 backdrop-blur-md">
         <div className="mx-auto flex max-w-400 items-center space-x-2 px-4 py-1 text-sm text-slate-500">
           <ProjectInfo />
