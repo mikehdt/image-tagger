@@ -2,6 +2,21 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { applyFilters } from '../../utils/filter-actions';
+
+// Custom selector to check if any assets have scaled dimensions (different from bucket)
+export const selectHasScaledAssets = createSelector(
+  [selectAllImages],
+  (images) => {
+    // Check if any asset has dimensions different from bucket dimensions
+    return images.some((asset: ImageAsset) => {
+      return (
+        asset.dimensions.width !== asset.bucket.width ||
+        asset.dimensions.height !== asset.bucket.height
+      );
+    });
+  },
+);
+
 import { composeDimensions } from '../../utils/helpers';
 import type { RootState } from '../';
 import { selectAllImages } from '.';

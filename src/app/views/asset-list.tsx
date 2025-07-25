@@ -231,7 +231,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     () =>
       groupedAssets.map(({ category, assets }) => (
         <div key={category} className="asset-group">
-          <div className="sticky top-24 z-10 mb-2 border-b border-b-slate-300 bg-slate-500/60 px-2 py-1 text-sm text-white backdrop-blur-md">
+          <div className="sticky top-24 z-10 -mx-2 rounded-sm border-b border-b-slate-700/80 bg-slate-500/60 px-4 py-1 text-sm font-medium text-white backdrop-blur-md text-shadow-slate-700 text-shadow-xs">
             {category}
           </div>
           {assets.map((asset) => {

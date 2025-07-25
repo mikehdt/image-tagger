@@ -114,7 +114,7 @@ const AssetComponent = ({
 
   return (
     <div
-      className={`mb-4 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
+      className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
     >
       <div
         className={`flex cursor-pointer flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}

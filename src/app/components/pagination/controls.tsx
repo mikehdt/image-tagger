@@ -39,22 +39,14 @@ export const PaginationControls = ({
       value: PaginationSize.TWO_HUNDRED,
       label: PaginationSize.TWO_HUNDRED.toString(),
     },
-    {
-      value: PaginationSize.ALL,
-      label: (
-        <span className="flex justify-between">
-          All
-          {totalItems > 500 ? (
-            <ExclamationTriangleIcon
-              className="w-4 text-amber-700"
-              title="Caution! A high amount of items will perform slowly"
-            />
-          ) : (
-            ''
-          )}
-        </span>
-      ),
-    },
+    ...(totalItems <= 500
+      ? [
+          {
+            value: PaginationSize.ALL,
+            label: <span className="flex justify-between">All</span>,
+          },
+        ]
+      : []),
   ];
 
   // When pagination size changes, we need to redirect to page 1 if the current page

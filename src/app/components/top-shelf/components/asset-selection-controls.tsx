@@ -11,7 +11,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import {
+  selectFilteredAssets,
+  selectHasScaledAssets,
+  selectImageCount,
+} from '@/app/store/assets';
 import {
   selectSortDirection,
   selectSortType,
@@ -77,6 +81,7 @@ export const AssetSelectionControls = ({
   const sortDirection = useAppSelector(selectSortDirection);
 
   const showCropVisualization = useAppSelector(selectShowCropVisualization);
+  const hasScaledAssets = useAppSelector(selectHasScaledAssets);
 
   const handleToggleCropVisualization = () => {
     dispatch(toggleCropVisualization());
@@ -213,6 +218,7 @@ export const AssetSelectionControls = ({
     {
       value: SortType.SCALED,
       label: 'Scaled',
+      disabled: !hasScaledAssets,
     },
     {
       value: SortType.SELECTED,
