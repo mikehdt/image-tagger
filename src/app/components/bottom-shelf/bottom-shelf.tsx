@@ -3,6 +3,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 
 import {
   IoState,
@@ -17,6 +18,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
+import { useToast } from '../shared/toast';
 import { LoadingStatus } from './components';
 import { IoActions } from './components/io-actions';
 
@@ -28,11 +30,28 @@ type BottomShelfProps = {
 export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { showToast } = useToast();
 
   // IO state selectors
   const ioState = useAppSelector(selectIoState);
   const saveProgress = useAppSelector(selectSaveProgress) || null;
   const loadProgress = useAppSelector(selectLoadProgress) || null;
+
+  // Track previous IO state to detect completion
+  const prevIoStateRef = useRef<IoState>(ioState);
+
+  // Show toast when loading completes
+  useEffect(() => {
+    const prevIoState = prevIoStateRef.current;
+
+    // If we transitioned from COMPLETING to COMPLETE, show completion toast
+    if (prevIoState === IoState.COMPLETING && ioState === IoState.COMPLETE) {
+      showToast('Asset reload complete');
+    }
+
+    // Update the ref for next comparison
+    prevIoStateRef.current = ioState;
+  }, [ioState, showToast]);
 
   // Action handlers
   const doRefresh = () => {

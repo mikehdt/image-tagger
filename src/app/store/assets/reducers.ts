@@ -1,7 +1,13 @@
 // Core reducers for the assets slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { ImageAssets, IoState, TagState } from './types';
+import {
+  ImageAssets,
+  IoState,
+  SortDirection,
+  SortType,
+  TagState,
+} from './types';
 import { addState, hasState, removeState, toggleState } from './utils';
 
 export const coreReducers = {
@@ -12,6 +18,9 @@ export const coreReducers = {
     state.images = [];
     state.loadProgress = undefined;
     state.saveProgress = undefined;
+    // Reset sorting to defaults
+    state.sortType = SortType.NAME;
+    state.sortDirection = SortDirection.ASC;
   },
 
   markFilterTagsToDelete: (
@@ -289,5 +298,24 @@ export const coreReducers = {
       },
       ...state.images.slice(assetIndex + 1),
     ];
+  },
+
+  // Sorting reducers
+  setSortType: (state: ImageAssets, { payload }: PayloadAction<SortType>) => {
+    state.sortType = payload;
+  },
+
+  setSortDirection: (
+    state: ImageAssets,
+    { payload }: PayloadAction<SortDirection>,
+  ) => {
+    state.sortDirection = payload;
+  },
+
+  toggleSortDirection: (state: ImageAssets) => {
+    state.sortDirection =
+      state.sortDirection === SortDirection.ASC
+        ? SortDirection.DESC
+        : SortDirection.ASC;
   },
 };

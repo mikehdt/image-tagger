@@ -16,6 +16,19 @@ export enum TagState {
   DIRTY = 4, // 0100 - Position changed
 }
 
+export enum SortType {
+  NAME = 'Name',
+  IMAGE_SIZE = 'ImageSize',
+  BUCKET_SIZE = 'BucketSize',
+  SCALED = 'Scaled',
+  SELECTED = 'Selected',
+}
+
+export enum SortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 export type ImageDimensions = {
   width: number;
   height: number;
@@ -59,6 +72,9 @@ export type ImageAssets = {
   images: ImageAsset[];
   saveProgress?: SaveProgress;
   loadProgress?: LoadProgress;
+  // Sorting state
+  sortType: SortType;
+  sortDirection: SortDirection;
 };
 
 export type KeyedCountList = { [key: string]: number };

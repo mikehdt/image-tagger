@@ -127,8 +127,8 @@ export const selectFilteredAssets = createSelector(
     (state: RootState) => state.filters.showModified,
     (state: RootState) => state.filters.searchQuery,
     (state: RootState) => state.selection.selectedAssets,
-    (state: RootState) => state.filters.sortType,
-    (state: RootState) => state.filters.sortDirection,
+    (state: RootState) => state.assets.sortType,
+    (state: RootState) => state.assets.sortDirection,
   ],
   (
     assets,

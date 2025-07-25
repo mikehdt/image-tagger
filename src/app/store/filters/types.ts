@@ -16,18 +16,6 @@ export enum PaginationSize {
   ALL = -1,
 }
 
-export enum SortType {
-  NAME = 'Name',
-  IMAGE_SIZE = 'ImageSize',
-  BUCKET_SIZE = 'BucketSize',
-  SELECTED = 'Selected',
-}
-
-export enum SortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 export type Filters = {
   filterMode: FilterMode;
   filterTags: string[];
@@ -37,8 +25,6 @@ export type Filters = {
   paginationSize: PaginationSize;
   showModified: boolean;
   searchQuery: string;
-  sortType: SortType;
-  sortDirection: SortDirection;
 };
 
 export type FilterCount = {

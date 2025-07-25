@@ -13,16 +13,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import {
-  selectSearchQuery,
   selectSortDirection,
   selectSortType,
-  setSearchQuery,
   setSortDirection,
   setSortType,
   SortDirection,
   SortType,
   toggleSortDirection,
-} from '@/app/store/filters';
+} from '@/app/store/assets';
+import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectShowCropVisualization,
@@ -53,6 +52,8 @@ const getSortDirectionLabel = (
     case SortType.IMAGE_SIZE:
     case SortType.BUCKET_SIZE:
       return isAsc ? '0-9' : '9-0';
+    case SortType.SCALED:
+      return isAsc ? '1:1' : 'Diff'; // 1:1 for identical first, Diff for different first
     case SortType.SELECTED:
       return isAsc ? '✓' : '○'; // ✓ for selected first, ○ for unselected first
     default:
@@ -208,6 +209,10 @@ export const AssetSelectionControls = ({
     {
       value: SortType.BUCKET_SIZE,
       label: 'Bucket Size',
+    },
+    {
+      value: SortType.SCALED,
+      label: 'Scaled',
     },
     {
       value: SortType.SELECTED,

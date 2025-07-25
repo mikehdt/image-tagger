@@ -1,6 +1,11 @@
-import { type ImageAsset, TagState } from '../store/assets';
+import {
+  type ImageAsset,
+  SortDirection,
+  SortType,
+  TagState,
+} from '../store/assets';
 import { hasState } from '../store/assets/utils';
-import { FilterMode, SortDirection, SortType } from '../store/filters';
+import { FilterMode } from '../store/filters';
 import { composeDimensions } from './helpers';
 
 // Define an interface that extends ImageAsset with originalIndex
@@ -278,6 +283,54 @@ const applySorting = (
           comparison = a.bucket.width - b.bucket.width;
         } else {
           comparison = a.bucket.height - b.bucket.height;
+        }
+        break;
+
+      case SortType.SCALED:
+        // Sort by scaling relationship between image and bucket
+        // Priority: 1. Identical size, 2. Same aspect ratio, 3. Different aspect ratio
+        // Within each category, sort alphabetically by asset name
+
+        // Calculate scaling categories for both assets
+        const getCategoryAndSecondary = (asset: ImageAssetWithIndex) => {
+          const imageDims = asset.dimensions;
+          const bucketDims = asset.bucket;
+
+          // Check if dimensions are identical
+          if (
+            imageDims.width === bucketDims.width &&
+            imageDims.height === bucketDims.height
+          ) {
+            return { category: 0, secondary: asset.fileId }; // Identical - highest priority
+          }
+
+          // Check if aspect ratios are identical (within small tolerance for floating point)
+          const imageAspectRatio = imageDims.width / imageDims.height;
+          const bucketAspectRatio = bucketDims.width / bucketDims.height;
+          const aspectRatioTolerance = 0.001;
+
+          if (
+            Math.abs(imageAspectRatio - bucketAspectRatio) <
+            aspectRatioTolerance
+          ) {
+            return { category: 1, secondary: asset.fileId }; // Same aspect ratio - medium priority
+          }
+
+          // Different aspect ratio - lowest priority
+          return { category: 2, secondary: asset.fileId };
+        };
+
+        const aCategoryData = getCategoryAndSecondary(a);
+        const bCategoryData = getCategoryAndSecondary(b);
+
+        // First compare by category
+        if (aCategoryData.category !== bCategoryData.category) {
+          comparison = aCategoryData.category - bCategoryData.category;
+        } else {
+          // Within the same category, sort alphabetically by filename
+          comparison = aCategoryData.secondary.localeCompare(
+            bCategoryData.secondary,
+          );
         }
         break;
 

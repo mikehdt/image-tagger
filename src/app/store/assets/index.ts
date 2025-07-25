@@ -3,12 +3,14 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import { setupExtraReducers } from './extraReducers';
 import { coreReducers } from './reducers';
-import { ImageAssets, IoState } from './types';
+import { ImageAssets, IoState, SortDirection, SortType } from './types';
 
 const initialState: ImageAssets = {
   ioState: IoState.INITIAL,
   ioMessage: undefined,
   images: [],
+  sortType: SortType.NAME,
+  sortDirection: SortDirection.ASC,
 };
 
 const assetsSlice = createSlice({
@@ -24,6 +26,8 @@ const assetsSlice = createSlice({
     selectImageCount: (state) => state.images.length,
     selectSaveProgress: (state) => state.saveProgress,
     selectLoadProgress: (state) => state.loadProgress,
+    selectSortType: (state) => state.sortType,
+    selectSortDirection: (state) => state.sortDirection,
   },
 });
 
@@ -37,6 +41,9 @@ export const {
   reorderTags,
   resetTags,
   markFilterTagsToDelete,
+  setSortType,
+  setSortDirection,
+  toggleSortDirection,
 } = assetsSlice.actions;
 
 // Export the selectors from the slice
@@ -47,6 +54,8 @@ export const {
   selectImageCount,
   selectSaveProgress,
   selectLoadProgress,
+  selectSortType,
+  selectSortDirection,
 } = assetsSlice.selectors;
 
 // Main exports for assets module
