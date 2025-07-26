@@ -14,6 +14,7 @@ import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { selectSelectedAssets } from '../store/selection';
 import { getSortCategory, sortCategories } from '../utils/category-utils';
+import { scrollToAnchor } from '../utils/scroll-to-anchor';
 import { useAnchorScrolling } from '../utils/use-anchor-scrolling';
 
 // Define interface for asset with pagination index
@@ -102,10 +103,13 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           <div key={category} className="asset-group">
             <div
               id={anchorId}
-              className="sticky top-24 z-10 -mx-2 scroll-mt-24 rounded-sm border-b border-b-slate-700/80 bg-slate-500/60 px-4 py-1 text-sm font-medium text-white backdrop-blur-md text-shadow-slate-700 text-shadow-xs"
+              className="sticky top-24 z-10 -mx-2 cursor-pointer scroll-mt-24 rounded-sm border-b border-b-slate-700/80 bg-slate-500/60 px-4 py-1 text-sm font-medium text-white backdrop-blur-md transition-colors text-shadow-slate-700 text-shadow-xs hover:bg-slate-600/70"
+              onClick={() => scrollToAnchor(anchorId)}
+              title="Click to scroll to top of this section"
             >
               {category}
             </div>
+
             {assets.map((asset) => {
               // Calculate the filtered index based on current page and position in filtered results
               const start =

@@ -12,6 +12,7 @@ import { selectPaginationSize } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssets } from '@/app/store/selection';
 import { getCategoriesWithPageInfo } from '@/app/utils/category-utils';
+import { scrollToAnchor } from '@/app/utils/scroll-to-anchor';
 
 interface CategoryNavigationProps {
   currentPage: number;
@@ -60,27 +61,8 @@ export const CategoryNavigation = ({
       handleClose();
 
       if (page === currentPage) {
-        // Same page - scroll to anchor with manual offset AND update URL hash
-        const element = document.getElementById(anchorId);
-        if (element) {
-          // Try to find the parent container (asset-group) for better positioning
-          const container = element.parentElement;
-          const targetElement = container || element;
-
-          const headerOffset = 96; // 6rem = 96px (matching top-24)
-          const elementPosition =
-            targetElement.getBoundingClientRect().top + window.pageYOffset;
-          const offsetPosition = elementPosition - headerOffset;
-
-          // Update the URL hash without triggering navigation
-          const newUrl = `${window.location.pathname}${window.location.search}#${anchorId}`;
-          window.history.replaceState(null, '', newUrl);
-
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth',
-          });
-        }
+        // Same page - scroll to anchor with utility function
+        scrollToAnchor(anchorId);
       } else {
         // Different page - navigate and then scroll
         router.push(`/${page}#${anchorId}`);
@@ -198,6 +180,7 @@ export const CategoryNavigation = ({
               <h3 className="text-sm font-medium text-slate-700">
                 Jump to Category
               </h3>
+
               <button
                 onClick={handleClose}
                 className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200"
@@ -228,12 +211,11 @@ export const CategoryNavigation = ({
                           : 'text-slate-700'
                       }`}
                     >
-                      <span
-                        className={`truncate ${isFirstOccurrence ? 'font-medium' : 'font-normal'}`}
-                      >
+                      <span className="truncate">
                         {category}
+
                         {!isFirstOccurrence && (
-                          <span className="ml-1 text-xs text-slate-500">
+                          <span className="ml-2 text-xs text-slate-400">
                             (continued)
                           </span>
                         )}
