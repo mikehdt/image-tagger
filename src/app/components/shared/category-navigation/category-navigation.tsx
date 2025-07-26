@@ -23,7 +23,10 @@ export const CategoryNavigation = ({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [renderList, setRenderList] = useState(false);
-  const [panelPosition, setPanelPosition] = useState({ right: false, left: 0 });
+  const [panelPosition, setPanelPosition] = useState({
+    alignRight: false,
+    left: 0,
+  });
   const [isPositioned, setIsPositioned] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -57,10 +60,22 @@ export const CategoryNavigation = ({
       handleClose();
 
       if (page === currentPage) {
-        // Same page - just scroll to anchor (scroll-margin-top CSS will handle offset)
+        // Same page - scroll to anchor with manual offset
         const element = document.getElementById(anchorId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Try to find the parent container (asset-group) for better positioning
+          const container = element.parentElement;
+          const targetElement = container || element;
+
+          const headerOffset = 96; // 6rem = 96px (matching top-24)
+          const elementPosition =
+            targetElement.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
         }
       } else {
         // Different page - navigate and then scroll
@@ -83,22 +98,18 @@ export const CategoryNavigation = ({
       const rect = containerRef.current.getBoundingClientRect();
       const panelWidth = 256; // w-64 = 16rem = 256px
 
-      // Use right alignment by default (like filter-list)
-      let useRightAlignment = true;
-      let leftPosition = 0;
+      // Default to left-aligned dropdown (left edges of button and panel align)
+      const alignRight = false; // This means we use the left property
+      let leftPosition = 0; // Panel's left edge aligns with button's left edge
 
-      // When right-aligned, the panel's right edge aligns with button's right edge
-      // Check if the panel's left edge would go off-screen to the left
-      const panelLeftEdge = rect.right - panelWidth;
-
-      if (panelLeftEdge < 16) {
-        // Switch to left alignment
-        useRightAlignment = false;
-        leftPosition = 16; // Small padding from left edge
+      // Check if this would put panel off-screen to the right
+      if (rect.left + panelWidth > window.innerWidth - 16) {
+        // Panel would go off-screen, so adjust leftPosition to keep it in bounds
+        leftPosition = window.innerWidth - 16 - panelWidth - rect.left;
       }
 
       setPanelPosition({
-        right: useRightAlignment,
+        alignRight,
         left: leftPosition,
       });
     }
@@ -165,12 +176,12 @@ export const CategoryNavigation = ({
       <div
         ref={panelRef}
         style={{
-          right: panelPosition.right ? 0 : 'auto',
-          left: panelPosition.right ? 'auto' : `${panelPosition.left}px`,
+          left: panelPosition.alignRight ? 'auto' : `${panelPosition.left}px`,
+          right: panelPosition.alignRight ? 0 : 'auto',
           minWidth: '256px',
         }}
         className={`absolute z-20 mt-1 flex max-h-[60vh] w-64 ${
-          panelPosition.right ? 'origin-top-right' : 'origin-top-left'
+          panelPosition.alignRight ? 'origin-top-right' : 'origin-top-left'
         } flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg transition-all duration-150 ease-in-out ${
           isOpen
             ? 'scale-100 opacity-100'
@@ -193,35 +204,46 @@ export const CategoryNavigation = ({
             </div>
 
             <div className="overflow-y-auto">
-              {categoriesWithPageInfo.map(({ category, page }) => {
-                const isCurrentPage = page === currentPage;
-                const anchorId = `category-${category.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+              {categoriesWithPageInfo.map(
+                ({ category, page, isFirstOccurrence }) => {
+                  const isCurrentPage = page === currentPage;
+                  const anchorId = `category-${category.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
 
-                return (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryClick(page, anchorId)}
-                    className={`block w-full border-b border-slate-100 px-4 py-3 text-left text-sm transition-colors hover:bg-slate-50 ${
-                      isCurrentPage
-                        ? 'border-sky-200 bg-sky-50 text-sky-700'
-                        : 'text-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="truncate font-medium">{category}</span>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs ${
-                          isCurrentPage
-                            ? 'bg-sky-100 text-sky-600'
-                            : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        Page {page}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={`${category}-${page}`} // Use both category and page for unique keys
+                      onClick={() => handleCategoryClick(page, anchorId)}
+                      className={`block w-full border-b border-slate-100 px-4 py-3 text-left text-sm transition-colors hover:bg-slate-50 ${
+                        isCurrentPage
+                          ? 'border-sky-200 bg-sky-50 text-sky-700'
+                          : 'text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`truncate ${isFirstOccurrence ? 'font-medium' : 'font-normal'}`}
+                        >
+                          {category}
+                          {!isFirstOccurrence && (
+                            <span className="ml-1 text-xs text-slate-500">
+                              (continued)
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className={`rounded-full px-2 py-1 text-xs ${
+                            isCurrentPage
+                              ? 'bg-sky-100 text-sky-600'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          Page {page}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                },
+              )}
             </div>
           </>
         ) : null}

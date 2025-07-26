@@ -157,6 +157,7 @@ export interface CategoryInfo {
   category: string;
   page: number;
   firstAssetIndex: number;
+  isFirstOccurrence: boolean; // True if this is the first time this category appears
 }
 
 // Function to get all categories with their page information
@@ -166,6 +167,75 @@ export const getCategoriesWithPageInfo = (
   sortDirection: SortDirection,
   selectedAssets: string[],
   paginationSize: number,
+): CategoryInfo[] => {
+  // If showing all on one page, use the simpler original logic
+  if (paginationSize === -1) {
+    return getSimpleCategoriesWithPageInfo(
+      filteredAssets,
+      sortType,
+      sortDirection,
+      selectedAssets,
+    );
+  }
+
+  // Group all assets by category with their indices
+  const categoryGroups: { [key: string]: number[] } = {};
+
+  filteredAssets.forEach((asset, index) => {
+    const category = getSortCategory(asset, sortType, selectedAssets);
+    if (!categoryGroups[category]) {
+      categoryGroups[category] = [];
+    }
+    categoryGroups[category].push(index);
+  });
+
+  // Get sorted category names
+  const sortedCategories = sortCategories(
+    Object.keys(categoryGroups),
+    sortType,
+    sortDirection,
+  );
+
+  // Build a map of which categories appear on which pages
+  const categoriesWithPageInfo: CategoryInfo[] = [];
+  const seenCategories = new Set<string>();
+  let currentIndex = 0;
+
+  for (const category of sortedCategories) {
+    const assetIndices = categoryGroups[category];
+    const categoryStart = currentIndex;
+    const categoryEnd = currentIndex + assetIndices.length - 1;
+
+    // Calculate which pages this category spans
+    const startPage = Math.floor(categoryStart / paginationSize) + 1;
+    const endPage = Math.floor(categoryEnd / paginationSize) + 1;
+
+    // Add an entry for each page this category appears on
+    for (let page = startPage; page <= endPage; page++) {
+      const isFirstOccurrence = !seenCategories.has(category);
+
+      categoriesWithPageInfo.push({
+        category,
+        page,
+        firstAssetIndex: categoryStart,
+        isFirstOccurrence,
+      });
+
+      seenCategories.add(category);
+    }
+
+    currentIndex += assetIndices.length;
+  }
+
+  return categoriesWithPageInfo;
+};
+
+// Simpler version for when all items are on one page
+const getSimpleCategoriesWithPageInfo = (
+  filteredAssets: ImageAsset[],
+  sortType: SortType,
+  sortDirection: SortDirection,
+  selectedAssets: string[],
 ): CategoryInfo[] => {
   // Group all assets by category
   const categoryGroups: { [key: string]: number[] } = {};
@@ -192,15 +262,12 @@ export const getCategoriesWithPageInfo = (
   for (const category of sortedCategories) {
     const assetIndices = categoryGroups[category];
     const firstAssetIndex = currentIndex;
-    const page =
-      paginationSize === -1
-        ? 1
-        : Math.floor(firstAssetIndex / paginationSize) + 1;
 
     categoriesWithPageInfo.push({
       category,
-      page,
+      page: 1,
       firstAssetIndex,
+      isFirstOccurrence: true,
     });
 
     currentIndex += assetIndices.length;

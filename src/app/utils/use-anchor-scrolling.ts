@@ -14,8 +14,19 @@ export const useAnchorScrolling = () => {
         const timeoutId = setTimeout(() => {
           const element = document.getElementById(hash.substring(1));
           if (element) {
-            // Use scrollIntoView - scroll-margin-top CSS will handle the offset
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Try to find the parent container (asset-group) for better positioning
+            const container = element.parentElement;
+            const targetElement = container || element;
+
+            const headerOffset = 96; // 6rem = 96px (matching top-24)
+            const elementPosition =
+              targetElement.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - headerOffset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth',
+            });
           }
         }, 100);
 
