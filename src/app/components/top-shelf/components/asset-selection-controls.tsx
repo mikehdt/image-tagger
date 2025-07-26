@@ -11,7 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { CategoryNavigation } from '@/app/components/shared/category-navigation';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
   selectFilteredAssets,
@@ -68,10 +67,8 @@ const getSortDirectionLabel = (
 
 export const AssetSelectionControls = ({
   selectedAssetsCount,
-  currentPage = 1,
 }: {
   selectedAssetsCount: number;
-  currentPage?: number;
 }) => {
   const dispatch = useAppDispatch();
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -281,10 +278,6 @@ export const AssetSelectionControls = ({
           {getSortDirectionLabel(sortType, sortDirection)}
         </span>
       </Button>
-
-      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
-
-      <CategoryNavigation currentPage={currentPage} />
 
       <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
 

@@ -13,6 +13,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
+import { CategoryNavigation } from '../shared/category-navigation';
 import {
   AssetCounts,
   AssetSelectionControls,
@@ -81,11 +82,10 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
       {/* Main toolbar row */}
       <div className="border-t border-t-white/50 bg-white/80 shadow-md backdrop-blur-md">
         <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
+          <CategoryNavigation currentPage={currentPage} />
+
           <div className="mr-auto!">
-            <AssetSelectionControls
-              selectedAssetsCount={selectedAssetsCount}
-              currentPage={currentPage}
-            />
+            <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
           </div>
 
           <TagActions selectedAssetsCount={selectedAssetsCount} />

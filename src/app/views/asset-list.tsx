@@ -13,7 +13,11 @@ import {
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { selectSelectedAssets } from '../store/selection';
-import { getSortCategory, sortCategories } from '../utils/category-utils';
+import {
+  getCategoryAnchorId,
+  getSortCategory,
+  sortCategories,
+} from '../utils/category-utils';
 import { scrollToAnchor } from '../utils/scroll-to-anchor';
 import { useAnchorScrolling } from '../utils/use-anchor-scrolling';
 
@@ -97,7 +101,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const renderedAssets = useMemo(
     () =>
       groupedAssets.map(({ category, assets }) => {
-        const anchorId = `category-${category.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+        const anchorId = getCategoryAnchorId(category);
 
         return (
           <div key={category} className="asset-group">

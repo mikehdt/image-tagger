@@ -275,3 +275,10 @@ const getSimpleCategoriesWithPageInfo = (
 
   return categoriesWithPageInfo;
 };
+
+/**
+ * Generate a consistent anchor ID for a category name
+ */
+export const getCategoryAnchorId = (category: string): string => {
+  return `category-${category.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+};
