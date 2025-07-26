@@ -23,7 +23,11 @@ import {
   TagActions,
 } from './components';
 
-export const TopShelf = () => {
+type TopShelfProps = {
+  currentPage?: number;
+};
+
+export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
   const dispatch = useAppDispatch();
 
   // Filter selectors (only keeping ones needed for useEffects)
@@ -75,7 +79,10 @@ export const TopShelf = () => {
       <div className="border-t border-t-white/50 bg-white/80 shadow-md backdrop-blur-md">
         <div className="mx-auto flex h-12 max-w-400 items-center space-x-2 px-4 text-sm">
           <div className="mr-auto!">
-            <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
+            <AssetSelectionControls
+              selectedAssetsCount={selectedAssetsCount}
+              currentPage={currentPage}
+            />
           </div>
 
           <TagActions selectedAssetsCount={selectedAssetsCount} />

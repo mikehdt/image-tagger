@@ -44,7 +44,7 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <main className="relative mx-auto min-h-screen max-w-400 px-4 pt-30 pb-20">
-      {showShelves && <TopShelf />}
+      {showShelves && <TopShelf currentPage={currentPage} />}
       {children}
       {showShelves && (
         <BottomShelf currentPage={currentPage} totalPages={totalPages} />

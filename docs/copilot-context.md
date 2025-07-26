@@ -47,6 +47,7 @@ An image tagging application that allows users to:
 
 - Feature-based component organization
 - Path aliases `@/app/...` for clean imports, at most two `../../` is allowable
+- Main development environment is Windows, so when needed favour Powershell commands etc over Unix/BSD tooling
 
 ## Performance Considerations
 

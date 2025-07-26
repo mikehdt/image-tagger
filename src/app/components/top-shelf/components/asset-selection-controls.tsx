@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { CategoryNavigation } from '@/app/components/shared/category-navigation';
+import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
   selectFilteredAssets,
   selectHasScaledAssets,
@@ -38,7 +40,6 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
-import { Dropdown, DropdownItem } from '../../shared/dropdown';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
 /**
@@ -67,8 +68,10 @@ const getSortDirectionLabel = (
 
 export const AssetSelectionControls = ({
   selectedAssetsCount,
+  currentPage = 1,
 }: {
   selectedAssetsCount: number;
+  currentPage?: number;
 }) => {
   const dispatch = useAppDispatch();
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -247,6 +250,10 @@ export const AssetSelectionControls = ({
           <EyeIcon className="w-4" />
         )}
       </Button>
+
+      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
+
+      <CategoryNavigation currentPage={currentPage} />
 
       <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
 
