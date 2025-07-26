@@ -18,8 +18,8 @@ import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combin
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
-import { AddTagsModal } from './add-tags-modal';
-import { EditTagsModal } from './edit-tags-modal';
+import { AddTagsModal } from '../modals/add-tags-modal';
+import { EditTagsModal } from '../modals/edit-tags-modal';
 
 interface TagActionsProps {
   selectedAssetsCount: number;
