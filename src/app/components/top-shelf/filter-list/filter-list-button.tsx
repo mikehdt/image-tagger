@@ -1,8 +1,8 @@
 import { QueueListIcon } from '@heroicons/react/24/outline';
 import { memo, useCallback, useRef, useState } from 'react';
 
-import { FilterList } from '../../filter-list/filter-list';
 import { Button } from '../../shared/button';
+import { FilterList } from '../filter-list/filter-list';
 
 const FilterListButtonComponent = () => {
   const tagButtonRef = useRef<HTMLDivElement>(null);
@@ -20,13 +20,12 @@ const FilterListButtonComponent = () => {
     <div className="relative" ref={tagButtonRef}>
       <Button
         variant="toggle"
+        size="large"
         isPressed={isTagPanelOpen}
         onClick={onToggleTagPanel}
         title="Show filters"
       >
         <QueueListIcon className="w-4" />
-
-        <span className="ml-2 max-lg:hidden">List</span>
       </Button>
 
       <FilterList

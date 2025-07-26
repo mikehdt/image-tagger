@@ -162,9 +162,9 @@ const AssetComponent = ({
           className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-slate-300 transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
           onClick={toggleImageZoom}
         >
-          <span className="relative object-contain">
+          <span className="relative">
             <Image
-              className={`h-auto w-auto ${!imageZoom && 'max-h-64'}`}
+              className={`w-auto object-contain ${!imageZoom && 'max-h-64'}`}
               src={imageUrl}
               width={dimensions.width}
               height={dimensions.height}

@@ -29,7 +29,7 @@ const ProjectInfoComponent = () => {
           className="h-6 w-6 rounded-full object-cover"
         />
       ) : (
-        <CubeIcon className="h-4 w-4 p-1 text-slate-500" />
+        <CubeIcon className="h-6 w-6 rounded-full bg-slate-200 p-1 text-slate-500" />
       )}
       <span className="font-medium text-slate-700">{projectName}</span>
     </div>
