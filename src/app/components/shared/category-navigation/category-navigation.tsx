@@ -1,4 +1,4 @@
-import { QueueListIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { NumberedListIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -60,7 +60,7 @@ export const CategoryNavigation = ({
       handleClose();
 
       if (page === currentPage) {
-        // Same page - scroll to anchor with manual offset
+        // Same page - scroll to anchor with manual offset AND update URL hash
         const element = document.getElementById(anchorId);
         if (element) {
           // Try to find the parent container (asset-group) for better positioning
@@ -71,6 +71,10 @@ export const CategoryNavigation = ({
           const elementPosition =
             targetElement.getBoundingClientRect().top + window.pageYOffset;
           const offsetPosition = elementPosition - headerOffset;
+
+          // Update the URL hash without triggering navigation
+          const newUrl = `${window.location.pathname}${window.location.search}#${anchorId}`;
+          window.history.replaceState(null, '', newUrl);
 
           window.scrollTo({
             top: offsetPosition,
@@ -157,20 +161,20 @@ export const CategoryNavigation = ({
   }, [isOpen, handleClose]);
 
   // Don't render if no categories or only one category
-  if (categoriesWithPageInfo.length <= 1) {
-    return null;
-  }
+  // if (categoriesWithPageInfo.length <= 1) {
+  //   return null;
+  // }
 
   return (
     <div ref={containerRef} className="relative">
       <Button
         onClick={handleToggle}
-        variant="ghost"
+        variant="toggle"
         size="medium"
         title="Jump to category"
         isPressed={isOpen}
       >
-        <QueueListIcon className="w-4" />
+        <NumberedListIcon className="w-4" />
       </Button>
 
       <div
@@ -190,61 +194,64 @@ export const CategoryNavigation = ({
       >
         {renderList ? (
           <>
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 p-3">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 p-2">
               <h3 className="text-sm font-medium text-slate-700">
                 Jump to Category
               </h3>
               <button
                 onClick={handleClose}
-                className="rounded p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-700"
+                className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200"
                 title="Close"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="overflow-y-auto">
+            <ul className="divide-y divide-slate-100">
               {categoriesWithPageInfo.map(
-                ({ category, page, isFirstOccurrence }) => {
+                ({ category, page, isFirstOccurrence }, index) => {
                   const isCurrentPage = page === currentPage;
                   const anchorId = `category-${category.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
 
+                  // Show page number only when it changes from the previous item
+                  const showPageNumber =
+                    index === 0 ||
+                    categoriesWithPageInfo[index - 1].page !== page;
+
                   return (
-                    <button
+                    <li
                       key={`${category}-${page}`} // Use both category and page for unique keys
                       onClick={() => handleCategoryClick(page, anchorId)}
-                      className={`block w-full border-b border-slate-100 px-4 py-3 text-left text-sm transition-colors hover:bg-slate-50 ${
+                      className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors hover:bg-blue-50 ${
                         isCurrentPage
                           ? 'border-sky-200 bg-sky-50 text-sky-700'
                           : 'text-slate-700'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
+                      <span
+                        className={`truncate ${isFirstOccurrence ? 'font-medium' : 'font-normal'}`}
+                      >
+                        {category}
+                        {!isFirstOccurrence && (
+                          <span className="ml-1 text-xs text-slate-500">
+                            (continued)
+                          </span>
+                        )}
+                      </span>
+                      {showPageNumber && (
                         <span
-                          className={`truncate ${isFirstOccurrence ? 'font-medium' : 'font-normal'}`}
-                        >
-                          {category}
-                          {!isFirstOccurrence && (
-                            <span className="ml-1 text-xs text-slate-500">
-                              (continued)
-                            </span>
-                          )}
-                        </span>
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs ${
-                            isCurrentPage
-                              ? 'bg-sky-100 text-sky-600'
-                              : 'bg-slate-100 text-slate-500'
+                          className={`text-xs ${
+                            isCurrentPage ? 'text-sky-600' : 'text-slate-500'
                           }`}
                         >
                           Page {page}
                         </span>
-                      </div>
-                    </button>
+                      )}
+                    </li>
                   );
                 },
               )}
-            </div>
+            </ul>
           </>
         ) : null}
       </div>

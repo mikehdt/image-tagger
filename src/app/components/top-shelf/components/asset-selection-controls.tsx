@@ -253,10 +253,6 @@ export const AssetSelectionControls = ({
 
       <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
 
-      <CategoryNavigation currentPage={currentPage} />
-
-      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
-
       <Dropdown
         items={sortTypeItems}
         selectedValue={sortType}
@@ -285,6 +281,10 @@ export const AssetSelectionControls = ({
           {getSortDirectionLabel(sortType, sortDirection)}
         </span>
       </Button>
+
+      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
+
+      <CategoryNavigation currentPage={currentPage} />
 
       <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
 

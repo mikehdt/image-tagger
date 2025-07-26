@@ -20,10 +20,9 @@ const FilterListButtonComponent = () => {
     <div className="relative" ref={tagButtonRef}>
       <Button
         variant="toggle"
-        size="large"
         isPressed={isTagPanelOpen}
         onClick={onToggleTagPanel}
-        title="Show tag summary"
+        title="Show filters"
       >
         <QueueListIcon className="w-4" />
 
