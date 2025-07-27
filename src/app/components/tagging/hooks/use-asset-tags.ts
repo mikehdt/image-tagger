@@ -6,10 +6,10 @@ import {
   reorderTags,
   resetTags,
   saveAsset,
-  selectAllTags,
+  selectAssetTagCounts,
   selectOrderedTagsWithStatus,
 } from '@/app/store/assets';
-import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
+import { selectFilterTagsSet, toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 /**
@@ -28,8 +28,14 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
  */
 export const useAssetTags = (assetId: string) => {
   const dispatch = useAppDispatch();
-  const globalTagList = useAppSelector(selectAllTags);
-  const filterTags = useAppSelector(selectFilterTags);
+
+  // Use optimized selector for asset-specific tag counts instead of global
+  const assetTagCounts = useAppSelector((state) =>
+    selectAssetTagCounts(state, assetId),
+  );
+
+  // Use memoized filter tags set
+  const filterTagsSet = useAppSelector(selectFilterTagsSet);
 
   // Memoize the selector to avoid unnecessary re-renders
   const orderedTagsWithStatus = useAppSelector((state) =>
@@ -60,9 +66,6 @@ export const useAssetTags = (assetId: string) => {
       ),
     [orderedTagsWithStatus],
   );
-
-  // Create a Set from filterTags for efficient lookups
-  const filterTagsSet = useMemo(() => new Set(filterTags), [filterTags]);
 
   // Function to handle tag toggle (used for filtering)
   const toggleTag = useCallback(
@@ -135,7 +138,7 @@ export const useAssetTags = (assetId: string) => {
   return {
     tagList,
     tagsByStatus,
-    globalTagList,
+    globalTagList: assetTagCounts,
     filterTagsSet,
     addNewTag,
     toggleTag,

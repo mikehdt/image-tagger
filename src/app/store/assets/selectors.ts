@@ -228,3 +228,33 @@ export const selectFilterTagsDeleteState = createSelector(
     };
   },
 );
+
+// Optimized selector for asset-specific tag counts
+// Only recalculates counts for tags actually used by the specific asset
+export const selectAssetTagCounts = createSelector(
+  [selectAllImages, (_, assetId: string) => assetId],
+  (imageAssets, assetId) => {
+    const asset = imageAssets.find((img) => img.fileId === assetId);
+    if (!asset || !imageAssets?.length) return {};
+
+    const assetTagCounts: KeyedCountList = {};
+
+    // Only calculate counts for tags that exist on this specific asset
+    const assetTags = new Set(asset.tagList);
+
+    // Process all images and count only the tags used by this asset
+    for (const img of imageAssets) {
+      for (const tag of img.tagList) {
+        // Only count if this tag is used by the target asset and isn't marked for deletion
+        if (
+          assetTags.has(tag) &&
+          !hasState(img.tagStatus[tag], TagState.TO_DELETE)
+        ) {
+          assetTagCounts[tag] = (assetTagCounts[tag] || 0) + 1;
+        }
+      }
+    }
+
+    return assetTagCounts;
+  },
+);

@@ -25,6 +25,7 @@ import { useAnchorScrolling } from '../utils/use-anchor-scrolling';
 interface AssetWithPaginationIndex extends ImageAsset {
   originalIndex: number;
   paginatedIndex: number;
+  filteredIndex: number; // Pre-calculated filtered index for display
 }
 
 type AssetListProps = {
@@ -67,10 +68,17 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const groupedAssets = useMemo(() => {
     const groups: { [key: string]: AssetWithPaginationIndex[] } = {};
 
+    // Pre-calculate the start index for filtered index calculation
+    const startIndex =
+      (currentPage - 1) * (paginationSize === -1 ? 0 : paginationSize);
+
     paginatedAssets.forEach((asset, index) => {
       const assetWithIndex: AssetWithPaginationIndex = {
         ...asset,
         paginatedIndex: index,
+        // Pre-calculate filtered index to avoid doing it in render
+        originalIndex: asset.originalIndex,
+        filteredIndex: startIndex + index + 1, // 1-based index for display
       };
       const category = getSortCategory(
         assetWithIndex,
@@ -95,7 +103,14 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       category,
       assets: groups[category],
     }));
-  }, [paginatedAssets, sortType, sortDirection, selectedAssets]);
+  }, [
+    paginatedAssets,
+    sortType,
+    sortDirection,
+    selectedAssets,
+    currentPage,
+    paginationSize,
+  ]);
 
   // Memoize rendered assets to prevent unnecessary re-renders
   const renderedAssets = useMemo(
@@ -115,18 +130,12 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
             </div>
 
             {assets.map((asset) => {
-              // Calculate the filtered index based on current page and position in filtered results
-              const start =
-                (currentPage - 1) *
-                (paginationSize === -1 ? 0 : paginationSize);
-              const filteredIndex = start + asset.paginatedIndex + 1; // 1-based index for display
-
               return (
                 <Asset
                   key={asset.fileId}
                   assetId={asset.fileId}
                   assetNumber={asset.originalIndex}
-                  filteredIndex={filteredIndex}
+                  filteredIndex={asset.filteredIndex}
                   fileExtension={asset.fileExtension}
                   dimensions={asset.dimensions}
                   bucket={asset.bucket}
@@ -138,7 +147,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           </div>
         );
       }),
-    [groupedAssets, currentPage, paginationSize],
+    [groupedAssets],
   );
 
   return filteredAssets.length ? (

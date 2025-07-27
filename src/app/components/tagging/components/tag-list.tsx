@@ -42,6 +42,8 @@ export const TagList = ({ className = '' }: TagListProps) => {
               nonInteractive={props.nonInteractive}
               tagState={props.tagState}
               count={props.count}
+              isHighlighted={props.isHighlighted}
+              isBeingEdited={props.isBeingEdited}
             />
           );
         })}

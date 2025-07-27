@@ -6,11 +6,12 @@ import type { RootState } from '../';
 export const selectSelectedAssets = (state: RootState) =>
   state.selection.selectedAssets;
 
-// Derived selectors
-export const selectAssetIsSelected = (assetId: string) =>
-  createSelector([selectSelectedAssets], (selectedAssets) =>
-    selectedAssets.includes(assetId),
-  );
+// Optimized selector for checking if a specific asset is selected
+// This avoids creating new selector instances per asset
+export const selectAssetIsSelected = createSelector(
+  [selectSelectedAssets, (_, assetId: string) => assetId],
+  (selectedAssets, assetId) => selectedAssets.includes(assetId),
+);
 
 export const selectSelectedAssetsCount = createSelector(
   [selectSelectedAssets],

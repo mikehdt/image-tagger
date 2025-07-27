@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback, useMemo } from 'react';
 
 import { addTag, deleteTag, editTag } from '@/app/store/assets';
 import { useAppDispatch } from '@/app/store/hooks';
@@ -166,15 +166,28 @@ export const useTagActions = ({
     [externalToggleTag],
   );
 
-  return {
-    startEditingTag,
-    cancelEditingTag,
-    saveEditingTag,
-    handleAddTag,
-    handleDeleteTag,
-    handleEditValueChange,
-    handleInputChange,
-    handleCancelAdd,
-    handleToggleTag,
-  };
+  return useMemo(
+    () => ({
+      startEditingTag,
+      cancelEditingTag,
+      saveEditingTag,
+      handleAddTag,
+      handleDeleteTag,
+      handleEditValueChange,
+      handleInputChange,
+      handleCancelAdd,
+      handleToggleTag,
+    }),
+    [
+      startEditingTag,
+      cancelEditingTag,
+      saveEditingTag,
+      handleAddTag,
+      handleDeleteTag,
+      handleEditValueChange,
+      handleInputChange,
+      handleCancelAdd,
+      handleToggleTag,
+    ],
+  );
 };

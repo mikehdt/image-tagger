@@ -54,7 +54,9 @@ const AssetComponent = ({
   );
 
   const dispatch = useAppDispatch();
-  const isSelected = useAppSelector(selectAssetIsSelected(assetId));
+  const isSelected = useAppSelector((state) =>
+    selectAssetIsSelected(state, assetId),
+  );
   const globalShowCropVisualization = useAppSelector(
     selectShowCropVisualization,
   );
@@ -201,4 +203,41 @@ const AssetComponent = ({
   );
 };
 
-export const Asset = memo(AssetComponent);
+// Custom comparison function for memo to avoid re-renders when object props have same values
+const assetPropsAreEqual = (
+  prevProps: AssetProps,
+  nextProps: AssetProps,
+): boolean => {
+  // Check primitive props
+  if (
+    prevProps.assetId !== nextProps.assetId ||
+    prevProps.fileExtension !== nextProps.fileExtension ||
+    prevProps.assetNumber !== nextProps.assetNumber ||
+    prevProps.filteredIndex !== nextProps.filteredIndex ||
+    prevProps.ioState !== nextProps.ioState ||
+    prevProps.lastModified !== nextProps.lastModified
+  ) {
+    return false;
+  }
+
+  // Check dimensions object
+  if (
+    prevProps.dimensions.width !== nextProps.dimensions.width ||
+    prevProps.dimensions.height !== nextProps.dimensions.height
+  ) {
+    return false;
+  }
+
+  // Check bucket object
+  if (
+    prevProps.bucket.width !== nextProps.bucket.width ||
+    prevProps.bucket.height !== nextProps.bucket.height ||
+    prevProps.bucket.aspectRatio !== nextProps.bucket.aspectRatio
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+export const Asset = memo(AssetComponent, assetPropsAreEqual);

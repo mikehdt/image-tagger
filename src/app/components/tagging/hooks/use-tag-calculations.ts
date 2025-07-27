@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 /**
  * Hook for tag-related calculations
@@ -101,11 +101,20 @@ export const useTagCalculations = ({
     [filterTagsSet],
   );
 
-  return {
-    isDuplicate,
-    shouldFade,
-    isTagInteractive,
-    isTagBeingEdited,
-    isHighlighted,
-  };
+  return useMemo(
+    () => ({
+      isDuplicate,
+      shouldFade,
+      isTagInteractive,
+      isTagBeingEdited,
+      isHighlighted,
+    }),
+    [
+      isDuplicate,
+      shouldFade,
+      isTagInteractive,
+      isTagBeingEdited,
+      isHighlighted,
+    ],
+  );
 };

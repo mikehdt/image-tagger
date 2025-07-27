@@ -49,6 +49,7 @@ type TaggingContextType = {
       tagState: number;
       count: number;
       isHighlighted: boolean;
+      isBeingEdited: boolean;
     }
   >;
 };
@@ -117,6 +118,7 @@ export const TaggingProvider = ({
         tagState: number;
         count: number;
         isHighlighted: boolean;
+        isBeingEdited: boolean; // Pre-compute this too
       }
     > = {};
 
@@ -127,13 +129,14 @@ export const TaggingProvider = ({
         tagState: tagsByStatus[tagName] || 0,
         count: globalTagList[tagName] || 0,
         isHighlighted: calculations.isHighlighted(tagName),
+        isBeingEdited: calculations.isTagBeingEdited(tagName),
       };
     });
 
     return props;
   }, [tagList, calculations, tagsByStatus, globalTagList]);
 
-  // Combine all values into a single context value
+  // Combine all values into a single context value - avoid spreading objects to reduce re-renders
   const contextValue = useMemo(
     () => ({
       // Data
@@ -149,11 +152,23 @@ export const TaggingProvider = ({
       isEditing,
       setNewTagInput,
 
-      // Calculations
-      ...calculations,
+      // Calculations - individual functions instead of spreading object
+      isDuplicate: calculations.isDuplicate,
+      isTagBeingEdited: calculations.isTagBeingEdited,
+      shouldFade: calculations.shouldFade,
+      isTagInteractive: calculations.isTagInteractive,
+      isHighlighted: calculations.isHighlighted,
 
-      // Actions
-      ...actions,
+      // Actions - individual functions instead of spreading object
+      startEditingTag: actions.startEditingTag,
+      cancelEditingTag: actions.cancelEditingTag,
+      saveEditingTag: actions.saveEditingTag,
+      handleAddTag: actions.handleAddTag,
+      handleDeleteTag: actions.handleDeleteTag,
+      handleEditValueChange: actions.handleEditValueChange,
+      handleInputChange: actions.handleInputChange,
+      handleCancelAdd: actions.handleCancelAdd,
+      handleToggleTag: actions.handleToggleTag,
 
       // Pre-calculated props
       tagProps,
@@ -168,8 +183,20 @@ export const TaggingProvider = ({
       editingTagName,
       isEditing,
       setNewTagInput,
-      calculations,
-      actions,
+      calculations.isDuplicate,
+      calculations.isTagBeingEdited,
+      calculations.shouldFade,
+      calculations.isTagInteractive,
+      calculations.isHighlighted,
+      actions.startEditingTag,
+      actions.cancelEditingTag,
+      actions.saveEditingTag,
+      actions.handleAddTag,
+      actions.handleDeleteTag,
+      actions.handleEditValueChange,
+      actions.handleInputChange,
+      actions.handleCancelAdd,
+      actions.handleToggleTag,
       tagProps,
     ],
   );
@@ -188,4 +215,23 @@ export const useTaggingContext = () => {
     throw new Error('useTaggingContext must be used within a TaggingProvider');
   }
   return context;
+};
+
+// Optimized hook for SortableTag that only returns what it needs
+export const useTagActions = () => {
+  const context = useContext(TaggingContext);
+  if (context === undefined) {
+    throw new Error('useTagActions must be used within a TaggingProvider');
+  }
+
+  return {
+    isDuplicate: context.isDuplicate,
+    editTagValue: context.editTagValue,
+    handleEditValueChange: context.handleEditValueChange,
+    startEditingTag: context.startEditingTag,
+    saveEditingTag: context.saveEditingTag,
+    cancelEditingTag: context.cancelEditingTag,
+    handleDeleteTag: context.handleDeleteTag,
+    handleToggleTag: context.handleToggleTag,
+  };
 };

@@ -41,3 +41,9 @@ export const selectFilterCount = createSelector(
       filterExtensions.length,
   }),
 );
+
+// Memoized selector for filter tags as a Set to avoid array recreation
+export const selectFilterTagsSet = createSelector(
+  [selectFilterTags],
+  (filterTags) => new Set(filterTags),
+);

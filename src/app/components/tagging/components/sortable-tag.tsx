@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent, useCallback } from 'react';
 import { memo, useRef } from 'react';
 
-import { useTaggingContext } from '../tagging-context';
+import { useTagActions } from '../tagging-context';
 import { InputTag } from './input-tag';
 import { Tag } from './tag';
 
@@ -15,6 +15,8 @@ type SortableTagProps = {
   nonInteractive: boolean;
   tagState: number;
   count: number;
+  isHighlighted: boolean; // Pre-computed from context
+  isBeingEdited: boolean; // Pre-computed from context
 };
 
 const SortableTagComponent = ({
@@ -24,9 +26,10 @@ const SortableTagComponent = ({
   nonInteractive,
   tagState,
   count,
+  isHighlighted,
+  isBeingEdited,
 }: SortableTagProps) => {
   const {
-    isTagBeingEdited,
     isDuplicate,
     editTagValue,
     handleEditValueChange,
@@ -35,10 +38,9 @@ const SortableTagComponent = ({
     cancelEditingTag,
     handleDeleteTag,
     handleToggleTag,
-    isHighlighted,
-  } = useTaggingContext();
+  } = useTagActions();
 
-  const isEditing = isTagBeingEdited(tagName);
+  const isEditing = isBeingEdited;
 
   const {
     attributes,
@@ -162,7 +164,7 @@ const SortableTagComponent = ({
           tagName={tagName}
           tagState={tagState}
           count={count}
-          highlight={isHighlighted(tagName)}
+          highlight={isHighlighted}
           fade={fade}
           nonInteractive={nonInteractive}
           onToggleTag={onHandleToggleTag}
@@ -175,4 +177,21 @@ const SortableTagComponent = ({
   );
 };
 
-export const SortableTag = memo(SortableTagComponent);
+// Custom comparison function to prevent unnecessary re-renders
+const sortableTagPropsAreEqual = (
+  prevProps: SortableTagProps,
+  nextProps: SortableTagProps,
+): boolean => {
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.tagName === nextProps.tagName &&
+    prevProps.fade === nextProps.fade &&
+    prevProps.nonInteractive === nextProps.nonInteractive &&
+    prevProps.tagState === nextProps.tagState &&
+    prevProps.count === nextProps.count &&
+    prevProps.isHighlighted === nextProps.isHighlighted &&
+    prevProps.isBeingEdited === nextProps.isBeingEdited
+  );
+};
+
+export const SortableTag = memo(SortableTagComponent, sortableTagPropsAreEqual);
