@@ -1,7 +1,8 @@
 import { memo } from 'react';
 
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
-import { selectHasActiveFilters } from '@/app/store/filters';
+import { selectFilterMode, selectHasActiveFilters } from '@/app/store/filters';
+import { FilterMode } from '@/app/store/filters/types';
 import { useAppSelector } from '@/app/store/hooks';
 
 interface AssetCountsProps {
@@ -11,6 +12,7 @@ interface AssetCountsProps {
 const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const filtersActive = useAppSelector(selectHasActiveFilters);
+  const filterMode = useAppSelector(selectFilterMode);
   const allAssetsCount = useAppSelector(selectImageCount);
 
   const filteredCount = filteredAssets.length;
@@ -22,7 +24,7 @@ const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
         <span className="text-slate-400">images total</span>
       </div>
 
-      {filtersActive ? (
+      {filtersActive && filterMode !== FilterMode.SHOW_ALL ? (
         <div className="flex items-center space-x-1 border-l border-l-slate-300 pl-2">
           <span className="text-emerald-600">{filteredCount}</span>
           <span className="text-slate-400">filtered</span>

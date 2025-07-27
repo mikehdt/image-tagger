@@ -223,16 +223,20 @@ export const applyFilters = ({
       );
     }
 
-    // TAGLESS mode - asset must have no tags at all and meet size/bucket/extension criteria
+    // TAGLESS mode - asset must have no persisted tags and meet size/bucket/extension criteria
     if (filterMode === FilterMode.TAGLESS) {
-      // Check if the asset has no tags (considering only tags not marked for deletion)
-      const activeTags = img.tagList.filter(
-        (tag) => !hasState(img.tagStatus[tag], TagState.TO_DELETE),
+      // Check if the asset has no persisted tags (only TO_ADD or TO_DELETE tags are allowed)
+      const persistedTags = img.tagList.filter(
+        (tag) =>
+          !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
+          !hasState(img.tagStatus[tag], TagState.TO_ADD),
       );
-      const hasNoTags = activeTags.length === 0;
+      const hasNoPersistedTags = persistedTags.length === 0;
 
       // Size, bucket, and extension filters are still combined with AND logic
-      return hasNoTags && sizeMatches && bucketMatches && extensionMatches;
+      return (
+        hasNoPersistedTags && sizeMatches && bucketMatches && extensionMatches
+      );
     }
 
     // This should never happen if using enum correctly

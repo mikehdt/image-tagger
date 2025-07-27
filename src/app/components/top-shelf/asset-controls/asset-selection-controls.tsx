@@ -12,11 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
-import {
-  selectFilteredAssets,
-  selectHasScaledAssets,
-  selectImageCount,
-} from '@/app/store/assets';
+import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import {
   selectSortDirection,
   selectSortType,
@@ -81,13 +77,19 @@ export const AssetSelectionControls = ({
   const sortDirection = useAppSelector(selectSortDirection);
 
   const showCropVisualization = useAppSelector(selectShowCropVisualization);
-  const hasScaledAssets = useAppSelector(selectHasScaledAssets);
 
   const handleToggleCropVisualization = () => {
     dispatch(toggleCropVisualization());
   };
 
-  const handleClearSelection = () => dispatch(clearSelection());
+  const handleClearSelection = () => {
+    dispatch(clearSelection());
+    // If currently sorted by "Selected", switch back to "Name" when clearing selection
+    if (sortType === SortType.SELECTED) {
+      dispatch(setSortType(SortType.NAME));
+      dispatch(setSortDirection(SortDirection.ASC));
+    }
+  };
 
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {
@@ -188,6 +190,14 @@ export const AssetSelectionControls = ({
     };
   }, []);
 
+  // Auto-switch from "Selected" sort to "Name" when no assets are selected
+  useEffect(() => {
+    if (sortType === SortType.SELECTED && selectedAssetsCount === 0) {
+      dispatch(setSortType(SortType.NAME));
+      dispatch(setSortDirection(SortDirection.ASC));
+    }
+  }, [sortType, selectedAssetsCount, dispatch]);
+
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
     if (filteredAssets.length === 0) return true; // No assets to select
@@ -218,7 +228,6 @@ export const AssetSelectionControls = ({
     {
       value: SortType.SCALED,
       label: 'Scaled',
-      disabled: !hasScaledAssets,
     },
     {
       value: SortType.SELECTED,

@@ -98,17 +98,21 @@ export const selectHasModifiedAssets = createSelector(
   },
 );
 
-// Custom selector to check if any assets have no tags
+// Custom selector to check if any assets have no persisted tags
 export const selectHasTaglessAssets = createSelector(
   [selectAllImages],
   (images) => {
-    // Check if any asset has no tags (excluding tags marked for deletion)
-    return images.some((asset: ImageAsset) => {
-      const activeTags = asset.tagList.filter(
-        (tag: string) => !hasState(asset.tagStatus[tag], TagState.TO_DELETE),
+    // Check if any asset has no persisted tags (only TO_ADD or TO_DELETE tags are allowed)
+    const taglessAssets = images.filter((asset: ImageAsset) => {
+      const persistedTags = asset.tagList.filter(
+        (tag: string) =>
+          !hasState(asset.tagStatus[tag], TagState.TO_DELETE) &&
+          !hasState(asset.tagStatus[tag], TagState.TO_ADD),
       );
-      return activeTags.length === 0;
+      return persistedTags.length === 0;
     });
+
+    return taglessAssets.length > 0;
   },
 );
 

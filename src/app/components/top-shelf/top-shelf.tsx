@@ -18,7 +18,7 @@ import { CategoryNavigation } from './category-navigation';
 import { FilterModeControls } from './filter-controls/filter-mode-controls';
 import { FilterListButton } from './filter-list/filter-list-button';
 import { AssetCounts } from './info/asset-counts';
-import { FilterIndicatorsInfo } from './info/filter-indicators-info';
+import { FilterIndicatorsInfo } from './info/filter-counts';
 import { ProjectInfo } from './info/project-info';
 import { TagActions } from './tag-controls/tag-actions';
 

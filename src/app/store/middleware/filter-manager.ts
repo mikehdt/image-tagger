@@ -3,7 +3,7 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { deleteTag, editTag } from '../assets';
+import { addTag, deleteTag, editTag, selectHasTaglessAssets } from '../assets';
 import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
@@ -251,11 +251,34 @@ const cleanupInvalidFilters = (
 const shouldResetFilterMode = (state: RootState): boolean => {
   const { filters } = state;
 
-  // If there are no active filters but the mode is not SHOW_ALL
-  return (
+  // Special cases: modes that should auto-switch when their conditions are no longer met
+  // Check these FIRST before general filter logic
+
+  // TAGLESS mode should switch to SHOW_ALL when no tagless assets exist
+  if (filters.filterMode === FilterMode.TAGLESS) {
+    const hasTaglessAssets = selectHasTaglessAssets(state);
+    if (!hasTaglessAssets) {
+      return true;
+    }
+  }
+
+  // SELECTED_ASSETS mode should switch to SHOW_ALL when no assets are selected
+  if (filters.filterMode === FilterMode.SELECTED_ASSETS) {
+    const selectedAssets = state.selection.selectedAssets;
+    if (selectedAssets.length === 0) {
+      return true;
+    }
+  }
+
+  // General case: If there are no active filters but the mode is not SHOW_ALL
+  if (
     !selectHasActiveFilters({ filters }) &&
     filters.filterMode !== FilterMode.SHOW_ALL
-  );
+  ) {
+    return true;
+  }
+
+  return false;
 };
 
 // Create the listener middleware
@@ -278,13 +301,22 @@ filterManagerMiddleware.startListening({
     const updatedState = listenerApi.getState() as RootState;
 
     // Check if all remaining filters should be cleared (no results after cleanup)
-    if (shouldClearFilters(updatedState)) {
+    // BUT NOT if we're in special modes like TAGLESS - those have their own logic
+    if (
+      updatedState.filters.filterMode !== FilterMode.TAGLESS &&
+      shouldClearFilters(updatedState)
+    ) {
       listenerApi.dispatch(clearFilters());
       return;
     }
 
     // If we made changes but didn't clear all filters, check if we need to reset the filter mode
-    if (hasChanges && shouldResetFilterMode(updatedState)) {
+    // BUT NOT if we're in TAGLESS mode - let the tagless-specific logic handle that
+    if (
+      hasChanges &&
+      updatedState.filters.filterMode !== FilterMode.TAGLESS &&
+      shouldResetFilterMode(updatedState)
+    ) {
       listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
     }
   },
@@ -322,11 +354,15 @@ filterManagerMiddleware.startListening({
     clearFilters,
     editTag,
   ),
-  effect: async (_action, listenerApi) => {
+  effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 
     // Check if we need to reset the filter mode after a filter toggle action
-    if (shouldResetFilterMode(state)) {
+    // BUT NOT if we're in TAGLESS mode - let the tagless-specific logic handle that
+    if (
+      state.filters.filterMode !== FilterMode.TAGLESS &&
+      shouldResetFilterMode(state)
+    ) {
       listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
     }
   },
@@ -350,8 +386,12 @@ filterManagerMiddleware.startListening({
         listenerApi.dispatch(toggleTagFilter(tagName));
 
         // After removing the filter, check if we need to reset filter mode
+        // BUT NOT if we're in TAGLESS mode - let the tagless-specific logic handle that
         const updatedState = listenerApi.getState() as RootState;
-        if (shouldResetFilterMode(updatedState)) {
+        if (
+          updatedState.filters.filterMode !== FilterMode.TAGLESS &&
+          shouldResetFilterMode(updatedState)
+        ) {
           listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
         }
       }
@@ -387,6 +427,31 @@ filterManagerMiddleware.startListening({
         if (shouldResetFilterMode(updatedState)) {
           listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
         }
+      }
+    }
+  },
+});
+
+// Add a listener for tag operations that might affect tagless filter mode
+filterManagerMiddleware.startListening({
+  matcher: isAnyOf(
+    saveAllAssets.fulfilled,
+    saveAsset.fulfilled,
+    addTag,
+    deleteTag,
+    editTag,
+  ),
+  effect: async (action, listenerApi) => {
+    const state = listenerApi.getState() as RootState;
+
+    // Check if we're in TAGLESS mode and no longer have tagless assets
+    if (state.filters.filterMode === FilterMode.TAGLESS) {
+      const hasTaglessAssets = selectHasTaglessAssets(state);
+
+      if (!hasTaglessAssets) {
+        // When leaving TAGLESS mode, always switch to SHOW_ALL
+        // This preserves any existing filters but shows all assets
+        listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
       }
     }
   },
