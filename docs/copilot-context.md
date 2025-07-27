@@ -35,6 +35,7 @@ An image tagging application that allows users to:
   - Follow established file and folder patterns
   - Avoid unnecessary or wildcard exports (exception: Redux slices)
   - Preference named exports over default exports
+  - Only export values and functions that are actually consumed elsewhere
   - Structure reference can be found in subfolder `README.md` files if needed
   - Shared UI components should be placed in the `components/shared` folder
 - **UI Timing**: Prefer `requestAnimationFrame` over `setTimeout`

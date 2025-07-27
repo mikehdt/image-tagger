@@ -26,11 +26,11 @@ const toastsSlice = createSlice({
         (toast) => toast.id !== action.payload,
       );
     },
-    clearAllToasts: (state) => {
-      state.toasts = [];
-    },
+    // clearAllToasts: (state) => {
+    //   state.toasts = [];
+    // },
   },
 });
 
-export const { addToast, removeToast, clearAllToasts } = toastsSlice.actions;
+export const { addToast, removeToast } = toastsSlice.actions;
 export const toastsReducer = toastsSlice.reducer;

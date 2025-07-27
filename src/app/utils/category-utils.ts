@@ -1,13 +1,13 @@
 import { type ImageAsset, SortDirection, SortType } from '@/app/store/assets';
 
 // Constants for sort category names
-export const SCALED_CATEGORIES = {
+const SCALED_CATEGORIES = {
   EQUAL_SIZE: 'Equal Size',
   SAME_ASPECT: 'Scaled (Same Aspect)',
   DIFFERENT: 'Scaled',
 } as const;
 
-export const SELECTED_CATEGORIES = {
+const SELECTED_CATEGORIES = {
   SELECTED: 'Selected',
   NOT_SELECTED: 'Not Selected',
 } as const;
@@ -17,11 +17,11 @@ const SCALED_ORDER = Object.values(SCALED_CATEGORIES);
 const SELECTED_ORDER = Object.values(SELECTED_CATEGORIES);
 
 // Helper functions for type-safe category ordering
-export const getScaledCategoryIndex = (category: string): number => {
+const getScaledCategoryIndex = (category: string): number => {
   return SCALED_ORDER.findIndex((cat) => cat === category);
 };
 
-export const getSelectedCategoryIndex = (category: string): number => {
+const getSelectedCategoryIndex = (category: string): number => {
   return SELECTED_ORDER.findIndex((cat) => cat === category);
 };
 
