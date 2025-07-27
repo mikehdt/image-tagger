@@ -8,6 +8,7 @@ import {
 import { memo, useCallback, useState } from 'react';
 
 import { markFilterTagsToDelete } from '@/app/store/assets';
+import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
 import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -19,6 +20,7 @@ import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combin
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { AddTagsModal } from './add-tags-modal';
+import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';
 
 interface TagActionsProps {
@@ -27,12 +29,12 @@ interface TagActionsProps {
 
 const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isToggled, setIsToggled] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
 
   const dispatch = useAppDispatch();
   const filterTags = useAppSelector(selectFilterTags);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const filterTagsDeleteState = useAppSelector(selectFilterTagsDeleteState);
   const assetsWithActiveFiltersCount = useAppSelector(
     selectAssetsWithActiveFiltersCount,
   );
@@ -56,8 +58,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
 
   const toggleFilterTagsDelete = useCallback(() => {
     handleMarkFilterTagsToDelete(filterTags);
-    setIsToggled(!isToggled);
-  }, [filterTags, isToggled, handleMarkFilterTagsToDelete]);
+  }, [filterTags, handleMarkFilterTagsToDelete]);
 
   const handleAddTag = useCallback(
     (
@@ -137,10 +138,18 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
           variant="ghost"
           onClick={toggleFilterTagsDelete}
           disabled={!filterTags.length}
-          title="Toggle selected tags for deletion"
+          title={
+            filterTagsDeleteState.state === 'all'
+              ? 'Remove TO_DELETE state from selected tags'
+              : filterTagsDeleteState.state === 'mixed'
+                ? 'Mixed state - some tags marked for deletion'
+                : 'Mark selected tags for deletion'
+          }
         >
-          {isToggled ? (
+          {filterTagsDeleteState.state === 'all' ? (
             <DocumentPlusIcon className="w-4" />
+          ) : filterTagsDeleteState.state === 'mixed' ? (
+            <DocumentMixedIcon className="w-4" />
           ) : (
             <DocumentMinusIcon className="w-4" />
           )}

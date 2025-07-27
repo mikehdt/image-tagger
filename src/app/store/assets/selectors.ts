@@ -162,3 +162,69 @@ export const selectFilteredAssets = createSelector(
     });
   },
 );
+
+// Selector to analyze the TO_DELETE state of filter tags
+export const selectFilterTagsDeleteState = createSelector(
+  [selectAllImages, (state: RootState) => state.filters.filterTags],
+  (images, filterTags) => {
+    if (!filterTags.length || !images.length) {
+      return {
+        state: 'none',
+        hasAllToDelete: false,
+        hasSomeToDelete: false,
+        hasMixed: false,
+      };
+    }
+
+    let assetsWithAnyFilterTag = 0;
+    let assetsWithAllFilterTagsToDelete = 0;
+    let assetsWithSomeFilterTagsToDelete = 0;
+
+    for (const asset of images) {
+      // Check if this asset has any of the filter tags
+      const assetFilterTags = filterTags.filter(
+        (tag) => tag in asset.tagStatus,
+      );
+
+      if (assetFilterTags.length === 0) continue;
+
+      assetsWithAnyFilterTag++;
+
+      // Count how many of the filter tags are marked TO_DELETE
+      const toDeleteCount = assetFilterTags.filter((tag) =>
+        hasState(asset.tagStatus[tag], TagState.TO_DELETE),
+      ).length;
+
+      if (toDeleteCount === assetFilterTags.length) {
+        assetsWithAllFilterTagsToDelete++;
+      } else if (toDeleteCount > 0) {
+        assetsWithSomeFilterTagsToDelete++;
+      }
+    }
+
+    const hasAllToDelete =
+      assetsWithAllFilterTagsToDelete === assetsWithAnyFilterTag &&
+      assetsWithAnyFilterTag > 0;
+    const hasSomeToDelete =
+      assetsWithSomeFilterTagsToDelete > 0 ||
+      (assetsWithAllFilterTagsToDelete > 0 &&
+        assetsWithAllFilterTagsToDelete < assetsWithAnyFilterTag);
+    const hasMixed = hasSomeToDelete && !hasAllToDelete;
+
+    let state: 'none' | 'all' | 'mixed';
+    if (hasAllToDelete) {
+      state = 'all';
+    } else if (hasSomeToDelete) {
+      state = 'mixed';
+    } else {
+      state = 'none';
+    }
+
+    return {
+      state,
+      hasAllToDelete,
+      hasSomeToDelete,
+      hasMixed,
+    };
+  },
+);
