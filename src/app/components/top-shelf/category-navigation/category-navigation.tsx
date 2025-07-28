@@ -168,13 +168,11 @@ export const CategoryNavigation = ({
           right: panelPosition.alignRight ? 0 : 'auto',
           minWidth: '256px',
         }}
-        className={`absolute z-20 mt-1 flex max-h-[60vh] w-64 ${
-          panelPosition.alignRight ? 'origin-top-right' : 'origin-top-left'
-        } flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg transition-all duration-150 ease-in-out ${
+        className={`absolute z-20 mt-1 flex max-h-[80vh] w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg transition-all duration-150 ease-in-out ${
           isOpen
             ? 'scale-100 opacity-100'
             : 'pointer-events-none scale-95 opacity-0'
-        }`}
+        } ${panelPosition.alignRight ? 'origin-top-right' : 'origin-top-left'}`}
       >
         {renderList ? (
           <CategoryList

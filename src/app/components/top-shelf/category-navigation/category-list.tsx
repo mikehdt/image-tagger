@@ -29,7 +29,7 @@ export const CategoryList = ({
         </button>
       </div>
 
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-slate-100 overflow-y-auto">
         {categoriesWithPageInfo.map(
           ({ category, page, isFirstOccurrence }, index) => {
             const isCurrentPage = page === currentPage;
