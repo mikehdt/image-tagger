@@ -33,79 +33,102 @@ type KohyaConfig = {
   targetResolution: number; // Base resolution (e.g., 512, 768, 1024)
   stepSize: number; // Increment size (typically 64)
   minSize: number; // Minimum bucket dimension
+  maxSize: number; // Maximum bucket dimension
 };
 
 export const KOHYA_CONFIGS = {
-  SD15: { targetResolution: 512, stepSize: 64, minSize: 256 } as KohyaConfig,
+  SD15: {
+    targetResolution: 512,
+    stepSize: 64,
+    minSize: 256,
+    maxSize: 768,
+  } as KohyaConfig,
   SDXL_768: {
     targetResolution: 768,
     stepSize: 64,
     minSize: 256,
+    maxSize: 1024,
   } as KohyaConfig,
   SDXL_1024: {
     targetResolution: 1024,
     stepSize: 64,
     minSize: 256,
+    maxSize: 2048,
   } as KohyaConfig,
 } as const;
 
 /**
  * Calculate the Kohya SS bucket dimensions for a given image
- * Based on Kohya SS bucketing logic where:
- * - Buckets are in 64-pixel increments
- * - Bucket width + height = targetResolution * 2 (for square max resolution)
- * - Images are assigned to minimize crop loss while preserving area
+ * Based on the actual Kohya SS bucketing logic from make_bucket_resolutions():
+ * - Buckets are generated with area constraint (width * height = targetResolution²)
+ * - Buckets are in step-size increments (typically 64px)
+ * - Images are assigned to the bucket with the closest aspect ratio
  */
 export const calculateKohyaBucket = (
   imageWidth: number,
   imageHeight: number,
   config: KohyaConfig = KOHYA_CONFIGS.SDXL_1024, // Default to SDXL 1024
 ): { width: number; height: number; aspectRatio: number } => {
-  const TARGET_PERIMETER = config.targetResolution * 2;
-  const STEP_SIZE = config.stepSize;
-  const MIN_SIZE = config.minSize;
-  const MAX_SIZE = TARGET_PERIMETER - MIN_SIZE; // Max individual dimension
+  const maxArea = config.targetResolution * config.targetResolution;
+  const stepSize = config.stepSize;
+  const minSize = config.minSize;
+  const maxSize = config.maxSize;
 
-  // Generate all possible buckets
-  const buckets: Array<{ width: number; height: number; area: number }> = [];
+  // Generate all possible bucket resolutions using Kohya's exact algorithm
+  const resos = new Set<string>(); // Use Set to avoid duplicates, store as strings
 
-  for (let width = MIN_SIZE; width <= MAX_SIZE; width += STEP_SIZE) {
-    const height = TARGET_PERIMETER - width;
-    if (height >= MIN_SIZE && height <= MAX_SIZE) {
-      buckets.push({
-        width,
-        height,
-        area: width * height,
-      });
+  // Add the square resolution first
+  const squareWidth = Math.floor(Math.sqrt(maxArea) / stepSize) * stepSize;
+  resos.add(`${squareWidth}x${squareWidth}`);
+
+  // Generate buckets by iterating through widths
+  let width = minSize;
+  while (width <= maxSize) {
+    // Calculate height to maintain max area
+    const idealHeight = maxArea / width;
+    const height = Math.min(
+      maxSize,
+      Math.floor(idealHeight / stepSize) * stepSize,
+    );
+
+    if (height >= minSize) {
+      // Add both orientations (width×height and height×width)
+      resos.add(`${width}x${height}`);
+      resos.add(`${height}x${width}`);
     }
+
+    width += stepSize;
   }
 
+  // Convert back to array of bucket objects
+  const buckets: Array<{ width: number; height: number; aspectRatio: number }> =
+    [];
+  for (const reso of resos) {
+    const [w, h] = reso.split('x').map(Number);
+    buckets.push({
+      width: w,
+      height: h,
+      aspectRatio: w / h,
+    });
+  }
+
+  // Sort buckets (to match Kohya's behavior)
+  buckets.sort((a, b) => {
+    if (a.width !== b.width) return a.width - b.width;
+    return a.height - b.height;
+  });
+
+  // Find bucket with closest aspect ratio to the image
+  const imageAspectRatio = imageWidth / imageHeight;
   let bestBucket = buckets[0];
-  let bestScore = -Infinity;
+  let smallestAspectRatioError = Math.abs(
+    bestBucket.aspectRatio - imageAspectRatio,
+  );
 
-  // For each bucket, calculate the score based on minimal loss
   for (const bucket of buckets) {
-    // Calculate scale factor needed to fill the bucket completely
-    const scaleToFillWidth = bucket.width / imageWidth;
-    const scaleToFillHeight = bucket.height / imageHeight;
-
-    // Use the larger scale factor to ensure bucket is completely filled
-    const scale = Math.max(scaleToFillWidth, scaleToFillHeight);
-
-    // Calculate scaled image dimensions
-    const scaledWidth = imageWidth * scale;
-    const scaledHeight = imageHeight * scale;
-
-    // Calculate excess area that will be cropped off
-    const scaledArea = scaledWidth * scaledHeight;
-    const excessArea = scaledArea - bucket.area;
-
-    // Score = bucket area - excess area (higher is better)
-    // This represents how much image content is preserved
-    const score = bucket.area - excessArea;
-
-    if (score > bestScore) {
-      bestScore = score;
+    const aspectRatioError = Math.abs(bucket.aspectRatio - imageAspectRatio);
+    if (aspectRatioError < smallestAspectRatioError) {
+      smallestAspectRatioError = aspectRatioError;
       bestBucket = bucket;
     }
   }
@@ -113,7 +136,7 @@ export const calculateKohyaBucket = (
   return {
     width: bestBucket.width,
     height: bestBucket.height,
-    aspectRatio: bestBucket.width / bestBucket.height,
+    aspectRatio: bestBucket.aspectRatio,
   };
 };
 
