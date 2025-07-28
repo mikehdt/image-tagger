@@ -26,6 +26,7 @@ const ProjectInfoComponent = () => {
           alt={`${projectName} thumbnail`}
           width={20}
           height={20}
+          priority
           className="h-6 w-6 rounded-full object-cover"
         />
       ) : (

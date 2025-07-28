@@ -262,7 +262,7 @@ export const ProjectList = () => {
       </div>
 
       <Button onClick={loadProjects} size="mediumWide">
-        Refresh List
+        Refresh Project List
       </Button>
 
       <p className="mt-4 text-sm text-slate-500">

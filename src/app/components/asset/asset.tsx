@@ -171,6 +171,7 @@ const AssetComponent = ({
               width={dimensions.width}
               height={dimensions.height}
               alt=""
+              priority={filteredIndex <= 4}
             />
             <CropVisualization
               dimensions={dimensions}
