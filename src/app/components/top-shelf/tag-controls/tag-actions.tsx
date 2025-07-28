@@ -12,6 +12,7 @@ import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
 import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
+  addMultipleTagsToAssetsWithDualSelection,
   addTagToAssetsWithDualSelection,
   clearSelection,
 } from '@/app/store/selection';
@@ -70,6 +71,26 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
       dispatch(
         addTagToAssetsWithDualSelection({
           tagName: tag,
+          addToStart,
+          applyToSelectedAssets,
+          applyToAssetsWithActiveFilters,
+        }),
+      );
+      setIsAddTagsModalOpen(false);
+    },
+    [dispatch],
+  );
+
+  const handleAddMultipleTags = useCallback(
+    (
+      tags: string[],
+      addToStart = false,
+      applyToSelectedAssets = false,
+      applyToAssetsWithActiveFilters = false,
+    ) => {
+      dispatch(
+        addMultipleTagsToAssetsWithDualSelection({
+          tagNames: tags,
           addToStart,
           applyToSelectedAssets,
           applyToAssetsWithActiveFilters,
@@ -163,6 +184,7 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
         onClearSelection={handleClearSelection}
         selectedAssetsCount={selectedAssetsCount}
         onAddTag={handleAddTag}
+        onAddMultipleTags={handleAddMultipleTags}
       />
 
       <EditTagsModal

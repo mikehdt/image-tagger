@@ -36,6 +36,7 @@ export const { reducer: assetsReducer } = assetsSlice;
 export const {
   resetAssetsState,
   addTag,
+  addMultipleTags,
   editTag,
   deleteTag,
   reorderTags,

@@ -1,7 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import { addTag, deleteTag, editTag, markFilterTagsToDelete } from '../assets';
-import { selectFilteredAssets } from '../assets';
+import {
+  addMultipleTags,
+  addTag,
+  deleteTag,
+  editTag,
+  markFilterTagsToDelete,
+  selectFilteredAssets,
+} from '../assets';
 import { updateTagFilters } from '../filters';
 import { RootState } from '../index';
 import {
@@ -276,6 +282,115 @@ export const addTagToAssetsWithDualSelection = createAsyncThunk(
       success: true,
       count: finalAssets.length,
       message: `Added tag "${tagName}" to ${finalAssets.length} assets`,
+    };
+  },
+);
+
+/**
+ * Enhanced thunk action to add multiple tags to assets based on dual selection logic
+ * This is optimized to avoid redundant DIRTY marking when adding multiple tags
+ */
+export const addMultipleTagsToAssetsWithDualSelection = createAsyncThunk(
+  'selection/addMultipleTagsToAssetsWithDualSelection',
+  async (
+    {
+      tagNames,
+      addToStart = false,
+      applyToSelectedAssets = false,
+      applyToAssetsWithSelectedTags = false,
+      applyToAssetsWithActiveFilters = false,
+      onlyFilteredAssets = false,
+    }: {
+      tagNames: string[];
+      addToStart?: boolean;
+      applyToSelectedAssets?: boolean;
+      applyToAssetsWithSelectedTags?: boolean; // Deprecated: kept for backwards compatibility
+      applyToAssetsWithActiveFilters?: boolean; // New: supports all filter types
+      onlyFilteredAssets?: boolean;
+    },
+    { getState, dispatch },
+  ) => {
+    const state = getState() as RootState;
+
+    // Skip if no tags provided
+    if (!tagNames.length) {
+      return { success: false, message: 'No tags provided' };
+    }
+
+    // Clean and deduplicate tag names
+    const cleanedTags = [
+      ...new Set(
+        tagNames.map((tag) => tag.trim()).filter((tag) => tag.length > 0),
+      ),
+    ];
+
+    if (!cleanedTags.length) {
+      return { success: false, message: 'No valid tags provided' };
+    }
+
+    // Determine which assets to target using the same logic as single tag addition
+    let finalAssets: string[] = [];
+
+    // Handle backward compatibility
+    const useActiveFilters =
+      applyToAssetsWithActiveFilters || applyToAssetsWithSelectedTags;
+
+    if (applyToSelectedAssets && useActiveFilters) {
+      // Both constraints: intersection of selected assets and assets with active filters
+      const selectedAssets = state.selection.selectedAssets;
+      const assetsWithFilters = applyToAssetsWithActiveFilters
+        ? selectAssetsWithActiveFilters(state)
+        : selectAssetsWithSelectedTags(state);
+
+      const assetsWithFiltersIds = new Set(
+        assetsWithFilters.map((asset) => asset.fileId),
+      );
+      finalAssets = selectedAssets.filter((assetId) =>
+        assetsWithFiltersIds.has(assetId),
+      );
+    } else if (applyToSelectedAssets) {
+      // Only selected assets constraint
+      finalAssets = [...state.selection.selectedAssets];
+    } else if (useActiveFilters) {
+      // Only assets with active filters constraint
+      const assetsWithFilters = applyToAssetsWithActiveFilters
+        ? selectAssetsWithActiveFilters(state)
+        : selectAssetsWithSelectedTags(state);
+      finalAssets = assetsWithFilters.map((asset) => asset.fileId);
+    }
+
+    // Further filter by filtered assets if constraint is active
+    if (onlyFilteredAssets) {
+      const filteredAssets = selectFilteredAssets(state);
+      const filteredAssetIds = new Set(
+        filteredAssets.map((asset) => asset.fileId),
+      );
+      finalAssets = finalAssets.filter((assetId) =>
+        filteredAssetIds.has(assetId),
+      );
+    }
+
+    // Check if we have assets
+    if (!finalAssets.length) {
+      return { success: false, message: 'No assets available' };
+    }
+
+    // For each final asset, dispatch an addMultipleTags action
+    finalAssets.forEach((assetId) => {
+      dispatch(
+        addMultipleTags({
+          assetId,
+          tagNames: cleanedTags,
+          position: addToStart ? 'start' : 'end',
+        }),
+      );
+    });
+
+    return {
+      success: true,
+      count: finalAssets.length,
+      tagCount: cleanedTags.length,
+      message: `Added ${cleanedTags.length} tags to ${finalAssets.length} assets`,
     };
   },
 );

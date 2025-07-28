@@ -27,6 +27,12 @@ type AddTagsModalProps = {
     onlySelectedAssets?: boolean,
     onlyFilteredAssets?: boolean,
   ) => void;
+  onAddMultipleTags?: (
+    tags: string[],
+    addToStart?: boolean,
+    onlySelectedAssets?: boolean,
+    onlyFilteredAssets?: boolean,
+  ) => void;
   onClearSelection?: () => void; // Optional callback to clear selection
 };
 
@@ -35,6 +41,7 @@ export const AddTagsModal = ({
   onClose,
   selectedAssetsCount,
   onAddTag,
+  onAddMultipleTags,
   onClearSelection,
 }: AddTagsModalProps) => {
   const [tags, setTags] = useState<string[]>([]);
@@ -161,17 +168,29 @@ export const AddTagsModal = ({
       return !tagInfo || tagInfo.status !== 'all';
     });
 
-    // If adding to start, process tags in reverse order to maintain the original order
-    const tagsToProcess = addToStart ? [...validTags].reverse() : validTags;
-
-    tagsToProcess.forEach((tag) => {
-      onAddTag(
-        tag,
+    // Use batched approach if we have multiple tags and the callback is available
+    if (validTags.length > 1 && onAddMultipleTags) {
+      // For batch operations, maintain original order (no need to reverse)
+      onAddMultipleTags(
+        validTags,
         addToStart,
         applyToSelectedAssets,
         applyToAssetsWithActiveFilters,
       );
-    });
+    } else {
+      // Fall back to individual tag addition for single tags or if batch function not available
+      // If adding to start, process tags in reverse order to maintain the original order
+      const tagsToProcess = addToStart ? [...validTags].reverse() : validTags;
+
+      tagsToProcess.forEach((tag) => {
+        onAddTag(
+          tag,
+          addToStart,
+          applyToSelectedAssets,
+          applyToAssetsWithActiveFilters,
+        );
+      });
+    }
 
     setTags([]);
     if (!keepSelection && onClearSelection) {

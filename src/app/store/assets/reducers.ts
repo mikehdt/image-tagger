@@ -92,6 +92,64 @@ export const coreReducers = {
     }
   },
 
+  addMultipleTags: (
+    state: ImageAssets,
+    {
+      payload,
+    }: PayloadAction<{
+      assetId: string;
+      tagNames: string[];
+      position?: 'start' | 'end';
+    }>,
+  ) => {
+    const { assetId, tagNames, position = 'end' } = payload;
+
+    if (tagNames.length === 0) return;
+
+    const imageIndex = state.images.findIndex(
+      (element) => element.fileId === assetId,
+    );
+
+    if (imageIndex === -1) return;
+
+    // Filter out tags that already exist and empty tags
+    const tagsToAdd = tagNames.filter(
+      (tagName) =>
+        tagName.trim() !== '' &&
+        !state.images[imageIndex].tagList.includes(tagName),
+    );
+
+    if (tagsToAdd.length === 0) return;
+
+    // Get current tag status for efficiency
+    const currentTagStatus = state.images[imageIndex].tagStatus;
+
+    if (position === 'start') {
+      // Add all new tags to the beginning of the list in the order provided
+      state.images[imageIndex].tagList.unshift(...tagsToAdd);
+
+      // Mark all other existing valid tags as DIRTY only once
+      // since their positions have shifted (similar to drag/drop behavior)
+      Object.keys(currentTagStatus).forEach((existingTag) => {
+        // Only mark tags as DIRTY if they are not already TO_ADD
+        if (!hasState(currentTagStatus[existingTag], TagState.TO_ADD)) {
+          currentTagStatus[existingTag] = addState(
+            currentTagStatus[existingTag],
+            TagState.DIRTY,
+          );
+        }
+      });
+    } else {
+      // Add all new tags to the end of the list (default behavior)
+      state.images[imageIndex].tagList.push(...tagsToAdd);
+    }
+
+    // Mark all new tags as TO_ADD
+    tagsToAdd.forEach((tagName) => {
+      state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
+    });
+  },
+
   editTag: (
     state: ImageAssets,
     {
