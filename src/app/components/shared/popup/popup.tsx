@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { usePopup } from './popup-context';
-import { PopupProps } from './types';
+import type { PopupProps } from './types';
 import {
   calculatePopupPosition,
   DEFAULT_OFFSET,

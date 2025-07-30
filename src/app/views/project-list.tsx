@@ -158,7 +158,7 @@ export const ProjectList = () => {
               </span>
               Featured Projects
             </h2>
-            <div className="gap-3">
+            <div className="flex flex-wrap gap-3">
               {featuredProjects.map((project) => (
                 <Button
                   key={project.path}
@@ -213,7 +213,7 @@ export const ProjectList = () => {
               </span>
               {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
             </h2>
-            <div className="gap-3">
+            <div className="flex flex-wrap gap-3">
               {regularProjects.map((project) => (
                 <Button
                   key={project.path}

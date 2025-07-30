@@ -11,10 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  DropdownItem,
-  DropdownV2 as Dropdown,
-} from '@/app/components/shared/dropdown';
+import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import {
   selectSortDirection,
@@ -38,7 +35,7 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
-import { ResponsiveToolbarGroupV2 as ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
 /**
  * Get the appropriate sort direction label based on sort type

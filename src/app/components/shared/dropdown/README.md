@@ -59,26 +59,3 @@ const MyComponent = () => {
 | `icon`                  | `ReactNode`                            | Icon to show in button             |
 | `alignRight`            | `boolean`                              | Right-align the dropdown           |
 | `openUpward`            | `boolean`                              | Open the dropdown upward           |
-
-## Helper Hook
-
-You can also use the `useDropdown` hook for easier state management:
-
-```tsx
-import { useDropdown } from '../path/to/components/shared/dropdown';
-
-const MyComponent = () => {
-  const { items, selectedValue, selectedItem, handleSelect } = useDropdown(
-    myItems,
-    initialValue,
-  );
-
-  return (
-    <Dropdown
-      items={items}
-      selectedValue={selectedValue}
-      onChange={handleSelect}
-    />
-  );
-};
-```

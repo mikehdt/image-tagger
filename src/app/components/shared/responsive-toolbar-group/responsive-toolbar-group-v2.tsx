@@ -125,9 +125,7 @@ function ResponsiveToolbarGroupInternal({
  * and becomes an active icon button with popover at smaller screens (max-md).
  * This version uses the popup system for consistent behavior across the application.
  */
-export const ResponsiveToolbarGroupV2 = (
-  props: ResponsiveToolbarGroupProps,
-) => {
+export const ResponsiveToolbarGroup = (props: ResponsiveToolbarGroupProps) => {
   return (
     <PopupProvider>
       <ResponsiveToolbarGroupInternal {...props} />
