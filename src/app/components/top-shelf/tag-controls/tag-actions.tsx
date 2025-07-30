@@ -19,7 +19,7 @@ import {
 import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
-import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ResponsiveToolbarGroupV2 as ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { AddTagsModal } from './add-tags-modal';
 import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';

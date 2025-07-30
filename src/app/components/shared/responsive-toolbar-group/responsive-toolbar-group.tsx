@@ -276,15 +276,15 @@ export const ResponsiveToolbarGroup = ({
                     ? 'scale-100 opacity-100'
                     : 'pointer-events-none scale-95 opacity-0'
                 }`
-              : 'flex space-x-1'
+              : 'flex gap-1'
           }
           role={isMobile ? 'menu' : undefined}
         >
           <div
             className={
               isMobile
-                ? 'flex items-center space-x-1 p-2'
-                : 'flex items-center space-x-1'
+                ? 'flex items-center gap-1 p-2'
+                : 'flex items-center gap-1'
             }
           >
             {children}

@@ -24,7 +24,7 @@ export const ToastContainer = () => {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 transform flex-col items-center space-y-0"
+      className="pointer-events-none fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 transform flex-col items-center gap-0"
       aria-label="Notifications"
     >
       {toasts.map((toast) => (

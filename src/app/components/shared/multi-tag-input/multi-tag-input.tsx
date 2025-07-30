@@ -164,7 +164,7 @@ export const MultiTagInput = ({
         return (
           <div
             key={tag}
-            className={`m-0.5 flex cursor-default items-center space-x-1 rounded-full border py-0.5 pr-1 pl-3 text-sm ${tagStyles[status]}`}
+            className={`m-0.5 flex cursor-default items-center gap-1 rounded-full border py-0.5 pr-1 pl-3 text-sm ${tagStyles[status]}`}
           >
             <span>{tag}</span>
 

@@ -133,13 +133,13 @@ export const AssetMetadata = ({
 
   return (
     <div
-      className={`flex w-full items-end space-x-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
         hasModifiedTags
           ? 'border-t-amber-300 bg-amber-100'
           : 'border-t-slate-300 bg-slate-100'
       }`}
     >
-      <span className="inline-flex min-w-0 flex-wrap items-center space-x-2 py-0.5 tabular-nums">
+      <span className="inline-flex min-w-0 flex-wrap items-center gap-2 py-0.5 tabular-nums">
         <Button
           type="button"
           color="sky"
@@ -185,7 +185,7 @@ export const AssetMetadata = ({
       </span>
 
       {hasModifiedTags ? (
-        <span className="ml-auto flex space-x-2 pl-2">
+        <span className="ml-auto flex gap-2 pl-2">
           <Button
             color="stone"
             size="medium"

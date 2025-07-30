@@ -32,7 +32,7 @@ export const NoContent = ({ onReload }: NoContentProps) => {
         No assets found{projectName ? ` in ${projectName}` : ''}
       </h1>
 
-      <div className="mt-4 flex w-full justify-center space-x-3">
+      <div className="mt-4 flex w-full justify-center gap-3">
         <Button onClick={doReload} size="mediumWide">
           Refresh
         </Button>

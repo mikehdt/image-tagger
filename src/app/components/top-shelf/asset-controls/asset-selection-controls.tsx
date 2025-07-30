@@ -38,7 +38,7 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
-import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ResponsiveToolbarGroupV2 as ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
 /**
  * Get the appropriate sort direction label based on sort type

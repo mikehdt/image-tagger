@@ -34,7 +34,7 @@ export const Error = ({ onReload }: ErrorProps) => {
         An I/O error occurred{projectName ? ` loading ${projectName}` : ''}
       </h1>
 
-      <div className="mt-4 flex w-full justify-center space-x-3">
+      <div className="mt-4 flex w-full justify-center gap-3">
         <Button onClick={handleRetry} size="mediumWide">
           Retry
         </Button>

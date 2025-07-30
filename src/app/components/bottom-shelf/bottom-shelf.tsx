@@ -86,7 +86,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   return (
     <div className="fixed bottom-0 left-0 z-10 w-full border-t border-t-white/50 bg-white/80 inset-shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-400 items-center px-4">
-        <div className="flex w-1/4 items-center space-x-2 text-xs whitespace-nowrap text-slate-500">
+        <div className="flex w-1/4 items-center gap-2 text-xs whitespace-nowrap text-slate-500">
           <Button
             size="small"
             variant="ghost"
@@ -127,7 +127,7 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
           <Pagination currentPage={currentPage} totalItems={filteredCount} />
         </div>
 
-        <div className="flex w-1/4 items-center justify-end space-x-2 text-sm">
+        <div className="flex w-1/4 items-center justify-end gap-2 text-sm">
           <IoActions ioInProgress={ioInProgress} />
         </div>
       </div>

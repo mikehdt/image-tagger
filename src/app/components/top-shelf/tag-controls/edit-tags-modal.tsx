@@ -377,7 +377,7 @@ export const EditTagsModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
-      <div className="relative space-y-4">
+      <div className="relative gap-4">
         {/* Title */}
         <h2 className="text-2xl font-semibold text-slate-700">Edit Tags</h2>
 
@@ -388,8 +388,8 @@ export const EditTagsModal = ({
         </p>
 
         {/* Tag editing form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-3">
+        <form onSubmit={handleSubmit} className="gap-4">
+          <div className="gap-3">
             {tagStatuses.map(({ tag, status }, index) => {
               // Define style variants based on status
               const inputStyles = {
@@ -456,7 +456,7 @@ export const EditTagsModal = ({
             })}
           </div>
 
-          <div className="space-y-4 text-xs text-slate-500">
+          <div className="gap-4 text-xs text-slate-500">
             <p>
               Editing a tag will update it across all assets where it appears.
               Duplicate tag names are allowed - duplicates will be marked for
@@ -545,7 +545,7 @@ export const EditTagsModal = ({
           </p>
 
           {/* Action buttons */}
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               onClick={onClose}

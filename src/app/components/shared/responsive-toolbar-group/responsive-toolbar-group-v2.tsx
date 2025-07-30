@@ -81,7 +81,7 @@ function ResponsiveToolbarGroupInternal({
   return (
     <div ref={containerRef} className="relative">
       {/* Desktop: Show icon with inline children */}
-      <div className="hidden items-center gap-2 rounded-md bg-slate-100 px-1 py-1 md:flex">
+      <div className="hidden min-h-9.5 items-center gap-1 rounded-md bg-slate-100 px-1 py-1 md:flex">
         <div
           className="mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 text-slate-400 max-md:hidden"
           title={title}
@@ -92,7 +92,7 @@ function ResponsiveToolbarGroupInternal({
       </div>
 
       {/* Mobile: Show button that opens popover */}
-      <div className="md:hidden">
+      <div className="flex items-center rounded-md bg-slate-100 px-1 py-1 md:hidden">
         <Button
           ref={buttonRef}
           variant="ghost"
@@ -109,9 +109,9 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="w-64 rounded-md border border-slate-200 bg-white shadow-lg focus:outline-none"
+          className="rounded-md border border-slate-200 bg-white shadow-lg focus:outline-none"
         >
-          <div className="flex items-center gap-2 bg-slate-50 p-3">
+          <div className="flex items-center gap-1 bg-slate-50 p-2">
             {children}
           </div>
         </Popup>

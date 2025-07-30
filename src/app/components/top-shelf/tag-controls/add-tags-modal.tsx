@@ -282,7 +282,7 @@ export const AddTagsModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
-      <div className="relative space-y-4">
+      <div className="relative gap-4">
         {/* Title */}
         <h2 className="text-2xl font-semibold text-slate-700">Add Tags</h2>
 
@@ -314,7 +314,7 @@ export const AddTagsModal = ({
         )}
 
         {/* Tag input form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="gap-4">
           <div className="relative">
             <MultiTagInput
               tags={tags}
@@ -334,7 +334,7 @@ export const AddTagsModal = ({
           ) : tagsStatus.some(
               (t) => t.status === 'some' || t.status === 'all',
             ) ? (
-            <div className="space-y-2 text-xs text-slate-500">
+            <div className="gap-2 text-xs text-slate-500">
               {tagsStatus.some((t) => t.status === 'all') && (
                 <p className="flex">
                   <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
@@ -417,7 +417,7 @@ export const AddTagsModal = ({
           )}
 
           {/* Action buttons */}
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               onClick={onClose}

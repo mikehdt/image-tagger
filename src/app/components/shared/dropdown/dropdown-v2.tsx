@@ -157,7 +157,7 @@ function DropdownInternal<T>({
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors ${
           isOpen
             ? 'bg-white shadow-sm'
             : 'bg-white shadow-sm hover:bg-slate-200'

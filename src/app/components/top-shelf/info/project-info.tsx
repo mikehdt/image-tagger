@@ -19,7 +19,7 @@ const ProjectInfoComponent = () => {
   }
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-2">
       {projectThumbnail ? (
         <Image
           src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectPath=${encodeURIComponent(projectPath)}&isProjectInfo=true`}
