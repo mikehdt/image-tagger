@@ -6,7 +6,10 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/app/components/shared/button';
-import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import {
+  DropdownItem,
+  DropdownV2 as Dropdown,
+} from '@/app/components/shared/dropdown';
 import { selectHasTaglessAssets } from '@/app/store/assets';
 import {
   FilterMode,
@@ -19,7 +22,7 @@ import {
 import { useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
-import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ResponsiveToolbarGroupV2 as ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
 interface FilterModeControlsProps {
   filterModifiedActive: boolean;

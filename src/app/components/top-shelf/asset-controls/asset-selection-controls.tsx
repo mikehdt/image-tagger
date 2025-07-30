@@ -11,7 +11,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import {
+  DropdownItem,
+  DropdownV2 as Dropdown,
+} from '@/app/components/shared/dropdown';
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import {
   selectSortDirection,
