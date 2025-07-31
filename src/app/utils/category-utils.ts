@@ -39,7 +39,10 @@ export const getSortCategory = (
       } else if (firstChar >= 'a' && firstChar <= 'z') {
         return firstChar.toUpperCase();
       } else {
-        return 'Other';
+        // Check if this character sorts before letters using localeCompare
+        // We use 'a' as the reference since it's the first letter
+        const sortsBefore = firstChar.localeCompare('a') < 0;
+        return sortsBefore ? 'Symbols' : 'Other';
       }
 
     case SortType.IMAGE_SIZE:
@@ -91,11 +94,12 @@ export const sortCategories = (
 
     switch (sortType) {
       case SortType.NAME:
-        // Numbers first, then letters, then other
+        // Order: Symbols first, then numbers, then letters, then other
         const getOrder = (cat: string) => {
-          if (cat === '0-9') return 0;
-          if (cat.length === 1 && cat >= 'A' && cat <= 'Z') return 1;
-          return 2;
+          if (cat === 'Symbols') return 0;
+          if (cat === '0-9') return 1;
+          if (cat.length === 1 && cat >= 'A' && cat <= 'Z') return 2;
+          return 3; // Other
         };
 
         const orderA = getOrder(a);
