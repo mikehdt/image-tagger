@@ -6,8 +6,30 @@ import path from 'node:path';
 import {
   isSupportedImageExtension,
   PROJECT_INFO_FOLDER,
-  PROJECTS_FOLDER,
 } from '@/app/constants';
+
+// Server-side config reading function
+const getServerConfig = () => {
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const configContent = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(configContent);
+      return {
+        projectsFolder: config.projectsFolder || 'public/assets',
+        infoFolder: config.infoFolder || '_info',
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to read server config:', error);
+  }
+
+  // Return defaults if config reading fails
+  return {
+    projectsFolder: 'public/assets',
+    infoFolder: '_info',
+  };
+};
 
 type ProjectInfo = {
   title?: string;
@@ -65,14 +87,18 @@ const readProjectInfo = (projectPath: string): ProjectInfo | null => {
  */
 export const getProjectList = async (): Promise<Project[]> => {
   try {
+    // Get the current configuration to determine projects folder
+    const config = getServerConfig();
+    const projectsFolder = config.projectsFolder;
+
     // Check if the projects folder exists
-    if (!fs.existsSync(PROJECTS_FOLDER)) {
-      console.warn(`Projects folder does not exist: ${PROJECTS_FOLDER}`);
+    if (!fs.existsSync(projectsFolder)) {
+      console.warn(`Projects folder does not exist: ${projectsFolder}`);
       return [];
     }
 
     // Read the directory contents
-    const entries = fs.readdirSync(PROJECTS_FOLDER, { withFileTypes: true });
+    const entries = fs.readdirSync(projectsFolder, { withFileTypes: true });
 
     // Filter to only include directories (project folders)
     const projectFolders = entries.filter((entry) => entry.isDirectory());
@@ -80,7 +106,7 @@ export const getProjectList = async (): Promise<Project[]> => {
     // Map to project objects and count images
     const projects: Project[] = await Promise.all(
       projectFolders.map(async (folder) => {
-        const projectPath = path.join(PROJECTS_FOLDER, folder.name);
+        const projectPath = path.join(projectsFolder, folder.name);
         let imageCount = 0;
 
         try {
@@ -126,6 +152,6 @@ export const getProjectList = async (): Promise<Project[]> => {
     return [...featuredProjects, ...regularProjects];
   } catch (error) {
     console.error('Error reading projects folder:', error);
-    throw new Error(`Failed to read projects from ${PROJECTS_FOLDER}`);
+    throw new Error(`Failed to read projects from configured folder`);
   }
 };

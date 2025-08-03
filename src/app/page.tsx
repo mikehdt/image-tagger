@@ -3,6 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { resetAssetsState } from './store/assets';
+import { clearFilters } from './store/filters';
+import { useAppDispatch } from './store/hooks';
+import { resetProjectState } from './store/project';
+import { clearSelection } from './store/selection';
 import { ProjectList } from './views/project-list';
 
 // Inline configuration check function to avoid import issues
@@ -21,36 +26,31 @@ const checkIfUsingDefaultProject = async (): Promise<boolean> => {
 
 export default function Home() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [showProjectList, setShowProjectList] = useState(true);
 
   useEffect(() => {
     const checkProjectConfig = async () => {
-      console.log('Home page: checking project config...');
       try {
         const isDefault = await checkIfUsingDefaultProject();
-        console.log('Home page: isDefault =', isDefault);
 
         // Check for configuration mode mismatch
         const storedConfigMode = sessionStorage.getItem('configMode');
         const currentConfigMode = isDefault ? 'default' : 'custom';
-        console.log('Home page: config mode check -', {
-          storedConfigMode,
-          currentConfigMode,
-        });
 
         if (storedConfigMode && storedConfigMode !== currentConfigMode) {
           // Configuration has changed, clear all session state
-          console.log(
-            `Config mode changed from ${storedConfigMode} to ${currentConfigMode}, clearing state`,
-          );
           sessionStorage.removeItem('selectedProject');
           sessionStorage.removeItem('selectedProjectTitle');
           sessionStorage.removeItem('selectedProjectThumbnail');
           sessionStorage.removeItem('configMode');
 
           // Clear Redux state to ensure clean slate
-          // The AppProvider will handle the redirect appropriately
+          dispatch(resetAssetsState());
+          dispatch(resetProjectState());
+          dispatch(clearFilters());
+          dispatch(clearSelection());
         }
 
         if (isDefault) {
@@ -74,7 +74,7 @@ export default function Home() {
     };
 
     checkProjectConfig();
-  }, [router]);
+  }, [router, dispatch]);
 
   if (isLoading) {
     return (

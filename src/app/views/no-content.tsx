@@ -36,13 +36,16 @@ export const NoContent = ({ onReload }: NoContentProps) => {
         <Button onClick={doReload} size="mediumWide">
           Refresh
         </Button>
-        <Button
-          onClick={handleBackToProjects}
-          size="mediumWide"
-          variant="ghost"
-        >
-          Back to Projects
-        </Button>
+
+        {projectName !== 'Default Project' && (
+          <Button
+            onClick={handleBackToProjects}
+            size="mediumWide"
+            variant="ghost"
+          >
+            Back to Projects
+          </Button>
+        )}
       </div>
     </div>
   );

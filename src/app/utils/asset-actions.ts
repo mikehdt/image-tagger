@@ -19,7 +19,7 @@ import { calculateKohyaBucket, KOHYA_CONFIGS } from './image-utils';
  * Get the current data path - either from provided project path or default
  */
 const getCurrentDataPath = (projectPath?: string): string =>
-  projectPath ? projectPath : '';
+  projectPath ? projectPath : 'public/assets';
 
 /**
  * Helper function to detect duplicate fileIds and return filtered results
