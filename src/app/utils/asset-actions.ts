@@ -65,7 +65,9 @@ const detectDuplicateFileIds = (
 export const getImageFileList = async (
   projectPath?: string,
 ): Promise<string[]> => {
-  const dir = path.resolve(getCurrentDataPath(projectPath));
+  const dataPath = getCurrentDataPath(projectPath);
+  // Use the path directly if it's absolute, otherwise resolve it relative to cwd
+  const dir = path.isAbsolute(dataPath) ? dataPath : path.resolve(dataPath);
 
   const filenames = fs.readdirSync(dir);
 

@@ -1,16 +1,81 @@
 // Shared constants for the application
 
-// Default batch size for asset operations (loading and saving)
-export const DEFAULT_BATCH_SIZE = 48;
+// Configuration interface
+interface AppConfig {
+  batchSize?: number;
+  projectsFolder?: string;
+  infoFolder?: string;
+}
 
-// Hardcoded projects folder path - update this to your projects directory
-// Examples:
-// Windows: 'C:\\Users\\YourUsername\\Pictures\\ImageProjects'
-// macOS/Linux: '/Users/YourUsername/Pictures/ImageProjects'
-export const PROJECTS_FOLDER = '';
+// Default values
+const DEFAULT_CONFIG: Required<AppConfig> = {
+  batchSize: 48,
+  projectsFolder: 'public/assets',
+  infoFolder: '_info',
+};
 
-// Project info folder name (contains project.json and thumbnail images)
-export const PROJECT_INFO_FOLDER = '_info';
+// Load configuration from API with fallback defaults
+let configPromise: Promise<AppConfig> | null = null;
+let loadedConfig: Required<AppConfig> | null = null;
+
+const loadConfigFromAPI = async (): Promise<AppConfig> => {
+  try {
+    // Use relative URL that works in both dev and production
+    const response = await fetch('/api/config', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `Config API returned ${response.status}:`,
+        response.statusText,
+      );
+      return {};
+    }
+
+    const config = await response.json();
+    console.log('Loaded config from API:', config);
+    return config;
+  } catch (error) {
+    console.warn('Failed to load config from API, using defaults:', error);
+    return {};
+  }
+};
+
+// Get configuration (async)
+export const getConfig = (): Promise<Required<AppConfig>> => {
+  if (loadedConfig) {
+    return Promise.resolve(loadedConfig);
+  }
+
+  if (!configPromise) {
+    configPromise = loadConfigFromAPI();
+  }
+
+  return configPromise.then((config) => {
+    loadedConfig = {
+      batchSize: config.batchSize ?? DEFAULT_CONFIG.batchSize,
+      projectsFolder: config.projectsFolder ?? DEFAULT_CONFIG.projectsFolder,
+      infoFolder: config.infoFolder ?? DEFAULT_CONFIG.infoFolder,
+    };
+    return loadedConfig;
+  });
+};
+
+// Check if using default project folder
+export const isUsingDefaultProject = async (): Promise<boolean> => {
+  const config = await getConfig();
+  return config.projectsFolder === DEFAULT_CONFIG.projectsFolder;
+};
+
+// Synchronous constants with defaults (for immediate use)
+// These will be the defaults until config is loaded
+export const DEFAULT_BATCH_SIZE = DEFAULT_CONFIG.batchSize;
+export const PROJECTS_FOLDER = DEFAULT_CONFIG.projectsFolder;
+export const PROJECT_INFO_FOLDER = DEFAULT_CONFIG.infoFolder;
 
 // Supported image file extensions (including the dot)
 const SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'] as const;
