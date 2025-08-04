@@ -377,9 +377,11 @@ export const EditTagsModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
-      <div className="relative gap-4">
+      <div className="flex flex-wrap gap-4">
         {/* Title */}
-        <h2 className="text-2xl font-semibold text-slate-700">Edit Tags</h2>
+        <h2 className="w-full text-2xl font-semibold text-slate-700">
+          Edit Tags
+        </h2>
 
         {/* Selected tags count */}
         <p className="text-sm text-slate-500">
@@ -388,8 +390,8 @@ export const EditTagsModal = ({
         </p>
 
         {/* Tag editing form */}
-        <form onSubmit={handleSubmit} className="gap-4">
-          <div className="gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
             {tagStatuses.map(({ tag, status }, index) => {
               // Define style variants based on status
               const inputStyles = {
@@ -456,8 +458,8 @@ export const EditTagsModal = ({
             })}
           </div>
 
-          <div className="gap-4 text-xs text-slate-500">
-            <p>
+          <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+            <p className="w-full">
               Editing a tag will update it across all assets where it appears.
               Duplicate tag names are allowed - duplicates will be marked for
               deletion.
@@ -465,7 +467,7 @@ export const EditTagsModal = ({
 
             {/* Conditionally show the status explanations based on usage */}
             {hasStatusAll && (
-              <p className="flex">
+              <p className="flex w-full">
                 <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
                 Red highlights indicate the tag exists in all assets and would
                 create duplicates in all assets.
@@ -473,7 +475,7 @@ export const EditTagsModal = ({
             )}
 
             {hasStatusSome && (
-              <p className="flex">
+              <p className="flex w-full">
                 <span className="mt-0.5 mr-2 inline-block h-3 min-w-3 rounded-full border border-amber-400 bg-amber-50"></span>
                 Yellow highlights indicate the tag exists in some assets or
                 would create duplicates in some (but not all) assets.
@@ -481,7 +483,7 @@ export const EditTagsModal = ({
             )}
 
             {hasStatusFormDuplicate && (
-              <p className="flex">
+              <p className="flex w-full">
                 <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-purple-400 bg-purple-100"></span>{' '}
                 Purple highlights indicate duplicate tag names within the form.
               </p>
@@ -489,7 +491,7 @@ export const EditTagsModal = ({
           </div>
 
           {hasActiveFilters ? (
-            <div className="flex items-center gap-2 pb-2">
+            <div className="flex w-full items-center gap-2 pb-2">
               <Checkbox
                 isSelected={onlyFilteredAssets}
                 onChange={() => setOnlyFilteredAssets(!onlyFilteredAssets)}
@@ -545,7 +547,7 @@ export const EditTagsModal = ({
           </p>
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex w-full justify-end gap-2 pt-2">
             <Button
               type="button"
               onClick={onClose}

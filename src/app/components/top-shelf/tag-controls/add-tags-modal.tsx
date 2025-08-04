@@ -282,9 +282,11 @@ export const AddTagsModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
-      <div className="relative gap-4">
+      <div className="flex flex-wrap gap-4">
         {/* Title */}
-        <h2 className="text-2xl font-semibold text-slate-700">Add Tags</h2>
+        <h2 className="w-full text-2xl font-semibold text-slate-700">
+          Add Tags
+        </h2>
 
         {/* Selected assets/filters count and description */}
         {hasSelectedAssets && hasActiveFilters ? (
@@ -314,17 +316,15 @@ export const AddTagsModal = ({
         )}
 
         {/* Tag input form */}
-        <form onSubmit={handleSubmit} className="gap-4">
-          <div className="relative">
-            <MultiTagInput
-              tags={tags}
-              onTagsChange={setTags}
-              duplicateCheck={handleDuplicateCheck}
-              tagStatus={tagsStatus}
-              autoFocus
-              className="w-full"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
+          <MultiTagInput
+            tags={tags}
+            onTagsChange={setTags}
+            duplicateCheck={handleDuplicateCheck}
+            tagStatus={tagsStatus}
+            autoFocus
+            className="w-full"
+          />
 
           {tags.length === 0 ? (
             <p className="text-xs text-slate-700">
@@ -417,7 +417,7 @@ export const AddTagsModal = ({
           )}
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex w-full justify-end gap-2 pt-2">
             <Button
               type="button"
               onClick={onClose}
