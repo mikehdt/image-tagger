@@ -127,24 +127,9 @@ export const AddTagsModal = ({
   // Initialize checkboxes based on what selections are available
   useEffect(() => {
     if (isOpen) {
-      // Set defaults based on what's available
-      if (hasSelectedAssets && !hasActiveFilters) {
-        // Only assets selected - apply to selected assets
-        setApplyToSelectedAssets(true);
-        setApplyToAssetsWithActiveFilters(false);
-      } else if (!hasSelectedAssets && hasActiveFilters) {
-        // Only filters active - apply to assets with active filters
-        setApplyToSelectedAssets(false);
-        setApplyToAssetsWithActiveFilters(true);
-      } else if (hasSelectedAssets && hasActiveFilters) {
-        // Both available - let user choose, default to both
-        setApplyToSelectedAssets(true);
-        setApplyToAssetsWithActiveFilters(true);
-      } else {
-        // Neither available - shouldn't happen but handle gracefully
-        setApplyToSelectedAssets(false);
-        setApplyToAssetsWithActiveFilters(false);
-      }
+      // Simply enable each constraint if it's available
+      setApplyToSelectedAssets(hasSelectedAssets);
+      setApplyToAssetsWithActiveFilters(hasActiveFilters);
     }
   }, [isOpen, hasSelectedAssets, hasActiveFilters]);
 
