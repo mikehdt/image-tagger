@@ -484,7 +484,7 @@ export const EditTagsModal = ({
 
             {hasStatusFormDuplicate && (
               <p className="flex w-full">
-                <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-purple-400 bg-purple-100"></span>{' '}
+                <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-purple-400 bg-purple-100"></span>
                 Purple highlights indicate duplicate tag names within the form.
               </p>
             )}

@@ -19,7 +19,7 @@
     "@heroicons/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.8.2",
     "image-dimensions": "^2.3.0",
-    "next": "15.4.5",
+    "next": "15.4.6",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-redux": "9.2.0"
@@ -27,11 +27,11 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "^24.2.0",
+    "@types/node": "^24.2.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "eslint": "^9.32.0",
-    "eslint-config-next": "^15.4.5",
+    "eslint": "^9.33.0",
+    "eslint-config-next": "^15.4.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "knip": "^5.62.0",
