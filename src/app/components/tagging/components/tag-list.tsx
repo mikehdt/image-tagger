@@ -1,5 +1,8 @@
-import { SyntheticEvent } from 'react';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
+import { SyntheticEvent, useCallback } from 'react';
 
+import { Button } from '../../shared/button';
+import { useToast } from '../../shared/toast';
 import { useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';
 import { SortableTag } from './sortable-tag';
@@ -28,6 +31,20 @@ export const TagList = ({ className = '' }: TagListProps) => {
     tagProps,
   } = useTaggingContext();
 
+  const { showToast } = useToast();
+
+  const handleCopyTags = useCallback(async () => {
+    const tagsText = tagList.join(', ');
+
+    try {
+      await navigator.clipboard.writeText(tagsText);
+      showToast('Tags copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      showToast('Failed to copy tags');
+    }
+  }, [tagList, showToast]);
+
   return (
     <div className={className}>
       <div className="relative flex flex-wrap">
@@ -50,7 +67,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
       </div>
 
       <div
-        className={`transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
+        className={`flex flex-wrap items-center gap-2 transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
       >
         <InputTag
           inputValue={newTagInput}
@@ -66,6 +83,17 @@ export const TagList = ({ className = '' }: TagListProps) => {
           nonInteractive={isEditing}
           isDuplicate={isDuplicate(newTagInput)}
         />
+
+        {tagList.length > 0 && (
+          <Button
+            onClick={handleCopyTags}
+            variant="ghost"
+            size="small"
+            title="Copy tags as comma-separated list"
+          >
+            <ClipboardDocumentIcon className="w-5 text-slate-400" />
+          </Button>
+        )}
       </div>
     </div>
   );
