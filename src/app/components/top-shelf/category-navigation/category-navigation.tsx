@@ -145,9 +145,9 @@ export const CategoryNavigation = ({
   }, [isOpen, handleClose]);
 
   // Don't render if no categories or only one category
-  // if (categoriesWithPageInfo.length <= 1) {
-  //   return null;
-  // }
+  if (categoriesWithPageInfo.length <= 1) {
+    return null;
+  }
 
   return (
     <div ref={containerRef} className="relative">

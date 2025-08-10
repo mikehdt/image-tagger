@@ -112,6 +112,9 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     paginationSize,
   ]);
 
+  // Check if there's only one category to hide headers
+  const showCategoryHeaders = groupedAssets.length > 1;
+
   // Memoize rendered assets to prevent unnecessary re-renders
   const renderedAssets = useMemo(
     () =>
@@ -120,14 +123,19 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
 
         return (
           <div key={category} className="asset-group">
-            <div
-              id={anchorId}
-              className="sticky top-24 z-10 -mx-2 cursor-pointer scroll-mt-24 rounded-sm border-b border-b-slate-700/80 bg-slate-500/60 px-4 py-1 text-sm font-medium text-white backdrop-blur-md transition-colors text-shadow-slate-700 text-shadow-xs hover:bg-slate-600/70"
-              onClick={() => scrollToAnchor(anchorId)}
-              title="Click to scroll to top of this section"
-            >
-              {category}
-            </div>
+            {showCategoryHeaders ? (
+              <div
+                id={anchorId}
+                className="sticky top-24 z-10 -mx-2 cursor-pointer scroll-mt-24 rounded-sm border-b border-b-slate-700/80 bg-slate-500/60 px-4 py-1 text-sm font-medium text-white backdrop-blur-md transition-colors text-shadow-slate-700 text-shadow-xs hover:bg-slate-600/70"
+                onClick={() => scrollToAnchor(anchorId)}
+                title="Click to scroll to top of this section"
+              >
+                {category}
+              </div>
+            ) : (
+              // Still provide anchor ID for single category case, but invisible
+              <div id={anchorId} className="scroll-mt-24" />
+            )}
 
             {assets.map((asset) => {
               return (
@@ -147,7 +155,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           </div>
         );
       }),
-    [groupedAssets],
+    [groupedAssets, showCategoryHeaders],
   );
 
   return filteredAssets.length ? (

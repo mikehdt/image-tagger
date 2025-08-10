@@ -6,7 +6,7 @@ import {
 } from '../store/assets';
 import { hasState } from '../store/assets/utils';
 import { FilterMode } from '../store/filters';
-import { composeDimensions } from './helpers';
+import { composeDimensions, naturalCompare } from './helpers';
 
 // Define an interface that extends ImageAsset with originalIndex
 interface ImageAssetWithIndex extends ImageAsset {
@@ -269,7 +269,7 @@ const applySorting = (
 
     switch (sortType) {
       case SortType.NAME:
-        comparison = a.fileId.localeCompare(b.fileId);
+        comparison = naturalCompare(a.fileId, b.fileId);
         break;
 
       case SortType.IMAGE_SIZE:
@@ -331,8 +331,9 @@ const applySorting = (
         if (aCategoryData.category !== bCategoryData.category) {
           comparison = aCategoryData.category - bCategoryData.category;
         } else {
-          // Within the same category, sort alphabetically by filename
-          comparison = aCategoryData.secondary.localeCompare(
+          // Within the same category, sort naturally by filename
+          comparison = naturalCompare(
+            aCategoryData.secondary,
             bCategoryData.secondary,
           );
         }

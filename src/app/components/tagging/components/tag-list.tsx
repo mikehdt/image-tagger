@@ -67,7 +67,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
       </div>
 
       <div
-        className={`flex flex-wrap items-center gap-2 transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
+        className={`flex flex-wrap items-center justify-between gap-2 transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
       >
         <InputTag
           inputValue={newTagInput}
@@ -91,7 +91,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
             size="small"
             title="Copy tags as comma-separated list"
           >
-            <ClipboardDocumentIcon className="w-5 text-slate-400" />
+            <ClipboardDocumentIcon className="w-4 text-slate-400" />
           </Button>
         )}
       </div>
