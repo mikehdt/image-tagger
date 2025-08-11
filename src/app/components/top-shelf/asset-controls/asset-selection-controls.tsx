@@ -1,6 +1,7 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  CalculatorIcon,
   EyeIcon,
   EyeSlashIcon,
   IdentificationIcon,
@@ -36,6 +37,7 @@ import {
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { BucketCropModal } from './bucket-crop-modal';
 
 /**
  * Get the appropriate sort direction label based on sort type
@@ -68,6 +70,7 @@ export const AssetSelectionControls = ({
 }) => {
   const dispatch = useAppDispatch();
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedAssets = useAppSelector(selectSelectedAssets);
@@ -80,6 +83,14 @@ export const AssetSelectionControls = ({
 
   const handleToggleCropVisualization = () => {
     dispatch(toggleCropVisualization());
+  };
+
+  const handleOpenBucketModal = () => {
+    setIsBucketModalOpen(true);
+  };
+
+  const handleCloseBucketModal = () => {
+    setIsBucketModalOpen(false);
   };
 
   const handleClearSelection = () => {
@@ -257,6 +268,16 @@ export const AssetSelectionControls = ({
         )}
       </Button>
 
+      <Button
+        variant="ghost"
+        color="slate"
+        size="medium"
+        onClick={handleOpenBucketModal}
+        title="Open bucket crop visualization"
+      >
+        <CalculatorIcon className="w-4" />
+      </Button>
+
       <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
 
       <Dropdown
@@ -370,6 +391,11 @@ export const AssetSelectionControls = ({
           </Button>
         </>
       ) : null}
+
+      <BucketCropModal
+        isOpen={isBucketModalOpen}
+        onClose={handleCloseBucketModal}
+      />
     </ResponsiveToolbarGroup>
   );
 };
