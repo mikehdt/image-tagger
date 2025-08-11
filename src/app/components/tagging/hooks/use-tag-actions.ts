@@ -96,6 +96,35 @@ export const useTagActions = ({
     ],
   );
 
+  // Action to add multiple tags (for comma-separated input and paste)
+  const handleAddMultipleTags = useCallback(
+    (tags: string[]): void => {
+      let addedCount = 0;
+
+      tags.forEach((tagName) => {
+        const trimmedTag = tagName.trim();
+        if (trimmedTag && !isDuplicate(trimmedTag)) {
+          dispatch(addTag({ assetId, tagName: trimmedTag }));
+          addedCount++;
+        }
+      });
+
+      // Clear the input field after processing
+      setNewTagInput('');
+
+      // Log results for debugging
+      if (addedCount > 0) {
+        console.log(`Added ${addedCount} new tags`);
+      }
+      if (addedCount < tags.length) {
+        console.log(
+          `Skipped ${tags.length - addedCount} duplicate or empty tags`,
+        );
+      }
+    },
+    [assetId, isDuplicate, dispatch, setNewTagInput],
+  );
+
   // Action to add a new tag
   const handleAddTag = useCallback(
     (e: SyntheticEvent, tagName: string): boolean => {
@@ -172,6 +201,7 @@ export const useTagActions = ({
       cancelEditingTag,
       saveEditingTag,
       handleAddTag,
+      handleAddMultipleTags,
       handleDeleteTag,
       handleEditValueChange,
       handleInputChange,
@@ -183,6 +213,7 @@ export const useTagActions = ({
       cancelEditingTag,
       saveEditingTag,
       handleAddTag,
+      handleAddMultipleTags,
       handleDeleteTag,
       handleEditValueChange,
       handleInputChange,

@@ -23,14 +23,14 @@ export const DocumentMixedIcon = ({ className }: DocumentMixedIconProps) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M8.5 10.5h4m-2-2v4"
+      d="M8.5,12.5h6M11.5,9.5v6"
     />
     {/* Minus symbol (bottom half) - larger and more visible */}
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M8.5 15.5h4"
+      d="M8.5,17.5h6"
     />
   </svg>
 );

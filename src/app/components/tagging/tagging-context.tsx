@@ -34,6 +34,7 @@ type TaggingContextType = {
   cancelEditingTag: (e?: SyntheticEvent) => void;
   saveEditingTag: (e?: SyntheticEvent) => void;
   handleAddTag: (e: SyntheticEvent, tagName: string) => boolean;
+  handleAddMultipleTags: (tags: string[]) => void;
   handleDeleteTag: (e: SyntheticEvent, tagName: string) => void;
   handleEditValueChange: (value: string) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -164,6 +165,7 @@ export const TaggingProvider = ({
       cancelEditingTag: actions.cancelEditingTag,
       saveEditingTag: actions.saveEditingTag,
       handleAddTag: actions.handleAddTag,
+      handleAddMultipleTags: actions.handleAddMultipleTags,
       handleDeleteTag: actions.handleDeleteTag,
       handleEditValueChange: actions.handleEditValueChange,
       handleInputChange: actions.handleInputChange,
@@ -192,6 +194,7 @@ export const TaggingProvider = ({
       actions.cancelEditingTag,
       actions.saveEditingTag,
       actions.handleAddTag,
+      actions.handleAddMultipleTags,
       actions.handleDeleteTag,
       actions.handleEditValueChange,
       actions.handleInputChange,

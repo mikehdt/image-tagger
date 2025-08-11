@@ -1,5 +1,5 @@
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import type { ChangeEvent, SyntheticEvent } from 'react';
+import type { ChangeEvent, ClipboardEvent, SyntheticEvent } from 'react';
 import {
   KeyboardEvent,
   memo,
@@ -23,6 +23,7 @@ type InputTagProps = {
   mode: 'add' | 'edit';
   isDuplicate?: boolean;
   nonInteractive?: boolean;
+  onMultipleTagsSubmit?: (tags: string[]) => void;
 };
 
 const InputTagComponent = ({
@@ -34,11 +35,88 @@ const InputTagComponent = ({
   mode = 'add',
   isDuplicate,
   nonInteractive = false,
+  onMultipleTagsSubmit,
 }: InputTagProps) => {
   // Reference to the input element to maintain focus
   const inputRef = useRef<HTMLInputElement>(null);
   // Track if the input is focused for showing/hiding controls in add mode
   const [isFocused, setIsFocused] = useState(mode === 'edit');
+
+  // Helper function to process comma-separated tags
+  const processMultipleTags = useCallback(
+    (tagsString: string) => {
+      if (mode === 'edit' || !onMultipleTagsSubmit) {
+        return false;
+      }
+
+      const tags = tagsString
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
+      if (tags.length > 1) {
+        onMultipleTagsSubmit(tags);
+        return true;
+      }
+
+      return false;
+    },
+    [mode, onMultipleTagsSubmit],
+  );
+
+  // Handle paste events to detect comma-separated content
+  const handlePaste = useCallback(
+    (e: ClipboardEvent<HTMLInputElement>) => {
+      if (mode === 'edit' || nonInteractive) {
+        return;
+      }
+
+      const pastedText = e.clipboardData.getData('text');
+      const fullText = inputValue + pastedText;
+
+      // If the pasted content contains commas, process it as multiple tags
+      if (pastedText.includes(',')) {
+        e.preventDefault();
+        processMultipleTags(fullText);
+      }
+    },
+    [mode, nonInteractive, inputValue, processMultipleTags],
+  );
+
+  // Helper function to handle tag submission with comma detection
+  const handleTagSubmission = useCallback(
+    (e: SyntheticEvent, value: string) => {
+      // First check if we have comma-separated tags (only in add mode)
+      if (mode === 'add' && processMultipleTags(value)) {
+        return;
+      }
+
+      // Handle single tag submission
+      if (value.trim() !== '' && !nonInteractive) {
+        if (mode === 'edit') {
+          if (!isDuplicate) {
+            onSubmit(e);
+          }
+        } else {
+          // Add mode
+          if (!isDuplicate) {
+            onSubmit(e);
+          } else {
+            // Clear the field when trying to add a duplicate
+            onCancel(e);
+          }
+        }
+      }
+    },
+    [
+      mode,
+      processMultipleTags,
+      nonInteractive,
+      isDuplicate,
+      onSubmit,
+      onCancel,
+    ],
+  );
 
   // Handle focus and blur events
   const handleFocus = useCallback(() => {
@@ -55,45 +133,25 @@ const InputTagComponent = ({
     }
   }, [mode]);
 
-  // Allow submitting via Enter key and canceling via Escape
+  // Allow submitting via Enter/comma and canceling via Escape
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      // For edit mode, we need different handling
-      if (mode === 'edit') {
-        if (
-          e.key === 'Enter' &&
-          inputValue.trim() !== '' &&
-          !isDuplicate &&
-          !nonInteractive
-        ) {
-          // Only allow submission of non-empty, non-duplicate values in edit mode
-          onSubmit(e);
-        } else if (e.key === 'Escape' && !nonInteractive) {
+      // Handle Enter and comma as submission triggers
+      if (e.key === 'Enter' || (e.key === ',' && mode === 'add')) {
+        e.preventDefault(); // Prevent default behavior for both keys
+        handleTagSubmission(e, inputValue);
+      } else if (e.key === 'Escape' && !nonInteractive) {
+        if (mode === 'edit') {
           // Always call cancel in edit mode, which will properly un-fade tags
           // This is the ONLY way to exit edit mode
           onCancel(e);
-        } else if (e.key === 'Enter') {
-          // Prevent default form submission behavior for empty/duplicate values
-          e.preventDefault();
-        }
-      } else {
-        // Add mode behavior
-        if (e.key === 'Enter' && inputValue.trim() !== '' && !nonInteractive) {
-          if (!isDuplicate) {
-            onSubmit(e);
-          } else {
-            // Clear the field when trying to add a duplicate
-            onCancel(e);
-          }
-        } else if (e.key === 'Escape' && !nonInteractive) {
+        } else {
+          // Add mode
           onCancel(e);
-        } else if (e.key === 'Enter') {
-          // Prevent form submission on empty input in add mode
-          e.preventDefault();
         }
       }
     },
-    [inputValue, onSubmit, onCancel, isDuplicate, nonInteractive, mode],
+    [inputValue, handleTagSubmission, nonInteractive, mode, onCancel],
   );
 
   const onCancelAdd = useCallback(
@@ -102,6 +160,16 @@ const InputTagComponent = ({
       if (inputValue.trim() !== '' && !nonInteractive) onCancel(e);
     },
     [inputValue, nonInteractive, onCancel],
+  );
+
+  const onSubmitAdd = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      if (inputValue.trim() !== '' && !nonInteractive) {
+        handleTagSubmission(e, inputValue);
+      }
+    },
+    [inputValue, nonInteractive, handleTagSubmission],
   );
 
   const onClickEdit = useCallback(
@@ -172,7 +240,8 @@ const InputTagComponent = ({
         ref={inputRef}
         value={inputValue}
         onChange={onInputChange}
-        onKeyUp={handleKeyPress}
+        onKeyDown={handleKeyPress}
+        onPaste={handlePaste}
         type="text"
         placeholder={placeholder}
         tabIndex={nonInteractive ? -1 : 0}
@@ -194,7 +263,7 @@ const InputTagComponent = ({
               inputValue.trim() !== '' && !nonInteractive
                 ? isDuplicate
                   ? onCancel
-                  : onSubmit
+                  : onSubmitAdd
                 : undefined
             }
             tabIndex={nonInteractive ? -1 : 0}

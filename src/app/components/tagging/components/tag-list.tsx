@@ -28,6 +28,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
     handleInputChange,
     handleCancelAdd,
     handleAddTag,
+    handleAddMultipleTags,
     tagProps,
   } = useTaggingContext();
 
@@ -82,6 +83,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
           placeholder="Add tag..."
           nonInteractive={isEditing}
           isDuplicate={isDuplicate(newTagInput)}
+          onMultipleTagsSubmit={handleAddMultipleTags}
         />
 
         {tagList.length > 0 && (
