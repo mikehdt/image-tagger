@@ -36,6 +36,9 @@ export const MultiTagInput = ({
 }: MultiTagInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [hasFocus, setHasFocus] = useState(false);
+  const [highlightedTagIndex, setHighlightedTagIndex] = useState<number | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +82,11 @@ export const MultiTagInput = ({
   };
 
   const handleInputChange = (value: string) => {
+    // Clear any highlighted tag when typing
+    if (highlightedTagIndex !== null) {
+      setHighlightedTagIndex(null);
+    }
+
     // If the input contains a comma, split and process the tags
     if (value.includes(',')) {
       const parts = value.split(',');
@@ -106,6 +114,7 @@ export const MultiTagInput = ({
   };
 
   const removeTag = (tagToRemove: string) => {
+    setHighlightedTagIndex(null); // Clear highlight when removing a tag
     onTagsChange(tags.filter((tag) => tag !== tagToRemove));
   };
 
@@ -114,13 +123,27 @@ export const MultiTagInput = ({
       e.preventDefault();
       addTag(inputValue);
     } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
-      // Remove the last tag if Backspace is pressed on an empty input
-      removeTag(tags[tags.length - 1]);
+      e.preventDefault();
+
+      if (highlightedTagIndex !== null) {
+        // Second backspace: remove the highlighted tag
+        const newTags = [...tags];
+        newTags.splice(highlightedTagIndex, 1);
+        onTagsChange(newTags);
+        setHighlightedTagIndex(null);
+      } else {
+        // First backspace: highlight the last tag
+        setHighlightedTagIndex(tags.length - 1);
+      }
+    } else if (e.key !== 'Backspace' && highlightedTagIndex !== null) {
+      // Any key other than backspace clears the highlight
+      setHighlightedTagIndex(null);
     }
   };
 
   const handleInputBlur = () => {
     setHasFocus(false);
+    setHighlightedTagIndex(null); // Clear highlight when losing focus
     if (inputValue.trim()) {
       addTag(inputValue);
     }
@@ -134,31 +157,38 @@ export const MultiTagInput = ({
       } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300' : 'inset-shadow-slate-300'}`}
       data-container="true"
     >
-      {tags.map((tag) => {
+      {tags.map((tag, index) => {
         // Find the status for this tag
         const tagInfo = tagStatus.find((t) => t.tag === tag) || {
           tag,
           status: 'none',
         };
         const status = tagInfo.status;
+        const isHighlighted = highlightedTagIndex === index;
 
         // Define style variants based on status
         const tagStyles = {
-          none: 'border-slate-300 bg-slate-100 text-slate-800',
-          some: 'border-amber-300 bg-amber-50 text-amber-800',
-          all: 'border-rose-300 bg-rose-100 text-rose-800',
+          none: isHighlighted
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
+            : 'border-slate-300 bg-slate-100 text-slate-800',
+          some: isHighlighted
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
+            : 'border-amber-300 bg-amber-50 text-amber-800',
+          all: isHighlighted
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
+            : 'border-rose-300 bg-rose-100 text-rose-800',
         };
 
         const buttonHoverStyles = {
-          none: 'hover:bg-slate-300',
-          some: 'hover:bg-amber-200',
-          all: 'hover:bg-rose-300',
+          none: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-slate-300',
+          some: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-amber-200',
+          all: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-rose-300',
         };
 
         const iconStyles = {
-          none: 'text-slate-600',
-          some: 'text-amber-600',
-          all: 'text-rose-600',
+          none: isHighlighted ? 'text-blue-600' : 'text-slate-600',
+          some: isHighlighted ? 'text-blue-600' : 'text-amber-600',
+          all: isHighlighted ? 'text-blue-600' : 'text-rose-600',
         };
 
         return (
