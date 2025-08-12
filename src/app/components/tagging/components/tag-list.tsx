@@ -47,56 +47,60 @@ export const TagList = ({ className = '' }: TagListProps) => {
   }, [tagList, showToast]);
 
   return (
-    <div className={className}>
-      <div className="relative flex flex-wrap">
-        {tagList.map((tagName: string) => {
-          const props = tagProps[tagName];
-          return (
-            <SortableTag
-              key={`tag-${tagName}`}
-              id={tagName}
-              tagName={tagName}
-              fade={props.fade}
-              nonInteractive={props.nonInteractive}
-              tagState={props.tagState}
-              count={props.count}
-              isHighlighted={props.isHighlighted}
-              isBeingEdited={props.isBeingEdited}
-            />
-          );
-        })}
+    <div className={`flex h-full w-full`}>
+      <div className={className}>
+        <div className="relative flex flex-wrap">
+          {tagList.map((tagName: string) => {
+            const props = tagProps[tagName];
+            return (
+              <SortableTag
+                key={`tag-${tagName}`}
+                id={tagName}
+                tagName={tagName}
+                fade={props.fade}
+                nonInteractive={props.nonInteractive}
+                tagState={props.tagState}
+                count={props.count}
+                isHighlighted={props.isHighlighted}
+                isBeingEdited={props.isBeingEdited}
+              />
+            );
+          })}
+        </div>
+
+        <div
+          className={`transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
+        >
+          <InputTag
+            inputValue={newTagInput}
+            onInputChange={handleInputChange}
+            onSubmit={(e: SyntheticEvent) => {
+              if (handleAddTag(e, newTagInput)) {
+                // The context will handle clearing the input on success
+              }
+            }}
+            onCancel={handleCancelAdd}
+            mode="add"
+            placeholder="Add tag..."
+            nonInteractive={isEditing}
+            isDuplicate={isDuplicate(newTagInput)}
+            onMultipleTagsSubmit={handleAddMultipleTags}
+          />
+        </div>
       </div>
 
-      <div
-        className={`flex flex-wrap items-center justify-between gap-2 transition-all ${isEditing || editingTagName !== '' ? 'pointer-events-none opacity-25' : ''}`}
-      >
-        <InputTag
-          inputValue={newTagInput}
-          onInputChange={handleInputChange}
-          onSubmit={(e: SyntheticEvent) => {
-            if (handleAddTag(e, newTagInput)) {
-              // The context will handle clearing the input on success
-            }
-          }}
-          onCancel={handleCancelAdd}
-          mode="add"
-          placeholder="Add tag..."
-          nonInteractive={isEditing}
-          isDuplicate={isDuplicate(newTagInput)}
-          onMultipleTagsSubmit={handleAddMultipleTags}
-        />
-
-        {tagList.length > 0 && (
+      {tagList.length > 0 && (
+        <div className="self-end">
           <Button
             onClick={handleCopyTags}
             variant="ghost"
-            size="small"
+            size="smallSquare"
             title="Copy tags as comma-separated list"
           >
             <ClipboardDocumentIcon className="w-4 text-slate-400" />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

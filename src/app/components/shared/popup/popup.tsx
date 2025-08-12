@@ -32,11 +32,8 @@ export const Popup: React.FC<PopupProps> = ({
     if (state.shouldRender && popupRef.current && config?.triggerRef?.current) {
       // Force a layout to ensure accurate measurements
       const popup = popupRef.current;
-      void popup.offsetHeight; // Force reflow
 
       const result = calculatePopupPosition(
-        config.triggerRef.current,
-        popup,
         config.position || position,
         config.offset || offset,
       );

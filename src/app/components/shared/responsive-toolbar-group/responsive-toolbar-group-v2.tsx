@@ -39,23 +39,23 @@ function ResponsiveToolbarGroupInternal({
         : 'bottom';
 
   // Detect mobile breakpoint and handle resize
-  useEffect(() => {
-    const checkIsMobile = () => {
-      const isMobileView = window.innerWidth < 768; // md breakpoint
+  // useEffect(() => {
+  //   const checkIsMobile = () => {
+  //     const isMobileView = window.innerWidth < 768; // md breakpoint
 
-      // Close popover when switching to desktop
-      if (!isMobileView && isPopoverOpen) {
-        closePopup(popupId);
-      }
-    };
+  //     // Close popover when switching to desktop
+  //     if (!isMobileView && isPopoverOpen) {
+  //       closePopup(popupId);
+  //     }
+  //   };
 
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
+  //   checkIsMobile();
+  //   window.addEventListener('resize', checkIsMobile);
 
-    return () => {
-      window.removeEventListener('resize', checkIsMobile);
-    };
-  }, [isPopoverOpen, closePopup]);
+  //   return () => {
+  //     window.removeEventListener('resize', checkIsMobile);
+  //   };
+  // }, [isPopoverOpen, closePopup]);
 
   const handleButtonClick = useCallback(() => {
     if (isPopoverOpen) {

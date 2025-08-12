@@ -10,8 +10,6 @@ export const VIEWPORT_MARGIN = 16; // px minimum margin from viewport edges
  * Calculate the optimal position for a popup based on trigger element and desired position
  */
 export function calculatePopupPosition(
-  triggerElement: HTMLElement,
-  popupElement: HTMLElement,
   desiredPosition: PopupPosition,
   offset: number = DEFAULT_OFFSET,
 ): { position: PopupPosition; styles: React.CSSProperties } {
@@ -59,13 +57,13 @@ export function getTransformOrigin(position: PopupPosition): string {
     case 'top-left':
       return 'bottom left';
     case 'top':
-      return 'bottom center';
+      return 'bottom left'; // Don't ask me why
     case 'top-right':
       return 'bottom right';
     case 'bottom-left':
       return 'top left';
     case 'bottom':
-      return 'top center';
+      return 'top left'; // Don't ask me why
     case 'bottom-right':
       return 'top right';
     default:
