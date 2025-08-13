@@ -1,5 +1,5 @@
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback, useMemo } from 'react';
 
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
@@ -30,21 +30,46 @@ export const TagList = ({ className = '' }: TagListProps) => {
     handleAddTag,
     handleAddMultipleTags,
     tagProps,
+    filterTagsSet,
   } = useTaggingContext();
 
   const { showToast } = useToast();
 
+  // Determine which tags to copy and whether it's a partial copy
+  const copyInfo = useMemo(() => {
+    // Get selected tags that are actually in this asset
+    const selectedTagsInAsset = tagList.filter((tag) => filterTagsSet.has(tag));
+
+    // If we have selected tags in this asset, copy only those
+    // Otherwise, copy all tags
+    const shouldCopySelection = selectedTagsInAsset.length > 0;
+    const tagsToCopy = shouldCopySelection ? selectedTagsInAsset : tagList;
+
+    return {
+      tagsToCopy,
+      isPartialCopy: shouldCopySelection,
+      selectedCount: selectedTagsInAsset.length,
+    };
+  }, [tagList, filterTagsSet]);
+
   const handleCopyTags = useCallback(async () => {
-    const tagsText = tagList.join(', ');
+    const tagsText = copyInfo.tagsToCopy.join(', ');
 
     try {
       await navigator.clipboard.writeText(tagsText);
-      showToast('Tags copied to clipboard');
+
+      if (copyInfo.isPartialCopy) {
+        showToast(
+          `Copied ${copyInfo.selectedCount} selected ${copyInfo.selectedCount === 1 ? 'tag' : 'tags'} `,
+        );
+      } else {
+        showToast('Tags copied to clipboard');
+      }
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       showToast('Failed to copy tags');
     }
-  }, [tagList, showToast]);
+  }, [copyInfo, showToast]);
 
   return (
     <div className={`flex h-full w-full`}>
@@ -95,9 +120,14 @@ export const TagList = ({ className = '' }: TagListProps) => {
             onClick={handleCopyTags}
             variant="ghost"
             size="smallSquare"
-            title="Copy tags as comma-separated list"
+            color={copyInfo.isPartialCopy ? 'emerald' : 'slate'}
+            title={
+              copyInfo.isPartialCopy
+                ? `Copy ${copyInfo.selectedCount} selected ${copyInfo.selectedCount === 1 ? 'tag' : 'tags'} as comma-separated list`
+                : 'Copy all tags as comma-separated list'
+            }
           >
-            <ClipboardDocumentIcon className="w-4 text-slate-400" />
+            <ClipboardDocumentIcon className="w-4 opacity-50" />
           </Button>
         </div>
       )}
