@@ -19,7 +19,7 @@ export function calculatePopupPosition(
   const position = desiredPosition;
   const styles: React.CSSProperties = {
     position: 'absolute',
-    zIndex: 50,
+    zIndex: 60, // Higher than modal (z-50) to appear on top
   };
 
   // Handle horizontal positioning

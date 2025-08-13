@@ -16,6 +16,11 @@ export interface DropdownItem<T> {
 }
 
 /**
+ * Size options for the dropdown
+ */
+type DropdownSize = 'small' | 'medium' | 'large';
+
+/**
  * Props for the Dropdown component
  */
 interface DropdownProps<T> {
@@ -31,7 +36,18 @@ interface DropdownProps<T> {
   disabledItemClassName?: string;
   alignRight?: boolean;
   openUpward?: boolean;
+  size?: DropdownSize;
+  fullWidth?: boolean;
 }
+
+/**
+ * Size styles for dropdown buttons
+ */
+const sizeStyles: Record<DropdownSize, string> = {
+  small: 'px-2 py-1',
+  medium: 'px-2 py-1',
+  large: 'px-3 py-2',
+};
 
 /**
  * Internal dropdown component that uses the popup context
@@ -49,6 +65,8 @@ function DropdownInternal<T>({
   disabledItemClassName = '',
   alignRight = false,
   openUpward = false,
+  size = 'medium',
+  fullWidth = false,
 }: DropdownProps<T>) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
@@ -150,14 +168,16 @@ function DropdownInternal<T>({
   }, [isOpen, closePopup, openPopup, position]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${fullWidth ? 'w-full' : ''} ${className}`}>
       <button
         ref={buttonRef}
         type="button"
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors ${
+          fullWidth ? 'w-full' : ''
+        } ${sizeStyles[size]} ${
           isOpen
             ? 'bg-white shadow-sm'
             : 'bg-white shadow-sm hover:bg-slate-200'
@@ -181,7 +201,9 @@ function DropdownInternal<T>({
         id={popupId}
         position={position}
         triggerRef={buttonRef}
-        className={`min-w-20 rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none ${menuClassName}`}
+        className={`${
+          fullWidth ? 'min-w-full' : 'min-w-20'
+        } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none ${menuClassName}`}
       >
         <div className="divide-y divide-slate-100" role="menu">
           {items.map((item, index) => (

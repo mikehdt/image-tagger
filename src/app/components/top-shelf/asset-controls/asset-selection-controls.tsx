@@ -252,6 +252,7 @@ export const AssetSelectionControls = ({
       icon={<IdentificationIcon className="w-4" />}
       title="Asset Selection"
       position="left"
+      breakpoint="large"
     >
       <Button
         variant="ghost"

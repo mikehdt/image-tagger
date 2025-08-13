@@ -48,7 +48,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
 
   return (
     <div className={`flex h-full w-full`}>
-      <div className={className}>
+      <div className={`flex-1 ${className}`}>
         <div className="relative flex flex-wrap">
           {tagList.map((tagName: string) => {
             const props = tagProps[tagName];
