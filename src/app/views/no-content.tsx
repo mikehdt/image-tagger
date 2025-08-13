@@ -38,12 +38,8 @@ export const NoContent = ({ onReload }: NoContentProps) => {
         </Button>
 
         {projectName !== 'Default Project' && (
-          <Button
-            onClick={handleBackToProjects}
-            size="mediumWide"
-            variant="ghost"
-          >
-            Back to Projects
+          <Button onClick={handleBackToProjects} size="mediumWide">
+            Back to Project List
           </Button>
         )}
       </div>

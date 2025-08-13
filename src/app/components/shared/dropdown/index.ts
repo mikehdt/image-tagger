@@ -1,1 +1,1 @@
-export { Dropdown, type DropdownItem } from './dropdown-v2';
+export { Dropdown, type DropdownItem } from './dropdown';

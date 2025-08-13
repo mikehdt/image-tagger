@@ -1,1 +1,1 @@
-export { ResponsiveToolbarGroup } from './responsive-toolbar-group-v2';
+export { ResponsiveToolbarGroup } from './responsive-toolbar-group';

@@ -1,11 +1,7 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { ReactNode, useCallback, useRef } from 'react';
+
+import { Popup, PopupProvider, usePopup } from '../popup';
 
 /**
  * Dropdown Item interface - defines the structure of each dropdown option
@@ -38,9 +34,9 @@ interface DropdownProps<T> {
 }
 
 /**
- * A reusable dropdown component with keyboard navigation and accessibility features.
+ * Internal dropdown component that uses the popup context
  */
-export function Dropdown<T>({
+function DropdownInternal<T>({
   items,
   selectedValue,
   onChange,
@@ -54,63 +50,34 @@ export function Dropdown<T>({
   alignRight = false,
   openUpward = false,
 }: DropdownProps<T>) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({ left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { openPopup, closePopup, getPopupState } = usePopup();
+
+  const popupId = 'dropdown-menu';
+  const isOpen = getPopupState(popupId).isOpen;
 
   // Find the selected item
   const selectedItem = items.find((item) => item.value === selectedValue);
 
-  // Handle closing dropdown when clicking outside or pressing Escape
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscapeKey);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [isOpen]);
-
-  // Update dropdown position when it opens
-  useEffect(() => {
-    if (isOpen && dropdownRef.current) {
-      // Calculate position to ensure dropdown stays within viewport
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-
-      // If dropdownRef is too close to the right edge, adjust position
-      if (rect.right > viewportWidth - 10) {
-        const adjustment = rect.right - (viewportWidth - 10);
-        setDropdownPosition({ left: -adjustment });
-      } else {
-        setDropdownPosition({ left: 0 });
-      }
-    }
-  }, [isOpen]);
+  // Determine popup position based on alignment and direction
+  const position = openUpward
+    ? alignRight
+      ? 'top-right'
+      : 'top-left'
+    : alignRight
+      ? 'bottom-right'
+      : 'bottom-left';
 
   // Handle keyboard navigation in the dropdown button
   const handleButtonKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-      setIsOpen(true);
+      openPopup(popupId, {
+        position,
+        triggerRef: buttonRef,
+      });
       e.preventDefault();
     } else if (e.key === 'Escape' && isOpen) {
-      setIsOpen(false);
+      closePopup(popupId);
       e.preventDefault();
     }
   };
@@ -122,7 +89,7 @@ export function Dropdown<T>({
     index: number,
   ) => {
     if (e.key === 'Escape') {
-      setIsOpen(false);
+      closePopup(popupId);
       e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       // Find the next non-disabled item
@@ -157,29 +124,40 @@ export function Dropdown<T>({
   const handleItemClick = (item: DropdownItem<T>) => {
     if (!item.disabled) {
       onChange(item.value);
-      setIsOpen(false);
+      closePopup(popupId);
     }
   };
 
   // Handle blur event on the button
   const handleButtonBlur = (e: React.FocusEvent) => {
-    // Check if the next focus is outside our component
-    if (!dropdownRef.current?.contains(e.relatedTarget as Node)) {
+    // Check if the next focus is not within a popup
+    const popupElement = document.querySelector(`[data-popup-id="${popupId}"]`);
+    if (!popupElement?.contains(e.relatedTarget as Node)) {
       // Give a small delay to allow new focus to be established before closing
-      setTimeout(() => setIsOpen(false), 100);
+      setTimeout(() => closePopup(popupId), 100);
     }
   };
 
-  const handleClick = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const handleClick = useCallback(() => {
+    if (isOpen) {
+      closePopup(popupId);
+    } else {
+      openPopup(popupId, {
+        position,
+        triggerRef: buttonRef,
+      });
+    }
+  }, [isOpen, closePopup, openPopup, position]);
 
   return (
-    <div ref={dropdownRef} className={`relative ${className}`}>
+    <div className={`relative ${className}`}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 px-2 py-1 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors ${
           isOpen
             ? 'bg-white shadow-sm'
             : 'bg-white shadow-sm hover:bg-slate-200'
@@ -199,29 +177,13 @@ export function Dropdown<T>({
         />
       </button>
 
-      <div
-        style={{
-          left: alignRight ? 'auto' : `${dropdownPosition.left}px`,
-          right: alignRight ? 0 : 'auto',
-        }}
-        className={`absolute z-10 min-w-20 transform rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg transition-all focus:outline-none ${
-          openUpward ? 'bottom-full mb-1' : 'mt-1'
-        } ${
-          openUpward
-            ? alignRight
-              ? 'origin-bottom-right'
-              : 'origin-bottom-left'
-            : alignRight
-              ? 'origin-top-right'
-              : 'origin-top-left'
-        } ${
-          isOpen
-            ? 'scale-100 opacity-100'
-            : 'pointer-events-none scale-95 opacity-0'
-        } ${menuClassName}`}
-        role="menu"
+      <Popup
+        id={popupId}
+        position={position}
+        triggerRef={buttonRef}
+        className={`min-w-20 rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none ${menuClassName}`}
       >
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100" role="menu">
           {items.map((item, index) => (
             <button
               key={index}
@@ -244,7 +206,19 @@ export function Dropdown<T>({
             </button>
           ))}
         </div>
-      </div>
+      </Popup>
     </div>
+  );
+}
+
+/**
+ * A reusable dropdown component with keyboard navigation and accessibility features.
+ * This version uses the popup system for consistent behavior across the application.
+ */
+export function Dropdown<T>(props: DropdownProps<T>) {
+  return (
+    <PopupProvider>
+      <DropdownInternal {...props} />
+    </PopupProvider>
   );
 }

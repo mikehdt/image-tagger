@@ -21,7 +21,7 @@ import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';
 
 /**
- * Enhanced tag processing that handles duplicate tags with precedence rules
+ * Enhanced tag processing that handles duplicate tags - allows multiple renames to the same value
  */
 const processTagUpdatesWithDuplicateHandling = (
   editedTags: Record<string, string>,
@@ -38,10 +38,7 @@ const processTagUpdatesWithDuplicateHandling = (
     operation: 'RENAME' | 'DELETE';
   }> = [];
 
-  // Track which new tag names have been used (for precedence)
-  const usedNewNames = new Set<string>();
-
-  // Process tags in the order they appear in filterTags (precedence)
+  // Process tags in the order they appear in filterTags
   filterTags.forEach((originalTag) => {
     const newValue = editedTags[originalTag];
 
@@ -63,20 +60,9 @@ const processTagUpdatesWithDuplicateHandling = (
       return;
     }
 
-    // Check if this new name has already been used by a previous tag (precedence rule)
-    if (usedNewNames.has(trimmedValue)) {
-      // This tag loses precedence - mark for deletion but pass the intended new name
-      // so the thunk can handle the duplicate logic properly
-      result.push({
-        oldTagName: originalTag,
-        newTagName: trimmedValue, // Pass the intended target name, not the original
-        operation: 'DELETE',
-      });
-      return;
-    }
-
-    // This tag can be renamed safely - mark the new name as used
-    usedNewNames.add(trimmedValue);
+    // Allow all other renames - the thunk will handle duplicate detection at the asset level
+    // This means multiple tags can be renamed to the same value, and the thunk will properly
+    // handle duplicates within individual assets
     result.push({
       oldTagName: originalTag,
       newTagName: trimmedValue,
@@ -254,9 +240,9 @@ export const EditTagsModal = ({
         return 'none';
       }
 
-      // Check if this value is a duplicate of another edited tag
-      // This is a separate check from the asset-level duplicates
       const trimmedValue = newValue.trim();
+
+      // Check if this value is a duplicate of another edited tag (form-level duplicate)
       const duplicateCount = Object.entries(editedTags).filter(
         ([otherTag, otherValue]) =>
           otherTag !== originalTag && // Not the same tag
@@ -264,10 +250,7 @@ export const EditTagsModal = ({
           otherValue.trim() === trimmedValue, // Values match
       ).length;
 
-      if (duplicateCount > 0) {
-        // This is a duplicate within the form
-        return 'duplicate';
-      }
+      const hasFormDuplicates = duplicateCount > 0;
 
       // Check for potential duplicates within the same assets
       // This is the case where an asset has both the original tag and the new tag value
@@ -278,11 +261,18 @@ export const EditTagsModal = ({
 
         if (allAssetsWouldHaveDuplicates) {
           // Every asset that has the original tag also has the new tag
-          return 'all'; // Complete duplicate, prevent saving
+          // Asset-level 'all' takes priority over form duplicates
+          return 'all';
         } else {
           // Only some assets that have the original tag also have the new tag
-          return 'some'; // Partial duplicate, show amber warning
+          // Asset-level 'some' takes priority over form duplicates
+          return 'some';
         }
+      }
+
+      // If we have form duplicates but no asset-level issues, show form duplicate
+      if (hasFormDuplicates) {
+        return 'duplicate';
       }
 
       // If the new value is the same as any other original tag (case-sensitive match)
@@ -429,7 +419,8 @@ export const EditTagsModal = ({
                   tooltipText = `Tag already exists in all ${info.totalSelected} selected assets`;
                 }
               } else if (status === 'duplicate') {
-                tooltipText = 'Multiple tags cannot have the same value';
+                tooltipText =
+                  'Multiple tags are being renamed to the same value - duplicates within assets will be cleaned up automatically';
               }
 
               return (
@@ -461,16 +452,16 @@ export const EditTagsModal = ({
           <div className="flex flex-wrap gap-4 text-xs text-slate-500">
             <p className="w-full">
               Editing a tag will update it across all assets where it appears.
-              Duplicate tag names are allowed - duplicates will be marked for
-              deletion.
+              Multiple tags can be renamed to the same value - duplicate tags
+              within assets will be automatically cleaned up.
             </p>
 
             {/* Conditionally show the status explanations based on usage */}
             {hasStatusAll && (
               <p className="flex w-full">
                 <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
-                Red highlights indicate the tag exists in all assets and would
-                create duplicates in all assets.
+                Red highlights indicate the tag would create duplicates in all
+                assets that have this tag.
               </p>
             )}
 
@@ -485,7 +476,8 @@ export const EditTagsModal = ({
             {hasStatusFormDuplicate && (
               <p className="flex w-full">
                 <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-purple-400 bg-purple-100"></span>
-                Purple highlights indicate duplicate tag names within the form.
+                Purple highlights indicate multiple tags are being renamed to
+                the same value.
               </p>
             )}
           </div>
