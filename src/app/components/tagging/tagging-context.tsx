@@ -21,6 +21,7 @@ type TaggingContextType = {
   editingTagName: string;
   isEditing: boolean;
   setNewTagInput: (value: string) => void;
+  isDragDropDisabled: boolean;
 
   // Calculations
   isDuplicate: (tagName: string) => boolean;
@@ -67,6 +68,7 @@ export const TaggingProvider = ({
   filterTagsSet = new Set<string>(),
   toggleTag,
   onTagEditingChange,
+  isDragDropDisabled = false,
 }: {
   children: ReactNode;
   assetId: string;
@@ -76,6 +78,7 @@ export const TaggingProvider = ({
   filterTagsSet?: Set<string>;
   toggleTag?: (e: SyntheticEvent, tagName: string) => void;
   onTagEditingChange?: (isEditing: boolean) => void;
+  isDragDropDisabled?: boolean;
 }) => {
   const {
     newTagInput,
@@ -152,6 +155,7 @@ export const TaggingProvider = ({
       editingTagName,
       isEditing,
       setNewTagInput,
+      isDragDropDisabled,
 
       // Calculations - individual functions instead of spreading object
       isDuplicate: calculations.isDuplicate,
@@ -185,6 +189,7 @@ export const TaggingProvider = ({
       editingTagName,
       isEditing,
       setNewTagInput,
+      isDragDropDisabled,
       calculations.isDuplicate,
       calculations.isTagBeingEdited,
       calculations.shouldFade,

@@ -16,6 +16,7 @@ import { selectSelectedAssetsCount } from '@/app/store/selection';
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
 import { CategoryNavigation } from './category-navigation';
 import { FilterModeControls } from './filter-controls/filter-mode-controls';
+import { TagSortControls } from './filter-controls/tag-sort-controls';
 import { FilterListButton } from './filter-list/filter-list-button';
 import { AssetCounts } from './info/asset-counts';
 import { FilterIndicatorsInfo } from './info/filter-counts';
@@ -87,6 +88,8 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
           </div>
 
           <TagActions selectedAssetsCount={selectedAssetsCount} />
+
+          <TagSortControls />
 
           <FilterModeControls
             filterModifiedActive={filterModifiedActive}

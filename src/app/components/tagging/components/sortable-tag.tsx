@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent, useCallback } from 'react';
 import { memo, useRef } from 'react';
 
-import { useTagActions } from '../tagging-context';
+import { useTagActions, useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';
 import { Tag } from './tag';
 
@@ -39,6 +39,9 @@ const SortableTagComponent = ({
     handleDeleteTag,
     handleToggleTag,
   } = useTagActions();
+
+  // Get drag/drop disabled state from context
+  const { isDragDropDisabled } = useTaggingContext();
 
   const isEditing = isBeingEdited;
 
@@ -142,9 +145,9 @@ const SortableTagComponent = ({
     <div
       ref={setRefs}
       style={style}
-      // Don't apply drag attributes or listeners when editing or explicitly non-interactive
-      {...(isEditing || nonInteractive ? {} : attributes)}
-      {...(isEditing || nonInteractive ? {} : listeners)}
+      // Don't apply drag attributes or listeners when editing, explicitly non-interactive, or drag/drop is disabled
+      {...(isEditing || nonInteractive || isDragDropDisabled ? {} : attributes)}
+      {...(isEditing || nonInteractive || isDragDropDisabled ? {} : listeners)}
       className={`mr-2 mb-2 flex touch-none ${nonInteractive ? 'pointer-events-none' : ''}`}
       data-tag-name={tagName}
     >
@@ -170,7 +173,7 @@ const SortableTagComponent = ({
           onToggleTag={onHandleToggleTag}
           onDeleteTag={onHandleDeleteTag}
           onStartEdit={onHandleStartEdit}
-          isDraggable={!isEditing}
+          isDraggable={!isEditing && !isDragDropDisabled}
         />
       )}
     </div>

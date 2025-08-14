@@ -2,7 +2,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { coreReducers } from './reducers';
-import { ProjectState } from './types';
+import { ProjectState, TagSortDirection, TagSortType } from './types';
 
 const initialState: ProjectState = {
   info: {
@@ -12,6 +12,8 @@ const initialState: ProjectState = {
   },
   config: {
     showCropVisualization: false,
+    tagSortType: TagSortType.SORTABLE,
+    tagSortDirection: TagSortDirection.ASC,
   },
 };
 
@@ -28,14 +30,22 @@ const projectSlice = createSlice({
 
     // Project config selectors
     selectShowCropVisualization: (state) => state.config.showCropVisualization,
+    selectTagSortType: (state) => state.config.tagSortType,
+    selectTagSortDirection: (state) => state.config.tagSortDirection,
     selectProjectConfig: (state) => state.config,
   },
 });
 
 // Main exports for slice
 export const { reducer: projectReducer } = projectSlice;
-export const { setProjectInfo, resetProjectState, toggleCropVisualization } =
-  projectSlice.actions;
+export const {
+  setProjectInfo,
+  resetProjectState,
+  toggleCropVisualization,
+  setTagSortType,
+  setTagSortDirection,
+  toggleTagSortDirection,
+} = projectSlice.actions;
 
 // Export the selectors from the slice
 export const {
@@ -43,6 +53,8 @@ export const {
   selectProjectPath,
   selectProjectThumbnail,
   selectShowCropVisualization,
+  selectTagSortType,
+  selectTagSortDirection,
 } = projectSlice.selectors;
 
 // Main exports for project module
