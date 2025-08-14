@@ -46,7 +46,7 @@ const loadConfigFromAPI = async (): Promise<AppConfig> => {
 };
 
 // Get configuration (async)
-export const getConfig = (): Promise<Required<AppConfig>> => {
+const getConfig = (): Promise<Required<AppConfig>> => {
   if (loadedConfig) {
     return Promise.resolve(loadedConfig);
   }
@@ -65,16 +65,9 @@ export const getConfig = (): Promise<Required<AppConfig>> => {
   });
 };
 
-// Check if using default project folder
-export const isUsingDefaultProject = async (): Promise<boolean> => {
-  const config = await getConfig();
-  return config.projectsFolder === DEFAULT_CONFIG.projectsFolder;
-};
-
 // Synchronous constants with defaults (for immediate use)
 // These will be the defaults until config is loaded
 export const DEFAULT_BATCH_SIZE = DEFAULT_CONFIG.batchSize;
-export const PROJECTS_FOLDER = DEFAULT_CONFIG.projectsFolder;
 export const PROJECT_INFO_FOLDER = DEFAULT_CONFIG.infoFolder;
 
 // Supported image file extensions (including the dot)

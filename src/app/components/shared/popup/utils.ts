@@ -4,7 +4,7 @@ export const ANIMATION_DURATION = 150; // ms - should match CSS transition durat
 
 export const DEFAULT_OFFSET = 4; // px spacing between trigger and popup - matches Tailwind mt-1
 
-export const VIEWPORT_MARGIN = 16; // px minimum margin from viewport edges
+const VIEWPORT_MARGIN = 16; // px minimum margin from viewport edges
 
 /**
  * Calculate the optimal position for a popup based on trigger element and desired position
