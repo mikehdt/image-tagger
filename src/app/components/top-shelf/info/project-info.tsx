@@ -14,7 +14,10 @@ const ProjectInfoComponent = () => {
   const projectPath = useAppSelector(selectProjectPath);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
-  if (!projectName || !projectPath) {
+  // Extract project name from path for API calls
+  const projectNameFromPath = projectPath?.split(/[/\\]/).pop();
+
+  if (!projectName || !projectNameFromPath) {
     return null;
   }
 
@@ -22,7 +25,7 @@ const ProjectInfoComponent = () => {
     <div className="flex items-center gap-2">
       {projectThumbnail ? (
         <Image
-          src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectPath=${encodeURIComponent(projectPath)}&isProjectInfo=true`}
+          src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectName=${encodeURIComponent(projectNameFromPath)}&isProjectInfo=true`}
           alt={`${projectName} thumbnail`}
           width={20}
           height={20}

@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { selectImageSizes } from '@/app/store/assets';
 import { selectFilterSizes, toggleSizeFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { decomposeDimensions } from '@/app/utils/helpers';
+import { decomposeDimensions, getAspectRatio } from '@/app/utils/helpers';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { useFilterContext } from '../filter-context';
@@ -16,16 +16,6 @@ import { SortDirection, SortType } from '../types';
  */
 const normalizeSizeText = (text: string): string => {
   return text.replace('×', 'x');
-};
-
-// Calculate aspect ratio from width and height
-const getAspectRatio = (width: number, height: number): [number, number] => {
-  const gcd = (a: number, b: number): number => {
-    return b === 0 ? a : gcd(b, a % b);
-  };
-
-  const divisor = gcd(width, height);
-  return [width / divisor, height / divisor];
 };
 
 // Format aspect ratio as a simplified string

@@ -17,6 +17,9 @@ export const InitialLoad = () => {
   const projectPath = useAppSelector(selectProjectPath);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
+  // Extract project name from path for API calls
+  const projectNameFromPath = projectPath?.split(/[/\\]/).pop();
+
   // Calculate progress percentage safely
   const progressPercentage =
     loadProgress && loadProgress.total > 0
@@ -26,10 +29,10 @@ export const InitialLoad = () => {
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
       <div className="relative">
-        {projectThumbnail && projectPath ? (
+        {projectThumbnail && projectNameFromPath ? (
           <span className="absolute top-0 right-0 bottom-0 left-0 m-auto flex h-21 w-21 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white">
             <Image
-              src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectPath=${encodeURIComponent(projectPath)}&isProjectInfo=true`}
+              src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectName=${encodeURIComponent(projectNameFromPath)}&isProjectInfo=true`}
               alt={projectName || 'Project'}
               width={80}
               height={80}

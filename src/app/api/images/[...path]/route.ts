@@ -5,6 +5,29 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getImageMimeType, PROJECT_INFO_FOLDER } from '@/app/constants';
 
+// Server-side config reading function
+const getServerConfig = () => {
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const configContent = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(configContent);
+      return {
+        projectsFolder: config.projectsFolder || 'public/assets',
+        infoFolder: config.infoFolder || '_info',
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to read server config:', error);
+  }
+
+  // Return defaults if config reading fails
+  return {
+    projectsFolder: 'public/assets',
+    infoFolder: '_info',
+  };
+};
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
@@ -13,19 +36,29 @@ export async function GET(
     // Await params before using its properties
     const { path: pathSegments } = await params;
 
-    // Get the project path from query params
+    // Get parameters from query params - support both old (projectPath) and new (projectName) formats
     const searchParams = request.nextUrl.searchParams;
     const projectPath = searchParams.get('projectPath');
+    const projectName = searchParams.get('projectName');
     const isProjectInfo = searchParams.get('isProjectInfo') === 'true';
 
-    if (!projectPath) {
-      return new NextResponse('Project path required', { status: 400 });
+    let fullProjectPath: string;
+
+    if (projectName) {
+      // New format: reconstruct full path from project name and config
+      const config = getServerConfig();
+      fullProjectPath = path.join(config.projectsFolder, projectName);
+    } else if (projectPath) {
+      // Legacy format: use the full path directly
+      fullProjectPath = projectPath;
+    } else {
+      return new NextResponse('Project name or path required', { status: 400 });
     }
 
     // Reconstruct the file path - support both regular assets and project info
     const basePath = isProjectInfo
-      ? path.join(projectPath, PROJECT_INFO_FOLDER)
-      : projectPath;
+      ? path.join(fullProjectPath, PROJECT_INFO_FOLDER)
+      : fullProjectPath;
     const imagePath = path.join(basePath, ...pathSegments);
 
     // Security check: ensure the path is within allowed directories

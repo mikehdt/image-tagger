@@ -2,23 +2,25 @@
  * Generate a URL for an image that can be used with Next.js Image component
  * This works with images from any folder on disk via our API route
  */
-export const getImageUrl = (fileName: string, projectPath?: string): string => {
-  if (!projectPath) {
+export const getImageUrl = (fileName: string, projectName?: string): string => {
+  if (!projectName) {
     // Fallback to public/assets for backward compatibility
     return `/assets/${fileName}`;
   }
 
   // Use our API route to serve images from any folder
-  const encodedProjectPath = encodeURIComponent(projectPath);
+  // Pass just the project name, not the full path
+  const encodedProjectName = encodeURIComponent(projectName);
   const encodedFileName = encodeURIComponent(fileName);
 
-  return `/api/images/${encodedFileName}?projectPath=${encodedProjectPath}`;
+  return `/api/images/${encodedFileName}?projectName=${encodedProjectName}`;
 };
 
 /**
- * Get the current project path from sessionStorage (client-side only)
+ * Get the current project name from sessionStorage (client-side only)
+ * Returns just the project folder name, not the full path
  */
-export const getCurrentProjectPath = (): string | null => {
+export const getCurrentProjectName = (): string | null => {
   if (typeof window === 'undefined') {
     return null;
   }

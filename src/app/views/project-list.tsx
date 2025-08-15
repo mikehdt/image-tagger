@@ -76,8 +76,8 @@ export const ProjectList = () => {
         }),
       );
 
-      // Store the selected project path, title, and thumbnail for session persistence
-      sessionStorage.setItem('selectedProject', projectPath);
+      // Store just the project folder name (not the full path) for session persistence
+      sessionStorage.setItem('selectedProject', projectName);
       sessionStorage.setItem('selectedProjectTitle', projectTitle);
       if (selectedProject?.thumbnail) {
         sessionStorage.setItem(
@@ -171,7 +171,7 @@ export const ProjectList = () => {
                     <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
                       {project.thumbnail ? (
                         <Image
-                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectPath=${encodeURIComponent(project.path)}&isProjectInfo=true`}
+                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectName=${encodeURIComponent(project.name)}&isProjectInfo=true`}
                           alt={project.title || project.name}
                           width={40}
                           height={40}
@@ -226,7 +226,7 @@ export const ProjectList = () => {
                     <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
                       {project.thumbnail ? (
                         <Image
-                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectPath=${encodeURIComponent(project.path)}&isProjectInfo=true`}
+                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectName=${encodeURIComponent(project.name)}&isProjectInfo=true`}
                           alt={project.title || project.name}
                           width={40}
                           height={40}

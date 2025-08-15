@@ -18,8 +18,32 @@ import { calculateKohyaBucket, KOHYA_CONFIGS } from './image-utils';
 /**
  * Get the current data path - either from provided project path or default
  */
-const getCurrentDataPath = (projectPath?: string): string =>
-  projectPath ? projectPath : 'public/assets';
+const getCurrentDataPath = async (projectPath?: string): Promise<string> => {
+  if (!projectPath) {
+    return 'public/assets';
+  }
+
+  // Check if the projectPath is already a full absolute path
+  if (path.isAbsolute(projectPath)) {
+    return projectPath;
+  }
+
+  // If it's not absolute, treat it as a project name and construct the full path
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const configContent = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(configContent);
+      const projectsFolder = config.projectsFolder || 'public/assets';
+      return path.join(projectsFolder, projectPath);
+    }
+  } catch (error) {
+    console.warn('Failed to read config, using default:', error);
+  }
+
+  // Fallback to default if config reading fails
+  return path.join('public/assets', projectPath);
+};
 
 /**
  * Helper function to detect duplicate fileIds and return filtered results
@@ -65,7 +89,7 @@ const detectDuplicateFileIds = (
 export const getImageFileList = async (
   projectPath?: string,
 ): Promise<string[]> => {
-  const dataPath = getCurrentDataPath(projectPath);
+  const dataPath = await getCurrentDataPath(projectPath);
   // Use the path directly if it's absolute, otherwise resolve it relative to cwd
   const dir = path.isAbsolute(dataPath) ? dataPath : path.resolve(dataPath);
 
@@ -141,7 +165,7 @@ export const getImageAssetDetails = async (
 ): Promise<ImageAsset> => {
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
-  const currentDataPath = getCurrentDataPath(projectPath);
+  const currentDataPath = await getCurrentDataPath(projectPath);
   const fullFilePath = `${currentDataPath}/${file}`;
 
   // Get file stats for last modified time
@@ -215,7 +239,7 @@ export const saveAssetTags = async (
   projectPath?: string,
 ): Promise<boolean> => {
   try {
-    const currentDataPath = getCurrentDataPath(projectPath);
+    const currentDataPath = await getCurrentDataPath(projectPath);
     fs.writeFileSync(`${currentDataPath}/${fileId}.txt`, composedTags);
     return true;
   } catch (err) {
@@ -245,7 +269,7 @@ export const saveMultipleAssetTags = async (
   errors: string[]; // Add list of failed files
 }> => {
   // Process all operations in parallel
-  const currentDataPath = getCurrentDataPath(projectPath);
+  const currentDataPath = await getCurrentDataPath(projectPath);
   const results = await Promise.all(
     operations.map(async ({ fileId, composedTags }) => {
       try {

@@ -16,8 +16,8 @@ import {
   selectAssetIsSelected,
   toggleAssetSelection,
 } from '@/app/store/selection';
-import { composeDimensions } from '@/app/utils/helpers';
-import { getCurrentProjectPath, getImageUrl } from '@/app/utils/image-utils';
+import { composeDimensions, getAspectRatio } from '@/app/utils/helpers';
+import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
@@ -83,9 +83,9 @@ const AssetComponent = ({
 
   // Get the image URL for the current project with cache busting
   const imageUrl = useMemo(() => {
-    const projectPath = getCurrentProjectPath();
+    const projectName = getCurrentProjectName();
     const fileName = `${assetId}.${fileExtension}`;
-    const baseUrl = getImageUrl(fileName, projectPath || undefined);
+    const baseUrl = getImageUrl(fileName, projectName || undefined);
 
     // Properly append cache-busting parameter
     const separator = baseUrl.includes('?') ? '&' : '?';
@@ -170,6 +170,12 @@ const AssetComponent = ({
               src={imageUrl}
               width={dimensions.width}
               height={dimensions.height}
+              style={{
+                aspectRatio: getAspectRatio(
+                  dimensions.width,
+                  dimensions.height,
+                ).join('/'),
+              }}
               alt=""
               priority={filteredIndex <= 4}
             />
