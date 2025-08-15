@@ -54,7 +54,8 @@ const InputTagComponent = ({
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
 
-      if (tags.length > 1) {
+      // Process if we have any valid tags (even just one)
+      if (tags.length > 0) {
         onMultipleTagsSubmit(tags);
         return true;
       }
