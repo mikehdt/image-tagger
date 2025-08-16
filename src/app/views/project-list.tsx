@@ -1,7 +1,6 @@
 'use client';
 
 import { FolderIcon, StarIcon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -12,6 +11,7 @@ import { useAppDispatch } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection } from '../store/selection';
 import { getProjectList } from '../utils/project-actions';
+import { ProjectIcon } from './project-icon';
 
 type Project = {
   name: string;
@@ -92,6 +92,48 @@ export const ProjectList = () => {
     [router, dispatch, projects],
   );
 
+  const handleToggleFeatured = useCallback(
+    async (projectName: string, currentFeatured: boolean) => {
+      try {
+        // Optimistically update the UI
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, featured: !currentFeatured }
+              : project,
+          ),
+        );
+
+        // Make API call to toggle featured status
+        const response = await fetch(
+          `/api/projects/${encodeURIComponent(projectName)}/featured`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ featured: !currentFeatured }),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to update featured status');
+        }
+      } catch (error) {
+        console.error('Error toggling featured status:', error);
+        // Revert the optimistic update on error
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, featured: currentFeatured }
+              : project,
+          ),
+        );
+      }
+    },
+    [],
+  );
+
   // Separate projects into featured and regular
   const featuredProjects = projects.filter((project) => project.featured);
   const regularProjects = projects.filter((project) => !project.featured);
@@ -165,22 +207,13 @@ export const ProjectList = () => {
                   onClick={() => handleProjectSelect(project.path)}
                   size="large"
                   color={project.color || 'slate'}
-                  className="w-full justify-start p-4 text-left"
+                  className="group w-full justify-start p-4 text-left"
                 >
                   <div className="flex w-full items-center">
-                    <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
-                      {project.thumbnail ? (
-                        <Image
-                          src={`/projects/${project.thumbnail}`}
-                          alt={project.title || project.name}
-                          width={40}
-                          height={40}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <FolderIcon className="h-5 w-5 text-slate-500" />
-                      )}
-                    </span>
+                    <ProjectIcon
+                      project={project}
+                      onToggleFeatured={handleToggleFeatured}
+                    />
 
                     <div className="flex min-w-0 flex-1 items-center justify-between">
                       <div className="flex flex-wrap font-medium text-slate-900">
@@ -220,22 +253,13 @@ export const ProjectList = () => {
                   onClick={() => handleProjectSelect(project.path)}
                   size="large"
                   color={project.color || 'slate'}
-                  className="w-full justify-start p-4 text-left"
+                  className="group w-full justify-start p-4 text-left"
                 >
                   <div className="flex w-full items-center">
-                    <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
-                      {project.thumbnail ? (
-                        <Image
-                          src={`/projects/${project.thumbnail}`}
-                          alt={project.title || project.name}
-                          width={40}
-                          height={40}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <FolderIcon className="h-5 w-5 text-slate-500" />
-                      )}
-                    </span>
+                    <ProjectIcon
+                      project={project}
+                      onToggleFeatured={handleToggleFeatured}
+                    />
 
                     <div className="flex min-w-0 flex-1 items-center justify-between">
                       <div className="flex flex-wrap font-medium text-slate-900">
