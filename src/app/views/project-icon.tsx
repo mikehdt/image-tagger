@@ -50,9 +50,7 @@ const ProjectIconComponent = ({
       {/* Star overlay on hover */}
       <div
         onClick={handleStarClick}
-        className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full transition-opacity duration-200 hover:bg-white ${
-          isHovering ? 'border border-slate-300 opacity-100' : 'opacity-0'
-        }`}
+        className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:border hover:opacity-100 ${project.featured ? 'hover:border-amber-400 hover:bg-amber-100' : 'hover:border-slate-300 hover:bg-white'}`}
         title={project.featured ? 'Remove from featured' : 'Add to featured'}
       >
         {project.featured ? (
