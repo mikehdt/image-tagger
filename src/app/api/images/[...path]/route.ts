@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
-import { getImageMimeType, PROJECT_INFO_FOLDER } from '@/app/constants';
+import { getImageMimeType } from '@/app/constants';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -40,7 +40,6 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const projectPath = searchParams.get('projectPath');
     const projectName = searchParams.get('projectName');
-    const isProjectInfo = searchParams.get('isProjectInfo') === 'true';
 
     let fullProjectPath: string;
 
@@ -55,15 +54,12 @@ export async function GET(
       return new NextResponse('Project name or path required', { status: 400 });
     }
 
-    // Reconstruct the file path - support both regular assets and project info
-    const basePath = isProjectInfo
-      ? path.join(fullProjectPath, PROJECT_INFO_FOLDER)
-      : fullProjectPath;
-    const imagePath = path.join(basePath, ...pathSegments);
+    // Reconstruct the file path for regular assets
+    const imagePath = path.join(fullProjectPath, ...pathSegments);
 
     // Security check: ensure the path is within allowed directories
     const resolvedPath = path.resolve(imagePath);
-    const resolvedBasePath = path.resolve(basePath);
+    const resolvedBasePath = path.resolve(fullProjectPath);
 
     if (!resolvedPath.startsWith(resolvedBasePath)) {
       return new NextResponse('Access denied', { status: 403 });

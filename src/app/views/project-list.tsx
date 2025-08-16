@@ -171,7 +171,7 @@ export const ProjectList = () => {
                     <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
                       {project.thumbnail ? (
                         <Image
-                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectName=${encodeURIComponent(project.name)}&isProjectInfo=true`}
+                          src={`/projects/${project.thumbnail}`}
                           alt={project.title || project.name}
                           width={40}
                           height={40}
@@ -226,7 +226,7 @@ export const ProjectList = () => {
                     <span className="mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
                       {project.thumbnail ? (
                         <Image
-                          src={`/api/images/${encodeURIComponent(project.thumbnail)}?projectName=${encodeURIComponent(project.name)}&isProjectInfo=true`}
+                          src={`/projects/${project.thumbnail}`}
                           alt={project.title || project.name}
                           width={40}
                           height={40}

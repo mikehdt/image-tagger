@@ -3,10 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import {
-  isSupportedImageExtension,
-  PROJECT_INFO_FOLDER,
-} from '@/app/constants';
+import { isSupportedImageExtension } from '@/app/constants';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -17,7 +14,6 @@ const getServerConfig = () => {
       const config = JSON.parse(configContent);
       return {
         projectsFolder: config.projectsFolder || 'public/assets',
-        infoFolder: config.infoFolder || '_info',
       };
     }
   } catch (error) {
@@ -27,16 +23,19 @@ const getServerConfig = () => {
   // Return defaults if config reading fails
   return {
     projectsFolder: 'public/assets',
-    infoFolder: '_info',
   };
 };
 
-type ProjectInfo = {
+type CentralizedProjectInfo = {
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
   thumbnail?: string;
   hidden?: boolean;
   featured?: boolean;
+};
+
+type LocalProjectInfo = {
+  private?: boolean;
 };
 
 type Project = {
@@ -51,32 +50,73 @@ type Project = {
 };
 
 /**
- * Read project info from _info/project.json if it exists
+ * Read centralized project info from /public/projects/[project-name].json
  */
-const readProjectInfo = (projectPath: string): ProjectInfo | null => {
+const readCentralizedProjectInfo = (
+  projectName: string,
+): CentralizedProjectInfo | null => {
   try {
-    const infoFolderPath = path.join(projectPath, PROJECT_INFO_FOLDER);
-    const projectInfoPath = path.join(infoFolderPath, 'project.json');
+    const centralConfigPath = path.join(
+      process.cwd(),
+      'public',
+      'projects',
+      `${projectName}.json`,
+    );
 
-    if (!fs.existsSync(projectInfoPath)) {
+    if (!fs.existsSync(centralConfigPath)) {
       return null;
     }
 
-    const infoContent = fs.readFileSync(projectInfoPath, 'utf-8');
-    const info = JSON.parse(infoContent) as ProjectInfo;
+    const configContent = fs.readFileSync(centralConfigPath, 'utf-8');
+    const config = JSON.parse(configContent) as CentralizedProjectInfo;
 
     // Validate thumbnail file exists if specified
-    if (info.thumbnail) {
-      const thumbnailPath = path.join(infoFolderPath, info.thumbnail);
+    if (config.thumbnail) {
+      const thumbnailPath = path.join(
+        process.cwd(),
+        'public',
+        'projects',
+        config.thumbnail,
+      );
       if (!fs.existsSync(thumbnailPath)) {
-        console.warn(`Thumbnail file not found: ${thumbnailPath}`);
-        info.thumbnail = undefined;
+        console.warn(
+          `Centralized thumbnail file not found: ${thumbnailPath}`,
+        );
+        config.thumbnail = undefined;
       }
     }
 
-    return info;
+    return config;
   } catch (error) {
-    console.warn(`Error reading project info for ${projectPath}:`, error);
+    console.warn(
+      `Error reading centralized project info for ${projectName}:`,
+      error,
+    );
+    return null;
+  }
+};
+
+/**
+ * Read local project info from [project-folder]/_project.json
+ * Only supports private flag
+ */
+const readLocalProjectInfo = (projectPath: string): LocalProjectInfo | null => {
+  try {
+    const localConfigPath = path.join(projectPath, '_project.json');
+
+    if (!fs.existsSync(localConfigPath)) {
+      return null;
+    }
+
+    const configContent = fs.readFileSync(localConfigPath, 'utf-8');
+    const config = JSON.parse(configContent) as LocalProjectInfo;
+
+    // Only return private flag - ignore any other properties
+    return {
+      private: config.private || false,
+    };
+  } catch (error) {
+    console.warn(`Error reading local project info for ${projectPath}:`, error);
     return null;
   }
 };
@@ -120,23 +160,30 @@ export const getProjectList = async (): Promise<Project[]> => {
           // Continue with imageCount = 0
         }
 
-        // Read project info if available
-        const projectInfo = readProjectInfo(projectPath);
+        // Read centralized project info first (takes precedence)
+        const centralizedInfo = readCentralizedProjectInfo(folder.name);
+        
+        // Read local project info for privacy setting
+        const localInfo = readLocalProjectInfo(projectPath);
+
+        // Combine configuration with centralized taking precedence
+        const isPrivate = localInfo?.private || false;
+        const isHidden = centralizedInfo?.hidden || isPrivate;
 
         return {
           name: folder.name,
           path: projectPath,
           imageCount,
-          title: projectInfo?.title,
-          color: projectInfo?.color,
-          thumbnail: projectInfo?.thumbnail,
-          hidden: projectInfo?.hidden || false,
-          featured: projectInfo?.featured || false,
+          title: centralizedInfo?.title,
+          color: centralizedInfo?.color,
+          thumbnail: centralizedInfo?.thumbnail,
+          hidden: isHidden,
+          featured: centralizedInfo?.featured || false,
         };
       }),
     );
 
-    // Filter out hidden projects
+    // Filter out hidden/private projects
     const visibleProjects = projects.filter((project) => !project.hidden);
 
     // Separate featured and regular projects

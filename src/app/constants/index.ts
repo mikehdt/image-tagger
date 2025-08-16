@@ -4,14 +4,12 @@
 interface AppConfig {
   batchSize?: number;
   projectsFolder?: string;
-  infoFolder?: string;
 }
 
 // Default values
 const DEFAULT_CONFIG: Required<AppConfig> = {
   batchSize: 48,
   projectsFolder: 'public/assets',
-  infoFolder: '_info',
 };
 
 // Load configuration from API with fallback defaults
@@ -59,7 +57,6 @@ const getConfig = (): Promise<Required<AppConfig>> => {
     loadedConfig = {
       batchSize: config.batchSize ?? DEFAULT_CONFIG.batchSize,
       projectsFolder: config.projectsFolder ?? DEFAULT_CONFIG.projectsFolder,
-      infoFolder: config.infoFolder ?? DEFAULT_CONFIG.infoFolder,
     };
     return loadedConfig;
   });
@@ -68,7 +65,6 @@ const getConfig = (): Promise<Required<AppConfig>> => {
 // Synchronous constants with defaults (for immediate use)
 // These will be the defaults until config is loaded
 export const DEFAULT_BATCH_SIZE = DEFAULT_CONFIG.batchSize;
-export const PROJECT_INFO_FOLDER = DEFAULT_CONFIG.infoFolder;
 
 // Supported image file extensions (including the dot)
 const SUPPORTED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'] as const;
