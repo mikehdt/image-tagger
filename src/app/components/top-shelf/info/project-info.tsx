@@ -3,21 +3,13 @@ import Image from 'next/image';
 import { memo } from 'react';
 
 import { useAppSelector } from '@/app/store/hooks';
-import {
-  selectProjectName,
-  selectProjectPath,
-  selectProjectThumbnail,
-} from '@/app/store/project';
+import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
 
 const ProjectInfoComponent = () => {
   const projectName = useAppSelector(selectProjectName);
-  const projectPath = useAppSelector(selectProjectPath);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
-  // Extract project name from path for API calls
-  const projectNameFromPath = projectPath?.split(/[/\\]/).pop();
-
-  if (!projectName || !projectNameFromPath) {
+  if (!projectName) {
     return null;
   }
 
@@ -25,7 +17,7 @@ const ProjectInfoComponent = () => {
     <div className="flex items-center gap-2">
       {projectThumbnail ? (
         <Image
-          src={`/api/images/${encodeURIComponent(projectThumbnail)}?projectName=${encodeURIComponent(projectNameFromPath)}&isProjectInfo=true`}
+          src={`/projects/${encodeURIComponent(projectThumbnail)}`}
           alt={`${projectName} thumbnail`}
           width={20}
           height={20}

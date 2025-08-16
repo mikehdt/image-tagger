@@ -29,7 +29,7 @@ const getServerConfig = () => {
 type CentralizedProjectInfo = {
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
-  thumbnail?: string;
+  thumbnail?: boolean;
   hidden?: boolean;
   featured?: boolean;
 };
@@ -47,6 +47,29 @@ type Project = {
   thumbnail?: string;
   hidden?: boolean;
   featured?: boolean;
+};
+
+/**
+ * Find thumbnail file for a project based on project name
+ * Looks for [project-name].[ext] in /public/projects/ folder
+ */
+const findThumbnailFile = (projectName: string): string | undefined => {
+  try {
+    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    for (const ext of supportedExtensions) {
+      const thumbnailPath = path.join(projectsDir, `${projectName}${ext}`);
+      if (fs.existsSync(thumbnailPath)) {
+        return `${projectName}${ext}`;
+      }
+    }
+
+    return undefined;
+  } catch (error) {
+    console.warn(`Error finding thumbnail for ${projectName}:`, error);
+    return undefined;
+  }
 };
 
 /**
@@ -69,22 +92,6 @@ const readCentralizedProjectInfo = (
 
     const configContent = fs.readFileSync(centralConfigPath, 'utf-8');
     const config = JSON.parse(configContent) as CentralizedProjectInfo;
-
-    // Validate thumbnail file exists if specified
-    if (config.thumbnail) {
-      const thumbnailPath = path.join(
-        process.cwd(),
-        'public',
-        'projects',
-        config.thumbnail,
-      );
-      if (!fs.existsSync(thumbnailPath)) {
-        console.warn(
-          `Centralized thumbnail file not found: ${thumbnailPath}`,
-        );
-        config.thumbnail = undefined;
-      }
-    }
 
     return config;
   } catch (error) {
@@ -162,7 +169,7 @@ export const getProjectList = async (): Promise<Project[]> => {
 
         // Read centralized project info first (takes precedence)
         const centralizedInfo = readCentralizedProjectInfo(folder.name);
-        
+
         // Read local project info for privacy setting
         const localInfo = readLocalProjectInfo(projectPath);
 
@@ -170,13 +177,18 @@ export const getProjectList = async (): Promise<Project[]> => {
         const isPrivate = localInfo?.private || false;
         const isHidden = centralizedInfo?.hidden || isPrivate;
 
+        // Find thumbnail file if thumbnail is enabled
+        const thumbnailFile = centralizedInfo?.thumbnail
+          ? findThumbnailFile(folder.name)
+          : undefined;
+
         return {
           name: folder.name,
           path: projectPath,
           imageCount,
           title: centralizedInfo?.title,
           color: centralizedInfo?.color,
-          thumbnail: centralizedInfo?.thumbnail,
+          thumbnail: thumbnailFile,
           hidden: isHidden,
           featured: centralizedInfo?.featured || false,
         };

@@ -1,6 +1,6 @@
 {
   "title": "Example Project",
   "color": "emerald",
-  "thumbnail": "example-thumbnail.jpg",
+  "thumbnail": true,
   "featured": true
 }
