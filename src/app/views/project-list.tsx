@@ -11,6 +11,7 @@ import { useAppDispatch } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection } from '../store/selection';
 import { getProjectList } from '../utils/project-actions';
+import { ProjectContent } from './project-content';
 import { ProjectIcon } from './project-icon';
 
 type Project = {
@@ -29,6 +30,9 @@ export const ProjectList = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editColor, setEditColor] = useState<Project['color']>('slate');
 
   const loadProjects = useCallback(async () => {
     try {
@@ -134,6 +138,70 @@ export const ProjectList = () => {
     [],
   );
 
+  const handleStartEdit = useCallback((project: Project) => {
+    setEditingProject(project.name);
+    setEditTitle(project.title || '');
+    setEditColor(project.color || 'slate');
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingProject(null);
+    setEditTitle('');
+    setEditColor('slate');
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (projectName: string) => {
+      try {
+        const updates: { title?: string; color?: Project['color'] } = {};
+
+        // Always include title - empty string will be removed by API, which is what we want
+        updates.title = editTitle.trim();
+
+        // Only include color if it's not the default
+        if (editColor && editColor !== 'slate') {
+          updates.color = editColor;
+        }
+
+        // Make API call to update the project
+        const response = await fetch(
+          `/api/projects/${encodeURIComponent(projectName)}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updates),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to update project');
+        }
+
+        // Update the project in the state
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? {
+                  ...project,
+                  title: editTitle.trim() ? editTitle.trim() : undefined,
+                  color: editColor !== 'slate' ? editColor : undefined,
+                }
+              : project,
+          ),
+        );
+
+        // Exit edit mode
+        handleCancelEdit();
+      } catch (error) {
+        console.error('Error saving project edit:', error);
+        // Could add toast notification here
+      }
+    },
+    [editTitle, editColor, handleCancelEdit],
+  );
+
   // Separate projects into featured and regular
   const featuredProjects = projects.filter((project) => project.featured);
   const regularProjects = projects.filter((project) => !project.featured);
@@ -201,39 +269,43 @@ export const ProjectList = () => {
               Featured Projects
             </h2>
             <div className="flex flex-wrap gap-3">
-              {featuredProjects.map((project) => (
-                <Button
-                  key={project.path}
-                  onClick={() => handleProjectSelect(project.path)}
-                  size="large"
-                  color={project.color || 'slate'}
-                  className="group w-full justify-start p-4 text-left"
-                >
-                  <div className="flex w-full items-center">
-                    <ProjectIcon
-                      project={project}
-                      onToggleFeatured={handleToggleFeatured}
-                    />
+              {featuredProjects.map((project) => {
+                const isEditing = editingProject === project.name;
+                return (
+                  <Button
+                    key={project.path}
+                    onClick={
+                      isEditing
+                        ? (e) => e.preventDefault()
+                        : () => handleProjectSelect(project.path)
+                    }
+                    size="large"
+                    color={isEditing ? editColor : project.color || 'slate'}
+                    className={`group w-full justify-start p-4 text-left ${
+                      isEditing ? 'cursor-default!' : ''
+                    }`}
+                  >
+                    <div className="flex w-full items-center">
+                      <ProjectIcon
+                        project={project}
+                        onToggleFeatured={handleToggleFeatured}
+                      />
 
-                    <div className="flex min-w-0 flex-1 items-center justify-between">
-                      <div className="flex flex-wrap font-medium text-slate-900">
-                        <span className="w-full truncate">
-                          {project.title || project.name}
-                        </span>
-
-                        <span className="w-full text-xs text-black/40">
-                          {project.name}
-                        </span>
-                      </div>
-                      {project.imageCount !== undefined && (
-                        <div className="text-sm text-slate-500 tabular-nums">
-                          {project.imageCount} images
-                        </div>
-                      )}
+                      <ProjectContent
+                        project={project}
+                        isEditing={isEditing}
+                        editTitle={editTitle}
+                        editColor={editColor}
+                        onStartEdit={() => handleStartEdit(project)}
+                        onCancelEdit={handleCancelEdit}
+                        onSaveEdit={() => handleSaveEdit(project.name)}
+                        onTitleChange={setEditTitle}
+                        onColorChange={setEditColor}
+                      />
                     </div>
-                  </div>
-                </Button>
-              ))}
+                  </Button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -247,39 +319,43 @@ export const ProjectList = () => {
               {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
             </h2>
             <div className="flex flex-wrap gap-3">
-              {regularProjects.map((project) => (
-                <Button
-                  key={project.path}
-                  onClick={() => handleProjectSelect(project.path)}
-                  size="large"
-                  color={project.color || 'slate'}
-                  className="group w-full justify-start p-4 text-left"
-                >
-                  <div className="flex w-full items-center">
-                    <ProjectIcon
-                      project={project}
-                      onToggleFeatured={handleToggleFeatured}
-                    />
+              {regularProjects.map((project) => {
+                const isEditing = editingProject === project.name;
+                return (
+                  <Button
+                    key={project.path}
+                    onClick={
+                      isEditing
+                        ? (e) => e.preventDefault()
+                        : () => handleProjectSelect(project.path)
+                    }
+                    size="large"
+                    color={isEditing ? editColor : project.color || 'slate'}
+                    className={`group w-full justify-start p-4 text-left ${
+                      isEditing ? 'cursor-default' : 'cursor-pointer'
+                    }`}
+                  >
+                    <div className="flex w-full items-center">
+                      <ProjectIcon
+                        project={project}
+                        onToggleFeatured={handleToggleFeatured}
+                      />
 
-                    <div className="flex min-w-0 flex-1 items-center justify-between">
-                      <div className="flex flex-wrap font-medium text-slate-900">
-                        <span className="w-full truncate">
-                          {project.title || project.name}
-                        </span>
-
-                        <span className="w-full text-xs text-black/40">
-                          {project.name}
-                        </span>
-                      </div>
-                      {project.imageCount !== undefined && (
-                        <div className="text-sm text-slate-500 tabular-nums">
-                          {project.imageCount} images
-                        </div>
-                      )}
+                      <ProjectContent
+                        project={project}
+                        isEditing={isEditing}
+                        editTitle={editTitle}
+                        editColor={editColor}
+                        onStartEdit={() => handleStartEdit(project)}
+                        onCancelEdit={handleCancelEdit}
+                        onSaveEdit={() => handleSaveEdit(project.name)}
+                        onTitleChange={setEditTitle}
+                        onColorChange={setEditColor}
+                      />
                     </div>
-                  </div>
-                </Button>
-              ))}
+                  </Button>
+                );
+              })}
             </div>
           </div>
         )}

@@ -48,7 +48,7 @@ const ProjectIconComponent = ({
       </div>
 
       {/* Star overlay on hover */}
-      <button
+      <div
         onClick={handleStarClick}
         className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full transition-opacity duration-200 hover:bg-white ${
           isHovering ? 'border border-slate-300 opacity-100' : 'opacity-0'
@@ -60,7 +60,7 @@ const ProjectIconComponent = ({
         ) : (
           <StarIcon className="h-5 w-5 text-slate-600" />
         )}
-      </button>
+      </div>
     </span>
   );
 };
