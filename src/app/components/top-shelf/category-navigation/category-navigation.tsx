@@ -144,11 +144,6 @@ export const CategoryNavigation = ({
     };
   }, [isOpen, handleClose]);
 
-  // Don't render if no categories or only one category
-  if (categoriesWithPageInfo.length <= 1) {
-    return null;
-  }
-
   return (
     <div ref={containerRef} className="relative">
       <Button
@@ -157,6 +152,7 @@ export const CategoryNavigation = ({
         size="large"
         title="Jump to category"
         isPressed={isOpen}
+        disabled={categoriesWithPageInfo.length <= 1}
       >
         <NumberedListIcon className="w-4" />
       </Button>

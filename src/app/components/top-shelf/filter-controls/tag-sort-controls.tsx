@@ -84,7 +84,7 @@ export const TagSortControls = () => {
     <ResponsiveToolbarGroup
       icon={<ChevronUpDownIcon className="w-4" />}
       title="Tag Sort"
-      position="right"
+      position="center"
       breakpoint="large"
     >
       <Dropdown
