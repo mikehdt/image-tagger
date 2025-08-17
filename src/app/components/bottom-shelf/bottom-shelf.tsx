@@ -37,16 +37,33 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
   const saveProgress = useAppSelector(selectSaveProgress) || null;
   const loadProgress = useAppSelector(selectLoadProgress) || null;
 
-  // Track previous IO state to detect completion
+  // Track previous IO state and operation type to detect completion
   const prevIoStateRef = useRef<IoState>(ioState);
+  const lastOperationTypeRef = useRef<'loading' | 'saving' | null>(null);
 
-  // Show toast when loading completes
+  // Show toast when operations complete
   useEffect(() => {
     const prevIoState = prevIoStateRef.current;
 
-    // If we transitioned from COMPLETING to COMPLETE, show completion toast
+    // Track the type of operation when entering LOADING or SAVING states
+    if (ioState === IoState.LOADING) {
+      lastOperationTypeRef.current = 'loading';
+    } else if (ioState === IoState.SAVING) {
+      lastOperationTypeRef.current = 'saving';
+    }
+
+    // If we transitioned from COMPLETING to COMPLETE, show completion toast based on operation type
     if (prevIoState === IoState.COMPLETING && ioState === IoState.COMPLETE) {
-      showToast('Asset reload complete');
+      const operationType = lastOperationTypeRef.current;
+
+      if (operationType === 'loading') {
+        showToast('Asset reload complete');
+      } else if (operationType === 'saving') {
+        showToast('Asset save complete');
+      }
+
+      // Clear the operation type after showing the toast
+      lastOperationTypeRef.current = null;
     }
 
     // Update the ref for next comparison
