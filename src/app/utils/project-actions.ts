@@ -46,6 +46,7 @@ type Project = {
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
   thumbnail?: string;
   hidden?: boolean;
+  private?: boolean;
   featured?: boolean;
 };
 
@@ -131,6 +132,7 @@ const readLocalProjectInfo = (projectPath: string): LocalProjectInfo | null => {
 /**
  * Get a list of project folders from the projects directory
  * Each project folder should contain image files and associated txt files
+ * Private projects are never included, hidden projects are included but filtered client-side
  */
 export const getProjectList = async (): Promise<Project[]> => {
   try {
@@ -190,13 +192,14 @@ export const getProjectList = async (): Promise<Project[]> => {
           color: centralizedInfo?.color,
           thumbnail: thumbnailFile,
           hidden: isHidden,
+          private: isPrivate,
           featured: centralizedInfo?.featured || false,
         };
       }),
     );
 
-    // Filter out hidden/private projects
-    const visibleProjects = projects.filter((project) => !project.hidden);
+    // Always filter out private projects, but include hidden ones when includeHidden is true
+    const visibleProjects = projects.filter((project) => !project.private);
 
     // Separate featured and regular projects
     const featuredProjects = visibleProjects

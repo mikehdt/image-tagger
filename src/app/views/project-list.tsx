@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '../components/shared/button';
+import { Checkbox } from '../components/shared/checkbox';
 import { resetAssetsState } from '../store/assets';
 import { clearFilters } from '../store/filters';
 import { useAppDispatch } from '../store/hooks';
@@ -22,6 +23,8 @@ type Project = {
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
   thumbnail?: string;
   featured?: boolean;
+  hidden?: boolean;
+  private?: boolean;
 };
 
 export const ProjectList = () => {
@@ -33,13 +36,15 @@ export const ProjectList = () => {
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editColor, setEditColor] = useState<Project['color']>('slate');
+  const [editHidden, setEditHidden] = useState(false);
+  const [showHidden, setShowHidden] = useState(false);
 
   const loadProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Call server action to get project list
+      // Call server action to get project list (always include hidden, but not private)
       const projectData = await getProjectList();
       setProjects(projectData.filter((project) => project?.imageCount));
     } catch (err) {
@@ -108,11 +113,11 @@ export const ProjectList = () => {
           ),
         );
 
-        // Make API call to toggle featured status
+        // Make API call to toggle featured status using main PATCH endpoint
         const response = await fetch(
-          `/api/projects/${encodeURIComponent(projectName)}/featured`,
+          `/api/projects/${encodeURIComponent(projectName)}`,
           {
-            method: 'POST',
+            method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -142,18 +147,24 @@ export const ProjectList = () => {
     setEditingProject(project.name);
     setEditTitle(project.title || '');
     setEditColor(project.color || 'slate');
+    setEditHidden(project.hidden || false);
   }, []);
 
   const handleCancelEdit = useCallback(() => {
     setEditingProject(null);
     setEditTitle('');
     setEditColor('slate');
+    setEditHidden(false);
   }, []);
 
   const handleSaveEdit = useCallback(
     async (projectName: string) => {
       try {
-        const updates: { title?: string; color?: Project['color'] } = {};
+        const updates: {
+          title?: string;
+          color?: Project['color'];
+          hidden?: boolean;
+        } = {};
 
         // Always include title - empty string will be removed by API, which is what we want
         updates.title = editTitle.trim();
@@ -161,6 +172,11 @@ export const ProjectList = () => {
         // Only include color if it's not the default
         if (editColor && editColor !== 'slate') {
           updates.color = editColor;
+        }
+
+        // Include hidden state
+        if (editHidden) {
+          updates.hidden = editHidden;
         }
 
         // Make API call to update the project
@@ -187,6 +203,7 @@ export const ProjectList = () => {
                   ...project,
                   title: editTitle.trim() ? editTitle.trim() : undefined,
                   color: editColor !== 'slate' ? editColor : undefined,
+                  hidden: editHidden ? editHidden : undefined,
                 }
               : project,
           ),
@@ -199,12 +216,21 @@ export const ProjectList = () => {
         // Could add toast notification here
       }
     },
-    [editTitle, editColor, handleCancelEdit],
+    [editTitle, editColor, editHidden, handleCancelEdit],
   );
 
-  // Separate projects into featured and regular
-  const featuredProjects = projects.filter((project) => project.featured);
-  const regularProjects = projects.filter((project) => !project.featured);
+  // Separate projects into featured and regular, filtering out hidden projects unless showHidden is true
+  // Always filter out private projects regardless of showHidden state
+  const nonPrivateProjects = projects.filter((project) => !project.private);
+  const visibleProjects = showHidden
+    ? nonPrivateProjects
+    : nonPrivateProjects.filter((project) => !project.hidden);
+  const featuredProjects = visibleProjects.filter(
+    (project) => project.featured,
+  );
+  const regularProjects = visibleProjects.filter(
+    (project) => !project.featured,
+  );
 
   if (loading) {
     return (
@@ -282,8 +308,8 @@ export const ProjectList = () => {
                     size="large"
                     color={isEditing ? editColor : project.color || 'slate'}
                     className={`group w-full justify-start p-4 text-left ${
-                      isEditing ? 'cursor-default!' : ''
-                    }`}
+                      isEditing ? 'cursor-default' : 'cursor-pointer'
+                    } ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
                   >
                     <div className="flex w-full items-center">
                       <ProjectIcon
@@ -296,11 +322,13 @@ export const ProjectList = () => {
                         isEditing={isEditing}
                         editTitle={editTitle}
                         editColor={editColor}
+                        editHidden={editHidden}
                         onStartEdit={() => handleStartEdit(project)}
                         onCancelEdit={handleCancelEdit}
                         onSaveEdit={() => handleSaveEdit(project.name)}
                         onTitleChange={setEditTitle}
                         onColorChange={setEditColor}
+                        onHiddenChange={setEditHidden}
                       />
                     </div>
                   </Button>
@@ -333,7 +361,7 @@ export const ProjectList = () => {
                     color={isEditing ? editColor : project.color || 'slate'}
                     className={`group w-full justify-start p-4 text-left ${
                       isEditing ? 'cursor-default' : 'cursor-pointer'
-                    }`}
+                    } ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
                   >
                     <div className="flex w-full items-center">
                       <ProjectIcon
@@ -346,11 +374,13 @@ export const ProjectList = () => {
                         isEditing={isEditing}
                         editTitle={editTitle}
                         editColor={editColor}
+                        editHidden={editHidden}
                         onStartEdit={() => handleStartEdit(project)}
                         onCancelEdit={handleCancelEdit}
                         onSaveEdit={() => handleSaveEdit(project.name)}
                         onTitleChange={setEditTitle}
                         onColorChange={setEditColor}
+                        onHiddenChange={setEditHidden}
                       />
                     </div>
                   </Button>
@@ -359,6 +389,15 @@ export const ProjectList = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mt-4 mb-4">
+        <Checkbox
+          isSelected={showHidden}
+          onChange={() => setShowHidden(!showHidden)}
+          label="Show hidden projects"
+          className="scale-90"
+        />
       </div>
 
       <Button onClick={loadProjects} size="mediumWide">

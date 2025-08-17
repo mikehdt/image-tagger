@@ -9,6 +9,8 @@ type ProjectIconProps = {
     title?: string;
     thumbnail?: string;
     featured?: boolean;
+    hidden?: boolean;
+    private?: boolean;
   };
   onToggleFeatured: (projectName: string, currentFeatured: boolean) => void;
 };

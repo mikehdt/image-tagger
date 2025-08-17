@@ -1,11 +1,15 @@
 import { CheckIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { memo, useEffect, useRef } from 'react';
 
+import { Checkbox } from '../components/shared/checkbox';
+
 type Project = {
   name: string;
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
   imageCount?: number;
+  hidden?: boolean;
+  private?: boolean;
 };
 
 type ProjectContentProps = {
@@ -13,11 +17,13 @@ type ProjectContentProps = {
   isEditing: boolean;
   editTitle: string;
   editColor: Project['color'];
+  editHidden?: boolean;
   onStartEdit: () => void;
   onCancelEdit: () => void;
   onSaveEdit: () => void;
   onTitleChange: (title: string) => void;
   onColorChange: (color: Project['color']) => void;
+  onHiddenChange?: (hidden: boolean) => void;
 };
 
 const colors: {
@@ -75,11 +81,13 @@ const ProjectContentComponent = ({
   isEditing,
   editTitle,
   editColor,
+  editHidden,
   onStartEdit,
   onCancelEdit,
   onSaveEdit,
   onTitleChange,
   onColorChange,
+  onHiddenChange,
 }: ProjectContentProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,6 +150,17 @@ const ProjectContentComponent = ({
                 />
               ))}
             </div>
+          </div>
+
+          {/* Hidden checkbox */}
+          <div className="flex items-center">
+            <Checkbox
+              isSelected={editHidden || false}
+              onChange={() => onHiddenChange?.(!editHidden)}
+              className="scale-75"
+              ariaLabel="Hide project from list"
+              label="Hide project"
+            />
           </div>
         </div>
 
