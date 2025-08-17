@@ -124,7 +124,7 @@ const ProjectContentComponent = ({
           {/* Color picker */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-600">Colour:</span>
-            <div className="flex gap-1">
+            <div className="mr-auto flex gap-1">
               {colors.map((color) => (
                 <div
                   key={color.value}
@@ -150,16 +150,13 @@ const ProjectContentComponent = ({
                 />
               ))}
             </div>
-          </div>
 
-          {/* Hidden checkbox */}
-          <div className="flex items-center">
             <Checkbox
               isSelected={editHidden || false}
               onChange={() => onHiddenChange?.(!editHidden)}
-              className="scale-75"
               ariaLabel="Hide project from list"
-              label="Hide project"
+              label="Hide"
+              size="small"
             />
           </div>
         </div>

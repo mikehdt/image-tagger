@@ -11,6 +11,7 @@ interface CheckboxProps {
   disabled?: boolean;
   ariaLabel?: string;
   label?: string; // Optional label to display next to the checkbox
+  size?: 'small' | 'medium'; // Size of the checkbox
 }
 
 /**
@@ -24,6 +25,7 @@ export const Checkbox = ({
   disabled = false,
   ariaLabel,
   label,
+  size = 'medium',
 }: CheckboxProps) => {
   const onClick = useCallback(
     (e: SyntheticEvent) => {
@@ -32,14 +34,30 @@ export const Checkbox = ({
     [disabled, onChange],
   );
 
+  // Size-specific styling
+  const sizeClasses = {
+    small: {
+      checkbox: 'h-4 w-4',
+      label: 'text-xs',
+      gap: 'gap-1.5',
+    },
+    medium: {
+      checkbox: 'h-5 w-5',
+      label: 'text-sm',
+      gap: 'gap-2',
+    },
+  };
+
+  const currentSize = sizeClasses[size];
+
   return (
     <label
-      className={`inline-flex items-start gap-2 text-sm select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
+      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
       onClick={onClick}
       tabIndex={-1} // prevent double tab stop
     >
       <div
-        className={`relative flex h-5 w-5 items-center justify-center overflow-hidden rounded border shadow-sm inset-shadow-xs transition-all ${
+        className={`relative flex ${currentSize.checkbox} items-center justify-center overflow-hidden rounded border shadow-sm inset-shadow-xs transition-all ${
           disabled
             ? 'border-slate-300 bg-slate-50 shadow-slate-200'
             : isSelected

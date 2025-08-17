@@ -396,7 +396,7 @@ export const ProjectList = () => {
           isSelected={showHidden}
           onChange={() => setShowHidden(!showHidden)}
           label="Show hidden projects"
-          className="scale-90"
+          size="small"
         />
       </div>
 
