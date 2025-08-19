@@ -473,6 +473,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 <Dropdown<number>
                   openUpward
                   fullWidth
+                  size="large"
                   items={validHeightsForWidth.map((height) => ({
                     value: height,
                     label: isHeightRounded

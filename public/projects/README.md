@@ -29,6 +29,8 @@ Each `[project-name].json` file can contain the following options:
 - **featured** (optional): Whether to show in "Featured Projects" section
 - **hidden** (optional): Whether to hide the project from listings
 
+Apart from the thumbnail, all other options are configurable from the interface
+
 ## Thumbnail Images
 
 When `thumbnail: true` is set, the system will look for an image file with the same name as the project:

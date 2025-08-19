@@ -29,7 +29,10 @@ export const NoContent = ({ onReload }: NoContentProps) => {
       <CubeTransparentIcon className="w-full max-w-80 text-slate-500" />
 
       <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
-        No assets found{projectName ? ` in ${projectName}` : ''}
+        No assets found
+        {projectName !== 'Default Project'
+          ? ` in ${projectName}`
+          : ' in the public assets folder'}
       </h1>
 
       <div className="mt-4 flex w-full justify-center gap-3">

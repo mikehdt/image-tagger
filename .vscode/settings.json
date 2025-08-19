@@ -1,4 +1,7 @@
 {
+  "files.exclude": {
+    ".next": true
+  },
   "search.exclude": {
     "pnpm-lock.yaml": true
   }

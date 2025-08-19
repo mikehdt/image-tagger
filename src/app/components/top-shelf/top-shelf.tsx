@@ -87,9 +87,9 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
             <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
           </div>
 
-          <TagActions selectedAssetsCount={selectedAssetsCount} />
-
           <TagSortControls />
+
+          <TagActions selectedAssetsCount={selectedAssetsCount} />
 
           <FilterModeControls
             filterModifiedActive={filterModifiedActive}
