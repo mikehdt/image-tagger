@@ -343,16 +343,11 @@ export const ProjectList = () => {
                 return (
                   <Button
                     key={project.path}
-                    onClick={
-                      isEditing
-                        ? (e) => e.preventDefault()
-                        : () => handleProjectSelect(project.path)
-                    }
+                    onClick={() => handleProjectSelect(project.path)}
                     size="large"
                     color={isEditing ? editColor : project.color || 'slate'}
-                    className={`group w-full justify-start p-4 text-left ${
-                      isEditing ? 'cursor-default' : 'cursor-pointer'
-                    } ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
+                    inert={isEditing}
+                    className={`group w-full justify-start p-4 text-left ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
                   >
                     <div className="flex w-full items-center">
                       <ProjectIcon
@@ -395,16 +390,11 @@ export const ProjectList = () => {
                 return (
                   <Button
                     key={project.path}
-                    onClick={
-                      isEditing
-                        ? (e) => e.preventDefault()
-                        : () => handleProjectSelect(project.path)
-                    }
+                    onClick={() => handleProjectSelect(project.path)}
                     size="large"
                     color={isEditing ? editColor : project.color || 'slate'}
-                    className={`group w-full justify-start p-4 text-left ${
-                      isEditing ? 'cursor-default' : 'cursor-pointer'
-                    } ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
+                    inert={isEditing}
+                    className={`group w-full justify-start p-4 text-left ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
                   >
                     <div className="flex w-full items-center">
                       <ProjectIcon

@@ -47,6 +47,9 @@ interface ButtonProps {
   // Ghost disabled removes all styling when disabled
   ghostDisabled?: boolean;
   neutralDisabled?: boolean;
+
+  // Inert removes interactive behavior (no click handling, default cursor, no hover)
+  inert?: boolean;
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -178,11 +181,12 @@ export const Button = ({
   isPressed = false,
   ghostDisabled = false,
   neutralDisabled = false,
+  inert = false,
   ref,
   ...props
 }: ButtonProps) => {
   const handleClick = (e: SyntheticEvent) => {
-    if (disabled) return;
+    if (disabled || inert) return;
     if (type === 'submit' && onSubmit) {
       onSubmit(e);
     } else if (onClick) {
@@ -191,7 +195,7 @@ export const Button = ({
   };
 
   const baseStyle = {
-    common: `flex justify-center items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`,
+    common: `flex justify-center items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : inert ? 'cursor-default' : 'cursor-pointer'}`,
     normal: 'inset-shadow-xs inset-shadow-white',
     disabled: 'opacity-60',
     ghost: 'hover:inset-shadow-xs hover:inset-shadow-white',
@@ -222,6 +226,34 @@ export const Button = ({
         ghostDisabled || variant === 'ghost'
           ? `${neutralDisabled ? colorStyles.slate.ghostDisabled : colorConfig.ghostDisabled} ${isPressed ? colorConfig.pressed : ''}`
           : `${baseStyle.disabled} ${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''} ${neutralDisabled ? colorStyles.slate.disabled : colorConfig.disabled}`;
+    }
+  } else if (inert) {
+    // Inert state: normal styling but no hover effects
+    switch (variant) {
+      case 'toggle':
+        styleClasses = isPressed
+          ? `${baseStyle.togglePressed} ${colorConfig.togglePressed}`
+          : `${baseStyle.normal} ${colorConfig.normal}`;
+        break;
+
+      case 'deep-toggle':
+        styleClasses = isPressed
+          ? `border-white bg-white ${baseStyle.pressed}`
+          : `${baseStyle.deepPressed} ${colorConfig.deepPressed}`;
+        break;
+
+      case 'ghost':
+        styleClasses = `${colorConfig.ghost
+          .split(' ')
+          .filter((cls) => !cls.startsWith('hover:'))
+          .join(
+            ' ',
+          )} ${isPressed ? `${baseStyle.pressed} ${colorConfig.pressed}` : ''}`;
+        break;
+
+      default:
+        styleClasses = `${baseStyle.normal} ${isPressed ? colorConfig.pressed : colorConfig.normal}`;
+        break;
     }
   } else {
     // Determine styling based on variant and state
