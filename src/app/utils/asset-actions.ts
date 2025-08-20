@@ -35,14 +35,33 @@ const getCurrentDataPath = async (projectPath?: string): Promise<string> => {
       const configContent = fs.readFileSync(configPath, 'utf-8');
       const config = JSON.parse(configContent);
       const projectsFolder = config.projectsFolder || 'public/assets';
-      return path.join(projectsFolder, projectPath);
+      const fullPath = path.join(projectsFolder, projectPath);
+
+      // Protect against edge case: if projects folder is default but constructed path doesn't exist,
+      // fall back to just the default path
+      if (projectsFolder === 'public/assets' && !fs.existsSync(fullPath)) {
+        console.warn(
+          `Project path ${fullPath} does not exist, falling back to default assets folder`,
+        );
+        return 'public/assets';
+      }
+
+      return fullPath;
     }
   } catch (error) {
     console.warn('Failed to read config, using default:', error);
   }
 
-  // Fallback to default if config reading fails
-  return path.join('public/assets', projectPath);
+  // Fallback to default if config reading fails or constructed path doesn't exist
+  const fallbackPath = path.join('public/assets', projectPath);
+  if (!fs.existsSync(fallbackPath)) {
+    console.warn(
+      `Fallback project path ${fallbackPath} does not exist, using default assets folder`,
+    );
+    return 'public/assets';
+  }
+
+  return fallbackPath;
 };
 
 /**

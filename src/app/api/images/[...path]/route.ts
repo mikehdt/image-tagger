@@ -46,7 +46,21 @@ export async function GET(
     if (projectName) {
       // New format: reconstruct full path from project name and config
       const config = getServerConfig();
-      fullProjectPath = path.join(config.projectsFolder, projectName);
+      const fullPath = path.join(config.projectsFolder, projectName);
+
+      // Protect against edge case: if projects folder is default but constructed path doesn't exist,
+      // fall back to just the default path
+      if (
+        config.projectsFolder === 'public/assets' &&
+        !fs.existsSync(fullPath)
+      ) {
+        console.warn(
+          `Project path ${fullPath} does not exist, falling back to default assets folder`,
+        );
+        fullProjectPath = 'public/assets';
+      } else {
+        fullProjectPath = fullPath;
+      }
     } else if (projectPath) {
       // Legacy format: use the full path directly
       fullProjectPath = projectPath;

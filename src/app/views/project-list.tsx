@@ -15,6 +15,20 @@ import { getProjectList } from '../utils/project-actions';
 import { ProjectContent } from './project-content';
 import { ProjectIcon } from './project-icon';
 
+// Inline configuration check function to avoid import issues
+const checkIfUsingDefaultProject = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/config');
+    if (!response.ok) return true; // Default to true if API fails
+    const config = await response.json();
+    const projectsFolder = config.projectsFolder || 'public/assets';
+    return projectsFolder === 'public/assets';
+  } catch (error) {
+    console.warn('Failed to check project config:', error);
+    return true; // Default to true if check fails
+  }
+};
+
 type Project = {
   name: string;
   path: string;
@@ -44,6 +58,35 @@ export const ProjectList = () => {
       setLoading(true);
       setError(null);
 
+      // Check if we should still be showing the project list
+      const isDefault = await checkIfUsingDefaultProject();
+
+      // Check for configuration mode mismatch
+      const storedConfigMode = sessionStorage.getItem('configMode');
+      const currentConfigMode = isDefault ? 'default' : 'custom';
+
+      if (storedConfigMode && storedConfigMode !== currentConfigMode) {
+        // Configuration has changed from custom to default, redirect to default assets
+        console.warn(
+          `[ProjectList] Config mode mismatch ${storedConfigMode} → ${currentConfigMode}, redirecting to default assets`,
+        );
+        sessionStorage.removeItem('selectedProject');
+        sessionStorage.removeItem('selectedProjectTitle');
+        sessionStorage.removeItem('selectedProjectThumbnail');
+        sessionStorage.removeItem('configMode');
+        router.replace('/1');
+        return;
+      }
+
+      if (isDefault) {
+        // If we're in default mode but somehow on the project list, redirect to default assets
+        console.warn(
+          '[ProjectList] In default mode but on project list, redirecting to default assets',
+        );
+        router.replace('/1');
+        return;
+      }
+
       // Call server action to get project list (always include hidden, but not private)
       const projectData = await getProjectList();
       setProjects(projectData.filter((project) => project?.imageCount));
@@ -52,7 +95,7 @@ export const ProjectList = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     // Clear all old project data when returning to project selection
@@ -253,7 +296,7 @@ export const ProjectList = () => {
         <p className="mt-4 w-full text-rose-500">{error}</p>
         <p className="mt-4 flex w-full justify-center">
           <Button onClick={loadProjects} size="mediumWide">
-            Retry
+            Refresh
           </Button>
         </p>
       </div>

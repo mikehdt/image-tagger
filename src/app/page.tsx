@@ -41,6 +41,9 @@ export default function Home() {
 
         if (storedConfigMode && storedConfigMode !== currentConfigMode) {
           // Configuration has changed, clear all session state
+          console.warn(
+            `[Home] Config mode mismatch ${storedConfigMode} → ${currentConfigMode}, clearing session state`,
+          );
           sessionStorage.removeItem('selectedProject');
           sessionStorage.removeItem('selectedProjectTitle');
           sessionStorage.removeItem('selectedProjectThumbnail');
@@ -54,9 +57,10 @@ export default function Home() {
         }
 
         if (isDefault) {
-          // Using default project folder, go directly to page 1
+          // Using default project folder, go directly to page 1 (no flicker)
           sessionStorage.setItem('configMode', 'default');
-          router.push('/1');
+          router.replace('/1');
+          return; // Don't set loading to false - let page 1 handle it
         } else {
           // Using custom project folder, show project list
           sessionStorage.setItem('configMode', 'custom');
