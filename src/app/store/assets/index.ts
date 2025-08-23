@@ -19,6 +19,8 @@ const assetsSlice = createSlice({
   reducers: coreReducers,
   extraReducers: setupExtraReducers,
   // Simple property accessors defined inline, complex selectors still in selectors.ts
+  // Note: These slice selectors are exported for external use, but complex selectors
+  // in selectors.ts use local versions to avoid circular dependencies
   selectors: {
     selectIoState: (state) => state.ioState,
     selectIoMessage: (state) => state.ioMessage,

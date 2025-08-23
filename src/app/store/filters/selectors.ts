@@ -1,14 +1,18 @@
 // Complex selectors for filters slice
 import { createSelector } from '@reduxjs/toolkit';
 
-import {
-  selectFilterBuckets,
-  selectFilterExtensions,
-  selectFilterSizes,
-  selectFilterTags,
-  selectShowModified,
-} from '.';
+import type { RootState } from '../';
 import { FilterCount } from './types';
+
+// Base selectors that extract filter state from RootState
+// Note: These are local versions to avoid circular dependency with index.ts
+// External consumers should use the slice selectors from the main exports
+const selectFilterTags = (state: RootState) => state.filters.filterTags;
+const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
+const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
+const selectFilterExtensions = (state: RootState) =>
+  state.filters.filterExtensions;
+const selectShowModified = (state: RootState) => state.filters.showModified;
 
 export const selectHasActiveFilters = createSelector(
   selectFilterTags,

@@ -4,9 +4,13 @@ import { createSelector } from '@reduxjs/toolkit';
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import type { RootState } from '../';
-import { selectAllImages } from '.';
 import { ImageAsset, KeyedCountList, TagState } from './types';
 import { hasState } from './utils';
+
+// Base selector that extracts all images from RootState
+// Note: This is a local version to avoid circular dependency with index.ts
+// External consumers should use the slice selector from the main exports
+const selectAllImages = (state: RootState) => state.assets.images;
 
 // Derived selectors
 export const selectOrderedTagsWithStatus = createSelector(
