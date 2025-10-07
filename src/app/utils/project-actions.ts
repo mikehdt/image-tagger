@@ -26,13 +26,15 @@ const getServerConfig = () => {
   };
 };
 
-type CentralizedProjectInfo = {
+export type ProjectConfig = {
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
   thumbnail?: boolean;
   hidden?: boolean;
   featured?: boolean;
 };
+
+type CentralizedProjectInfo = ProjectConfig;
 
 type LocalProjectInfo = {
   private?: boolean;
@@ -215,5 +217,89 @@ export const getProjectList = async (): Promise<Project[]> => {
   } catch (error) {
     console.error('Error reading projects folder:', error);
     throw new Error(`Failed to read projects from configured folder`);
+  }
+};
+
+/**
+ * Update a project's configuration
+ * Updates the centralized config file in /public/projects/[project-name].json
+ */
+export const updateProject = async (
+  projectName: string,
+  updates: Partial<ProjectConfig>,
+): Promise<{ success: boolean; config: ProjectConfig }> => {
+  try {
+    // Validate the updates
+    if (updates.title !== undefined && typeof updates.title !== 'string') {
+      throw new Error('Title must be a string');
+    }
+
+    if (updates.color !== undefined) {
+      const validColors = [
+        'slate',
+        'rose',
+        'amber',
+        'emerald',
+        'sky',
+        'indigo',
+        'stone',
+      ];
+      if (!validColors.includes(updates.color)) {
+        throw new Error('Invalid color value');
+      }
+    }
+
+    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const configPath = path.join(projectsDir, `${projectName}.json`);
+
+    // Ensure the projects directory exists
+    if (!fs.existsSync(projectsDir)) {
+      fs.mkdirSync(projectsDir, { recursive: true });
+    }
+
+    let config: ProjectConfig = {};
+
+    // Read existing config if it exists
+    if (fs.existsSync(configPath)) {
+      try {
+        const configContent = fs.readFileSync(configPath, 'utf-8');
+        config = JSON.parse(configContent);
+      } catch (error) {
+        console.error(
+          `Error reading existing config for ${projectName}:`,
+          error,
+        );
+        // Continue with empty config if parsing fails
+      }
+    }
+
+    // Update the config with new values
+    const updatedConfig = {
+      ...config,
+      ...updates,
+    };
+
+    // Remove undefined values and empty strings
+    Object.keys(updatedConfig).forEach((key) => {
+      const value = updatedConfig[key as keyof ProjectConfig];
+      if (value === undefined || value === '') {
+        delete updatedConfig[key as keyof ProjectConfig];
+      }
+    });
+
+    // If config is empty, remove the file
+    if (Object.keys(updatedConfig).length === 0) {
+      if (fs.existsSync(configPath)) {
+        fs.unlinkSync(configPath);
+      }
+    } else {
+      // Write the updated config
+      fs.writeFileSync(configPath, JSON.stringify(updatedConfig, null, 2));
+    }
+
+    return { success: true, config: updatedConfig };
+  } catch (error) {
+    console.error('Error updating project config:', error);
+    throw error;
   }
 };

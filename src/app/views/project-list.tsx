@@ -11,7 +11,11 @@ import { clearFilters } from '../store/filters';
 import { useAppDispatch } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection } from '../store/selection';
-import { getProjectList } from '../utils/project-actions';
+import {
+  getProjectList,
+  type ProjectConfig,
+  updateProject,
+} from '../utils/project-actions';
 import { ProjectContent } from './project-content';
 import { ProjectIcon } from './project-icon';
 
@@ -156,21 +160,8 @@ export const ProjectList = () => {
           ),
         );
 
-        // Make API call to toggle featured status using main PATCH endpoint
-        const response = await fetch(
-          `/api/projects/${encodeURIComponent(projectName)}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ featured: !currentFeatured }),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to update featured status');
-        }
+        // Update project using Server Action
+        await updateProject(projectName, { featured: !currentFeatured });
       } catch (error) {
         console.error('Error toggling featured status:', error);
         // Revert the optimistic update on error
@@ -203,13 +194,9 @@ export const ProjectList = () => {
   const handleSaveEdit = useCallback(
     async (projectName: string) => {
       try {
-        const updates: {
-          title?: string;
-          color?: Project['color'];
-          hidden?: boolean;
-        } = {};
+        const updates: Partial<ProjectConfig> = {};
 
-        // Always include title - empty string will be removed by API, which is what we want
+        // Always include title - empty string will be removed by Server Action, which is what we want
         updates.title = editTitle.trim();
 
         // Only include color if it's not the default
@@ -222,21 +209,8 @@ export const ProjectList = () => {
           updates.hidden = editHidden;
         }
 
-        // Make API call to update the project
-        const response = await fetch(
-          `/api/projects/${encodeURIComponent(projectName)}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updates),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to update project');
-        }
+        // Update project using Server Action
+        await updateProject(projectName, updates);
 
         // Update the project in the state
         setProjects((prev) =>
