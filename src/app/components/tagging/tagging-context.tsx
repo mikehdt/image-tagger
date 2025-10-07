@@ -1,5 +1,5 @@
 import { SyntheticEvent } from 'react';
-import { createContext, ReactNode, useContext, useMemo } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useRef } from 'react';
 
 import {
   useTagActions as useTagActionsHook,
@@ -113,8 +113,9 @@ export const TaggingProvider = ({
   });
 
   // Pre-calculate all tag props to avoid function calls in render loop
-  const tagProps = useMemo(() => {
-    const props: Record<
+  // Cache individual tag prop objects to prevent unnecessary re-renders when only some tags change
+  const tagPropsCache = useRef<
+    Record<
       string,
       {
         fade: boolean;
@@ -122,23 +123,52 @@ export const TaggingProvider = ({
         tagState: number;
         count: number;
         isHighlighted: boolean;
-        isBeingEdited: boolean; // Pre-compute this too
+        isBeingEdited: boolean;
       }
-    > = {};
+    >
+  >({});
+
+  const tagProps = useMemo(() => {
+    const props: typeof tagPropsCache.current = {};
+    let hasChanges = false;
 
     tagList.forEach((tagName) => {
-      props[tagName] = {
+      const newProps = {
         fade: calculations.shouldFade(tagName),
         nonInteractive: !calculations.isTagInteractive(tagName),
         tagState: tagsByStatus[tagName] || 0,
         count: globalTagList[tagName] || 0,
-        isHighlighted: calculations.isHighlighted(tagName),
+        isHighlighted: filterTagsSet.has(tagName),
         isBeingEdited: calculations.isTagBeingEdited(tagName),
       };
+
+      const cached = tagPropsCache.current[tagName];
+
+      // Only create new object if values actually changed
+      if (
+        !cached ||
+        cached.fade !== newProps.fade ||
+        cached.nonInteractive !== newProps.nonInteractive ||
+        cached.tagState !== newProps.tagState ||
+        cached.count !== newProps.count ||
+        cached.isHighlighted !== newProps.isHighlighted ||
+        cached.isBeingEdited !== newProps.isBeingEdited
+      ) {
+        props[tagName] = newProps;
+        hasChanges = true;
+      } else {
+        props[tagName] = cached; // Reuse cached object reference
+      }
     });
 
+    // If nothing changed, return the previous object to maintain referential equality
+    if (!hasChanges && Object.keys(tagPropsCache.current).length === tagList.length) {
+      return tagPropsCache.current;
+    }
+
+    tagPropsCache.current = props;
     return props;
-  }, [tagList, calculations, tagsByStatus, globalTagList]);
+  }, [tagList, calculations, tagsByStatus, globalTagList, filterTagsSet]);
 
   // Combine all values into a single context value
   // Both calculations and actions are already stable memoized objects from their hooks

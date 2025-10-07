@@ -1,5 +1,5 @@
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { SyntheticEvent, useCallback, useMemo } from 'react';
+import { memo, SyntheticEvent, useCallback, useMemo } from 'react';
 
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
@@ -14,6 +14,68 @@ type TagListProps = {
   /** Optional CSS class name to apply to the container */
   className?: string;
 };
+
+type TagsRendererProps = {
+  tagList: string[];
+  tagProps: Record<
+    string,
+    {
+      fade: boolean;
+      nonInteractive: boolean;
+      tagState: number;
+      count: number;
+      isHighlighted: boolean;
+      isBeingEdited: boolean;
+    }
+  >;
+};
+
+/**
+ * Memoized component that renders the tags themselves
+ * Uses custom comparison to check if individual tag props actually changed
+ * rather than just checking parent object reference
+ */
+const TagsRenderer = memo(
+  ({ tagList, tagProps }: TagsRendererProps) => {
+    return (
+      <>
+        {tagList.map((tagName: string) => {
+          const props = tagProps[tagName];
+          return (
+            <SortableTag
+              key={`tag-${tagName}`}
+              id={tagName}
+              tagName={tagName}
+              fade={props.fade}
+              nonInteractive={props.nonInteractive}
+              tagState={props.tagState}
+              count={props.count}
+              isHighlighted={props.isHighlighted}
+              isBeingEdited={props.isBeingEdited}
+            />
+          );
+        })}
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    // If tagList changed (length or order), must re-render
+    if (
+      prevProps.tagList.length !== nextProps.tagList.length ||
+      prevProps.tagList.some((tag, i) => tag !== nextProps.tagList[i])
+    ) {
+      return false;
+    }
+
+    // Check if any individual tag's props object changed reference
+    // (our caching ensures unchanged tags keep same object reference)
+    return prevProps.tagList.every(
+      (tagName) => prevProps.tagProps[tagName] === nextProps.tagProps[tagName],
+    );
+  },
+);
+
+TagsRenderer.displayName = 'TagsRenderer';
 
 /**
  * Tag list component that uses pre-calculated props to avoid function calls in render loop
@@ -75,22 +137,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
     <div className={`flex h-full w-full`}>
       <div className={`flex-1 ${className}`}>
         <div className="relative flex flex-wrap">
-          {tagList.map((tagName: string) => {
-            const props = tagProps[tagName];
-            return (
-              <SortableTag
-                key={`tag-${tagName}`}
-                id={tagName}
-                tagName={tagName}
-                fade={props.fade}
-                nonInteractive={props.nonInteractive}
-                tagState={props.tagState}
-                count={props.count}
-                isHighlighted={props.isHighlighted}
-                isBeingEdited={props.isBeingEdited}
-              />
-            );
-          })}
+          <TagsRenderer tagList={tagList} tagProps={tagProps} />
         </div>
 
         <div
