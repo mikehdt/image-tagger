@@ -140,7 +140,8 @@ export const TaggingProvider = ({
     return props;
   }, [tagList, calculations, tagsByStatus, globalTagList]);
 
-  // Combine all values into a single context value - avoid spreading objects to reduce re-renders
+  // Combine all values into a single context value
+  // Both calculations and actions are already stable memoized objects from their hooks
   const contextValue = useMemo(
     () => ({
       // Data
@@ -157,14 +158,14 @@ export const TaggingProvider = ({
       setNewTagInput,
       isDragDropDisabled,
 
-      // Calculations - individual functions instead of spreading object
+      // Calculations - use stable object reference
       isDuplicate: calculations.isDuplicate,
       isTagBeingEdited: calculations.isTagBeingEdited,
       shouldFade: calculations.shouldFade,
       isTagInteractive: calculations.isTagInteractive,
       isHighlighted: calculations.isHighlighted,
 
-      // Actions - individual functions instead of spreading object
+      // Actions - use stable object reference
       startEditingTag: actions.startEditingTag,
       cancelEditingTag: actions.cancelEditingTag,
       saveEditingTag: actions.saveEditingTag,
@@ -190,21 +191,8 @@ export const TaggingProvider = ({
       isEditing,
       setNewTagInput,
       isDragDropDisabled,
-      calculations.isDuplicate,
-      calculations.isTagBeingEdited,
-      calculations.shouldFade,
-      calculations.isTagInteractive,
-      calculations.isHighlighted,
-      actions.startEditingTag,
-      actions.cancelEditingTag,
-      actions.saveEditingTag,
-      actions.handleAddTag,
-      actions.handleAddMultipleTags,
-      actions.handleDeleteTag,
-      actions.handleEditValueChange,
-      actions.handleInputChange,
-      actions.handleCancelAdd,
-      actions.handleToggleTag,
+      calculations, // Use stable object reference
+      actions, // Use stable object reference
       tagProps,
     ],
   );

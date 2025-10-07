@@ -6,19 +6,22 @@ import {
 import { useCallback, useMemo } from 'react';
 
 import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
-import {
-  selectFilterBuckets,
-  selectFilterExtensions,
-  selectFilterSizes,
-  selectSearchQuery,
-} from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
-import { selectProjectPath } from '@/app/store/project';
+import type { RootState } from '@/app/store';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
 import { useAssetTags } from '../hooks';
+
+// Combined selector to reduce re-renders from 5 separate subscriptions to 1
+const selectMetadataFilters = (state: RootState) => ({
+  searchQuery: state.filters.searchQuery,
+  projectPath: state.project.info.projectPath,
+  filterSizes: state.filters.filterSizes,
+  filterBuckets: state.filters.filterBuckets,
+  filterExtensions: state.filters.filterExtensions,
+});
 
 type AssetMetadataProps = {
   assetId: string;
@@ -39,11 +42,9 @@ export const AssetMetadata = ({
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
-  const searchQuery = useAppSelector(selectSearchQuery);
-  const projectPath = useAppSelector(selectProjectPath);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterBuckets = useAppSelector(selectFilterBuckets);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
+  // Single selector call instead of 5 separate ones
+  const { searchQuery, projectPath, filterSizes, filterBuckets, filterExtensions } =
+    useAppSelector(selectMetadataFilters);
   const {
     tagList,
     tagsByStatus,
