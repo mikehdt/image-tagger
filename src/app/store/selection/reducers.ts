@@ -33,4 +33,4 @@ const selectionSlice = createSlice({
 export const { toggleAssetSelection, selectMultipleAssets, clearSelection } =
   selectionSlice.actions;
 
-export default selectionSlice.reducer;
+export const selectionReducer = selectionSlice.reducer;

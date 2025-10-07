@@ -8,7 +8,7 @@ import { assetsReducer } from './assets';
 import { filtersReducer } from './filters';
 import { filterManagerMiddleware } from './middleware/filter-manager';
 import { projectReducer } from './project';
-import selectionReducer from './selection/reducers';
+import { selectionReducer } from './selection';
 import { toastsReducer } from './toasts';
 
 export const makeStore = () => {
@@ -22,7 +22,7 @@ export const makeStore = () => {
       toasts: toastsReducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().prepend(filterManagerMiddleware.middleware),
+      getDefaultMiddleware().concat(filterManagerMiddleware.middleware),
   });
 };
 

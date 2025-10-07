@@ -59,108 +59,30 @@ const shouldClearFilters = (state: RootState): boolean => {
 };
 
 /**
- * Check if there are any tag filters that no longer match any images
+ * Generic helper to find invalid filters by comparing active filters
+ * against values extracted from current assets
  */
-const findInvalidTagFilters = (state: RootState): string[] => {
-  const { assets, filters } = state;
+const findInvalidFilters = <T extends string>(
+  state: RootState,
+  activeFilters: T[],
+  extractor: (state: RootState) => Set<T>,
+): T[] => {
+  const { assets } = state;
 
-  // Quick return if no tag filters or not in complete state
+  // Quick return if no filters or not in complete state
   if (
-    filters.filterTags.length === 0 ||
+    activeFilters.length === 0 ||
     (assets.ioState !== IoState.COMPLETE &&
       assets.ioState !== IoState.COMPLETING)
   ) {
     return [];
   }
 
-  // Get all unique tags that exist in the current assets
-  const allExistingTags = new Set<string>();
-  assets.images.forEach((img) => {
-    img.tagList.forEach((tag) => allExistingTags.add(tag));
-  });
+  // Get all existing values from current assets
+  const allExistingValues = extractor(state);
 
-  // Find tag filters that no longer exist in any asset
-  return filters.filterTags.filter((tag) => !allExistingTags.has(tag));
-};
-
-/**
- * Check if there are any size filters that no longer match any images
- */
-const findInvalidSizeFilters = (state: RootState): string[] => {
-  const { assets, filters } = state;
-
-  // Quick return if no size filters or not in complete state
-  if (
-    filters.filterSizes.length === 0 ||
-    (assets.ioState !== IoState.COMPLETE &&
-      assets.ioState !== IoState.COMPLETING)
-  ) {
-    return [];
-  }
-
-  // Get all unique sizes that exist in the current assets
-  const allExistingSizes = new Set<string>();
-  assets.images.forEach((img) => {
-    allExistingSizes.add(composeDimensions(img.dimensions));
-  });
-
-  // Find size filters that no longer exist in any asset
-  return filters.filterSizes.filter((size) => !allExistingSizes.has(size));
-};
-
-/**
- * Check if there are any bucket filters that no longer match any images
- */
-const findInvalidBucketFilters = (state: RootState): string[] => {
-  const { assets, filters } = state;
-
-  // Quick return if no bucket filters or not in complete state
-  if (
-    filters.filterBuckets.length === 0 ||
-    (assets.ioState !== IoState.COMPLETE &&
-      assets.ioState !== IoState.COMPLETING)
-  ) {
-    return [];
-  }
-
-  // Get all unique buckets that exist in the current assets
-  const allExistingBuckets = new Set<string>();
-  assets.images.forEach((img) => {
-    const bucketKey = `${img.bucket.width}×${img.bucket.height}`;
-    allExistingBuckets.add(bucketKey);
-  });
-
-  // Find bucket filters that no longer exist in any asset
-  return filters.filterBuckets.filter(
-    (bucket) => !allExistingBuckets.has(bucket),
-  );
-};
-
-/**
- * Check if there are any extension filters that no longer match any images
- */
-const findInvalidExtensionFilters = (state: RootState): string[] => {
-  const { assets, filters } = state;
-
-  // Quick return if no extension filters or not in complete state
-  if (
-    filters.filterExtensions.length === 0 ||
-    (assets.ioState !== IoState.COMPLETE &&
-      assets.ioState !== IoState.COMPLETING)
-  ) {
-    return [];
-  }
-
-  // Get all unique extensions that exist in the current assets
-  const allExistingExtensions = new Set<string>();
-  assets.images.forEach((img) => {
-    allExistingExtensions.add(img.fileExtension);
-  });
-
-  // Find extension filters that no longer exist in any asset
-  return filters.filterExtensions.filter(
-    (ext) => !allExistingExtensions.has(ext),
-  );
+  // Find filters that no longer exist in any asset
+  return activeFilters.filter((filter) => !allExistingValues.has(filter));
 };
 
 /**
@@ -187,7 +109,17 @@ const cleanupInvalidFilters = (
   let hasChanges = false;
 
   // Check for invalid tag filters
-  const invalidTagFilters = findInvalidTagFilters(state);
+  const invalidTagFilters = findInvalidFilters(
+    state,
+    state.filters.filterTags,
+    (s) => {
+      const tags = new Set<string>();
+      s.assets.images.forEach((img) => {
+        img.tagList.forEach((tag) => tags.add(tag));
+      });
+      return tags;
+    },
+  );
   if (invalidTagFilters.length > 0) {
     // If all tag filters are invalid, clear them all at once
     if (invalidTagFilters.length === state.filters.filterTags.length) {
@@ -202,7 +134,17 @@ const cleanupInvalidFilters = (
   }
 
   // Check for invalid size filters
-  const invalidSizeFilters = findInvalidSizeFilters(state);
+  const invalidSizeFilters = findInvalidFilters(
+    state,
+    state.filters.filterSizes,
+    (s) => {
+      const sizes = new Set<string>();
+      s.assets.images.forEach((img) => {
+        sizes.add(composeDimensions(img.dimensions));
+      });
+      return sizes;
+    },
+  );
   if (invalidSizeFilters.length > 0) {
     // If all size filters are invalid, clear them all at once
     if (invalidSizeFilters.length === state.filters.filterSizes.length) {
@@ -217,7 +159,18 @@ const cleanupInvalidFilters = (
   }
 
   // Check for invalid bucket filters
-  const invalidBucketFilters = findInvalidBucketFilters(state);
+  const invalidBucketFilters = findInvalidFilters(
+    state,
+    state.filters.filterBuckets,
+    (s) => {
+      const buckets = new Set<string>();
+      s.assets.images.forEach((img) => {
+        const bucketKey = `${img.bucket.width}×${img.bucket.height}`;
+        buckets.add(bucketKey);
+      });
+      return buckets;
+    },
+  );
   if (invalidBucketFilters.length > 0) {
     // If all bucket filters are invalid, clear them all at once
     if (invalidBucketFilters.length === state.filters.filterBuckets.length) {
@@ -232,7 +185,17 @@ const cleanupInvalidFilters = (
   }
 
   // Check for invalid extension filters
-  const invalidExtFilters = findInvalidExtensionFilters(state);
+  const invalidExtFilters = findInvalidFilters(
+    state,
+    state.filters.filterExtensions,
+    (s) => {
+      const extensions = new Set<string>();
+      s.assets.images.forEach((img) => {
+        extensions.add(img.fileExtension);
+      });
+      return extensions;
+    },
+  );
   if (invalidExtFilters.length > 0) {
     // If all extension filters are invalid, clear them all at once
     if (invalidExtFilters.length === state.filters.filterExtensions.length) {
@@ -286,11 +249,7 @@ export const filterManagerMiddleware = createListenerMiddleware();
 
 // Add a listener that checks after save operations if we need to clear filters
 filterManagerMiddleware.startListening({
-  matcher: isAnyOf(
-    saveAllAssets.fulfilled,
-    saveAsset.fulfilled,
-    // completeAfterDelay.fulfilled, // Not needed - saveAllAssets.fulfilled handles it
-  ),
+  matcher: isAnyOf(saveAllAssets.fulfilled, saveAsset.fulfilled),
   effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 
