@@ -193,6 +193,7 @@ export const EditTagsModal = ({
   useEffect(() => {
     if (isOpen) {
       // Make sure we initialize with valid tag values
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
       setEditedTags(
         filterTags.reduce(
           (acc, tag) => {

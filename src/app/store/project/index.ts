@@ -24,7 +24,6 @@ const projectSlice = createSlice({
   selectors: {
     // Project info selectors
     selectProjectName: (state) => state.info.projectName,
-    selectProjectPath: (state) => state.info.projectPath,
     selectProjectThumbnail: (state) => state.info.projectThumbnail,
     selectProjectInfo: (state) => state.info,
 
@@ -50,7 +49,6 @@ export const {
 // Export the selectors from the slice
 export const {
   selectProjectName,
-  selectProjectPath,
   selectProjectThumbnail,
   selectShowCropVisualization,
   selectTagSortType,

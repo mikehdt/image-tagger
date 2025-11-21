@@ -161,24 +161,6 @@ const formatDimensions = (dimensions: string): string => {
   return dimensions.replace('x', '×');
 };
 
-// Format the count with the appropriate megapixel label
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const formatMegaPixels = (pixelCount: number): string => {
-  const mp = pixelCount / 1000000;
-  if (mp < 0.1) {
-    return ''; // Skip showing MP for very small images
-  }
-  return mp.toFixed(1) + ' MP';
-};
-
-// Calculate the pixel count from dimensions
-// This function is not currently used but kept for future functionality
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getPixelCount = (dimensions: string): number => {
-  const { width, height } = decomposeDimensions(dimensions);
-  return width * height;
-};
-
 // Component to display conditional info based on sort type
 const SizeInfo = ({
   item,

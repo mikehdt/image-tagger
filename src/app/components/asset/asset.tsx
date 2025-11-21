@@ -52,6 +52,8 @@ const AssetComponent = ({
   const [localCropOverride, setLocalCropOverride] = useState<boolean | null>(
     null,
   );
+  // Track the last global value to detect changes
+  const [lastGlobalValue, setLastGlobalValue] = useState<boolean | null>(null);
 
   const dispatch = useAppDispatch();
   const isSelected = useAppSelector((state) =>
@@ -61,10 +63,13 @@ const AssetComponent = ({
     selectShowCropVisualization,
   );
 
-  // Reset local override when global state changes
-  useEffect(() => {
-    setLocalCropOverride(null);
-  }, [globalShowCropVisualization]);
+  // Reset local override when global state changes (derived state pattern)
+  if (globalShowCropVisualization !== lastGlobalValue) {
+    setLastGlobalValue(globalShowCropVisualization);
+    if (localCropOverride !== null) {
+      setLocalCropOverride(null);
+    }
+  }
 
   // Determine effective crop visualization state (local override takes precedence)
   const showCropVisualization =

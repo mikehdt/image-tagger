@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   completeAfterDelay,
@@ -37,7 +37,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
   const initialLoad = useRef<boolean>(true);
-  const hasCompletedInitialLoad = useRef<boolean>(false); // Track if we've ever completed initial load
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
@@ -233,7 +233,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     // Reset initial load flag when switching back to project selector
     if (!shouldLoadAssets) {
       initialLoad.current = true;
-      hasCompletedInitialLoad.current = false;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional state reset on navigation
+      setHasCompletedInitialLoad(false);
     }
   }, [loadImageAssets, shouldLoadAssets, pathname]);
 
@@ -253,15 +254,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Track initial load completion and reset flag if imageCount becomes 0 (crash recovery)
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    // Intentional state sync with Redux store for load tracking
     if (imageCount === 0) {
-      hasCompletedInitialLoad.current = false; // Reset if we somehow lose all images
-    } else if (
-      ioState === IoState.COMPLETE &&
-      !hasCompletedInitialLoad.current
-    ) {
-      hasCompletedInitialLoad.current = true; // Mark initial load as completed
+      setHasCompletedInitialLoad(false); // Reset if we somehow lose all images
+    } else if (ioState === IoState.COMPLETE && !hasCompletedInitialLoad) {
+      setHasCompletedInitialLoad(true); // Mark initial load as completed
     }
-  }, [imageCount, ioState]);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [imageCount, ioState, hasCompletedInitialLoad]);
 
   // Only show the loading/error/no-content screens when we're on a page route
   // On the root route, just show the children (project selector)
@@ -275,7 +276,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   if (
     ioState === IoState.INITIAL ||
     (ioState === IoState.LOADING && imageCount === 0) ||
-    (ioState === IoState.COMPLETING && !hasCompletedInitialLoad.current)
+    (ioState === IoState.COMPLETING && !hasCompletedInitialLoad)
   ) {
     return <InitialLoad />;
   }

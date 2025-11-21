@@ -19,6 +19,7 @@ export const usePanelPosition = (
   // Set positioned state when opening
   useEffect(() => {
     if (isOpen && containerRef?.current && !isPositioned) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional DOM measurement for positioning
       setIsPositioned(true);
 
       // Keep minimal position information for compatibility

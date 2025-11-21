@@ -5,9 +5,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCallback, useMemo } from 'react';
 
+import type { RootState } from '@/app/store';
 import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
 import { useAppSelector } from '@/app/store/hooks';
-import type { RootState } from '@/app/store';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
@@ -43,8 +43,13 @@ export const AssetMetadata = ({
   isTagEditing = false,
 }: AssetMetadataProps) => {
   // Single selector call instead of 5 separate ones
-  const { searchQuery, projectPath, filterSizes, filterBuckets, filterExtensions } =
-    useAppSelector(selectMetadataFilters);
+  const {
+    searchQuery,
+    projectPath,
+    filterSizes,
+    filterBuckets,
+    filterExtensions,
+  } = useAppSelector(selectMetadataFilters);
   const {
     tagList,
     tagsByStatus,

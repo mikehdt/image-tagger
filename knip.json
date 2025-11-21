@@ -1,8 +1,4 @@
 {
   "project": ["**/*.{js,ts,jsx,tsx}"],
-  "ignoreDependencies": [
-    "eslint-config-next",
-    "eslint-config-prettier",
-    "postcss-load-config"
-  ]
+  "ignoreDependencies": ["eslint-config-prettier", "postcss-load-config"]
 }

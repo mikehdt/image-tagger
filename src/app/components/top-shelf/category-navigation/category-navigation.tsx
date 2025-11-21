@@ -76,6 +76,7 @@ export const CategoryNavigation = ({
   // Set positioned state when opening
   useEffect(() => {
     if (isOpen && containerRef.current && !isPositioned) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional state sync for DOM measurement
       setIsPositioned(true);
     }
   }, [isOpen, isPositioned]);
@@ -96,6 +97,7 @@ export const CategoryNavigation = ({
         leftPosition = window.innerWidth - 16 - panelWidth - rect.left;
       }
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional DOM measurement for positioning
       setPanelPosition({
         alignRight,
         left: leftPosition,
@@ -106,6 +108,7 @@ export const CategoryNavigation = ({
   // Handle rendering timing similar to filter-list
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional animation state management
       setRenderList(true);
     } else if (!isOpen && renderList) {
       setTimeout(() => setRenderList(false), 150);

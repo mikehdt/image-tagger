@@ -50,6 +50,7 @@ const FilterPanel = () => {
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional animation state management
       setRenderList(true);
     } else if (!isOpen && renderList) {
       setTimeout(() => setRenderList(false), 150);
@@ -69,6 +70,7 @@ const FilterPanel = () => {
         leftPosition = 16; // Small padding from left edge
       }
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional DOM measurement for positioning
       setPanelPosition({
         right: useRightAlignment,
         left: leftPosition,

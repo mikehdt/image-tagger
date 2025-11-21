@@ -78,31 +78,32 @@ export const Modal = ({
     };
 
     if (isOpen) {
-      // First ensure the component is mounted but invisible
-      setShouldUnmount(false);
-      setIsVisible(false);
-
-      // Start checking for the DOM element using requestAnimationFrame
-      // This ensures we only animate when the element is actually in the DOM
-      rafId = requestAnimationFrame(checkAndAnimate);
+      // Use RAF to set initial state, avoiding synchronous setState in effect
+      rafId = requestAnimationFrame(() => {
+        setShouldUnmount(false);
+        setIsVisible(false);
+        // Start checking for the DOM element
+        rafId = requestAnimationFrame(checkAndAnimate);
+      });
     } else {
-      // When closing, first trigger the fade-out animation
-      setIsVisible(false);
+      // When closing, trigger fade-out animation in RAF
+      rafId = requestAnimationFrame(() => {
+        setIsVisible(false);
 
-      // Use nested requestAnimationFrames to approximate the animation duration
-      // This gives us better alignment with the browser's rendering cycle
-      const startTime = performance.now();
-      const animateUnmount = (currentTime: number) => {
-        if (currentTime - startTime >= ANIMATION_DURATION) {
-          // Animation duration elapsed, now unmount
-          setShouldUnmount(true);
-        } else {
-          // Keep waiting, ask for another frame
-          rafId = requestAnimationFrame(animateUnmount);
-        }
-      };
+        // Use nested requestAnimationFrames to approximate the animation duration
+        const startTime = performance.now();
+        const animateUnmount = (currentTime: number) => {
+          if (currentTime - startTime >= ANIMATION_DURATION) {
+            // Animation duration elapsed, now unmount
+            setShouldUnmount(true);
+          } else {
+            // Keep waiting, ask for another frame
+            rafId = requestAnimationFrame(animateUnmount);
+          }
+        };
 
-      rafId = requestAnimationFrame(animateUnmount);
+        rafId = requestAnimationFrame(animateUnmount);
+      });
     }
 
     // Clean up all possible async operations

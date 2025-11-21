@@ -113,9 +113,21 @@ export const AddTagsModal = ({
     tagStatusSelectorRef.current!(state, tags),
   );
 
+  // Use ref and state for tracking input changes (for duplicate checking)
+  const lastInputRef = useRef('');
+  const [inputChanged, setInputChanged] = useState(false);
+
+  useEffect(() => {
+    if (inputChanged) {
+      setCheckTag(lastInputRef.current);
+      setInputChanged(false);
+    }
+  }, [inputChanged]);
+
   // Reset the form state when modal is closed
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form reset on modal close
       setTags([]);
       setCheckTag('');
       setAddToStart(false);
@@ -128,6 +140,7 @@ export const AddTagsModal = ({
   useEffect(() => {
     if (isOpen) {
       // Simply enable each constraint if it's available
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
       setApplyToSelectedAssets(hasSelectedAssets);
       setApplyToAssetsWithActiveFilters(hasActiveFilters);
     }
@@ -183,20 +196,6 @@ export const AddTagsModal = ({
     }
     onClose();
   };
-
-  // Let's use a ref to track the last input value
-  const lastInputRef = useRef('');
-
-  // Use effect to update the check tag safely
-  // We'll use input value change detection instead of the ref as a dependency
-  const [inputChanged, setInputChanged] = useState(false);
-
-  useEffect(() => {
-    if (inputChanged) {
-      setCheckTag(lastInputRef.current);
-      setInputChanged(false);
-    }
-  }, [inputChanged]);
 
   // Safe duplicate check function that doesn't set state during render
   const handleDuplicateCheck = (tag: string) => {
