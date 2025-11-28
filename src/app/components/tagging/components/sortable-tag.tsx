@@ -4,7 +4,6 @@ import { CSS } from '@dnd-kit/utilities';
 import { SyntheticEvent, useCallback } from 'react';
 import { memo, useRef } from 'react';
 
-import { useTagActions, useTaggingContext } from '../tagging-context';
 import { InputTag } from './input-tag';
 import { Tag } from './tag';
 
@@ -15,8 +14,18 @@ type SortableTagProps = {
   nonInteractive: boolean;
   tagState: number;
   count: number;
-  isHighlighted: boolean; // Pre-computed from context
-  isBeingEdited: boolean; // Pre-computed from context
+  isHighlighted: boolean;
+  isBeingEdited: boolean;
+  isDragDropDisabled: boolean;
+  // Action callbacks passed as props
+  editTagValue: string;
+  isDuplicate: (value: string) => boolean;
+  onEditValueChange: (value: string) => void;
+  onStartEdit: (tagName: string) => void;
+  onSaveEdit: (e?: SyntheticEvent) => void;
+  onCancelEdit: (e?: SyntheticEvent) => void;
+  onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+  onToggleTag: (e: SyntheticEvent, tagName: string) => void;
 };
 
 const SortableTagComponent = ({
@@ -28,20 +37,16 @@ const SortableTagComponent = ({
   count,
   isHighlighted,
   isBeingEdited,
+  isDragDropDisabled,
+  editTagValue,
+  isDuplicate,
+  onEditValueChange,
+  onStartEdit,
+  onSaveEdit,
+  onCancelEdit,
+  onDeleteTag,
+  onToggleTag,
 }: SortableTagProps) => {
-  const {
-    isDuplicate,
-    editTagValue,
-    handleEditValueChange,
-    startEditingTag,
-    saveEditingTag,
-    cancelEditingTag,
-    handleDeleteTag,
-    handleToggleTag,
-  } = useTagActions();
-
-  // Get drag/drop disabled state from context
-  const { isDragDropDisabled } = useTaggingContext();
 
   const isEditing = isBeingEdited;
 
@@ -98,47 +103,46 @@ const SortableTagComponent = ({
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
-      // Update via context
-      handleEditValueChange(newValue);
+      onEditValueChange(newValue);
     },
-    [handleEditValueChange],
+    [onEditValueChange],
   );
 
   // Handler for saving edits
   const handleSaveEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      saveEditingTag(e);
+      onSaveEdit(e);
     },
-    [saveEditingTag],
+    [onSaveEdit],
   );
 
   // Handler for canceling edits
   const handleCancelEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      cancelEditingTag(e);
+      onCancelEdit(e);
     },
-    [cancelEditingTag],
+    [onCancelEdit],
   );
 
   // Handler for starting edit mode
   const onHandleStartEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      startEditingTag(tagName);
+      onStartEdit(tagName);
     },
-    [startEditingTag, tagName],
+    [onStartEdit, tagName],
   );
 
   const onHandleToggleTag = useCallback(
-    (e: SyntheticEvent) => handleToggleTag(e, tagName),
-    [handleToggleTag, tagName],
+    (e: SyntheticEvent) => onToggleTag(e, tagName),
+    [onToggleTag, tagName],
   );
 
   const onHandleDeleteTag = useCallback(
-    (e: SyntheticEvent) => handleDeleteTag(e, tagName),
-    [handleDeleteTag, tagName],
+    (e: SyntheticEvent) => onDeleteTag(e, tagName),
+    [onDeleteTag, tagName],
   );
 
   return (
@@ -185,15 +189,36 @@ const sortableTagPropsAreEqual = (
   prevProps: SortableTagProps,
   nextProps: SortableTagProps,
 ): boolean => {
+  // Check primitive values
+  if (
+    prevProps.id !== nextProps.id ||
+    prevProps.tagName !== nextProps.tagName ||
+    prevProps.fade !== nextProps.fade ||
+    prevProps.nonInteractive !== nextProps.nonInteractive ||
+    prevProps.tagState !== nextProps.tagState ||
+    prevProps.count !== nextProps.count ||
+    prevProps.isHighlighted !== nextProps.isHighlighted ||
+    prevProps.isBeingEdited !== nextProps.isBeingEdited ||
+    prevProps.isDragDropDisabled !== nextProps.isDragDropDisabled
+  ) {
+    return false;
+  }
+
+  // Only check editTagValue if this tag is being edited
+  if (nextProps.isBeingEdited && prevProps.editTagValue !== nextProps.editTagValue) {
+    return false;
+  }
+
+  // Check function reference equality
+  // These should be stable references from context
   return (
-    prevProps.id === nextProps.id &&
-    prevProps.tagName === nextProps.tagName &&
-    prevProps.fade === nextProps.fade &&
-    prevProps.nonInteractive === nextProps.nonInteractive &&
-    prevProps.tagState === nextProps.tagState &&
-    prevProps.count === nextProps.count &&
-    prevProps.isHighlighted === nextProps.isHighlighted &&
-    prevProps.isBeingEdited === nextProps.isBeingEdited
+    prevProps.isDuplicate === nextProps.isDuplicate &&
+    prevProps.onEditValueChange === nextProps.onEditValueChange &&
+    prevProps.onStartEdit === nextProps.onStartEdit &&
+    prevProps.onSaveEdit === nextProps.onSaveEdit &&
+    prevProps.onCancelEdit === nextProps.onCancelEdit &&
+    prevProps.onDeleteTag === nextProps.onDeleteTag &&
+    prevProps.onToggleTag === nextProps.onToggleTag
   );
 };
 

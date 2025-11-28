@@ -26,9 +26,6 @@ const toastsSlice = createSlice({
         (toast) => toast.id !== action.payload,
       );
     },
-    // clearAllToasts: (state) => {
-    //   state.toasts = [];
-    // },
   },
 });
 

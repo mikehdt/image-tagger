@@ -52,6 +52,14 @@ type TaggingContextType = {
       count: number;
       isHighlighted: boolean;
       isBeingEdited: boolean;
+      editTagValue: string;
+      isDuplicate: (value: string) => boolean;
+      onEditValueChange: (value: string) => void;
+      onStartEdit: (tagName: string) => void;
+      onSaveEdit: (e?: SyntheticEvent) => void;
+      onCancelEdit: (e?: SyntheticEvent) => void;
+      onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+      onToggleTag: (e: SyntheticEvent, tagName: string) => void;
     }
   >;
 };
@@ -124,6 +132,14 @@ export const TaggingProvider = ({
         count: number;
         isHighlighted: boolean;
         isBeingEdited: boolean;
+        editTagValue: string;
+        isDuplicate: (value: string) => boolean;
+        onEditValueChange: (value: string) => void;
+        onStartEdit: (tagName: string) => void;
+        onSaveEdit: (e?: SyntheticEvent) => void;
+        onCancelEdit: (e?: SyntheticEvent) => void;
+        onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+        onToggleTag: (e: SyntheticEvent, tagName: string) => void;
       }
     >
   >({});
@@ -140,6 +156,15 @@ export const TaggingProvider = ({
         count: globalTagList[tagName] || 0,
         isHighlighted: filterTagsSet.has(tagName),
         isBeingEdited: calculations.isTagBeingEdited(tagName),
+        // Include values and callbacks - these are stable references from hooks
+        editTagValue,
+        isDuplicate: calculations.isDuplicate,
+        onEditValueChange: actions.handleEditValueChange,
+        onStartEdit: actions.startEditingTag,
+        onSaveEdit: actions.saveEditingTag,
+        onCancelEdit: actions.cancelEditingTag,
+        onDeleteTag: actions.handleDeleteTag,
+        onToggleTag: actions.handleToggleTag,
       };
 
       const cached = tagPropsCache.current[tagName];
@@ -152,7 +177,15 @@ export const TaggingProvider = ({
         cached.tagState !== newProps.tagState ||
         cached.count !== newProps.count ||
         cached.isHighlighted !== newProps.isHighlighted ||
-        cached.isBeingEdited !== newProps.isBeingEdited
+        cached.isBeingEdited !== newProps.isBeingEdited ||
+        cached.editTagValue !== newProps.editTagValue ||
+        cached.isDuplicate !== newProps.isDuplicate ||
+        cached.onEditValueChange !== newProps.onEditValueChange ||
+        cached.onStartEdit !== newProps.onStartEdit ||
+        cached.onSaveEdit !== newProps.onSaveEdit ||
+        cached.onCancelEdit !== newProps.onCancelEdit ||
+        cached.onDeleteTag !== newProps.onDeleteTag ||
+        cached.onToggleTag !== newProps.onToggleTag
       ) {
         props[tagName] = newProps;
         hasChanges = true;
@@ -168,7 +201,7 @@ export const TaggingProvider = ({
 
     tagPropsCache.current = props;
     return props;
-  }, [tagList, calculations, tagsByStatus, globalTagList, filterTagsSet]);
+  }, [tagList, calculations, tagsByStatus, globalTagList, filterTagsSet, editTagValue, actions]);
 
   // Combine all values into a single context value
   // Both calculations and actions are already stable memoized objects from their hooks
@@ -243,7 +276,8 @@ export const useTaggingContext = () => {
   return context;
 };
 
-// Optimized hook for SortableTag that only returns what it needs
+// Legacy hook - kept for backwards compatibility but no longer used by SortableTag
+// SortableTag now receives all props directly to avoid context re-render issues
 export const useTagActions = () => {
   const context = useContext(TaggingContext);
   if (context === undefined) {

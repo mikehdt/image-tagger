@@ -19,13 +19,6 @@ export const coreReducers = {
     state.paginationSize = payload;
   },
 
-  // Not used for now; Keeping this logic in case we need it later
-  // addTagFilter: (state: Filters, { payload }: PayloadAction<string>) => {
-  //   if (payload && !state.filterTags.includes(payload)) {
-  //     state.filterTags.push(payload);
-  //   }
-  // },
-
   toggleTagFilter: (state: Filters, { payload }: PayloadAction<string>) => {
     state.filterTags = toggleFilter(state.filterTags, payload);
   },

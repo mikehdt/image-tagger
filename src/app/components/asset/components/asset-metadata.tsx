@@ -3,6 +3,7 @@ import {
   BookmarkIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+import { createSelector } from '@reduxjs/toolkit';
 import { useCallback, useMemo } from 'react';
 
 import type { RootState } from '@/app/store';
@@ -14,14 +15,23 @@ import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
 import { useAssetTags } from '../hooks';
 
-// Combined selector to reduce re-renders from 5 separate subscriptions to 1
-const selectMetadataFilters = (state: RootState) => ({
-  searchQuery: state.filters.searchQuery,
-  projectPath: state.project.info.projectPath,
-  filterSizes: state.filters.filterSizes,
-  filterBuckets: state.filters.filterBuckets,
-  filterExtensions: state.filters.filterExtensions,
-});
+// Properly memoized selector to reduce re-renders from 5 separate subscriptions to 1
+const selectMetadataFilters = createSelector(
+  [
+    (state: RootState) => state.filters.searchQuery,
+    (state: RootState) => state.project.info.projectPath,
+    (state: RootState) => state.filters.filterSizes,
+    (state: RootState) => state.filters.filterBuckets,
+    (state: RootState) => state.filters.filterExtensions,
+  ],
+  (searchQuery, projectPath, filterSizes, filterBuckets, filterExtensions) => ({
+    searchQuery,
+    projectPath,
+    filterSizes,
+    filterBuckets,
+    filterExtensions,
+  }),
+);
 
 type AssetMetadataProps = {
   assetId: string;

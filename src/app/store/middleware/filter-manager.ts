@@ -50,6 +50,29 @@ const extractExistingValues = (state: RootState) => {
 };
 
 /**
+ * Generic helper to clean up invalid filters of a specific type
+ */
+const cleanupFilterType = (
+  activeFilters: string[],
+  existingValues: Set<string>,
+  clearAction: () => any,
+  toggleAction: (value: string) => any,
+  dispatch: (action: any) => void,
+): boolean => {
+  const invalidFilters = findInvalidFilters(activeFilters, existingValues);
+
+  if (invalidFilters.length === 0) return false;
+
+  if (invalidFilters.length === activeFilters.length) {
+    dispatch(clearAction());
+  } else {
+    invalidFilters.forEach((filter) => dispatch(toggleAction(filter)));
+  }
+
+  return true;
+};
+
+/**
  * Clean up invalid filters and return whether any changes were made
  */
 const cleanupInvalidFilters = (
@@ -69,55 +92,38 @@ const cleanupInvalidFilters = (
   const existing = extractExistingValues(state);
   let hasChanges = false;
 
-  // Remove invalid tag filters
-  const invalidTags = findInvalidFilters(filters.filterTags, existing.tags);
-  if (invalidTags.length > 0) {
-    if (invalidTags.length === filters.filterTags.length) {
-      dispatch(clearTagFilters());
-    } else {
-      invalidTags.forEach((tag) => dispatch(toggleTagFilter(tag)));
-    }
-    hasChanges = true;
-  }
+  // Clean up each filter type using the generic helper
+  hasChanges = cleanupFilterType(
+    filters.filterTags,
+    existing.tags,
+    clearTagFilters,
+    toggleTagFilter,
+    dispatch,
+  ) || hasChanges;
 
-  // Remove invalid size filters
-  const invalidSizes = findInvalidFilters(filters.filterSizes, existing.sizes);
-  if (invalidSizes.length > 0) {
-    if (invalidSizes.length === filters.filterSizes.length) {
-      dispatch(clearSizeFilters());
-    } else {
-      invalidSizes.forEach((size) => dispatch(toggleSizeFilter(size)));
-    }
-    hasChanges = true;
-  }
+  hasChanges = cleanupFilterType(
+    filters.filterSizes,
+    existing.sizes,
+    clearSizeFilters,
+    toggleSizeFilter,
+    dispatch,
+  ) || hasChanges;
 
-  // Remove invalid bucket filters
-  const invalidBuckets = findInvalidFilters(
+  hasChanges = cleanupFilterType(
     filters.filterBuckets,
     existing.buckets,
-  );
-  if (invalidBuckets.length > 0) {
-    if (invalidBuckets.length === filters.filterBuckets.length) {
-      dispatch(clearBucketFilters());
-    } else {
-      invalidBuckets.forEach((bucket) => dispatch(toggleBucketFilter(bucket)));
-    }
-    hasChanges = true;
-  }
+    clearBucketFilters,
+    toggleBucketFilter,
+    dispatch,
+  ) || hasChanges;
 
-  // Remove invalid extension filters
-  const invalidExtensions = findInvalidFilters(
+  hasChanges = cleanupFilterType(
     filters.filterExtensions,
     existing.extensions,
-  );
-  if (invalidExtensions.length > 0) {
-    if (invalidExtensions.length === filters.filterExtensions.length) {
-      dispatch(clearExtensionFilters());
-    } else {
-      invalidExtensions.forEach((ext) => dispatch(toggleExtensionFilter(ext)));
-    }
-    hasChanges = true;
-  }
+    clearExtensionFilters,
+    toggleExtensionFilter,
+    dispatch,
+  ) || hasChanges;
 
   return hasChanges;
 };

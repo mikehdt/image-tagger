@@ -1,6 +1,7 @@
 // Core reducers for the assets slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
+import { toggleDirection } from '../utils';
 import {
   ImageAssets,
   IoState,
@@ -371,9 +372,10 @@ export const coreReducers = {
   },
 
   toggleSortDirection: (state: ImageAssets) => {
-    state.sortDirection =
-      state.sortDirection === SortDirection.ASC
-        ? SortDirection.DESC
-        : SortDirection.ASC;
+    state.sortDirection = toggleDirection(
+      state.sortDirection,
+      SortDirection.ASC,
+      SortDirection.DESC,
+    );
   },
 };

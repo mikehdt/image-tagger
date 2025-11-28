@@ -1,6 +1,7 @@
 // Core reducers for the project slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
+import { toggleDirection } from '../utils';
 import { ProjectState, TagSortDirection, TagSortType } from './types';
 
 export const coreReducers = {
@@ -32,14 +33,6 @@ export const coreReducers = {
     state.config.showCropVisualization = !state.config.showCropVisualization;
   },
 
-  // Set crop visualization state explicitly
-  setCropVisualization: (
-    state: ProjectState,
-    { payload }: PayloadAction<boolean>,
-  ) => {
-    state.config.showCropVisualization = payload;
-  },
-
   // Set tag sort type
   setTagSortType: (
     state: ProjectState,
@@ -58,9 +51,10 @@ export const coreReducers = {
 
   // Toggle tag sort direction
   toggleTagSortDirection: (state: ProjectState) => {
-    state.config.tagSortDirection =
-      state.config.tagSortDirection === TagSortDirection.ASC
-        ? TagSortDirection.DESC
-        : TagSortDirection.ASC;
+    state.config.tagSortDirection = toggleDirection(
+      state.config.tagSortDirection,
+      TagSortDirection.ASC,
+      TagSortDirection.DESC,
+    );
   },
 };

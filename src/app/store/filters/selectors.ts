@@ -46,8 +46,22 @@ export const selectFilterCount = createSelector(
   }),
 );
 
-// Memoized selector for filter tags as a Set to avoid array recreation
+// Memoized selector for filter tags as a Set
+// Uses custom equality check to avoid recreating Set when contents haven't changed
 export const selectFilterTagsSet = createSelector(
   [selectFilterTags],
   (filterTags) => new Set(filterTags),
+  {
+    memoizeOptions: {
+      resultEqualityCheck: (a, b) => {
+        // Compare Set sizes first (fast check)
+        if (a.size !== b.size) return false;
+        // Then compare contents
+        for (const item of a) {
+          if (!b.has(item)) return false;
+        }
+        return true;
+      },
+    },
+  },
 );

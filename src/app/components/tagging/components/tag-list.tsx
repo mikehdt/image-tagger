@@ -26,8 +26,17 @@ type TagsRendererProps = {
       count: number;
       isHighlighted: boolean;
       isBeingEdited: boolean;
+      editTagValue: string;
+      isDuplicate: (value: string) => boolean;
+      onEditValueChange: (value: string) => void;
+      onStartEdit: (tagName: string) => void;
+      onSaveEdit: (e?: SyntheticEvent) => void;
+      onCancelEdit: (e?: SyntheticEvent) => void;
+      onDeleteTag: (e: SyntheticEvent, tagName: string) => void;
+      onToggleTag: (e: SyntheticEvent, tagName: string) => void;
     }
   >;
+  isDragDropDisabled: boolean;
 };
 
 /**
@@ -36,7 +45,7 @@ type TagsRendererProps = {
  * rather than just checking parent object reference
  */
 const TagsRenderer = memo(
-  ({ tagList, tagProps }: TagsRendererProps) => {
+  ({ tagList, tagProps, isDragDropDisabled }: TagsRendererProps) => {
     return (
       <>
         {tagList.map((tagName: string) => {
@@ -52,6 +61,15 @@ const TagsRenderer = memo(
               count={props.count}
               isHighlighted={props.isHighlighted}
               isBeingEdited={props.isBeingEdited}
+              isDragDropDisabled={isDragDropDisabled}
+              editTagValue={props.editTagValue}
+              isDuplicate={props.isDuplicate}
+              onEditValueChange={props.onEditValueChange}
+              onStartEdit={props.onStartEdit}
+              onSaveEdit={props.onSaveEdit}
+              onCancelEdit={props.onCancelEdit}
+              onDeleteTag={props.onDeleteTag}
+              onToggleTag={props.onToggleTag}
             />
           );
         })}
@@ -64,6 +82,11 @@ const TagsRenderer = memo(
       prevProps.tagList.length !== nextProps.tagList.length ||
       prevProps.tagList.some((tag, i) => tag !== nextProps.tagList[i])
     ) {
+      return false;
+    }
+
+    // Check if drag/drop state changed
+    if (prevProps.isDragDropDisabled !== nextProps.isDragDropDisabled) {
       return false;
     }
 
@@ -93,6 +116,7 @@ export const TagList = ({ className = '' }: TagListProps) => {
     handleAddMultipleTags,
     tagProps,
     filterTagsSet,
+    isDragDropDisabled,
   } = useTaggingContext();
 
   const { showToast } = useToast();
@@ -137,7 +161,11 @@ export const TagList = ({ className = '' }: TagListProps) => {
     <div className={`flex h-full w-full`}>
       <div className={`flex-1 ${className}`}>
         <div className="relative flex flex-wrap">
-          <TagsRenderer tagList={tagList} tagProps={tagProps} />
+          <TagsRenderer
+            tagList={tagList}
+            tagProps={tagProps}
+            isDragDropDisabled={isDragDropDisabled}
+          />
         </div>
 
         <div
