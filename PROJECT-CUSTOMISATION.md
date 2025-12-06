@@ -1,12 +1,10 @@
 # Project Customization Guide
 
-The image tagger now supports customizable project information including titles, button colors, and thumbnails.
+The image tagger now supports customisable project information including titles, button colours, and thumbnails.
 
 ## Setting up Project Customization
 
-### 1. Create the Info Folder
-
-In your project folder, create a subfolder named `_info`:
+### 1. Create the Project Folder
 
 ```
 YourProject/
@@ -14,7 +12,7 @@ YourProject/
 ├── image1.txt
 ├── image2.png
 ├── image2.txt
-└── _project.json
+└── _project.json (optional)
 ```
 
 ### 2. Create \_project.json (optional)
