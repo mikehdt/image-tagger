@@ -1,13 +1,15 @@
 /**
- * Tag Component v2 - Static display only
+ * Tag Component v2
  *
- * Phase 1: Pure display, no interactivity
- * - Renders tag name with count
- * - Supports visual states (saved, to_delete, to_add, dirty)
- * - Supports highlight and fade
- * - No click handlers, no buttons
+ * Phase 2b: Interactive tag - NOT memoized
+ * Memoization happens at TagsDisplay level to reduce memo checks
+ * - Click to toggle tag state
+ * - Delete button (minus/plus icon based on state)
+ * - Visual states (saved, to_delete, to_add, dirty)
+ * - Highlight and fade support
  */
-import { memo } from 'react';
+import { MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { SyntheticEvent, useCallback } from 'react';
 
 import { hasState, TagState } from '@/app/store/assets';
 import { track } from '@/app/utils/render-tracker';
@@ -18,42 +20,60 @@ type TagProps = {
   count: number;
   isHighlighted: boolean;
   fade: boolean;
+  onToggle: (tagName: string) => void;
+  onDelete: (tagName: string) => void;
 };
 
-const TagComponent = ({
+export const Tag = ({
   tagName,
   tagState,
   count,
   isHighlighted,
   fade,
+  onToggle,
+  onDelete,
 }: TagProps) => {
   track('Tag', 'render');
 
+  const handleClick = useCallback(() => {
+    onToggle(tagName);
+  }, [onToggle, tagName]);
+
+  const handleDelete = useCallback(
+    (e: SyntheticEvent) => {
+      e.stopPropagation();
+      onDelete(tagName);
+    },
+    [onDelete, tagName],
+  );
+
+  const isMarkedForDeletion = hasState(tagState, TagState.TO_DELETE);
+
   // Determine visual styling based on state
   const getStateStyles = () => {
-    if (hasState(tagState, TagState.TO_DELETE)) {
+    if (isMarkedForDeletion) {
       return isHighlighted
-        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50'
-        : 'border-pink-500';
+        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
+        : 'border-pink-500 hover:bg-pink-100';
     }
     if (hasState(tagState, TagState.TO_ADD)) {
       return isHighlighted
-        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50'
-        : 'border-amber-500';
+        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
+        : 'border-amber-500 hover:bg-amber-100';
     }
     if (hasState(tagState, TagState.DIRTY)) {
       return isHighlighted
-        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50'
-        : 'border-indigo-500';
+        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
+        : 'border-indigo-500 hover:bg-indigo-100';
     }
     // SAVED (default)
     return isHighlighted
-      ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50'
-      : 'border-teal-500';
+      ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
+      : 'border-teal-500 hover:bg-teal-100';
   };
 
   const getCountColour = () => {
-    if (hasState(tagState, TagState.TO_DELETE)) return 'text-pink-500';
+    if (isMarkedForDeletion) return 'text-pink-500';
     if (hasState(tagState, TagState.TO_ADD)) return 'text-amber-500';
     if (hasState(tagState, TagState.DIRTY)) return 'text-indigo-500';
     return 'text-emerald-500';
@@ -63,33 +83,23 @@ const TagComponent = ({
 
   return (
     <div
-      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${fade ? 'opacity-25' : ''}`}
+      className={`inline-flex cursor-pointer items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${fade ? 'opacity-25' : ''}`}
+      onClick={handleClick}
     >
       <span
         className={`relative -ml-2 mr-1 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white ${getCountColour()}`}
       >
         {count}
       </span>
-      <span className={hasState(tagState, TagState.TO_DELETE) ? 'line-through' : ''}>
-        {tagName}
+      <span className={isMarkedForDeletion ? 'line-through' : ''}>{tagName}</span>
+      <span
+        className={`ml-1 inline-flex w-5 rounded-full p-0.5 transition-colors hover:bg-pink-500 hover:text-white ${isMarkedForDeletion ? 'text-pink-500' : ''}`}
+        onClick={handleDelete}
+        title={isMarkedForDeletion ? 'Unmark tag for deletion' : 'Mark tag for deletion'}
+        tabIndex={0}
+      >
+        {isMarkedForDeletion ? <PlusIcon /> : <MinusIcon />}
       </span>
     </div>
   );
 };
-
-// Custom memo comparison - only re-render if display-relevant props change
-const tagPropsAreEqual = (prevProps: TagProps, nextProps: TagProps): boolean => {
-  track('Tag', 'memo-check');
-
-  const isEqual =
-    prevProps.tagName === nextProps.tagName &&
-    prevProps.tagState === nextProps.tagState &&
-    prevProps.count === nextProps.count &&
-    prevProps.isHighlighted === nextProps.isHighlighted &&
-    prevProps.fade === nextProps.fade;
-
-  if (isEqual) track('Tag', 'memo-hit');
-  return isEqual;
-};
-
-export const Tag = memo(TagComponent, tagPropsAreEqual);

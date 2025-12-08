@@ -1,10 +1,10 @@
 /**
  * TagList Component v2
  *
- * Phase 1: Static rendering with memoization
- * - Renders list of Tag components
- * - Renders InputTag in add mode
- * - No DnD, no editing
+ * Phase 2b: Memoization at TagsDisplay level
+ * - TagsDisplay is memoized to prevent re-renders when input changes
+ * - Individual Tags are NOT memoized (reduces memo check overhead)
+ * - When TagsDisplay skips, all Tags skip automatically
  */
 import { memo, useCallback, useState } from 'react';
 
@@ -23,17 +23,22 @@ type TagData = {
 type TagListProps = {
   tags: TagData[];
   onAddTag: (tagName: string) => void;
+  onToggleTag: (tagName: string) => void;
+  onDeleteTag: (tagName: string) => void;
 };
 
 /**
  * Inner component that renders just the tags
- * Memoized separately to prevent re-renders when only input state changes
+ * Memoized to prevent re-renders when only input state changes
+ * Handler references are stable (useCallback in TaggingManager)
  */
 type TagsDisplayProps = {
   tags: TagData[];
+  onToggleTag: (tagName: string) => void;
+  onDeleteTag: (tagName: string) => void;
 };
 
-const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
+const TagsDisplayComponent = ({ tags, onToggleTag, onDeleteTag }: TagsDisplayProps) => {
   track('TagsDisplay', 'render');
 
   const result = (
@@ -46,6 +51,8 @@ const TagsDisplayComponent = ({ tags }: TagsDisplayProps) => {
             count={tag.count}
             isHighlighted={tag.isHighlighted}
             fade={false}
+            onToggle={onToggleTag}
+            onDelete={onDeleteTag}
           />
         </div>
       ))}
@@ -62,12 +69,21 @@ const tagsDisplayPropsAreEqual = (
 ): boolean => {
   track('TagsDisplay', 'memo-check');
 
+  // Handler references should be stable from useCallback in TaggingManager
+  // But check them anyway for safety
+  if (
+    prevProps.onToggleTag !== nextProps.onToggleTag ||
+    prevProps.onDeleteTag !== nextProps.onDeleteTag
+  ) {
+    return false;
+  }
+
   // Quick length check
   if (prevProps.tags.length !== nextProps.tags.length) {
     return false;
   }
 
-  // Deep comparison of tag data
+  // Deep comparison of tag data only
   const isEqual = prevProps.tags.every((prevTag, i) => {
     const nextTag = nextProps.tags[i];
     return (
@@ -87,7 +103,7 @@ const TagsDisplay = memo(TagsDisplayComponent, tagsDisplayPropsAreEqual);
 /**
  * Main TagList component
  */
-const TagListComponent = ({ tags, onAddTag }: TagListProps) => {
+const TagListComponent = ({ tags, onAddTag, onToggleTag, onDeleteTag }: TagListProps) => {
   track('TagList', 'render');
 
   const [inputValue, setInputValue] = useState('');
@@ -116,7 +132,7 @@ const TagListComponent = ({ tags, onAddTag }: TagListProps) => {
 
   return (
     <div className="flex h-full w-full flex-col">
-      <TagsDisplay tags={tags} />
+      <TagsDisplay tags={tags} onToggleTag={onToggleTag} onDeleteTag={onDeleteTag} />
 
       <div className="mt-2">
         <InputTag
@@ -136,8 +152,12 @@ const TagListComponent = ({ tags, onAddTag }: TagListProps) => {
 const tagListPropsAreEqual = (prevProps: TagListProps, nextProps: TagListProps): boolean => {
   track('TagList', 'memo-check');
 
-  // Check callback reference
-  if (prevProps.onAddTag !== nextProps.onAddTag) {
+  // Check callback references
+  if (
+    prevProps.onAddTag !== nextProps.onAddTag ||
+    prevProps.onToggleTag !== nextProps.onToggleTag ||
+    prevProps.onDeleteTag !== nextProps.onDeleteTag
+  ) {
     return false;
   }
 
