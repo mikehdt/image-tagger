@@ -1,16 +1,17 @@
 /**
  * TagList Component v2
  *
- * Phase 2b: Memoization at TagsDisplay level
- * - TagsDisplay is memoized to prevent re-renders when input changes
- * - Individual Tags are NOT memoized (reduces memo check overhead)
- * - When TagsDisplay skips, all Tags skip automatically
+ * Phase 3: Supports drag-and-drop via dnd-kit
+ * - TagsDisplay memoized at the group level
+ * - When sortable=true, uses SortableTag wrapper
+ * - DndContext/SortableContext provided by parent (TaggingManager)
  */
 import { memo, useCallback, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
 import { InputTag } from './input-tag';
+import { SortableTag } from './sortable-tag';
 import { Tag } from './tag';
 
 type TagData = {
@@ -22,6 +23,7 @@ type TagData = {
 
 type TagListProps = {
   tags: TagData[];
+  sortable?: boolean;
   onAddTag: (tagName: string) => void;
   onToggleTag: (tagName: string) => void;
   onDeleteTag: (tagName: string) => void;
@@ -30,22 +32,24 @@ type TagListProps = {
 /**
  * Inner component that renders just the tags
  * Memoized to prevent re-renders when only input state changes
- * Handler references are stable (useCallback in TaggingManager)
  */
 type TagsDisplayProps = {
   tags: TagData[];
+  sortable: boolean;
   onToggleTag: (tagName: string) => void;
   onDeleteTag: (tagName: string) => void;
 };
 
-const TagsDisplayComponent = ({ tags, onToggleTag, onDeleteTag }: TagsDisplayProps) => {
+const TagsDisplayComponent = ({ tags, sortable, onToggleTag, onDeleteTag }: TagsDisplayProps) => {
   track('TagsDisplay', 'render');
 
   const result = (
     <div className="flex flex-wrap">
-      {tags.map((tag) => (
-        <div key={tag.name} className="mr-2 mb-2">
-          <Tag
+      {tags.map((tag) =>
+        sortable ? (
+          <SortableTag
+            key={tag.name}
+            id={tag.name}
             tagName={tag.name}
             tagState={tag.state}
             count={tag.count}
@@ -54,8 +58,20 @@ const TagsDisplayComponent = ({ tags, onToggleTag, onDeleteTag }: TagsDisplayPro
             onToggle={onToggleTag}
             onDelete={onDeleteTag}
           />
-        </div>
-      ))}
+        ) : (
+          <div key={tag.name} className="mr-2 mb-2">
+            <Tag
+              tagName={tag.name}
+              tagState={tag.state}
+              count={tag.count}
+              isHighlighted={tag.isHighlighted}
+              fade={false}
+              onToggle={onToggleTag}
+              onDelete={onDeleteTag}
+            />
+          </div>
+        ),
+      )}
     </div>
   );
 
@@ -69,8 +85,12 @@ const tagsDisplayPropsAreEqual = (
 ): boolean => {
   track('TagsDisplay', 'memo-check');
 
+  // Check sortable mode
+  if (prevProps.sortable !== nextProps.sortable) {
+    return false;
+  }
+
   // Handler references should be stable from useCallback in TaggingManager
-  // But check them anyway for safety
   if (
     prevProps.onToggleTag !== nextProps.onToggleTag ||
     prevProps.onDeleteTag !== nextProps.onDeleteTag
@@ -103,7 +123,13 @@ const TagsDisplay = memo(TagsDisplayComponent, tagsDisplayPropsAreEqual);
 /**
  * Main TagList component
  */
-const TagListComponent = ({ tags, onAddTag, onToggleTag, onDeleteTag }: TagListProps) => {
+const TagListComponent = ({
+  tags,
+  sortable = false,
+  onAddTag,
+  onToggleTag,
+  onDeleteTag,
+}: TagListProps) => {
   track('TagList', 'render');
 
   const [inputValue, setInputValue] = useState('');
@@ -132,7 +158,12 @@ const TagListComponent = ({ tags, onAddTag, onToggleTag, onDeleteTag }: TagListP
 
   return (
     <div className="flex h-full w-full flex-col">
-      <TagsDisplay tags={tags} onToggleTag={onToggleTag} onDeleteTag={onDeleteTag} />
+      <TagsDisplay
+        tags={tags}
+        sortable={sortable}
+        onToggleTag={onToggleTag}
+        onDeleteTag={onDeleteTag}
+      />
 
       <div className="mt-2">
         <InputTag
@@ -151,6 +182,11 @@ const TagListComponent = ({ tags, onAddTag, onToggleTag, onDeleteTag }: TagListP
 
 const tagListPropsAreEqual = (prevProps: TagListProps, nextProps: TagListProps): boolean => {
   track('TagList', 'memo-check');
+
+  // Check sortable mode
+  if (prevProps.sortable !== nextProps.sortable) {
+    return false;
+  }
 
   // Check callback references
   if (

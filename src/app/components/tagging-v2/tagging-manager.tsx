@@ -1,16 +1,27 @@
 /**
  * TaggingManager v2
  *
- * Phase 2: Connects Redux data to TagList with interactivity
- * - Fetches tag data for an asset
- * - Handles add, toggle (filter), and delete actions
- * - No DnD, no editing, no sorting
+ * Phase 3: Drag-and-drop support via dnd-kit
+ * - DndContext and SortableContext wrap TagList
+ * - Each asset has isolated DnD context (no cross-asset interference)
+ * - Reorder dispatches to Redux
  */
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useCallback, useMemo } from 'react';
 
 import {
   addTag,
   deleteTag,
+  reorderTags,
   selectAssetTagCounts,
   selectOrderedTagsWithStatus,
 } from '@/app/store/assets';
@@ -52,6 +63,38 @@ export const TaggingManager = ({
     [orderedTagsWithStatus, tagCounts, filterTagsSet],
   );
 
+  // Tag names for SortableContext items
+  const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
+
+  // DnD sensors - stable across renders
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  // Handle drag end - reorder tags
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (over && active.id !== over.id) {
+        const oldIndex = tagNames.indexOf(active.id as string);
+        const newIndex = tagNames.indexOf(over.id as string);
+
+        if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+          dispatch(reorderTags({ assetId, oldIndex, newIndex }));
+        }
+      }
+    },
+    [dispatch, assetId, tagNames],
+  );
+
   // Handle adding a new tag
   const handleAddTag = useCallback(
     (tagName: string) => {
@@ -79,11 +122,16 @@ export const TaggingManager = ({
   track('TaggingManager', 'render-end');
 
   return (
-    <TagList
-      tags={tags}
-      onAddTag={handleAddTag}
-      onToggleTag={handleToggleTag}
-      onDeleteTag={handleDeleteTag}
-    />
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
+        <TagList
+          tags={tags}
+          sortable={true}
+          onAddTag={handleAddTag}
+          onToggleTag={handleToggleTag}
+          onDeleteTag={handleDeleteTag}
+        />
+      </SortableContext>
+    </DndContext>
   );
 };
