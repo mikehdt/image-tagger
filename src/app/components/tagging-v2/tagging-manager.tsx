@@ -1,10 +1,10 @@
 /**
  * TaggingManager v2
  *
- * Phase 3: Drag-and-drop support via dnd-kit
+ * Phase 4: Full functionality with inline tag editing
  * - DndContext and SortableContext wrap TagList
  * - Each asset has isolated DnD context (no cross-asset interference)
- * - Reorder dispatches to Redux
+ * - Supports add, toggle, edit, delete, and reorder
  */
 import {
   closestCenter,
@@ -21,6 +21,7 @@ import { useCallback, useMemo } from 'react';
 import {
   addTag,
   deleteTag,
+  editTag,
   reorderTags,
   selectAssetTagCounts,
   selectOrderedTagsWithStatus,
@@ -33,12 +34,12 @@ import { TagList } from './components';
 
 type TaggingManagerProps = {
   assetId: string;
-  onTagEditingChange?: (isEditing: boolean) => void; // Placeholder for future edit mode
+  onTagEditingChange?: (isEditing: boolean) => void; // Placeholder for future use
 };
 
 export const TaggingManager = ({
   assetId,
-  onTagEditingChange: _onTagEditingChange, // Unused until we add edit mode
+  onTagEditingChange: _onTagEditingChange, // Unused for now
 }: TaggingManagerProps) => {
   track('TaggingManager', 'render');
 
@@ -111,6 +112,14 @@ export const TaggingManager = ({
     [dispatch],
   );
 
+  // Handle editing a tag (rename)
+  const handleEditTag = useCallback(
+    (oldTagName: string, newTagName: string) => {
+      dispatch(editTag({ assetId, oldTagName, newTagName }));
+    },
+    [dispatch, assetId],
+  );
+
   // Handle deleting a tag (marks for deletion)
   const handleDeleteTag = useCallback(
     (tagName: string) => {
@@ -129,6 +138,7 @@ export const TaggingManager = ({
           sortable={true}
           onAddTag={handleAddTag}
           onToggleTag={handleToggleTag}
+          onEditTag={handleEditTag}
           onDeleteTag={handleDeleteTag}
         />
       </SortableContext>

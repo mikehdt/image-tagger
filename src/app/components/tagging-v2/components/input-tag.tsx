@@ -6,7 +6,7 @@
  * - Placeholder for edit mode (to be added later)
  */
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChangeEvent, KeyboardEvent, memo, SyntheticEvent, useCallback, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, memo, SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
@@ -35,6 +35,14 @@ const InputTagComponent = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(mode === 'edit');
+
+  // Auto-focus input in edit mode
+  useEffect(() => {
+    if (mode === 'edit' && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [mode]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {

@@ -1,10 +1,10 @@
 /**
  * TagList Component v2
  *
- * Phase 3: Supports drag-and-drop via dnd-kit
- * - TagsDisplay memoized at the group level
- * - When sortable=true, uses SortableTag wrapper
- * - DndContext/SortableContext provided by parent (TaggingManager)
+ * Phase 4: Supports inline tag editing
+ * - TagsDisplay NOT memoized when editing (edit state changes frequently)
+ * - Edit state managed here to keep it close to where it's used
+ * - Notifies parent when edit completes via onEditTag
  */
 import { memo, useCallback, useState } from 'react';
 
@@ -26,21 +26,41 @@ type TagListProps = {
   sortable?: boolean;
   onAddTag: (tagName: string) => void;
   onToggleTag: (tagName: string) => void;
+  onEditTag: (oldName: string, newName: string) => void;
   onDeleteTag: (tagName: string) => void;
 };
 
 /**
  * Inner component that renders just the tags
- * Memoized to prevent re-renders when only input state changes
+ * NOT memoized - edit state changes cause re-renders anyway
  */
 type TagsDisplayProps = {
   tags: TagData[];
   sortable: boolean;
+  editingTagName: string | null;
+  editValue: string;
+  isDuplicateEdit: boolean;
   onToggleTag: (tagName: string) => void;
+  onEditTag: (tagName: string) => void;
   onDeleteTag: (tagName: string) => void;
+  onEditChange: (value: string) => void;
+  onEditSubmit: () => void;
+  onEditCancel: () => void;
 };
 
-const TagsDisplayComponent = ({ tags, sortable, onToggleTag, onDeleteTag }: TagsDisplayProps) => {
+const TagsDisplayComponent = ({
+  tags,
+  sortable,
+  editingTagName,
+  editValue,
+  isDuplicateEdit,
+  onToggleTag,
+  onEditTag,
+  onDeleteTag,
+  onEditChange,
+  onEditSubmit,
+  onEditCancel,
+}: TagsDisplayProps) => {
   track('TagsDisplay', 'render');
 
   const result = (
@@ -54,9 +74,16 @@ const TagsDisplayComponent = ({ tags, sortable, onToggleTag, onDeleteTag }: Tags
             tagState={tag.state}
             count={tag.count}
             isHighlighted={tag.isHighlighted}
-            fade={false}
+            fade={editingTagName !== null && editingTagName !== tag.name}
+            isEditing={editingTagName === tag.name}
+            editValue={editValue}
             onToggle={onToggleTag}
+            onEdit={onEditTag}
             onDelete={onDeleteTag}
+            onEditChange={onEditChange}
+            onEditSubmit={onEditSubmit}
+            onEditCancel={onEditCancel}
+            isDuplicateEdit={isDuplicateEdit}
           />
         ) : (
           <div key={tag.name} className="mr-2 mb-2">
@@ -65,8 +92,9 @@ const TagsDisplayComponent = ({ tags, sortable, onToggleTag, onDeleteTag }: Tags
               tagState={tag.state}
               count={tag.count}
               isHighlighted={tag.isHighlighted}
-              fade={false}
+              fade={editingTagName !== null && editingTagName !== tag.name}
               onToggle={onToggleTag}
+              onEdit={onEditTag}
               onDelete={onDeleteTag}
             />
           </div>
@@ -79,20 +107,29 @@ const TagsDisplayComponent = ({ tags, sortable, onToggleTag, onDeleteTag }: Tags
   return result;
 };
 
+// Memo comparison - skip re-render only when NOT editing
 const tagsDisplayPropsAreEqual = (
   prevProps: TagsDisplayProps,
   nextProps: TagsDisplayProps,
 ): boolean => {
   track('TagsDisplay', 'memo-check');
 
+  // If either state is editing, don't memo (need to update for keystroke/fade changes)
+  if (prevProps.editingTagName !== null || nextProps.editingTagName !== null) {
+    // But if editing the same tag and only editValue changed, we still need to re-render
+    // So just return false to always re-render during edit mode
+    return false;
+  }
+
   // Check sortable mode
   if (prevProps.sortable !== nextProps.sortable) {
     return false;
   }
 
-  // Handler references should be stable from useCallback in TaggingManager
+  // Handler references should be stable from useCallback
   if (
     prevProps.onToggleTag !== nextProps.onToggleTag ||
+    prevProps.onEditTag !== nextProps.onEditTag ||
     prevProps.onDeleteTag !== nextProps.onDeleteTag
   ) {
     return false;
@@ -128,30 +165,67 @@ const TagListComponent = ({
   sortable = false,
   onAddTag,
   onToggleTag,
+  onEditTag,
   onDeleteTag,
 }: TagListProps) => {
   track('TagList', 'render');
 
+  // Add new tag input state
   const [inputValue, setInputValue] = useState('');
 
-  // Check if input would be a duplicate
-  const isDuplicate = tags.some(
+  // Edit tag state
+  const [editingTagName, setEditingTagName] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+
+  // Check if add input would be a duplicate
+  const isDuplicateAdd = tags.some(
     (tag) => tag.name.toLowerCase() === inputValue.trim().toLowerCase(),
   );
 
+  // Check if edit input would be a duplicate (excluding the tag being edited)
+  const isDuplicateEdit =
+    editValue.trim().toLowerCase() !== editingTagName?.toLowerCase() &&
+    tags.some((tag) => tag.name.toLowerCase() === editValue.trim().toLowerCase());
+
+  // Add input handlers
   const handleInputChange = useCallback((value: string) => {
     setInputValue(value);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (inputValue.trim() && !isDuplicate) {
+    if (inputValue.trim() && !isDuplicateAdd) {
       onAddTag(inputValue.trim());
       setInputValue('');
     }
-  }, [inputValue, isDuplicate, onAddTag]);
+  }, [inputValue, isDuplicateAdd, onAddTag]);
 
   const handleCancel = useCallback(() => {
     setInputValue('');
+  }, []);
+
+  // Edit handlers
+  const handleStartEdit = useCallback((tagName: string) => {
+    setEditingTagName(tagName);
+    setEditValue(tagName);
+  }, []);
+
+  const handleEditChange = useCallback((value: string) => {
+    setEditValue(value);
+  }, []);
+
+  const handleEditSubmit = useCallback(() => {
+    if (editingTagName && editValue.trim() && !isDuplicateEdit) {
+      if (editValue.trim() !== editingTagName) {
+        onEditTag(editingTagName, editValue.trim());
+      }
+      setEditingTagName(null);
+      setEditValue('');
+    }
+  }, [editingTagName, editValue, isDuplicateEdit, onEditTag]);
+
+  const handleEditCancel = useCallback(() => {
+    setEditingTagName(null);
+    setEditValue('');
   }, []);
 
   track('TagList', 'render-end');
@@ -161,8 +235,15 @@ const TagListComponent = ({
       <TagsDisplay
         tags={tags}
         sortable={sortable}
+        editingTagName={editingTagName}
+        editValue={editValue}
+        isDuplicateEdit={isDuplicateEdit}
         onToggleTag={onToggleTag}
+        onEditTag={handleStartEdit}
         onDeleteTag={onDeleteTag}
+        onEditChange={handleEditChange}
+        onEditSubmit={handleEditSubmit}
+        onEditCancel={handleEditCancel}
       />
 
       <div className="mt-2">
@@ -173,7 +254,8 @@ const TagListComponent = ({
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           placeholder="Add tag..."
-          isDuplicate={isDuplicate}
+          isDuplicate={isDuplicateAdd}
+          disabled={editingTagName !== null}
         />
       </div>
     </div>
@@ -192,6 +274,7 @@ const tagListPropsAreEqual = (prevProps: TagListProps, nextProps: TagListProps):
   if (
     prevProps.onAddTag !== nextProps.onAddTag ||
     prevProps.onToggleTag !== nextProps.onToggleTag ||
+    prevProps.onEditTag !== nextProps.onEditTag ||
     prevProps.onDeleteTag !== nextProps.onDeleteTag
   ) {
     return false;
