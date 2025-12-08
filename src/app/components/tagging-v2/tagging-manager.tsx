@@ -6,7 +6,7 @@
  * - Handles add tag action
  * - No DnD, no editing, no sorting
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   addTag,
@@ -36,16 +36,22 @@ export const TaggingManager = ({
   const orderedTagsWithStatus = useAppSelector((state) =>
     selectOrderedTagsWithStatus(state, assetId),
   );
-  const tagCounts = useAppSelector((state) => selectAssetTagCounts(state, assetId));
+  const tagCounts = useAppSelector((state) =>
+    selectAssetTagCounts(state, assetId),
+  );
   const filterTagsSet = useAppSelector(selectFilterTagsSet);
 
-  // Transform to the shape TagList expects
-  const tags = orderedTagsWithStatus.map((tag: { name: string; status: number }) => ({
-    name: tag.name,
-    state: tag.status,
-    count: tagCounts[tag.name] || 0,
-    isHighlighted: filterTagsSet.has(tag.name),
-  }));
+  // Transform to the shape TagList expects - memoized to maintain reference stability
+  const tags = useMemo(
+    () =>
+      orderedTagsWithStatus.map((tag: { name: string; status: number }) => ({
+        name: tag.name,
+        state: tag.status,
+        count: tagCounts[tag.name] || 0,
+        isHighlighted: filterTagsSet.has(tag.name),
+      })),
+    [orderedTagsWithStatus, tagCounts, filterTagsSet],
+  );
 
   // Handle adding a new tag
   const handleAddTag = useCallback(
