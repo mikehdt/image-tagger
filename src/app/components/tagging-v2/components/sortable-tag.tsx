@@ -8,6 +8,7 @@
  */
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { memo } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
@@ -32,7 +33,7 @@ type SortableTagProps = {
   isDuplicateEdit: boolean;
 };
 
-export const SortableTag = ({
+const SortableTagComponent = ({
   id,
   tagName,
   tagState,
@@ -103,3 +104,46 @@ export const SortableTag = ({
     </div>
   );
 };
+
+// Memo comparison - skip re-render if props unchanged
+const sortableTagPropsAreEqual = (
+  prevProps: SortableTagProps,
+  nextProps: SortableTagProps,
+): boolean => {
+  track('SortableTag', 'memo-check');
+
+  // If editing state changes, must re-render
+  if (prevProps.isEditing !== nextProps.isEditing) {
+    return false;
+  }
+
+  // During edit mode, check edit-specific props
+  if (nextProps.isEditing) {
+    if (
+      prevProps.editValue !== nextProps.editValue ||
+      prevProps.isDuplicateEdit !== nextProps.isDuplicateEdit
+    ) {
+      return false;
+    }
+  }
+
+  // Check all visual/interaction props
+  const isEqual =
+    prevProps.id === nextProps.id &&
+    prevProps.tagName === nextProps.tagName &&
+    prevProps.tagState === nextProps.tagState &&
+    prevProps.count === nextProps.count &&
+    prevProps.isHighlighted === nextProps.isHighlighted &&
+    prevProps.fade === nextProps.fade &&
+    prevProps.onToggle === nextProps.onToggle &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onEditChange === nextProps.onEditChange &&
+    prevProps.onEditSubmit === nextProps.onEditSubmit &&
+    prevProps.onEditCancel === nextProps.onEditCancel;
+
+  if (isEqual) track('SortableTag', 'memo-hit');
+  return isEqual;
+};
+
+export const SortableTag = memo(SortableTagComponent, sortableTagPropsAreEqual);

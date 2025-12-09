@@ -1,11 +1,13 @@
 /**
  * TagList Component v2
  *
- * Phase 4: Supports inline tag editing
- * - TagsDisplay NOT memoized when editing (edit state changes frequently)
+ * Phase 5: DndContext moved inside memo boundary
+ * - DndContext and SortableContext are now inside TagsDisplay
+ * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Edit state managed here to keep it close to where it's used
- * - Notifies parent when edit completes via onEditTag
  */
+import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { memo, useCallback, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
@@ -24,6 +26,11 @@ type TagData = {
 type TagListProps = {
   tags: TagData[];
   sortable?: boolean;
+  assetId: string;
+  // DnD props - passed through to TagsDisplay
+  sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
+  onDragEnd: (event: DragEndEvent) => void;
+  // Handlers
   onAddTag: (tagName: string) => void;
   onToggleTag: (tagName: string) => void;
   onEditTag: (oldName: string, newName: string) => void;
@@ -31,15 +38,21 @@ type TagListProps = {
 };
 
 /**
- * Inner component that renders just the tags
- * NOT memoized - edit state changes cause re-renders anyway
+ * Inner component that renders tags with DnD context inside memo boundary
+ * DndContext is inside here so memo can block re-renders of entire DnD subtree
  */
 type TagsDisplayProps = {
   tags: TagData[];
   sortable: boolean;
+  assetId: string;
+  // DnD props
+  sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
+  onDragEnd: (event: DragEndEvent) => void;
+  // Edit state
   editingTagName: string | null;
   editValue: string;
   isDuplicateEdit: boolean;
+  // Handlers
   onToggleTag: (tagName: string) => void;
   onEditTag: (tagName: string) => void;
   onDeleteTag: (tagName: string) => void;
@@ -51,6 +64,9 @@ type TagsDisplayProps = {
 const TagsDisplayComponent = ({
   tags,
   sortable,
+  assetId,
+  sensors,
+  onDragEnd,
   editingTagName,
   editValue,
   isDuplicateEdit,
@@ -63,48 +79,56 @@ const TagsDisplayComponent = ({
 }: TagsDisplayProps) => {
   track('TagsDisplay', 'render');
 
-  const result = (
-    <div className="flex flex-wrap">
-      {tags.map((tag) =>
-        sortable ? (
-          <SortableTag
-            key={tag.name}
-            id={tag.name}
-            tagName={tag.name}
-            tagState={tag.state}
-            count={tag.count}
-            isHighlighted={tag.isHighlighted}
-            fade={editingTagName !== null && editingTagName !== tag.name}
-            isEditing={editingTagName === tag.name}
-            editValue={editValue}
-            onToggle={onToggleTag}
-            onEdit={onEditTag}
-            onDelete={onDeleteTag}
-            onEditChange={onEditChange}
-            onEditSubmit={onEditSubmit}
-            onEditCancel={onEditCancel}
-            isDuplicateEdit={isDuplicateEdit}
-          />
-        ) : (
-          <div key={tag.name} className="mr-2 mb-2">
-            <Tag
-              tagName={tag.name}
-              tagState={tag.state}
-              count={tag.count}
-              isHighlighted={tag.isHighlighted}
-              fade={editingTagName !== null && editingTagName !== tag.name}
-              onToggle={onToggleTag}
-              onEdit={onEditTag}
-              onDelete={onDeleteTag}
-            />
-          </div>
-        ),
-      )}
-    </div>
+  const tagNames = tags.map((t) => t.name);
+
+  const tagElements = tags.map((tag) =>
+    sortable ? (
+      <SortableTag
+        key={tag.name}
+        id={tag.name}
+        tagName={tag.name}
+        tagState={tag.state}
+        count={tag.count}
+        isHighlighted={tag.isHighlighted}
+        fade={editingTagName !== null && editingTagName !== tag.name}
+        isEditing={editingTagName === tag.name}
+        editValue={editValue}
+        onToggle={onToggleTag}
+        onEdit={onEditTag}
+        onDelete={onDeleteTag}
+        onEditChange={onEditChange}
+        onEditSubmit={onEditSubmit}
+        onEditCancel={onEditCancel}
+        isDuplicateEdit={isDuplicateEdit}
+      />
+    ) : (
+      <div key={tag.name} className="mr-2 mb-2">
+        <Tag
+          tagName={tag.name}
+          tagState={tag.state}
+          count={tag.count}
+          isHighlighted={tag.isHighlighted}
+          fade={editingTagName !== null && editingTagName !== tag.name}
+          onToggle={onToggleTag}
+          onEdit={onEditTag}
+          onDelete={onDeleteTag}
+        />
+      </div>
+    ),
   );
 
   track('TagsDisplay', 'render-end');
-  return result;
+
+  // DndContext is inside memo boundary - when memo returns true, entire DnD subtree skipped
+  return sortable ? (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+      <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
+        <div className="flex flex-wrap">{tagElements}</div>
+      </SortableContext>
+    </DndContext>
+  ) : (
+    <div className="flex flex-wrap">{tagElements}</div>
+  );
 };
 
 // Memo comparison - skip re-render only when NOT editing
@@ -163,6 +187,9 @@ const TagsDisplay = memo(TagsDisplayComponent, tagsDisplayPropsAreEqual);
 const TagListComponent = ({
   tags,
   sortable = false,
+  assetId,
+  sensors,
+  onDragEnd,
   onAddTag,
   onToggleTag,
   onEditTag,
@@ -235,6 +262,9 @@ const TagListComponent = ({
       <TagsDisplay
         tags={tags}
         sortable={sortable}
+        assetId={assetId}
+        sensors={sensors}
+        onDragEnd={onDragEnd}
         editingTagName={editingTagName}
         editValue={editValue}
         isDuplicateEdit={isDuplicateEdit}
@@ -265,8 +295,13 @@ const TagListComponent = ({
 const tagListPropsAreEqual = (prevProps: TagListProps, nextProps: TagListProps): boolean => {
   track('TagList', 'memo-check');
 
-  // Check sortable mode
-  if (prevProps.sortable !== nextProps.sortable) {
+  // Check sortable mode and assetId
+  if (prevProps.sortable !== nextProps.sortable || prevProps.assetId !== nextProps.assetId) {
+    return false;
+  }
+
+  // Check DnD callback references (sensors is stable from useSensors)
+  if (prevProps.sensors !== nextProps.sensors || prevProps.onDragEnd !== nextProps.onDragEnd) {
     return false;
   }
 

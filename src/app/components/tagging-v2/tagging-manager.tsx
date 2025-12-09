@@ -1,21 +1,13 @@
 /**
  * TaggingManager v2
  *
- * Phase 4: Full functionality with inline tag editing
- * - DndContext and SortableContext wrap TagList
- * - Each asset has isolated DnD context (no cross-asset interference)
+ * Phase 5: DndContext moved inside TagList memo boundary
+ * - DndContext is now inside TagsDisplay (after memo check)
+ * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Supports add, toggle, edit, delete, and reorder
  */
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useCallback, useMemo } from 'react';
 
 import {
@@ -131,17 +123,16 @@ export const TaggingManager = ({
   track('TaggingManager', 'render-end');
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
-        <TagList
-          tags={tags}
-          sortable={true}
-          onAddTag={handleAddTag}
-          onToggleTag={handleToggleTag}
-          onEditTag={handleEditTag}
-          onDeleteTag={handleDeleteTag}
-        />
-      </SortableContext>
-    </DndContext>
+    <TagList
+      tags={tags}
+      sortable={true}
+      assetId={assetId}
+      sensors={sensors}
+      onDragEnd={handleDragEnd}
+      onAddTag={handleAddTag}
+      onToggleTag={handleToggleTag}
+      onEditTag={handleEditTag}
+      onDeleteTag={handleDeleteTag}
+    />
   );
 };
