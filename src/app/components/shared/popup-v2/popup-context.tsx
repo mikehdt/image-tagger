@@ -224,13 +224,30 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
   );
 
   // Handle escape key - close the top of the stack (innermost popup)
+  // But yield to focused inputs/textareas inside the popup first
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && activePopupId) {
-        event.preventDefault();
-        event.stopPropagation();
-        closePopup(activePopupId);
+      if (event.key !== 'Escape' || !activePopupId) return;
+
+      // Check if focus is on an input or textarea inside the active popup
+      const activeElement = document.activeElement;
+      const popupElement = document.querySelector(
+        `[data-popup-id="${activePopupId}"]`,
+      );
+
+      if (
+        activeElement &&
+        popupElement?.contains(activeElement) &&
+        (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')
+      ) {
+        // Focus is on an input inside the popup - don't close, let the input handle it
+        // The input's onKeyDown can blur itself or call closePopup when ready
+        return;
       }
+
+      event.preventDefault();
+      event.stopPropagation();
+      closePopup(activePopupId);
     };
 
     if (activePopupId) {
