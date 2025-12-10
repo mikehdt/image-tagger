@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { usePopup } from './popup-context';
-import type { PopupPosition, PopupProps } from './types';
+import type { PopupProps } from './types';
 import {
   adjustForViewport,
   calculateInitialStyles,
@@ -22,8 +22,6 @@ export const Popup: React.FC<PopupProps> = ({
   const popupRef = useRef<HTMLDivElement>(null);
   const { getPopupState, getPopupConfig, setPopupConfig, finishPositioning } =
     usePopup();
-  const [currentPosition, setCurrentPosition] =
-    useState<PopupPosition>(position);
   const [positionStyles, setPositionStyles] = useState<React.CSSProperties>({});
 
   const state = getPopupState(id);
@@ -71,11 +69,8 @@ export const Popup: React.FC<PopupProps> = ({
       currentOffset,
     );
 
-    // Apply adjusted styles
+    // Apply adjusted styles and transform origin
     setPositionStyles(styles);
-    setCurrentPosition(adjustedPosition);
-
-    // Apply transform origin based on final position
     popup.style.transformOrigin = getTransformOrigin(adjustedPosition);
   }, [position, offset, triggerRef]);
 
@@ -104,15 +99,32 @@ export const Popup: React.FC<PopupProps> = ({
   ]);
 
   // Handle window resize while popup is open
+  // Use rAF to batch with browser's render cycle and avoid jitter
   useEffect(() => {
     if (!state.isOpen) return;
 
+    let rafId: number | null = null;
+
     const handleResize = () => {
-      calculateAndApplyPosition();
+      // Cancel any pending frame
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+
+      // Schedule recalculation for next frame
+      rafId = requestAnimationFrame(() => {
+        calculateAndApplyPosition();
+        rafId = null;
+      });
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+    };
   }, [state.isOpen, calculateAndApplyPosition]);
 
   // Don't render if not needed

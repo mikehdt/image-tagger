@@ -15,13 +15,8 @@ import {
   getSizeSortOptions,
   getTagSortOptions,
 } from './components';
+import { useKeyboardNavigation } from './hooks';
 import {
-  useKeyboardNavigation,
-  useOutsideClick,
-  usePanelPosition,
-} from './hooks';
-import {
-  FilterListProps,
   FilterView,
   SizeSubViewType,
   SortDirection,
@@ -29,14 +24,10 @@ import {
 } from './types';
 
 interface FilterContextType {
-  // Panel visibility and positioning
-  isOpen: boolean;
-  position: { top: number; left: number };
-  isPositioned: boolean;
-  panelRef: RefObject<HTMLDivElement | null>;
+  // Close handler (provided by popup system)
   onClose: () => void;
 
-  // Persistent filter state (combines both providers)
+  // Persistent filter state
   activeView: FilterView;
   setActiveView: (view: FilterView) => void;
 
@@ -70,15 +61,15 @@ interface FilterContextType {
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
+interface FilterProviderProps {
+  children: ReactNode;
+  onClose: () => void;
+}
+
 export const FilterProvider = ({
   children,
-  isOpen,
   onClose,
-  containerRef,
-}: {
-  children: ReactNode;
-} & FilterListProps) => {
-  const panelRef = useRef<HTMLDivElement>(null);
+}: FilterProviderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Persistent state for view and sort settings
@@ -104,9 +95,6 @@ export const FilterProvider = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [listLength, setListLength] = useState(0);
 
-  // Panel positioning
-  const { position, isPositioned } = usePanelPosition(isOpen, containerRef);
-
   // Get current sort settings based on active view and sub-view
   const currentSort = useMemo(() => {
     if (activeView === 'size') {
@@ -115,7 +103,7 @@ export const FilterProvider = ({
     return sortSettings[activeView];
   }, [activeView, sizeSubView, sortSettings]);
 
-  //  sort setters that update the correct view settings
+  // Sort setters that update the correct view settings
   const setSortDirection = useCallback(
     (direction: SortDirection) => {
       setSortSettings((prev) => {
@@ -198,9 +186,6 @@ export const FilterProvider = ({
     inputRef,
   );
 
-  // Outside click handling
-  useOutsideClick(isOpen, onClose, panelRef, containerRef);
-
   // Reset selected index when search term changes
   const handleSearchTermChange = useCallback((term: string) => {
     setSearchTerm(term);
@@ -217,10 +202,6 @@ export const FilterProvider = ({
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
-      isOpen,
-      position,
-      isPositioned,
-      panelRef,
       onClose,
       activeView,
       setActiveView: handleViewChange,
@@ -241,9 +222,6 @@ export const FilterProvider = ({
       getSortOptions,
     }),
     [
-      isOpen,
-      position,
-      isPositioned,
       onClose,
       activeView,
       handleViewChange,
@@ -273,7 +251,7 @@ export const FilterProvider = ({
 export const useFilterContext = () => {
   const context = useContext(FilterContext);
   if (context === undefined) {
-    throw new Error('useFilterContext must be used within an FilterProvider');
+    throw new Error('useFilterContext must be used within a FilterProvider');
   }
   return context;
 };

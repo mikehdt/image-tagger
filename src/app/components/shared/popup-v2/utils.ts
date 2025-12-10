@@ -5,6 +5,7 @@ export const ANIMATION_DURATION = 150; // ms - should match CSS transition durat
 export const DEFAULT_OFFSET = 4; // px spacing between trigger and popup - matches Tailwind mt-1
 
 const VIEWPORT_MARGIN = 16; // px minimum margin from viewport edges
+const MAX_HEIGHT_VH = 0.8; // Maximum height as fraction of viewport height (80vh)
 
 /**
  * Calculate the initial position styles for a popup based on desired position.
@@ -124,21 +125,25 @@ export function adjustForViewport(
   }
 
   // --- Vertical adjustment ---
-  // For bottom-opening popups, cap maxHeight if it would overflow the viewport
+  // Always cap maxHeight to 80vh or available space, whichever is smaller
+  // This ensures proper scrolling and responsive resize behavior
+  const maxPreferredHeight = viewportHeight * MAX_HEIGHT_VH;
+
   if (verticalPart === 'bottom') {
     const availableHeight = viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
+    const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
-    if (popupRect.height > availableHeight && availableHeight > 0) {
-      // Cap the max height to available space
-      styles.maxHeight = `${availableHeight}px`;
+    if (maxHeight > 0) {
+      styles.maxHeight = `${maxHeight}px`;
       styles.overflowY = 'auto';
     }
   } else {
     // For top-opening popups, cap based on space above trigger
     const availableHeight = triggerRect.top - offset - VIEWPORT_MARGIN;
+    const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
-    if (popupRect.height > availableHeight && availableHeight > 0) {
-      styles.maxHeight = `${availableHeight}px`;
+    if (maxHeight > 0) {
+      styles.maxHeight = `${maxHeight}px`;
       styles.overflowY = 'auto';
     }
   }
