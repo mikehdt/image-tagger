@@ -49,7 +49,7 @@ export interface ViewportAdjustmentResult {
 
 /**
  * Adjust popup position to keep it within viewport bounds.
- * Only handles horizontal (left/right) overflow for now.
+ * Handles both horizontal (left/right) and vertical (bottom) overflow.
  */
 export function adjustForViewport(
   popupElement: HTMLElement,
@@ -60,11 +60,12 @@ export function adjustForViewport(
   const popupRect = popupElement.getBoundingClientRect();
   const triggerRect = triggerElement.getBoundingClientRect();
   const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   const styles = calculateInitialStyles(desiredPosition, offset);
   let adjustedPosition = desiredPosition;
 
-  // Check horizontal overflow
+  // --- Horizontal adjustment ---
   const overflowRight = popupRect.right > viewportWidth - VIEWPORT_MARGIN;
   const overflowLeft = popupRect.left < VIEWPORT_MARGIN;
 
@@ -81,7 +82,11 @@ export function adjustForViewport(
     adjustedPosition = `${verticalPart}-left` as PopupPosition;
   } else if (overflowRight) {
     // Overflowing right edge - try right-aligning
-    if (desiredPosition.includes('left') || desiredPosition === 'top' || desiredPosition === 'bottom') {
+    if (
+      desiredPosition.includes('left') ||
+      desiredPosition === 'top' ||
+      desiredPosition === 'bottom'
+    ) {
       // Switch from left/center to right alignment
       delete styles.left;
       delete styles.transform;
@@ -98,7 +103,11 @@ export function adjustForViewport(
     }
   } else if (overflowLeft) {
     // Overflowing left edge - try left-aligning
-    if (desiredPosition.includes('right') || desiredPosition === 'top' || desiredPosition === 'bottom') {
+    if (
+      desiredPosition.includes('right') ||
+      desiredPosition === 'top' ||
+      desiredPosition === 'bottom'
+    ) {
       // Switch from right/center to left alignment
       delete styles.right;
       delete styles.transform;
@@ -111,6 +120,26 @@ export function adjustForViewport(
       delete styles.right;
       delete styles.transform;
       styles.left = shiftNeeded;
+    }
+  }
+
+  // --- Vertical adjustment ---
+  // For bottom-opening popups, cap maxHeight if it would overflow the viewport
+  if (verticalPart === 'bottom') {
+    const availableHeight = viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
+
+    if (popupRect.height > availableHeight && availableHeight > 0) {
+      // Cap the max height to available space
+      styles.maxHeight = `${availableHeight}px`;
+      styles.overflowY = 'auto';
+    }
+  } else {
+    // For top-opening popups, cap based on space above trigger
+    const availableHeight = triggerRect.top - offset - VIEWPORT_MARGIN;
+
+    if (popupRect.height > availableHeight && availableHeight > 0) {
+      styles.maxHeight = `${availableHeight}px`;
+      styles.overflowY = 'auto';
     }
   }
 
