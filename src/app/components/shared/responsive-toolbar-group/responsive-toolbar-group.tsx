@@ -1,7 +1,7 @@
-import React, { ReactNode, useCallback, useRef } from 'react';
+import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
 import { Button } from '../button';
-import { Popup, PopupProvider, usePopup } from '../popup-v2';
+import { Popup, usePopup } from '../popup-v2';
 
 interface ResponsiveToolbarGroupProps {
   /** Icon to display as the visual indicator/button */
@@ -30,7 +30,7 @@ function ResponsiveToolbarGroupInternal({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
 
-  const popupId = 'responsive-toolbar-popover';
+  const popupId = useId();
   const isPopoverOpen = getPopupState(popupId).isOpen;
 
   // Define breakpoint-specific classes
@@ -118,12 +118,9 @@ function ResponsiveToolbarGroupInternal({
  * A responsive toolbar group that shows an inactive icon with inline actions at larger screens,
  * and becomes an active icon button with popover at smaller screens.
  * The breakpoint can be customized to 'medium' (md) or 'large' (lg) - defaults to 'medium'.
- * This version uses the popup system for consistent behavior across the application.
+ * This version uses the global popup stack for consistent behavior across the application.
+ * Requires a PopupProvider ancestor in the component tree.
  */
 export const ResponsiveToolbarGroup = (props: ResponsiveToolbarGroupProps) => {
-  return (
-    <PopupProvider>
-      <ResponsiveToolbarGroupInternal {...props} />
-    </PopupProvider>
-  );
+  return <ResponsiveToolbarGroupInternal {...props} />;
 };

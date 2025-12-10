@@ -1,3 +1,5 @@
+'use client';
+
 import React, {
   createContext,
   useCallback,
@@ -24,12 +26,29 @@ const DEFAULT_STATE: PopupState = {
   isPositioning: false,
 };
 
+/**
+ * Global popup stack provider - manages a stack of open popups.
+ *
+ * When a popup opens:
+ * - If its trigger is inside an existing open popup, it's pushed to the stack (child)
+ * - If its trigger is outside all open popups, the stack is cleared first (sibling/new chain)
+ *
+ * Escape closes the top of the stack (innermost popup).
+ * Click outside closes the entire stack.
+ */
 export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
-  const [activePopupId, setActivePopupId] = useState<string | null>(null);
+  // Stack of open popup IDs, from bottom (oldest) to top (newest/innermost)
+  const [popupStack, setPopupStack] = useState<string[]>([]);
   const [popupStates, setPopupStates] = useState<Map<string, PopupState>>(
     new Map(),
   );
   const popupConfigsRef = useRef<Map<string, PopupConfig>>(new Map());
+
+  // Track popups currently in closing animation to prevent re-opening
+  const closingPopupsRef = useRef<Set<string>>(new Set());
+
+  // The active popup is the top of the stack
+  const activePopupId = popupStack.length > 0 ? popupStack[popupStack.length - 1] : null;
 
   const getPopupState = useCallback(
     (id: string): PopupState => {
@@ -59,10 +78,16 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
     [],
   );
 
+  /**
+   * Close a single popup by ID (with animation)
+   */
   const closePopup = useCallback(
     (id: string) => {
       const state = getPopupState(id);
       if (!state.isOpen && !state.isPositioning) return;
+
+      // Mark as closing to prevent re-open during animation
+      closingPopupsRef.current.add(id);
 
       // Start closing animation
       updatePopupState(id, {
@@ -71,32 +96,76 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
         isPositioning: false,
       });
 
+      // Remove from stack immediately
+      setPopupStack((prev) => prev.filter((popupId) => popupId !== id));
+
       // After animation completes, stop rendering
       setTimeout(() => {
         updatePopupState(id, {
           isAnimating: false,
           shouldRender: false,
         });
-        if (activePopupId === id) {
-          setActivePopupId(null);
-        }
+        closingPopupsRef.current.delete(id);
       }, ANIMATION_DURATION);
     },
-    [activePopupId, getPopupState, updatePopupState],
+    [getPopupState, updatePopupState],
   );
 
+  /**
+   * Close all popups in the stack (from top to bottom)
+   */
   const closeAllPopups = useCallback(() => {
-    if (activePopupId) {
-      closePopup(activePopupId);
+    // Close from top to bottom for proper visual stacking
+    const stackCopy = [...popupStack].reverse();
+    for (const id of stackCopy) {
+      closePopup(id);
     }
-  }, [activePopupId, closePopup]);
+  }, [popupStack, closePopup]);
+
+  /**
+   * Close popups from the top of the stack down to (but not including) a specific popup.
+   * Used when opening a child popup to close any existing children first.
+   */
+  const closePopupsAbove = useCallback(
+    (parentId: string) => {
+      const parentIndex = popupStack.indexOf(parentId);
+      if (parentIndex === -1) return;
+
+      // Close all popups above the parent
+      const toClose = popupStack.slice(parentIndex + 1).reverse();
+      for (const id of toClose) {
+        closePopup(id);
+      }
+    },
+    [popupStack, closePopup],
+  );
+
+  /**
+   * Check if a DOM element is inside any currently open popup
+   */
+  const findContainingPopup = useCallback(
+    (element: HTMLElement | null): string | null => {
+      if (!element) return null;
+
+      // Check from top of stack down (innermost first)
+      for (let i = popupStack.length - 1; i >= 0; i--) {
+        const popupId = popupStack[i];
+        const popupElement = document.querySelector(
+          `[data-popup-id="${popupId}"]`,
+        );
+        if (popupElement?.contains(element)) {
+          return popupId;
+        }
+      }
+      return null;
+    },
+    [popupStack],
+  );
 
   const openPopup = useCallback(
     (id: string, config?: PopupConfig) => {
-      // Close any currently open popup first
-      if (activePopupId && activePopupId !== id) {
-        closePopup(activePopupId);
-      }
+      // Don't reopen a popup that's currently closing
+      if (closingPopupsRef.current.has(id)) return;
 
       // Update config if provided
       if (config) {
@@ -106,9 +175,28 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
         });
       }
 
-      // Start opening sequence - begin in positioning phase
-      // Transitions are disabled during this phase
-      setActivePopupId(id);
+      const fullConfig = popupConfigsRef.current.get(id);
+      const triggerElement = fullConfig?.triggerRef?.current;
+
+      // Check if the trigger is inside an existing open popup
+      const containingPopupId = findContainingPopup(triggerElement ?? null);
+
+      if (containingPopupId) {
+        // Trigger is inside an open popup - this is a child popup
+        // Close any popups above the containing one first
+        closePopupsAbove(containingPopupId);
+      } else {
+        // Trigger is not inside any open popup - start fresh
+        closeAllPopups();
+      }
+
+      // Add to stack and start opening
+      setPopupStack((prev) => {
+        // Remove if already in stack (shouldn't happen, but safety)
+        const filtered = prev.filter((popupId) => popupId !== id);
+        return [...filtered, id];
+      });
+
       updatePopupState(id, {
         shouldRender: true,
         isPositioning: true,
@@ -118,7 +206,7 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
 
       // The Popup component will call finishPositioning when ready
     },
-    [activePopupId, closePopup, updatePopupState],
+    [findContainingPopup, closePopupsAbove, closeAllPopups, updatePopupState],
   );
 
   const finishPositioning = useCallback(
@@ -135,10 +223,12 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
     [getPopupState, updatePopupState],
   );
 
-  // Handle escape key to close active popup
+  // Handle escape key - close the top of the stack (innermost popup)
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && activePopupId) {
+        event.preventDefault();
+        event.stopPropagation();
         closePopup(activePopupId);
       }
     };
@@ -152,38 +242,39 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
     };
   }, [activePopupId, closePopup]);
 
-  // Handle click outside to close active popup
+  // Handle click outside - close entire stack if click is outside all popups and triggers
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!activePopupId) return;
+      if (popupStack.length === 0) return;
 
-      const config = getPopupConfig(activePopupId);
-      const triggerElement = config?.triggerRef?.current;
-
-      // Check if click is outside both trigger and popup
       const target = event.target as Node;
-      const popupElement = document.querySelector(
-        `[data-popup-id="${activePopupId}"]`,
-      );
 
-      if (
-        triggerElement &&
-        !triggerElement.contains(target) &&
-        popupElement &&
-        !popupElement.contains(target)
-      ) {
-        closePopup(activePopupId);
+      // Check if click is inside any popup or its trigger
+      for (const popupId of popupStack) {
+        const config = getPopupConfig(popupId);
+        const triggerElement = config?.triggerRef?.current;
+        const popupElement = document.querySelector(
+          `[data-popup-id="${popupId}"]`,
+        );
+
+        // If click is inside this popup or its trigger, don't close anything
+        if (triggerElement?.contains(target) || popupElement?.contains(target)) {
+          return;
+        }
       }
+
+      // Click was outside all popups and triggers - close everything
+      closeAllPopups();
     };
 
-    if (activePopupId) {
+    if (popupStack.length > 0) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [activePopupId, closePopup, getPopupConfig]);
+  }, [popupStack, closeAllPopups, getPopupConfig]);
 
   const contextValue: PopupContextValue = {
     activePopupId,
