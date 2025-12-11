@@ -21,10 +21,11 @@ import {
   deleteTag,
   editTag,
   reorderTags,
+  selectAssetHighlightedTags,
   selectAssetTagCounts,
   selectOrderedTagsWithStatus,
 } from '@/app/store/assets';
-import { selectFilterTagsSet, toggleTagFilter } from '@/app/store/filters';
+import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { track } from '@/app/utils/render-tracker';
 
@@ -50,7 +51,11 @@ const TaggingManagerComponent = ({
   const tagCounts = useAppSelector((state) =>
     selectAssetTagCounts(state, assetId),
   );
-  const filterTagsSet = useAppSelector(selectFilterTagsSet);
+  // Use asset-specific highlighted tags selector - only re-renders when THIS asset's
+  // highlighted tags change, not when unrelated filter tags change
+  const highlightedTags = useAppSelector((state) =>
+    selectAssetHighlightedTags(state, assetId),
+  );
 
   // Transform to the shape TagList expects - memoized to maintain reference stability
   const tags = useMemo(
@@ -59,9 +64,9 @@ const TaggingManagerComponent = ({
         name: tag.name,
         state: tag.status,
         count: tagCounts[tag.name] || 0,
-        isHighlighted: filterTagsSet.has(tag.name),
+        isHighlighted: highlightedTags.has(tag.name),
       })),
-    [orderedTagsWithStatus, tagCounts, filterTagsSet],
+    [orderedTagsWithStatus, tagCounts, highlightedTags],
   );
 
   // Tag names for SortableContext items

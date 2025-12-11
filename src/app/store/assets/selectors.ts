@@ -262,3 +262,49 @@ export const selectAssetTagCounts = createSelector(
     return assetTagCounts;
   },
 );
+
+// Optimized selector for filtered asset count only
+// Avoids returning full array when only count is needed
+export const selectFilteredAssetsCount = createSelector(
+  [selectFilteredAssets],
+  (filteredAssets) => filteredAssets.length,
+);
+
+// Optimized selector for asset-specific highlighted tags
+// Returns a Set of tag names that are both on this asset AND in the filter
+// Only triggers re-renders when the intersection changes, not when unrelated filters change
+export const selectAssetHighlightedTags = createSelector(
+  [
+    selectAllImages,
+    (state: RootState) => state.filters.filterTags,
+    (_, assetId: string) => assetId,
+  ],
+  (imageAssets, filterTags, assetId) => {
+    const asset = imageAssets.find((img) => img.fileId === assetId);
+    if (!asset || filterTags.length === 0) return new Set<string>();
+
+    // Only return tags that exist on this asset AND are in the filter
+    const filterSet = new Set(filterTags);
+    const highlighted = new Set<string>();
+
+    for (const tag of asset.tagList) {
+      if (filterSet.has(tag)) {
+        highlighted.add(tag);
+      }
+    }
+
+    return highlighted;
+  },
+  {
+    memoizeOptions: {
+      // Custom equality check for Set comparison
+      resultEqualityCheck: (a: Set<string>, b: Set<string>) => {
+        if (a.size !== b.size) return false;
+        for (const item of a) {
+          if (!b.has(item)) return false;
+        }
+        return true;
+      },
+    },
+  },
+);

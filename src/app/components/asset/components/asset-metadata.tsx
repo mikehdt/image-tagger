@@ -3,7 +3,6 @@ import {
   BookmarkIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
-import { createSelector } from '@reduxjs/toolkit';
 import { memo, useCallback, useMemo } from 'react';
 
 import type { RootState } from '@/app/store';
@@ -15,23 +14,13 @@ import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
 import { useAssetTags } from '../hooks';
 
-// Properly memoized selector to reduce re-renders from 5 separate subscriptions to 1
-const selectMetadataFilters = createSelector(
-  [
-    (state: RootState) => state.filters.searchQuery,
-    (state: RootState) => state.project.info.projectPath,
-    (state: RootState) => state.filters.filterSizes,
-    (state: RootState) => state.filters.filterBuckets,
-    (state: RootState) => state.filters.filterExtensions,
-  ],
-  (searchQuery, projectPath, filterSizes, filterBuckets, filterExtensions) => ({
-    searchQuery,
-    projectPath,
-    filterSizes,
-    filterBuckets,
-    filterExtensions,
-  }),
-);
+// Individual selectors for metadata - avoids creating new object references
+const selectSearchQuery = (state: RootState) => state.filters.searchQuery;
+const selectProjectPath = (state: RootState) => state.project.info.projectPath;
+const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
+const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
+const selectFilterExtensions = (state: RootState) =>
+  state.filters.filterExtensions;
 
 type AssetMetadataProps = {
   assetId: string;
@@ -52,14 +41,12 @@ const AssetMetadataComponent = ({
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
-  // Single selector call instead of 5 separate ones
-  const {
-    searchQuery,
-    projectPath,
-    filterSizes,
-    filterBuckets,
-    filterExtensions,
-  } = useAppSelector(selectMetadataFilters);
+  // Individual selector calls - each only triggers re-render when its specific value changes
+  const searchQuery = useAppSelector(selectSearchQuery);
+  const projectPath = useAppSelector(selectProjectPath);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
   const {
     tagList,
     tagsByStatus,

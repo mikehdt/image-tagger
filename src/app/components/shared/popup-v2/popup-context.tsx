@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -42,6 +43,10 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
   const [popupStates, setPopupStates] = useState<Map<string, PopupState>>(
     new Map(),
   );
+  // Keep a ref to popupStates for stable callback references
+  const popupStatesRef = useRef<Map<string, PopupState>>(popupStates);
+  popupStatesRef.current = popupStates;
+
   const popupConfigsRef = useRef<Map<string, PopupConfig>>(new Map());
 
   // Track popups currently in closing animation to prevent re-opening
@@ -293,16 +298,28 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
     };
   }, [popupStack, closeAllPopups, getPopupConfig]);
 
-  const contextValue: PopupContextValue = {
-    activePopupId,
-    openPopup,
-    closePopup,
-    closeAllPopups,
-    getPopupState,
-    setPopupConfig,
-    getPopupConfig,
-    finishPositioning,
-  };
+  const contextValue: PopupContextValue = useMemo(
+    () => ({
+      activePopupId,
+      openPopup,
+      closePopup,
+      closeAllPopups,
+      getPopupState,
+      setPopupConfig,
+      getPopupConfig,
+      finishPositioning,
+    }),
+    [
+      activePopupId,
+      openPopup,
+      closePopup,
+      closeAllPopups,
+      getPopupState,
+      setPopupConfig,
+      getPopupConfig,
+      finishPositioning,
+    ],
+  );
 
   return (
     <PopupContext.Provider value={contextValue}>

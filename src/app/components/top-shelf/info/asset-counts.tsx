@@ -1,6 +1,9 @@
 import { memo } from 'react';
 
-import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import {
+  selectFilteredAssetsCount,
+  selectImageCount,
+} from '@/app/store/assets';
 import { selectFilterMode, selectHasActiveFilters } from '@/app/store/filters';
 import { FilterMode } from '@/app/store/filters/types';
 import { useAppSelector } from '@/app/store/hooks';
@@ -10,12 +13,10 @@ interface AssetCountsProps {
 }
 
 const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
-  const filteredAssets = useAppSelector(selectFilteredAssets);
+  const filteredCount = useAppSelector(selectFilteredAssetsCount);
   const filtersActive = useAppSelector(selectHasActiveFilters);
   const filterMode = useAppSelector(selectFilterMode);
   const allAssetsCount = useAppSelector(selectImageCount);
-
-  const filteredCount = filteredAssets.length;
 
   return (
     <div className="flex items-center gap-2 border-l border-l-slate-400 pl-2 text-xs font-medium tabular-nums">

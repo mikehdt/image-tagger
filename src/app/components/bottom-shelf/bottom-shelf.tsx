@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 import {
   IoState,
   loadAllAssets,
-  selectFilteredAssets,
+  selectFilteredAssetsCount,
   selectIoState,
   selectLoadProgress,
   selectSaveProgress,
@@ -204,9 +204,8 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
     }
   };
 
-  // Get filtered assets directly from the selector
-  const filteredAssets = useAppSelector(selectFilteredAssets);
-  const filteredCount = filteredAssets.length;
+  // Get filtered asset count only - avoids re-render when array contents change but count stays same
+  const filteredCount = useAppSelector(selectFilteredAssetsCount);
 
   const ioInProgress =
     ioState === IoState.LOADING ||

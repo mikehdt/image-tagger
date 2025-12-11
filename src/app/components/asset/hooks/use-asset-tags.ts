@@ -5,11 +5,9 @@ import {
   deleteTag,
   resetTags,
   saveAsset,
-  selectAllTags,
   selectOrderedTagsWithStatus,
 } from '@/app/store/assets';
 import {
-  selectFilterTags,
   toggleBucketFilter,
   toggleExtensionFilter,
   toggleSizeFilter,
@@ -19,10 +17,8 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 export const useAssetTags = (assetId: string) => {
   const dispatch = useAppDispatch();
-  const globalTagList = useAppSelector(selectAllTags);
-  const filterTags = useAppSelector(selectFilterTags);
 
-  // Memoize the selector to avoid unnecessary re-renders
+  // Only subscribe to this specific asset's tags - no global subscriptions
   const orderedTagsWithStatus = useAppSelector((state) =>
     selectOrderedTagsWithStatus(state, assetId),
   );
@@ -51,9 +47,6 @@ export const useAssetTags = (assetId: string) => {
       ),
     [orderedTagsWithStatus],
   );
-
-  // Create a Set from filterTags for efficient lookups
-  const filterTagsSet = useMemo(() => new Set(filterTags), [filterTags]);
 
   const addNewTag = useCallback(
     (e: SyntheticEvent, tagName: string) => {
@@ -128,8 +121,6 @@ export const useAssetTags = (assetId: string) => {
   return {
     tagList,
     tagsByStatus,
-    globalTagList,
-    filterTagsSet,
     addNewTag,
     toggleTag,
     toggleDeleteTag,
