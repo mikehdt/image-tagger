@@ -19,7 +19,7 @@
  * Set ENABLED = false to disable all tracking.
  */
 
-const ENABLED = true;
+const ENABLED = false;
 
 type CountEntry = {
   memoChecks: number;

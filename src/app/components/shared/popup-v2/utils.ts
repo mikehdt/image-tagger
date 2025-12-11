@@ -43,7 +43,7 @@ export function calculateInitialStyles(
   return styles;
 }
 
-export interface ViewportAdjustmentResult {
+interface ViewportAdjustmentResult {
   styles: React.CSSProperties;
   adjustedPosition: PopupPosition;
 }
@@ -130,7 +130,8 @@ export function adjustForViewport(
   const maxPreferredHeight = viewportHeight * MAX_HEIGHT_VH;
 
   if (verticalPart === 'bottom') {
-    const availableHeight = viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
+    const availableHeight =
+      viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
     const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
     if (maxHeight > 0) {

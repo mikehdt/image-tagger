@@ -6,7 +6,13 @@
  * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Supports add, toggle, edit, delete, and reorder
  */
-import { DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useCallback, useMemo } from 'react';
 
@@ -41,7 +47,9 @@ export const TaggingManager = ({
   const orderedTagsWithStatus = useAppSelector((state) =>
     selectOrderedTagsWithStatus(state, assetId),
   );
-  const tagCounts = useAppSelector((state) => selectAssetTagCounts(state, assetId));
+  const tagCounts = useAppSelector((state) =>
+    selectAssetTagCounts(state, assetId),
+  );
   const filterTagsSet = useAppSelector(selectFilterTagsSet);
 
   // Transform to the shape TagList expects - memoized to maintain reference stability
