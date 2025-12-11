@@ -6,9 +6,9 @@
  * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Edit state managed here to keep it close to where it's used
  */
-import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
+import { closestCenter, DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
@@ -79,10 +79,35 @@ const TagsDisplayComponent = ({
 }: TagsDisplayProps) => {
   track('TagsDisplay', 'render');
 
+  // Conditional DnD: only render DndContext when hovered or dragging
+  const [isHovered, setIsHovered] = useState(false);
+  const isDraggingRef = useRef(false);
+
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => {
+    // Don't disable DnD if we're mid-drag
+    if (!isDraggingRef.current) {
+      setIsHovered(false);
+    }
+  }, []);
+
+  const handleDragStart = useCallback((_event: DragStartEvent) => {
+    isDraggingRef.current = true;
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      isDraggingRef.current = false;
+      onDragEnd(event);
+    },
+    [onDragEnd],
+  );
+
   const tagNames = tags.map((t) => t.name);
+  const dndEnabled = sortable && isHovered;
 
   const tagElements = tags.map((tag) =>
-    sortable ? (
+    dndEnabled ? (
       <SortableTag
         key={tag.name}
         id={tag.name}
@@ -119,15 +144,24 @@ const TagsDisplayComponent = ({
 
   track('TagsDisplay', 'render-end');
 
-  // DndContext is inside memo boundary - when memo returns true, entire DnD subtree skipped
-  return sortable ? (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
-        <div className="flex flex-wrap">{tagElements}</div>
-      </SortableContext>
-    </DndContext>
-  ) : (
-    <div className="flex flex-wrap">{tagElements}</div>
+  // DndContext only rendered when hovered - eliminates dnd-kit overhead when not needed
+  return (
+    <div className="flex flex-wrap" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      {dndEnabled ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
+            {tagElements}
+          </SortableContext>
+        </DndContext>
+      ) : (
+        tagElements
+      )}
+    </div>
   );
 };
 
