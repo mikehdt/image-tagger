@@ -6,9 +6,32 @@
  * - Placeholder for edit mode (to be added later)
  */
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChangeEvent, KeyboardEvent, memo, SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, memo, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
+
+// Calculate dynamic input width based on text length
+// Uses discrete Tailwind classes for proper CSS extraction
+const useInputWidth = (textLength: number): string => {
+  return useMemo(() => {
+    const MIN_CHAR_LENGTH = 6;
+    const MAX_CHAR_LENGTH = 20;
+
+    // A note on Tailwind classes: They must be whole strings (`w-24` etc.)
+    // as otherwise Tailwind's parser won't properly extract the correct CSS
+    if (textLength <= MIN_CHAR_LENGTH) {
+      return 'w-40';
+    } else if (textLength >= MAX_CHAR_LENGTH) {
+      return 'w-68';
+    } else {
+      // Dynamic width between min and max based on character count
+      const widthStep = (textLength - MIN_CHAR_LENGTH) / (MAX_CHAR_LENGTH - MIN_CHAR_LENGTH);
+      const widthClasses = ['w-44', 'w-48', 'w-52', 'w-56', 'w-60', 'w-64'];
+      const index = Math.min(Math.floor(widthStep * widthClasses.length), widthClasses.length - 1);
+      return widthClasses[index];
+    }
+  }, [textLength]);
+};
 
 type InputTagProps = {
   mode: 'add' | 'edit';
@@ -35,12 +58,15 @@ const InputTagComponent = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(mode === 'edit');
+  const inputWidth = useInputWidth(value.length);
 
-  // Auto-focus input in edit mode
+  // Auto-focus input in edit mode, cursor at end
   useEffect(() => {
     if (mode === 'edit' && inputRef.current) {
       inputRef.current.focus();
-      inputRef.current.select();
+      // Move cursor to end of input (more natural for editing a few characters)
+      const length = inputRef.current.value.length;
+      inputRef.current.setSelectionRange(length, length);
     }
   }, [mode]);
 
@@ -108,7 +134,7 @@ const InputTagComponent = ({
         placeholder={placeholder}
         disabled={disabled}
         tabIndex={disabled ? -1 : 0}
-        className={`w-40 rounded-full border py-1 ps-4 pe-14 transition-all ${borderColour} ${disabled ? 'pointer-events-none opacity-50' : ''} ${isFocused ? `inset-shadow-sm ${shadowColour} ring-2 ring-blue-500` : ''}`}
+        className={`${inputWidth} rounded-full border py-1 ps-4 pe-14 transition-all ${borderColour} ${disabled ? 'pointer-events-none opacity-50' : ''} ${isFocused ? `inset-shadow-sm ${shadowColour} ring-2 ring-blue-500` : ''}`}
       />
 
       {/* Submit button */}
