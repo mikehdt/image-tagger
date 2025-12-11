@@ -4,8 +4,8 @@ import { memo, useCallback, useId, useRef } from 'react';
 import { Popup, usePopup } from '@/app/components/shared/popup-v2';
 
 import { Button } from '../../shared/button';
-import { FilterPanel } from './filter-panel';
 import { FilterProvider } from './filter-context';
+import { FilterPanel } from './filter-panel';
 
 const FilterListButtonComponent = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);

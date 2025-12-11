@@ -14,7 +14,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import {
   addTag,
@@ -35,7 +35,7 @@ type TaggingManagerProps = {
   onTagEditingChange?: (isEditing: boolean) => void; // Placeholder for future use
 };
 
-export const TaggingManager = ({
+const TaggingManagerComponent = ({
   assetId,
   onTagEditingChange: _onTagEditingChange, // Unused for now
 }: TaggingManagerProps) => {
@@ -144,3 +144,5 @@ export const TaggingManager = ({
     />
   );
 };
+
+export const TaggingManager = memo(TaggingManagerComponent);

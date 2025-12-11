@@ -4,7 +4,7 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import type { RootState } from '@/app/store';
 import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
@@ -43,7 +43,7 @@ type AssetMetadataProps = {
   isTagEditing?: boolean; // True when either editing or adding a tag
 };
 
-export const AssetMetadata = ({
+const AssetMetadataComponent = ({
   assetId,
   fileExtension,
   dimensions,
@@ -227,3 +227,5 @@ export const AssetMetadata = ({
     </div>
   );
 };
+
+export const AssetMetadata = memo(AssetMetadataComponent);

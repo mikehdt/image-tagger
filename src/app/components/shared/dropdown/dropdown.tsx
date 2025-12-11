@@ -165,7 +165,7 @@ function DropdownInternal<T>({
         triggerRef: buttonRef,
       });
     }
-  }, [isOpen, closePopup, openPopup, position]);
+  }, [isOpen, closePopup, openPopup, position, popupId]);
 
   return (
     <div className={`relative ${fullWidth ? 'w-full' : ''} ${className}`}>

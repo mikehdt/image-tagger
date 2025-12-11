@@ -56,7 +56,7 @@ function ResponsiveToolbarGroupInternal({
         triggerRef: buttonRef,
       });
     }
-  }, [isPopoverOpen, closePopup, openPopup, popupPosition]);
+  }, [isPopoverOpen, closePopup, openPopup, popupPosition, popupId]);
 
   const handleButtonKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
