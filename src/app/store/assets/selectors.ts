@@ -13,6 +13,22 @@ import { hasState } from './utils';
 const selectAllImages = (state: RootState) => state.assets.images;
 
 // Derived selectors
+
+// Optimised selector to check if a specific asset has modified tags
+// Returns boolean - only re-renders when modified state actually changes
+export const selectAssetHasModifiedTags = createSelector(
+  [selectAllImages, (_, assetId: string) => assetId],
+  (images, assetId) => {
+    const asset = images.find((img) => img.fileId === assetId);
+    if (!asset || asset.tagList.length === 0) return false;
+
+    // Check if any tag is not in SAVED state
+    return asset.tagList.some(
+      (tagName: string) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
+    );
+  },
+);
+
 export const selectOrderedTagsWithStatus = createSelector(
   // Input selectors
   [selectAllImages, (_, fileId: string) => fileId],

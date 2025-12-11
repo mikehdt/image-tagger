@@ -3,16 +3,27 @@ import {
   BookmarkIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 
 import type { RootState } from '@/app/store';
-import { IoState, KohyaBucket, selectSaveProgress } from '@/app/store/assets';
-import { useAppSelector } from '@/app/store/hooks';
+import {
+  IoState,
+  KohyaBucket,
+  resetTags,
+  saveAsset,
+  selectAssetHasModifiedTags,
+  selectSaveProgress,
+} from '@/app/store/assets';
+import {
+  toggleBucketFilter,
+  toggleExtensionFilter,
+  toggleSizeFilter,
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { highlightText } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
-import { useAssetTags } from '../hooks';
 
 // Individual selectors for metadata - avoids creating new object references
 const selectSearchQuery = (state: RootState) => state.filters.searchQuery;
@@ -41,25 +52,22 @@ const AssetMetadataComponent = ({
   dimensionsComposed,
   isTagEditing = false,
 }: AssetMetadataProps) => {
+  const dispatch = useAppDispatch();
+
   // Individual selector calls - each only triggers re-render when its specific value changes
   const searchQuery = useAppSelector(selectSearchQuery);
   const projectPath = useAppSelector(selectProjectPath);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
-  const {
-    tagList,
-    tagsByStatus,
-    toggleSize,
-    toggleBucket,
-    toggleExtension,
-    saveAction,
-    cancelAction,
-  } = useAssetTags(assetId);
+  const saveProgress = useAppSelector(selectSaveProgress);
+
+  // Use optimised selector - only re-renders when THIS asset's modified state changes
+  const hasModifiedTags =
+    useAppSelector((state) => selectAssetHasModifiedTags(state, assetId)) &&
+    ioState !== IoState.SAVING;
 
   const { showToast } = useToast();
-
-  const saveProgress = useAppSelector(selectSaveProgress);
 
   // Calculate pressed states based on filter arrays
   const dimensionsActive = filterSizes.includes(dimensionsComposed);
@@ -76,29 +84,19 @@ const AssetMetadataComponent = ({
   const isSaving =
     ioState === IoState.SAVING || isBatchSaveInProgress || isTagEditing;
 
-  // Memoize this calculation to prevent unnecessary re-renders
-  // We want to show the buttons whenever there are modified tags, even during tag editing
-  const hasModifiedTags = useMemo(
-    () =>
-      tagList.length &&
-      tagList.some((tagName: string) => tagsByStatus[tagName] !== 0) && // TagState.SAVED is 0
-      ioState !== IoState.SAVING,
-    [tagList, tagsByStatus, ioState],
-  );
-
   const handleToggleSize = useCallback(
-    () => toggleSize(dimensionsComposed),
-    [dimensionsComposed, toggleSize],
+    () => dispatch(toggleSizeFilter(dimensionsComposed)),
+    [dispatch, dimensionsComposed],
   );
 
   const handleToggleBucket = useCallback(
-    () => toggleBucket(bucketComposed),
-    [bucketComposed, toggleBucket],
+    () => dispatch(toggleBucketFilter(bucketComposed)),
+    [dispatch, bucketComposed],
   );
 
   const handleToggleExtension = useCallback(
-    () => toggleExtension(fileExtension),
-    [fileExtension, toggleExtension],
+    () => dispatch(toggleExtensionFilter(fileExtension)),
+    [dispatch, fileExtension],
   );
 
   const handleCopyAssetPath = useCallback(async () => {
@@ -122,17 +120,22 @@ const AssetMetadataComponent = ({
     if (isTagEditing || isSaving) {
       return;
     }
-    cancelAction();
-  }, [cancelAction, isSaving, isTagEditing]);
+    dispatch(resetTags(assetId));
+  }, [dispatch, assetId, isSaving, isTagEditing]);
 
   const handleSaveAction = useCallback(() => {
     // Extra guard to prevent clicking during tag editing
     if (isTagEditing || isSaving) {
       return;
     }
-
-    saveAction();
-  }, [isSaving, isTagEditing, saveAction]);
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    dispatch(
+      saveAsset({
+        fileId: assetId,
+        projectPath: selectedProject || undefined,
+      }),
+    );
+  }, [dispatch, assetId, isSaving, isTagEditing]);
 
   return (
     <div
