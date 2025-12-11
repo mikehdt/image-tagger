@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Geist /* Geist_Mono */ } from 'next/font/google';
 
 import { ModalProvider } from './components/shared/modal';
+import { PopupProvider } from './components/shared/popup-v2';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
 import { AppProvider } from './providers/AppProvider';
@@ -58,7 +59,9 @@ export default function Root({
         <StoreProvider>
           <AppProvider>
             <ModalProvider>
-              <StableLayout>{children}</StableLayout>
+              <PopupProvider>
+                <StableLayout>{children}</StableLayout>
+              </PopupProvider>
               <ToastContainer />
             </ModalProvider>
           </AppProvider>

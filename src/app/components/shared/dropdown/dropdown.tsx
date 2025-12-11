@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import React, { ReactNode, useCallback, useRef } from 'react';
+import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
-import { Popup, PopupProvider, usePopup } from '../popup';
+import { Popup, usePopup } from '../popup-v2';
 
 /**
  * Dropdown Item interface - defines the structure of each dropdown option
@@ -71,7 +71,7 @@ function DropdownInternal<T>({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
 
-  const popupId = 'dropdown-menu';
+  const popupId = useId();
   const isOpen = getPopupState(popupId).isOpen;
 
   // Find the selected item
@@ -235,12 +235,9 @@ function DropdownInternal<T>({
 
 /**
  * A reusable dropdown component with keyboard navigation and accessibility features.
- * This version uses the popup system for consistent behavior across the application.
+ * This version uses the global popup stack for consistent behavior across the application.
+ * Requires a PopupProvider ancestor in the component tree.
  */
 export function Dropdown<T>(props: DropdownProps<T>) {
-  return (
-    <PopupProvider>
-      <DropdownInternal {...props} />
-    </PopupProvider>
-  );
+  return <DropdownInternal {...props} />;
 }

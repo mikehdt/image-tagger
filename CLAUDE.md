@@ -15,7 +15,7 @@ Package manager: pnpm (specified in packageManager field)
 
 ## Architecture Overview
 
-This is a Next.js 15 application for managing and tagging image collections with the following architecture:
+This is a Next.js 16 application for managing and tagging image collections with the following architecture:
 
 ### State Management
 
@@ -73,7 +73,7 @@ This is a Next.js 15 application for managing and tagging image collections with
 ### Code Style
 
 - Australian English for UI text, US English for code (e.g., `colour` vs `color`)
-- Use `requestAnimationFrame` over `setTimeout` for UI timing
+- Prefer `requestAnimationFrame` over `setTimeout` for UI timing
 - Performance optimisation with `React.memo`, `useSelector`, `useMemo`, `useCallback`
 
 ### Data Structure
@@ -82,6 +82,7 @@ This is a Next.js 15 application for managing and tagging image collections with
 - Supports .jpg, .jpeg, .png, .webp formats
 - File pattern: `image.jpg` + `image.txt` in same directory
 - UI state in memory only, not persisted between sessions
+- Local app only; No over-the-network
 
 ### Documentation
 
