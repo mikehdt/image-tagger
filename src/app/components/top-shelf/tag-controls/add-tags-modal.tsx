@@ -13,9 +13,11 @@ import {
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
-import { Checkbox } from '../../shared/checkbox/checkbox';
+import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';
 import { MultiTagInput } from '../../shared/multi-tag-input';
+import { ScopingCheckboxes } from '../../shared/scoping-checkboxes';
+import { TagStatusLegend } from '../../shared/tag-status-legend';
 
 type AddTagsModalProps = {
   isOpen: boolean;
@@ -318,21 +320,18 @@ export const AddTagsModal = ({
           ) : tagsStatus.some(
               (t) => t.status === 'some' || t.status === 'all',
             ) ? (
-            <div className="gap-2 text-xs text-slate-500">
-              {tagsStatus.some((t) => t.status === 'all') && (
-                <p className="flex">
-                  <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
-                  Red tags exist on all selected assets and will be disregarded.
-                </p>
-              )}
-              {tagsStatus.some((t) => t.status === 'some') && (
-                <p className="flex">
-                  <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-amber-400 bg-amber-50"></span>
-                  Yellow tags exist on some assets and will only be added to
-                  assets without them.
-                </p>
-              )}
-            </div>
+            <TagStatusLegend
+              all={{
+                show: tagsStatus.some((t) => t.status === 'all'),
+                message:
+                  'Red tags exist on all selected assets and will be disregarded.',
+              }}
+              some={{
+                show: tagsStatus.some((t) => t.status === 'some'),
+                message:
+                  'Yellow tags exist on some assets and will only be added to assets without them.',
+              }}
+            />
           ) : (
             <p className="text-xs text-slate-500">
               Tags will be added to all selected assets that don&apos;t already
@@ -361,39 +360,18 @@ export const AddTagsModal = ({
           </div>
 
           {/* Constraint checkboxes - only show when both assets and active filters are available */}
-          {hasSelectedAssets && hasActiveFilters ? (
-            <>
-              <div className="flex items-center border-t border-t-slate-300 pt-4">
-                <Checkbox
-                  isSelected={applyToSelectedAssets}
-                  onChange={() =>
-                    setApplyToSelectedAssets(!applyToSelectedAssets)
-                  }
-                  label={`Scope to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Scope to selected assets"
-                />
-              </div>
-
-              <div className="flex items-center">
-                <Checkbox
-                  isSelected={applyToAssetsWithActiveFilters}
-                  onChange={() =>
-                    setApplyToAssetsWithActiveFilters(
-                      !applyToAssetsWithActiveFilters,
-                    )
-                  }
-                  label={`Scope to filtered assets (${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Scope to filtered assets"
-                />
-              </div>
-
-              {hasInvalidConstraints && (
-                <p className="text-xs text-red-600">
-                  Select at least one option above to proceed.
-                </p>
-              )}
-            </>
-          ) : null}
+          <ScopingCheckboxes
+            hasActiveFilters={hasActiveFilters}
+            filteredCount={assetsWithActiveFiltersCount}
+            scopeToFiltered={applyToAssetsWithActiveFilters}
+            onScopeToFilteredChange={setApplyToAssetsWithActiveFilters}
+            hasSelectedAssets={hasSelectedAssets}
+            selectedCount={selectedAssetsCount}
+            scopeToSelected={applyToSelectedAssets}
+            onScopeToSelectedChange={setApplyToSelectedAssets}
+            requireBothConstraints
+            requireAtLeastOne
+          />
 
           {/* Summary of how many assets will be affected - show for all cases */}
           {!hasInvalidConstraints && (

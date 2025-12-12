@@ -18,8 +18,9 @@ import {
 import { editTagsAcrossAssets } from '@/app/store/selection/thunks';
 
 import { Button } from '../../shared/button';
-import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';
+import { ScopingCheckboxes } from '../../shared/scoping-checkboxes';
+import { TagStatusLegend } from '../../shared/tag-status-legend';
 
 /**
  * Enhanced tag processing that handles duplicate tags - allows multiple renames to the same value
@@ -477,55 +478,35 @@ export const EditTagsModal = ({
               within assets will be automatically cleaned up.
             </p>
 
-            {/* Conditionally show the status explanations based on usage */}
-            {hasStatusAll && (
-              <p className="flex w-full">
-                <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-rose-400 bg-rose-100"></span>
-                Red highlights indicate the tag would create duplicates in all
-                assets that have this tag.
-              </p>
-            )}
-
-            {hasStatusSome && (
-              <p className="flex w-full">
-                <span className="mt-0.5 mr-2 inline-block h-3 min-w-3 rounded-full border border-amber-400 bg-amber-50"></span>
-                Yellow highlights indicate the tag exists in some assets or
-                would create duplicates in some (but not all) assets.
-              </p>
-            )}
-
-            {hasStatusFormDuplicate && (
-              <p className="flex w-full">
-                <span className="mt-0.5 mr-2 h-3 min-w-3 rounded-full border border-purple-400 bg-purple-100"></span>
-                Purple highlights indicate multiple tags are being renamed to
-                the same value.
-              </p>
-            )}
+            <TagStatusLegend
+              all={{
+                show: hasStatusAll,
+                message:
+                  'Red highlights indicate the tag would create duplicates in all assets that have this tag.',
+              }}
+              some={{
+                show: hasStatusSome,
+                message:
+                  'Yellow highlights indicate the tag exists in some assets or would create duplicates in some (but not all) assets.',
+              }}
+              duplicate={{
+                show: hasStatusFormDuplicate,
+                message:
+                  'Purple highlights indicate multiple tags are being renamed to the same value.',
+              }}
+            />
           </div>
 
-          {hasActiveFilters ? (
-            <div className="flex w-full items-center border-t border-t-slate-300 pt-4">
-              <Checkbox
-                isSelected={onlyFilteredAssets}
-                onChange={() => setOnlyFilteredAssets(!onlyFilteredAssets)}
-                label={`Scope to filtered assets (${filteredAssets.length} ${filteredAssets.length === 1 ? 'asset' : 'assets'})`}
-                ariaLabel="Scope to filtered assets"
-              />
-            </div>
-          ) : null}
-
-          {hasSelectedAssets ? (
-            <div
-              className={`flex items-center ${!hasActiveFilters ? 'border-t border-t-slate-300 pt-4' : ''}`}
-            >
-              <Checkbox
-                isSelected={onlySelectedAssets}
-                onChange={() => setOnlySelectedAssets(!onlySelectedAssets)}
-                label={`Scope to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
-                ariaLabel="Scope to selected assets"
-              />
-            </div>
-          ) : null}
+          <ScopingCheckboxes
+            hasActiveFilters={hasActiveFilters}
+            filteredCount={filteredAssets.length}
+            scopeToFiltered={onlyFilteredAssets}
+            onScopeToFilteredChange={setOnlyFilteredAssets}
+            hasSelectedAssets={hasSelectedAssets}
+            selectedCount={selectedAssetsCount}
+            scopeToSelected={onlySelectedAssets}
+            onScopeToSelectedChange={setOnlySelectedAssets}
+          />
 
           <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
 
