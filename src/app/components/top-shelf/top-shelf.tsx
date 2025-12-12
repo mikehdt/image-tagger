@@ -84,7 +84,7 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
           <CategoryNavigation currentPage={currentPage} />
 
           <div className="mr-auto!">
-            <AssetSelectionControls selectedAssetsCount={selectedAssetsCount} />
+            <AssetSelectionControls />
           </div>
 
           <TagSortControls />

@@ -63,17 +63,14 @@ const getSortDirectionLabel = (
   }
 };
 
-export const AssetSelectionControls = ({
-  selectedAssetsCount,
-}: {
-  selectedAssetsCount: number;
-}) => {
+export const AssetSelectionControls = () => {
   const dispatch = useAppDispatch();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedAssets = useAppSelector(selectSelectedAssets);
+  const selectedAssetsCount = selectedAssets.length;
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const searchQuery = useAppSelector(selectSearchQuery);
   const sortType = useAppSelector(selectSortType);

@@ -9,6 +9,7 @@ import {
   selectFilteredAssets,
   selectSortDirection,
   selectSortType,
+  SortType,
 } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
@@ -41,6 +42,13 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
   const selectedAssets = useAppSelector(selectSelectedAssets);
+
+  // Only use selectedAssets for grouping when sorting by selection
+  // This prevents unnecessary re-renders when selection changes but sort type doesn't need it
+  const selectedAssetsForGrouping = useMemo(
+    () => (sortType === SortType.SELECTED ? selectedAssets : []),
+    [sortType, selectedAssets],
+  );
 
   // Get filtered assets from the selector (this handles all filtering logic)
   const filteredAssets = useAppSelector(selectFilteredAssets);
@@ -83,7 +91,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       const category = getSortCategory(
         assetWithIndex,
         sortType,
-        selectedAssets,
+        selectedAssetsForGrouping,
       );
       if (!groups[category]) {
         groups[category] = [];
@@ -107,7 +115,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
     paginatedAssets,
     sortType,
     sortDirection,
-    selectedAssets,
+    selectedAssetsForGrouping,
     currentPage,
     paginationSize,
   ]);
