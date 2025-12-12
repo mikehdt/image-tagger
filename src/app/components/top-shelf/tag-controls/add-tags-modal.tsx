@@ -370,7 +370,7 @@ export const AddTagsModal = ({
                     setApplyToSelectedAssets(!applyToSelectedAssets)
                   }
                   label={`Scope to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Scope tags to selected assets"
+                  ariaLabel="Scope to selected assets"
                 />
               </div>
 
@@ -382,8 +382,8 @@ export const AddTagsModal = ({
                       !applyToAssetsWithActiveFilters,
                     )
                   }
-                  label={`Scope to assets with active filters (${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'})`}
-                  ariaLabel="Scope tags to assets with active filters"
+                  label={`Scope to filtered assets (${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'})`}
+                  ariaLabel="Scope to filtered assets"
                 />
               </div>
 

@@ -4,7 +4,8 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { createSelector } from '@reduxjs/toolkit';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import { selectFilteredAssets } from '@/app/store/assets';
+import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectSelectedAssets,
@@ -107,12 +108,9 @@ export const EditTagsModal = ({
 
   // Get filtered assets for the checkbox logic
   const filteredAssets = useAppSelector(selectFilteredAssets);
-  const allAssetsLength = useAppSelector(selectImageCount);
+  const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
-
-  // Check if any filters are currently applied
-  const hasActiveFilters = filteredAssets.length !== allAssetsLength;
   const hasSelectedAssets = selectedAssetsCount > 0;
 
   // For duplicate checking - used to track tag changes
@@ -366,6 +364,28 @@ export const EditTagsModal = ({
     (item) => item.status === 'duplicate',
   );
 
+  // Calculate the summary message for how many assets will be affected
+  const getSummaryMessage = () => {
+    const useFiltered = onlyFilteredAssets && hasActiveFilters;
+    const useSelected = onlySelectedAssets && hasSelectedAssets;
+
+    if (useFiltered && useSelected) {
+      // Both constraints active: intersection of filtered and selected
+      const intersection = selectedAssets.filter((assetId) =>
+        filteredAssets.some((asset) => asset.fileId === assetId),
+      ).length;
+      return `Tag changes will apply to ${intersection} ${intersection === 1 ? 'asset that is' : 'assets that are'} both filtered and selected.`;
+    } else if (useFiltered) {
+      // Only filtered constraint active
+      return `Tag changes will apply to the ${filteredAssets.length} currently filtered ${filteredAssets.length === 1 ? 'asset' : 'assets'}.`;
+    } else if (useSelected) {
+      // Only selected constraint active
+      return `Tag changes will apply to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
+    }
+    // No constraints active
+    return 'Tag changes will apply to all assets that have these tags.';
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
       <div className="flex flex-wrap gap-4">
@@ -484,60 +504,30 @@ export const EditTagsModal = ({
           </div>
 
           {hasActiveFilters ? (
-            <div className="flex w-full items-center gap-2 pb-2">
+            <div className="flex w-full items-center border-t border-t-slate-300 pt-4">
               <Checkbox
                 isSelected={onlyFilteredAssets}
                 onChange={() => setOnlyFilteredAssets(!onlyFilteredAssets)}
-                disabled={!hasActiveFilters}
-                label={
-                  hasActiveFilters
-                    ? `Scope tag edits with filtered assets (${filteredAssets.length} asset${filteredAssets.length !== 1 ? 's' : ''})`
-                    : 'Scope tag edits with filtered assets (no filters active)'
-                }
-                ariaLabel="Scope tag edits with filtered assets"
+                label={`Scope to filtered assets (${filteredAssets.length} ${filteredAssets.length === 1 ? 'asset' : 'assets'})`}
+                ariaLabel="Scope to filtered assets"
               />
             </div>
           ) : null}
 
           {hasSelectedAssets ? (
-            <div className="flex items-center gap-2 pb-2">
+            <div
+              className={`flex items-center ${!hasActiveFilters ? 'border-t border-t-slate-300 pt-4' : ''}`}
+            >
               <Checkbox
                 isSelected={onlySelectedAssets}
                 onChange={() => setOnlySelectedAssets(!onlySelectedAssets)}
-                disabled={!hasSelectedAssets}
-                label={
-                  hasSelectedAssets
-                    ? `Scope tag edits with selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`
-                    : 'Scope tag edits with selected assets (no assets selected)'
-                }
-                ariaLabel="Scope tag edits with selected assets"
+                label={`Scope to selected assets (${selectedAssetsCount} ${selectedAssetsCount === 1 ? 'asset' : 'assets'})`}
+                ariaLabel="Scope to selected assets"
               />
             </div>
           ) : null}
 
-          <p>
-            {(() => {
-              const useFiltered = onlyFilteredAssets && hasActiveFilters;
-              const useSelected = onlySelectedAssets && hasSelectedAssets;
-
-              if (useFiltered && useSelected) {
-                // Both constraints active: intersection of filtered and selected
-                const intersection = selectedAssets.filter((assetId) =>
-                  filteredAssets.some((asset) => asset.fileId === assetId),
-                ).length;
-                return `Tag changes will apply to ${intersection} ${intersection === 1 ? 'asset that is' : 'assets that are'} both filtered and selected.`;
-              } else if (useFiltered && !useSelected) {
-                // Only filtered constraint active
-                return `Tag changes will apply to the ${filteredAssets.length} currently filtered ${filteredAssets.length === 1 ? 'asset' : 'assets'}.`;
-              } else if (!useFiltered && useSelected) {
-                // Only selected constraint active
-                return `Tag changes will apply to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
-              } else {
-                // No constraints active
-                return `Tag changes will apply to all assets that have these tags regardless of active filters.`;
-              }
-            })()}
-          </p>
+          <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
 
           {/* Action buttons */}
           <div className="flex w-full justify-end gap-2 pt-2">
