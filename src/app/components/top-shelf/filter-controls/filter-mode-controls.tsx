@@ -4,38 +4,31 @@ import {
   FunnelIcon,
   NoSymbolIcon,
 } from '@heroicons/react/24/outline';
+import { memo, useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
-import { selectHasTaglessAssets } from '@/app/store/assets';
+import { selectHasModifiedAssets, selectHasTaglessAssets } from '@/app/store/assets';
 import {
+  clearFilters,
   FilterMode,
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
   selectFilterTags,
+  selectShowModified,
+  toggleModifiedFilter,
+  setTagFilterMode,
 } from '@/app/store/filters';
-import { useAppSelector } from '@/app/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 
-interface FilterModeControlsProps {
-  filterModifiedActive: boolean;
-  hasModifiedAssets: boolean;
-  setTagFilterMode: (mode: FilterMode) => void;
-  toggleModifiedFilter: () => void;
-  clearFilters: () => void;
-}
+const FilterModeControlsComponent = () => {
+  const dispatch = useAppDispatch();
 
-export const FilterModeControls = ({
-  filterModifiedActive,
-  hasModifiedAssets,
-  setTagFilterMode,
-  toggleModifiedFilter,
-  clearFilters,
-}: FilterModeControlsProps) => {
   // Get selectors from Redux
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const filterTagsMode = useAppSelector(selectFilterMode);
@@ -44,6 +37,22 @@ export const FilterModeControls = ({
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
+  const filterModifiedActive = useAppSelector(selectShowModified);
+  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+
+  // Action handlers
+  const handleSetTagFilterMode = useCallback(
+    (mode: FilterMode) => dispatch(setTagFilterMode(mode)),
+    [dispatch],
+  );
+  const handleToggleModifiedFilter = useCallback(
+    () => dispatch(toggleModifiedFilter()),
+    [dispatch],
+  );
+  const handleClearFilters = useCallback(
+    () => dispatch(clearFilters()),
+    [dispatch],
+  );
 
   // Derive filter selection active state (for traditional tag/size/bucket/extension filters)
   const filterSelectionActive = !!(
@@ -107,7 +116,7 @@ export const FilterModeControls = ({
       <Dropdown
         items={filterModeItems}
         selectedValue={filterTagsMode}
-        onChange={setTagFilterMode}
+        onChange={handleSetTagFilterMode}
         buttonClassName={
           // Show as disabled if we're in a mode that requires something that's not available
           (filterTagsMode !== FilterMode.SHOW_ALL &&
@@ -124,7 +133,7 @@ export const FilterModeControls = ({
 
       <Button
         type="button"
-        onClick={toggleModifiedFilter}
+        onClick={handleToggleModifiedFilter}
         variant="deep-toggle"
         isPressed={filterModifiedActive}
         disabled={!hasModifiedAssets}
@@ -142,7 +151,7 @@ export const FilterModeControls = ({
       <Button
         variant="ghost"
         type="button"
-        onClick={clearFilters}
+        onClick={handleClearFilters}
         disabled={!filterActive}
         ghostDisabled={!filterActive}
         size="medium"
@@ -153,3 +162,5 @@ export const FilterModeControls = ({
     </ResponsiveToolbarGroup>
   );
 };
+
+export const FilterModeControls = memo(FilterModeControlsComponent);

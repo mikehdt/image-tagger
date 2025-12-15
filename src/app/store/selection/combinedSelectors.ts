@@ -105,10 +105,11 @@ export const selectAssetsWithSelectedTags = createSelector(
  * @returns Array of assets that match at least one active filter criterion
  */
 export const selectAssetsWithActiveFilters = createSelector(
-  [selectAllImages, (state) => state.filters],
-  (allImages, filters) => {
+  [(state) => state, selectAllImages, (state) => state.filters],
+  (state, allImages, filters) => {
     // If no filters are active, return empty array
-    const hasActiveFilters = selectHasActiveFilters({ filters });
+    const hasActiveFilters = selectHasActiveFilters(state);
+
     if (!hasActiveFilters) {
       return [];
     }

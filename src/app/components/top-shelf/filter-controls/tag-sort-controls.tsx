@@ -3,7 +3,7 @@ import {
   ArrowUpIcon,
   ChevronUpDownIcon,
 } from '@heroicons/react/24/outline';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
@@ -39,7 +39,7 @@ const getTagSortDirectionLabel = (
   }
 };
 
-export const TagSortControls = () => {
+const TagSortControlsComponent = () => {
   const dispatch = useAppDispatch();
   const tagSortType = useAppSelector(selectTagSortType);
   const tagSortDirection = useAppSelector(selectTagSortDirection);
@@ -115,3 +115,5 @@ export const TagSortControls = () => {
     </ResponsiveToolbarGroup>
   );
 };
+
+export const TagSortControls = memo(TagSortControlsComponent);

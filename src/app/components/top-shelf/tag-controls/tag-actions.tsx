@@ -15,6 +15,7 @@ import {
   addMultipleTagsToAssetsWithDualSelection,
   addTagToAssetsWithDualSelection,
   clearSelection,
+  selectSelectedAssetsCount,
 } from '@/app/store/selection';
 import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
@@ -24,15 +25,12 @@ import { AddTagsModal } from './add-tags-modal';
 import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';
 
-interface TagActionsProps {
-  selectedAssetsCount: number;
-}
-
-const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
+const TagActionsComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
 
   const dispatch = useAppDispatch();
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const filterTags = useAppSelector(selectFilterTags);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const filterTagsDeleteState = useAppSelector(selectFilterTagsDeleteState);
@@ -182,7 +180,6 @@ const TagActionsComponent = ({ selectedAssetsCount }: TagActionsProps) => {
         isOpen={isAddTagsModalOpen}
         onClose={handleOnCloseAddModal}
         onClearSelection={handleClearSelection}
-        selectedAssetsCount={selectedAssetsCount}
         onAddTag={handleAddTag}
         onAddMultipleTags={handleAddMultipleTags}
       />

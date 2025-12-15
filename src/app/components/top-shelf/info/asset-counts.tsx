@@ -7,16 +7,14 @@ import {
 import { selectFilterMode, selectHasActiveFilters } from '@/app/store/filters';
 import { FilterMode } from '@/app/store/filters/types';
 import { useAppSelector } from '@/app/store/hooks';
+import { selectSelectedAssetsCount } from '@/app/store/selection';
 
-interface AssetCountsProps {
-  selectedAssetsCount: number;
-}
-
-const AssetCountsComponent = ({ selectedAssetsCount }: AssetCountsProps) => {
+const AssetCountsComponent = () => {
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
   const filtersActive = useAppSelector(selectHasActiveFilters);
   const filterMode = useAppSelector(selectFilterMode);
   const allAssetsCount = useAppSelector(selectImageCount);
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   return (
     <div className="flex items-center gap-2 border-l border-l-slate-400 pl-2 text-xs font-medium tabular-nums">

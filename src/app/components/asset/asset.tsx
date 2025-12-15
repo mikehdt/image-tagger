@@ -14,7 +14,6 @@ import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
-// import { TaggingManager } from '../tagging/tagging-manager';
 import { TaggingManager } from '../tagging-v2';
 import { AssetMetadata, CropVisualization } from './components';
 

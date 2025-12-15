@@ -10,6 +10,7 @@ import {
   selectAssetsWithActiveFilters,
   selectDuplicateTagInfo,
   selectSelectedAssets,
+  selectSelectedAssetsCount,
 } from '@/app/store/selection';
 
 import { Button } from '../../shared/button';
@@ -22,7 +23,6 @@ import { TagStatusLegend } from '../../shared/tag-status-legend';
 type AddTagsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  selectedAssetsCount: number;
   onAddTag: (
     tag: string,
     addToStart?: boolean,
@@ -41,7 +41,6 @@ type AddTagsModalProps = {
 export const AddTagsModal = ({
   isOpen,
   onClose,
-  selectedAssetsCount,
   onAddTag,
   onAddMultipleTags,
   onClearSelection,
@@ -59,6 +58,7 @@ export const AddTagsModal = ({
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const assetsWithActiveFilters = useAppSelector(selectAssetsWithActiveFilters);
+  const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   // Check state conditions
   const hasSelectedAssets = selectedAssetsCount > 0;

@@ -1,6 +1,6 @@
 import { NumberedListIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-import { useCallback, useId, useRef } from 'react';
+import { memo, useCallback, useId, useMemo, useRef } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Popup, usePopup } from '@/app/components/shared/popup-v2';
@@ -21,7 +21,7 @@ interface CategoryNavigationProps {
   currentPage: number;
 }
 
-export const CategoryNavigation = ({
+const CategoryNavigationComponent = ({
   currentPage,
 }: CategoryNavigationProps) => {
   const router = useRouter();
@@ -39,12 +39,16 @@ export const CategoryNavigation = ({
   const paginationSize = useAppSelector(selectPaginationSize);
 
   // Get categories with page information
-  const categoriesWithPageInfo = getCategoriesWithPageInfo(
-    filteredAssets,
-    sortType,
-    sortDirection,
-    selectedAssets,
-    paginationSize === -1 ? Number.MAX_SAFE_INTEGER : paginationSize,
+  const categoriesWithPageInfo = useMemo(
+    () =>
+      getCategoriesWithPageInfo(
+        filteredAssets,
+        sortType,
+        sortDirection,
+        selectedAssets,
+        paginationSize === -1 ? Number.MAX_SAFE_INTEGER : paginationSize,
+      ),
+    [filteredAssets, sortType, sortDirection, selectedAssets, paginationSize],
   );
 
   const handleToggle = useCallback(() => {
@@ -107,3 +111,5 @@ export const CategoryNavigation = ({
     </div>
   );
 };
+
+export const CategoryNavigation = memo(CategoryNavigationComponent);
