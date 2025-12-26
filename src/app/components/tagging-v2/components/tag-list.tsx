@@ -104,7 +104,8 @@ const TagsDisplayComponent = ({
   );
 
   const tagNames = tags.map((t) => t.name);
-  const dndEnabled = sortable && isHovered;
+  // Keep DnD enabled (which renders SortableTag with InputTag) when editing
+  const dndEnabled = sortable && (isHovered || editingTagName !== null);
 
   const tagElements = tags.map((tag) =>
     dndEnabled ? (
