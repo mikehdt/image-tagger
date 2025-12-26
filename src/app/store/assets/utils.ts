@@ -1,5 +1,5 @@
 // Utility functions for tag state management
-import { TagState } from './types';
+import { ImageAsset, TagState } from './types';
 
 // Bitwise & 0 would always return 0 so let's check it specifically
 export const hasState = (state: number, flag: TagState): boolean =>
@@ -28,4 +28,17 @@ export const debug_getTagStateString = (state: number): string => {
   if (hasState(state, TagState.DIRTY)) states.push('Dirty');
 
   return states.join(', ');
+};
+
+/**
+ * Build a lookup map from fileId to array index for O(1) asset access
+ */
+export const buildImageIndexMap = (
+  images: ImageAsset[],
+): { [fileId: string]: number } => {
+  const indexMap: { [fileId: string]: number } = {};
+  for (let i = 0; i < images.length; i++) {
+    indexMap[images[i].fileId] = i;
+  }
+  return indexMap;
 };

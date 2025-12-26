@@ -44,17 +44,17 @@ export function createCleanTagStatus(tags: string[]): {
  * @param asset The asset that was saved
  * @param updatedTags The tags after filtering
  * @param newTagStatus The clean tag status object
- * @param images All images in the store (for finding index)
+ * @param imageIndexById Lookup map from fileId to array index
  * @returns SaveAssetResult object ready for the reducer
  */
 export function createSaveAssetResult(
   asset: ImageAsset,
   updatedTags: string[],
   newTagStatus: { [key: string]: number },
-  images: ImageAsset[],
+  imageIndexById: { [fileId: string]: number },
 ): SaveAssetResult {
   return {
-    assetIndex: images.findIndex((element) => element.fileId === asset.fileId),
+    assetIndex: imageIndexById[asset.fileId] ?? -1,
     fileId: asset.fileId,
     tagList: updatedTags,
     tagStatus: newTagStatus,
@@ -79,13 +79,13 @@ export function findModifiedAssets(images: ImageAsset[]): ImageAsset[] {
  * Process a batch of write results and create SaveAssetResults
  * @param writeResults Results of writing tags to disk
  * @param modifiedAssets List of assets that were modified
- * @param images Full list of images
+ * @param imageIndexById Lookup map from fileId to array index
  * @returns Object with results array and success/error counters
  */
 export function processSaveResults(
   writeResults: { fileId: string; success: boolean }[],
   modifiedAssets: ImageAsset[],
-  images: ImageAsset[],
+  imageIndexById: { [fileId: string]: number },
 ): {
   results: SaveAssetResult[];
   successCount: number;
@@ -105,7 +105,7 @@ export function processSaveResults(
 
       // Create and add save result to results array
       results.push(
-        createSaveAssetResult(asset, updateTags, newTagStatus, images),
+        createSaveAssetResult(asset, updateTags, newTagStatus, imageIndexById),
       );
 
       successCount++;

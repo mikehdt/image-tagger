@@ -17,6 +17,7 @@ export const coreReducers = {
     state.ioState = IoState.INITIAL;
     state.ioMessage = undefined;
     state.images = [];
+    state.imageIndexById = {};
     state.loadProgress = undefined;
     state.saveProgress = undefined;
     // Reset sorting to defaults
@@ -60,9 +61,8 @@ export const coreReducers = {
 
     if (tagName.trim() === '') return;
 
-    const imageIndex = state.images.findIndex(
-      (element) => element.fileId === assetId,
-    );
+    const imageIndex = state.imageIndexById[assetId];
+    if (imageIndex === undefined) return;
 
     // Even if duplicate tags might exist, we'll only allow adding if not already in the list
     // This prevents inadvertently adding more duplicates
@@ -107,11 +107,8 @@ export const coreReducers = {
 
     if (tagNames.length === 0) return;
 
-    const imageIndex = state.images.findIndex(
-      (element) => element.fileId === assetId,
-    );
-
-    if (imageIndex === -1) return;
+    const imageIndex = state.imageIndexById[assetId];
+    if (imageIndex === undefined) return;
 
     // Filter out tags that already exist and empty tags
     const tagsToAdd = tagNames.filter(
@@ -164,9 +161,8 @@ export const coreReducers = {
     // savedTagList contains the unmodified tags in case of reverting
     const { assetId, oldTagName, newTagName } = payload;
 
-    const assetIndex = state.images.findIndex(
-      (element) => element.fileId === assetId,
-    );
+    const assetIndex = state.imageIndexById[assetId];
+    if (assetIndex === undefined) return;
 
     // Update the name in the tagList
     const tagListIndex = state.images[assetIndex].tagList.findIndex(
@@ -208,9 +204,8 @@ export const coreReducers = {
   ) => {
     const { assetId, tagName } = payload;
 
-    const assetIndex = state.images.findIndex(
-      (element) => element.fileId === assetId,
-    );
+    const assetIndex = state.imageIndexById[assetId];
+    if (assetIndex === undefined) return;
 
     // Stop if no tags to operate on
     if (!state.images[assetIndex]?.tagStatus) return;
@@ -245,24 +240,19 @@ export const coreReducers = {
     // No need to reorder if indexes are the same
     if (oldIndex === newIndex) return;
 
-    const assetIndex = state.images.findIndex(
-      (element) => element.fileId === assetId,
-    );
+    const assetIndex = state.imageIndexById[assetId];
+    if (assetIndex === undefined) return;
 
-    if (assetIndex === -1) return;
-
-    const asset = { ...state.images[assetIndex] };
+    const asset = state.images[assetIndex];
+    const tagList = asset.tagList;
+    const tagStatus = asset.tagStatus;
 
     // Get the tag being moved
-    const tagToMove = asset.tagList[oldIndex];
+    const tagToMove = tagList[oldIndex];
 
-    // Create a completely new tag list
-    const newTagList = [...asset.tagList];
-    newTagList.splice(oldIndex, 1);
-    newTagList.splice(newIndex, 0, tagToMove);
-
-    // Create a new tag status object
-    const newTagStatus = { ...asset.tagStatus };
+    // Reorder in place - Immer handles immutability
+    tagList.splice(oldIndex, 1);
+    tagList.splice(newIndex, 0, tagToMove);
 
     // Use savedTagList to compare current vs original positions
     const savedTagList = asset.savedTagList || [];
@@ -273,90 +263,53 @@ export const coreReducers = {
 
     // Check each tag in the affected range
     for (let i = minIndex; i <= maxIndex; i++) {
-      const tag = i === newIndex ? tagToMove : newTagList[i];
+      const tag = tagList[i];
 
       // Skip TO_ADD tags (they're always dirty)
-      if (tag && !hasState(newTagStatus[tag], TagState.TO_ADD)) {
+      if (tag && !hasState(tagStatus[tag], TagState.TO_ADD)) {
         const originalIndex = savedTagList.indexOf(tag);
 
         // If tag is in its original position, remove DIRTY flag
         // Otherwise, add DIRTY flag
         if (originalIndex === i) {
-          newTagStatus[tag] = removeState(newTagStatus[tag], TagState.DIRTY);
+          tagStatus[tag] = removeState(tagStatus[tag], TagState.DIRTY);
         } else {
-          newTagStatus[tag] = addState(newTagStatus[tag], TagState.DIRTY);
+          tagStatus[tag] = addState(tagStatus[tag], TagState.DIRTY);
         }
       }
     }
-
-    // Replace the entire asset with a new object
-    state.images = [
-      ...state.images.slice(0, assetIndex),
-      {
-        ...asset,
-        tagList: newTagList,
-        tagStatus: newTagStatus,
-      },
-      ...state.images.slice(assetIndex + 1),
-    ];
   },
 
   resetTags: (state: ImageAssets, { payload }: PayloadAction<string>) => {
-    const assetIndex = state.images.findIndex(
-      (element) => element.fileId === payload,
-    );
+    const assetIndex = state.imageIndexById[payload];
+    if (assetIndex === undefined) return;
 
-    const asset = { ...state.images[assetIndex] };
-    const newTagStatus = { ...asset.tagStatus };
-
-    // Start with the saved order as our base
-    const savedList = [...(asset.savedTagList || [])];
-
-    // Create filter map of valid tags (those that are not TO_ADD)
-    const validTags = new Set();
-    asset.tagList.forEach((tag) => {
-      // Skip TO_ADD tags
-      if (hasState(newTagStatus[tag], TagState.TO_ADD)) {
-        delete newTagStatus[tag];
-      } else {
-        validTags.add(tag);
-        // Reset all flags to SAVED state
-        newTagStatus[tag] = TagState.SAVED;
-      }
-    });
-
-    // Generate the restored tag list from the saved order
-    // Include all tags from savedList, as they're part of the original state
-    const newTagList = [...savedList];
-
-    // Create a Set from savedList for efficient lookup
+    const asset = state.images[assetIndex];
+    const tagStatus = asset.tagStatus;
+    const savedList = asset.savedTagList || [];
     const savedTagsSet = new Set(savedList);
 
-    // Clean up tagStatus by removing any tags not in savedList
-    Object.keys(newTagStatus).forEach((tag) => {
-      if (!savedTagsSet.has(tag)) {
-        delete newTagStatus[tag];
+    // Remove TO_ADD tags and tags not in savedList from tagStatus
+    for (const tag of Object.keys(tagStatus)) {
+      if (hasState(tagStatus[tag], TagState.TO_ADD) || !savedTagsSet.has(tag)) {
+        delete tagStatus[tag];
+      } else {
+        // Reset all remaining flags to SAVED state
+        tagStatus[tag] = TagState.SAVED;
       }
-    });
+    }
 
     // Ensure all tags in savedList have a status entry
-    savedList.forEach((tag) => {
-      if (!newTagStatus[tag]) {
+    for (const tag of savedList) {
+      if (!(tag in tagStatus)) {
         // If a tag from savedList is missing (was likely renamed), recreate it
-        newTagStatus[tag] = TagState.SAVED;
+        tagStatus[tag] = TagState.SAVED;
       }
-    });
+    }
 
-    // Replace the entire asset with a new object
-    state.images = [
-      ...state.images.slice(0, assetIndex),
-      {
-        ...asset,
-        tagList: newTagList,
-        tagStatus: newTagStatus,
-      },
-      ...state.images.slice(assetIndex + 1),
-    ];
+    // Restore tagList to saved order - Immer handles immutability
+    asset.tagList.length = 0;
+    asset.tagList.push(...savedList);
   },
 
   // Sorting reducers

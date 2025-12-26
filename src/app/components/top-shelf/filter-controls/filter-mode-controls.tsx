@@ -8,7 +8,10 @@ import { memo, useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
-import { selectHasModifiedAssets, selectHasTaglessAssets } from '@/app/store/assets';
+import {
+  selectHasModifiedAssets,
+  selectHasTaglessAssets,
+} from '@/app/store/assets';
 import {
   clearFilters,
   FilterMode,
@@ -18,8 +21,8 @@ import {
   selectFilterSizes,
   selectFilterTags,
   selectShowModified,
-  toggleModifiedFilter,
   setTagFilterMode,
+  toggleModifiedFilter,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';

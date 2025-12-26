@@ -70,6 +70,7 @@ export type ImageAssets = {
   ioState: IoState;
   ioMessage: undefined | string;
   images: ImageAsset[];
+  imageIndexById: { [fileId: string]: number }; // Lookup map for O(1) asset access
   saveProgress?: SaveProgress;
   loadProgress?: LoadProgress;
   // Sorting state

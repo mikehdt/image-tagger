@@ -138,14 +138,15 @@ export const saveAsset = createAsyncThunk<
   { state: { assets: ImageAssets } }
 >('assets/saveAsset', async ({ fileId, projectPath }, { getState }) => {
   const {
-    assets: { images },
+    assets: { images, imageIndexById },
   } = getState();
 
-  const asset = images.find((element) => element.fileId === fileId);
-
-  if (!asset) {
+  const assetIndex = imageIndexById[fileId];
+  if (assetIndex === undefined) {
     throw new Error(`Asset with ID ${fileId} not found`);
   }
+
+  const asset = images[assetIndex];
 
   // Get updated tags using the helper function
   const updateTags = getUpdatedTags(asset);
@@ -160,7 +161,7 @@ export const saveAsset = createAsyncThunk<
     const newTagStatus = createCleanTagStatus(updateTags);
 
     // Create and return the save result object
-    return createSaveAssetResult(asset, updateTags, newTagStatus, images);
+    return createSaveAssetResult(asset, updateTags, newTagStatus, imageIndexById);
   }
 
   throw new Error(`Unable to save the asset ${fileId}`);
@@ -173,7 +174,7 @@ export const saveAllAssets = createAsyncThunk<
   { state: { assets: ImageAssets } }
 >('assets/saveAllAssets', async (options, { getState, dispatch }) => {
   const {
-    assets: { images },
+    assets: { images, imageIndexById },
   } = getState();
 
   // Find all images with modified tags
@@ -259,7 +260,7 @@ export const saveAllAssets = createAsyncThunk<
     const processedResults = processSaveResults(
       writeResults,
       modifiedAssets,
-      images,
+      imageIndexById,
     );
 
     successCount = processedResults.successCount;

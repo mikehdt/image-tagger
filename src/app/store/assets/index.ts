@@ -9,6 +9,7 @@ const initialState: ImageAssets = {
   ioState: IoState.INITIAL,
   ioMessage: undefined,
   images: [],
+  imageIndexById: {},
   sortType: SortType.NAME,
   sortDirection: SortDirection.ASC,
 };

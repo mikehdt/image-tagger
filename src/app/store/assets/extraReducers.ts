@@ -13,6 +13,7 @@ import {
   updateSaveProgress,
 } from './actions';
 import { ImageAssets, IoState } from './types';
+import { buildImageIndexMap } from './utils';
 
 export const setupExtraReducers = (
   builder: ActionReducerMapBuilder<ImageAssets>,
@@ -46,12 +47,14 @@ export const setupExtraReducers = (
       state.ioState = IoState.COMPLETING;
       state.ioMessage = undefined;
       state.images = action.payload;
+      state.imageIndexById = buildImageIndexMap(action.payload);
       // Keep progress data briefly to show 100% completion
     } else {
       // If no progress tracking (e.g., small datasets), go directly to complete
       state.ioState = IoState.COMPLETE;
       state.ioMessage = undefined;
       state.images = action.payload;
+      state.imageIndexById = buildImageIndexMap(action.payload);
       state.loadProgress = undefined;
     }
   });
@@ -60,6 +63,7 @@ export const setupExtraReducers = (
     state.ioState = IoState.ERROR;
     state.ioMessage = action.error.message || 'Error loading assets';
     state.images = [];
+    state.imageIndexById = {};
     // Keep the progress information for error reporting
     // so users can see how far it got before failing
   });
@@ -69,7 +73,8 @@ export const setupExtraReducers = (
     const { arg } = action.meta;
     const fileId = typeof arg === 'string' ? arg : arg.fileId;
 
-    const imageIndex = state.images.findIndex((item) => item.fileId === fileId);
+    const imageIndex = state.imageIndexById[fileId];
+    if (imageIndex === undefined) return;
 
     state.images[imageIndex].ioState = IoState.SAVING;
     state.ioState = IoState.SAVING;
