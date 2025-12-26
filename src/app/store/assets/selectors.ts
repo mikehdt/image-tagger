@@ -3,14 +3,35 @@ import { createSelector } from '@reduxjs/toolkit';
 
 import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
+import { wrapSelector } from '../../utils/selector-perf';
 import type { RootState } from '../';
 import { ImageAsset, KeyedCountList, TagState } from './types';
-import { hasState } from './utils';
+import { buildTagCountsCache, hasState } from './utils';
 
 // Base selector that extracts all images from RootState
 // Note: This is a local version to avoid circular dependency with index.ts
 // External consumers should use the slice selector from the main exports
 const selectAllImages = (state: RootState) => state.assets.images;
+const selectTagCountsCache = (state: RootState) => state.assets.tagCountsCache;
+
+// Selector that returns cached tag counts, rebuilding if cache is null
+// This is the core of the caching strategy - counts are computed once and shared
+// Exported for direct use by components that need global tag counts
+export const selectTagCounts = wrapSelector(
+  'selectTagCounts',
+  createSelector(
+    [selectAllImages, selectTagCountsCache],
+    (images, cache) => {
+      // If cache exists, use it; otherwise rebuild
+      // Note: The rebuilt cache is returned but not stored in state here
+      // The cache is populated on load and invalidated on mutations
+      if (cache !== null) {
+        return cache;
+      }
+      return buildTagCountsCache(images);
+    },
+  ),
+);
 
 // Derived selectors
 
@@ -69,9 +90,9 @@ export const selectImageSizes = createSelector([selectAllImages], (images) => {
   );
 });
 
-export const selectAllTags = createSelector(
-  [selectAllImages],
-  (imageAssets) => {
+export const selectAllTags = wrapSelector(
+  'selectAllTags',
+  createSelector([selectAllImages], (imageAssets) => {
     if (!imageAssets?.length) return {};
 
     const tagCounts: KeyedCountList = {};
@@ -87,20 +108,20 @@ export const selectAllTags = createSelector(
     }
 
     return tagCounts;
-  },
+  }),
 );
 
 // Custom selector to check if any assets have modified tags
-export const selectHasModifiedAssets = createSelector(
-  [selectAllImages],
-  (images) => {
+export const selectHasModifiedAssets = wrapSelector(
+  'selectHasModifiedAssets',
+  createSelector([selectAllImages], (images) => {
     // Check if any asset has tags that aren't in the SAVED state
     return images.some((asset: ImageAsset) =>
       asset.tagList.some(
         (tag: string) => !hasState(asset.tagStatus[tag], TagState.SAVED),
       ),
     );
-  },
+  }),
 );
 
 // Custom selector to check if any assets have no persisted tags
@@ -140,34 +161,23 @@ export const selectAllExtensions = createSelector(
 );
 
 // Combined selector to get filtered assets based on current filter state
-export const selectFilteredAssets = createSelector(
-  [
-    selectAllImages,
-    (state: RootState) => state.filters.filterTags,
-    (state: RootState) => state.filters.filterSizes,
-    (state: RootState) => state.filters.filterBuckets,
-    (state: RootState) => state.filters.filterExtensions,
-    (state: RootState) => state.filters.filterMode,
-    (state: RootState) => state.filters.showModified,
-    (state: RootState) => state.filters.searchQuery,
-    (state: RootState) => state.selection.selectedAssets,
-    (state: RootState) => state.assets.sortType,
-    (state: RootState) => state.assets.sortDirection,
-  ],
-  (
-    assets,
-    filterTags,
-    filterSizes,
-    filterBuckets,
-    filterExtensions,
-    filterMode,
-    showModified,
-    searchQuery,
-    selectedAssets,
-    sortType,
-    sortDirection,
-  ) => {
-    return applyFilters({
+export const selectFilteredAssets = wrapSelector(
+  'selectFilteredAssets',
+  createSelector(
+    [
+      selectAllImages,
+      (state: RootState) => state.filters.filterTags,
+      (state: RootState) => state.filters.filterSizes,
+      (state: RootState) => state.filters.filterBuckets,
+      (state: RootState) => state.filters.filterExtensions,
+      (state: RootState) => state.filters.filterMode,
+      (state: RootState) => state.filters.showModified,
+      (state: RootState) => state.filters.searchQuery,
+      (state: RootState) => state.selection.selectedAssets,
+      (state: RootState) => state.assets.sortType,
+      (state: RootState) => state.assets.sortDirection,
+    ],
+    (
       assets,
       filterTags,
       filterSizes,
@@ -179,8 +189,22 @@ export const selectFilteredAssets = createSelector(
       selectedAssets,
       sortType,
       sortDirection,
-    });
-  },
+    ) => {
+      return applyFilters({
+        assets,
+        filterTags,
+        filterSizes,
+        filterBuckets,
+        filterExtensions,
+        filterMode,
+        showModified,
+        searchQuery,
+        selectedAssets,
+        sortType,
+        sortDirection,
+      });
+    },
+  ),
 );
 
 // Selector to analyze the TO_DELETE state of filter tags
@@ -249,36 +273,6 @@ export const selectFilterTagsDeleteState = createSelector(
   },
 );
 
-// Optimized selector for asset-specific tag counts
-// Only recalculates counts for tags actually used by the specific asset
-export const selectAssetTagCounts = createSelector(
-  [selectAllImages, (_, assetId: string) => assetId],
-  (imageAssets, assetId) => {
-    const asset = imageAssets.find((img) => img.fileId === assetId);
-    if (!asset || !imageAssets?.length) return {};
-
-    const assetTagCounts: KeyedCountList = {};
-
-    // Only calculate counts for tags that exist on this specific asset
-    const assetTags = new Set(asset.tagList);
-
-    // Process all images and count only the tags used by this asset
-    for (const img of imageAssets) {
-      for (const tag of img.tagList) {
-        // Only count if this tag is used by the target asset and isn't marked for deletion
-        if (
-          assetTags.has(tag) &&
-          !hasState(img.tagStatus[tag], TagState.TO_DELETE)
-        ) {
-          assetTagCounts[tag] = (assetTagCounts[tag] || 0) + 1;
-        }
-      }
-    }
-
-    return assetTagCounts;
-  },
-);
-
 // Optimized selector for filtered asset count only
 // Avoids returning full array when only count is needed
 export const selectFilteredAssetsCount = createSelector(
@@ -289,38 +283,41 @@ export const selectFilteredAssetsCount = createSelector(
 // Optimized selector for asset-specific highlighted tags
 // Returns a Set of tag names that are both on this asset AND in the filter
 // Only triggers re-renders when the intersection changes, not when unrelated filters change
-export const selectAssetHighlightedTags = createSelector(
-  [
-    selectAllImages,
-    (state: RootState) => state.filters.filterTags,
-    (_, assetId: string) => assetId,
-  ],
-  (imageAssets, filterTags, assetId) => {
-    const asset = imageAssets.find((img) => img.fileId === assetId);
-    if (!asset || filterTags.length === 0) return new Set<string>();
+export const selectAssetHighlightedTags = wrapSelector(
+  'selectAssetHighlightedTags',
+  createSelector(
+    [
+      selectAllImages,
+      (state: RootState) => state.filters.filterTags,
+      (_, assetId: string) => assetId,
+    ],
+    (imageAssets, filterTags, assetId) => {
+      const asset = imageAssets.find((img) => img.fileId === assetId);
+      if (!asset || filterTags.length === 0) return new Set<string>();
 
-    // Only return tags that exist on this asset AND are in the filter
-    const filterSet = new Set(filterTags);
-    const highlighted = new Set<string>();
+      // Only return tags that exist on this asset AND are in the filter
+      const filterSet = new Set(filterTags);
+      const highlighted = new Set<string>();
 
-    for (const tag of asset.tagList) {
-      if (filterSet.has(tag)) {
-        highlighted.add(tag);
-      }
-    }
-
-    return highlighted;
-  },
-  {
-    memoizeOptions: {
-      // Custom equality check for Set comparison
-      resultEqualityCheck: (a: Set<string>, b: Set<string>) => {
-        if (a.size !== b.size) return false;
-        for (const item of a) {
-          if (!b.has(item)) return false;
+      for (const tag of asset.tagList) {
+        if (filterSet.has(tag)) {
+          highlighted.add(tag);
         }
-        return true;
+      }
+
+      return highlighted;
+    },
+    {
+      memoizeOptions: {
+        // Custom equality check for Set comparison
+        resultEqualityCheck: (a: Set<string>, b: Set<string>) => {
+          if (a.size !== b.size) return false;
+          for (const item of a) {
+            if (!b.has(item)) return false;
+          }
+          return true;
+        },
       },
     },
-  },
+  ),
 );

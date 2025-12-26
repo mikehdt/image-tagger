@@ -71,6 +71,9 @@ export type ImageAssets = {
   ioMessage: undefined | string;
   images: ImageAsset[];
   imageIndexById: { [fileId: string]: number }; // Lookup map for O(1) asset access
+  // Cached tag counts - null means cache is invalidated and needs rebuild
+  // This is rebuilt lazily by selectors when accessed after invalidation
+  tagCountsCache: KeyedCountList | null;
   saveProgress?: SaveProgress;
   loadProgress?: LoadProgress;
   // Sorting state

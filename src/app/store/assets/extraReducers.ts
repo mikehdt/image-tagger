@@ -13,7 +13,7 @@ import {
   updateSaveProgress,
 } from './actions';
 import { ImageAssets, IoState } from './types';
-import { buildImageIndexMap } from './utils';
+import { buildImageIndexMap, buildTagCountsCache } from './utils';
 
 export const setupExtraReducers = (
   builder: ActionReducerMapBuilder<ImageAssets>,
@@ -48,6 +48,7 @@ export const setupExtraReducers = (
       state.ioMessage = undefined;
       state.images = action.payload;
       state.imageIndexById = buildImageIndexMap(action.payload);
+      state.tagCountsCache = buildTagCountsCache(action.payload);
       // Keep progress data briefly to show 100% completion
     } else {
       // If no progress tracking (e.g., small datasets), go directly to complete
@@ -55,6 +56,7 @@ export const setupExtraReducers = (
       state.ioMessage = undefined;
       state.images = action.payload;
       state.imageIndexById = buildImageIndexMap(action.payload);
+      state.tagCountsCache = buildTagCountsCache(action.payload);
       state.loadProgress = undefined;
     }
   });
@@ -92,6 +94,9 @@ export const setupExtraReducers = (
     state.images[assetIndex].tagList = tagList;
     state.images[assetIndex].tagStatus = tagStatus;
     state.images[assetIndex].savedTagList = savedTagList;
+
+    // Invalidate cache since TO_DELETE tags are removed and TO_ADD become SAVED
+    state.tagCountsCache = null;
   });
 
   builder.addCase(saveAsset.rejected, (state, action) => {
@@ -151,6 +156,9 @@ export const setupExtraReducers = (
     if (state.ioState === IoState.COMPLETE) {
       state.saveProgress = undefined;
     }
+
+    // Invalidate cache since TO_DELETE tags are removed and TO_ADD become SAVED
+    state.tagCountsCache = null;
   });
 
   builder.addCase(saveAllAssets.rejected, (state, action) => {
@@ -170,6 +178,8 @@ export const setupExtraReducers = (
     // Individual resetTags actions have already updated the state
     if (action.payload.resetCount > 0) {
       state.ioMessage = `Changes canceled for ${action.payload.resetCount} assets`;
+      // Invalidate cache since tags were reset
+      state.tagCountsCache = null;
     } else {
       state.ioMessage = 'No changes to cancel';
     }

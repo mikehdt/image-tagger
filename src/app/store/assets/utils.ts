@@ -42,3 +42,22 @@ export const buildImageIndexMap = (
   }
   return indexMap;
 };
+
+/**
+ * Build a cached map of tag counts across all assets.
+ * Only counts tags that aren't marked for deletion.
+ */
+export const buildTagCountsCache = (
+  images: ImageAsset[],
+): { [tag: string]: number } => {
+  const tagCounts: { [tag: string]: number } = {};
+  for (const asset of images) {
+    for (const tag of asset.tagList) {
+      // Only count tags that aren't marked for deletion
+      if (!hasState(asset.tagStatus[tag], TagState.TO_DELETE)) {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      }
+    }
+  }
+  return tagCounts;
+};

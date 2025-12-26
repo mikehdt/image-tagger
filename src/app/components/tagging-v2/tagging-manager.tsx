@@ -22,8 +22,8 @@ import {
   editTag,
   reorderTags,
   selectAssetHighlightedTags,
-  selectAssetTagCounts,
   selectOrderedTagsWithStatus,
+  selectTagCounts,
 } from '@/app/store/assets';
 import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -48,9 +48,8 @@ const TaggingManagerComponent = ({
   const orderedTagsWithStatus = useAppSelector((state) =>
     selectOrderedTagsWithStatus(state, assetId),
   );
-  const tagCounts = useAppSelector((state) =>
-    selectAssetTagCounts(state, assetId),
-  );
+  // Use global tag counts cache - one shared object for all assets
+  const tagCounts = useAppSelector(selectTagCounts);
   // Use asset-specific highlighted tags selector - only re-renders when THIS asset's
   // highlighted tags change, not when unrelated filter tags change
   const highlightedTags = useAppSelector((state) =>

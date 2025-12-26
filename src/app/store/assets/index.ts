@@ -10,6 +10,7 @@ const initialState: ImageAssets = {
   ioMessage: undefined,
   images: [],
   imageIndexById: {},
+  tagCountsCache: null,
   sortType: SortType.NAME,
   sortDirection: SortDirection.ASC,
 };

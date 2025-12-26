@@ -45,6 +45,9 @@ export const coreReducers = {
         }
       });
     });
+
+    // Invalidate tag counts cache since TO_DELETE state affects counts
+    state.tagCountsCache = null;
   },
 
   addTag: (
@@ -90,6 +93,9 @@ export const coreReducers = {
 
       // Mark the new tag as TO_ADD
       state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
+
+      // Invalidate tag counts cache
+      state.tagCountsCache = null;
     }
   },
 
@@ -146,6 +152,9 @@ export const coreReducers = {
     tagsToAdd.forEach((tagName) => {
       state.images[imageIndex].tagStatus[tagName] = TagState.TO_ADD;
     });
+
+    // Invalidate tag counts cache
+    state.tagCountsCache = null;
   },
 
   editTag: (
@@ -195,6 +204,9 @@ export const coreReducers = {
 
     delete state.images[assetIndex].tagStatus[oldTagName];
 
+    // Invalidate tag counts cache since tag name changed
+    state.tagCountsCache = null;
+
     // On cancel, need to also remove superfluous and reset any tag keys missing as a result!
   },
 
@@ -227,6 +239,9 @@ export const coreReducers = {
         TagState.TO_DELETE,
       );
     }
+
+    // Invalidate tag counts cache
+    state.tagCountsCache = null;
   },
 
   reorderTags: (
@@ -310,6 +325,9 @@ export const coreReducers = {
     // Restore tagList to saved order - Immer handles immutability
     asset.tagList.length = 0;
     asset.tagList.push(...savedList);
+
+    // Invalidate tag counts cache since TO_ADD/TO_DELETE tags are removed
+    state.tagCountsCache = null;
   },
 
   // Sorting reducers
