@@ -3,6 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import sharp from 'sharp';
+
 import { isSupportedImageExtension } from '@/app/constants';
 
 // Server-side config reading function
@@ -300,6 +302,95 @@ export const updateProject = async (
     return { success: true, config: updatedConfig };
   } catch (error) {
     console.error('Error updating project config:', error);
+    throw error;
+  }
+};
+
+const THUMBNAIL_SIZE = 80;
+
+/**
+ * Create a thumbnail for a project from an uploaded image
+ * Center-crops the image to a square and resizes to 80x80
+ */
+export const createProjectThumbnail = async (
+  projectName: string,
+  imageData: ArrayBuffer,
+): Promise<{ success: boolean; thumbnail: string }> => {
+  try {
+    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+
+    // Ensure the projects directory exists
+    if (!fs.existsSync(projectsDir)) {
+      fs.mkdirSync(projectsDir, { recursive: true });
+    }
+
+    // Remove any existing thumbnail files for this project
+    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    for (const ext of supportedExtensions) {
+      const existingPath = path.join(projectsDir, `${projectName}${ext}`);
+      if (fs.existsSync(existingPath)) {
+        fs.unlinkSync(existingPath);
+      }
+    }
+
+    // Process the image with sharp - center crop to square, resize to 80x80
+    const buffer = Buffer.from(imageData);
+    const image = sharp(buffer);
+    const metadata = await image.metadata();
+
+    if (!metadata.width || !metadata.height) {
+      throw new Error('Could not read image dimensions');
+    }
+
+    // Calculate center crop dimensions
+    const size = Math.min(metadata.width, metadata.height);
+    const left = Math.floor((metadata.width - size) / 2);
+    const top = Math.floor((metadata.height - size) / 2);
+
+    // Output as PNG for consistent quality
+    const thumbnailFilename = `${projectName}.png`;
+    const thumbnailPath = path.join(projectsDir, thumbnailFilename);
+
+    await image
+      .extract({ left, top, width: size, height: size })
+      .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE)
+      .png()
+      .toFile(thumbnailPath);
+
+    // Update the project config to enable thumbnail
+    await updateProject(projectName, { thumbnail: true });
+
+    return { success: true, thumbnail: thumbnailFilename };
+  } catch (error) {
+    console.error('Error creating project thumbnail:', error);
+    throw error;
+  }
+};
+
+/**
+ * Remove a project's thumbnail
+ */
+export const removeProjectThumbnail = async (
+  projectName: string,
+): Promise<{ success: boolean }> => {
+  try {
+    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+
+    // Remove any existing thumbnail files for this project
+    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    for (const ext of supportedExtensions) {
+      const existingPath = path.join(projectsDir, `${projectName}${ext}`);
+      if (fs.existsSync(existingPath)) {
+        fs.unlinkSync(existingPath);
+      }
+    }
+
+    // Update the project config to disable thumbnail
+    await updateProject(projectName, { thumbnail: false });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error removing project thumbnail:', error);
     throw error;
   }
 };

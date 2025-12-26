@@ -1,7 +1,12 @@
-import { FolderIcon, StarIcon } from '@heroicons/react/24/outline';
+import {
+  FolderIcon,
+  PhotoIcon,
+  StarIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import Image from 'next/image';
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 
 type ProjectIconProps = {
   project: {
@@ -12,30 +17,110 @@ type ProjectIconProps = {
     hidden?: boolean;
     private?: boolean;
   };
+  isEditing?: boolean;
   onToggleFeatured: (projectName: string, currentFeatured: boolean) => void;
+  onThumbnailSelect?: (file: File) => void;
+  onThumbnailRemove?: () => void;
 };
 
 const ProjectIconComponent = ({
   project,
+  isEditing,
   onToggleFeatured,
+  onThumbnailSelect,
+  onThumbnailRemove,
 }: ProjectIconProps) => {
   const [isHovering, setIsHovering] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleStarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFeatured(project.name, project.featured || false);
   };
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onThumbnailSelect) {
+      onThumbnailSelect(file);
+    }
+    // Reset the input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onThumbnailRemove?.();
+  };
+
+  // Edit mode: show thumbnail selector
+  if (isEditing) {
+    return (
+      <span
+        className="relative mr-3 h-10 w-10"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Base circle with thumbnail or folder icon */}
+        <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
+          {project.thumbnail ? (
+            <Image
+              src={`/projects/${project.thumbnail}`}
+              alt={project.title || project.name}
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <FolderIcon className="h-5 w-5 text-slate-500" />
+          )}
+        </span>
+
+        {/* Edit overlay on hover - transitions over the top */}
+        <div
+          onClick={handleEditClick}
+          className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full border border-sky-400 bg-sky-100 transition-opacity duration-200 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
+          title="Select thumbnail image"
+        >
+          <PhotoIcon className="h-5 w-5 text-sky-600" />
+        </div>
+
+        {/* Remove button - positioned outside overflow-hidden container */}
+        {project.thumbnail && isHovering && (
+          <div
+            onClick={handleRemoveClick}
+            className="absolute -top-1 -right-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-rose-300 bg-rose-100 transition-colors hover:bg-rose-200"
+            title="Remove thumbnail"
+          >
+            <XMarkIcon className="h-3 w-3 text-rose-600" />
+          </div>
+        )}
+      </span>
+    );
+  }
+
+  // Normal mode: show star toggle on hover
   return (
     <span
-      className="relative mr-3 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white transition-colors"
+      className="relative mr-3 h-10 w-10"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Regular content (thumbnail or folder icon) */}
-      <div
-        className={`transition-opacity duration-200 ${isHovering ? 'opacity-0' : 'opacity-100'}`}
-      >
+      {/* Base circle with thumbnail or folder icon */}
+      <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white">
         {project.thumbnail ? (
           <Image
             src={`/projects/${project.thumbnail}`}
@@ -47,12 +132,12 @@ const ProjectIconComponent = ({
         ) : (
           <FolderIcon className="h-5 w-5 text-slate-500" />
         )}
-      </div>
+      </span>
 
-      {/* Star overlay on hover */}
+      {/* Star overlay on hover - transitions over the top */}
       <div
         onClick={handleStarClick}
-        className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full opacity-0 transition-opacity hover:border hover:opacity-100 ${project.featured ? 'hover:border-slate-300 hover:bg-white' : 'hover:border-amber-400 hover:bg-amber-100'}`}
+        className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full transition-opacity duration-200 ${isHovering ? 'border opacity-100' : 'opacity-0'} ${project.featured ? 'border-slate-300 bg-white' : 'border-amber-400 bg-amber-100'}`}
         title={project.featured ? 'Remove from featured' : 'Add to featured'}
       >
         {project.featured ? (

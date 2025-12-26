@@ -12,8 +12,10 @@ import { useAppDispatch } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection } from '../store/selection';
 import {
+  createProjectThumbnail,
   getProjectList,
   type ProjectConfig,
+  removeProjectThumbnail,
   updateProject,
 } from '../utils/project-actions';
 import { ProjectContent } from './project-content';
@@ -236,6 +238,44 @@ export const ProjectList = () => {
     [editTitle, editColor, editHidden, handleCancelEdit],
   );
 
+  const handleThumbnailSelect = useCallback(
+    async (projectName: string, file: File) => {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await createProjectThumbnail(projectName, arrayBuffer);
+
+        // Update the project in state with new thumbnail
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, thumbnail: result.thumbnail }
+              : project,
+          ),
+        );
+      } catch (error) {
+        console.error('Error creating thumbnail:', error);
+      }
+    },
+    [],
+  );
+
+  const handleThumbnailRemove = useCallback(async (projectName: string) => {
+    try {
+      await removeProjectThumbnail(projectName);
+
+      // Update the project in state to remove thumbnail
+      setProjects((prev) =>
+        prev.map((project) =>
+          project.name === projectName
+            ? { ...project, thumbnail: undefined }
+            : project,
+        ),
+      );
+    } catch (error) {
+      console.error('Error removing thumbnail:', error);
+    }
+  }, []);
+
   // Separate projects into featured and regular, filtering out hidden projects unless showHidden is true
   // Always filter out private projects regardless of showHidden state
   const nonPrivateProjects = projects.filter((project) => !project.private);
@@ -326,7 +366,14 @@ export const ProjectList = () => {
                     <div className="flex w-full items-center">
                       <ProjectIcon
                         project={project}
+                        isEditing={isEditing}
                         onToggleFeatured={handleToggleFeatured}
+                        onThumbnailSelect={(file) =>
+                          handleThumbnailSelect(project.name, file)
+                        }
+                        onThumbnailRemove={() =>
+                          handleThumbnailRemove(project.name)
+                        }
                       />
 
                       <ProjectContent
@@ -373,7 +420,14 @@ export const ProjectList = () => {
                     <div className="flex w-full items-center">
                       <ProjectIcon
                         project={project}
+                        isEditing={isEditing}
                         onToggleFeatured={handleToggleFeatured}
+                        onThumbnailSelect={(file) =>
+                          handleThumbnailSelect(project.name, file)
+                        }
+                        onThumbnailRemove={() =>
+                          handleThumbnailRemove(project.name)
+                        }
                       />
 
                       <ProjectContent
