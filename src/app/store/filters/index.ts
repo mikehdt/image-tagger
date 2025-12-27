@@ -10,6 +10,7 @@ const initialState: Filters = {
   filterSizes: [],
   filterBuckets: [],
   filterExtensions: [],
+  filenamePatterns: [],
   paginationSize: PaginationSize.ONE_HUNDRED,
   showModified: false,
   searchQuery: '',
@@ -26,6 +27,7 @@ const filtersSlice = createSlice({
     selectFilterSizes: (state) => state.filterSizes,
     selectFilterBuckets: (state) => state.filterBuckets,
     selectFilterExtensions: (state) => state.filterExtensions,
+    selectFilenamePatterns: (state) => state.filenamePatterns,
     selectPaginationSize: (state) => state.paginationSize,
     selectShowModified: (state) => state.showModified,
     selectSearchQuery: (state) => state.searchQuery,
@@ -51,6 +53,9 @@ export const {
   setSearchQuery,
   clearModifiedFilter,
   resetFilterModeIfNeeded,
+  addFilenamePattern,
+  removeFilenamePattern,
+  clearFilenamePatterns,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice
@@ -60,6 +65,7 @@ export const {
   selectFilterSizes,
   selectFilterBuckets,
   selectFilterExtensions,
+  selectFilenamePatterns,
   selectPaginationSize,
   selectShowModified,
   selectSearchQuery,

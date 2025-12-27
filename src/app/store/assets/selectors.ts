@@ -205,6 +205,7 @@ export const selectFilteredAssets = wrapSelector(
       (state: RootState) => state.filters.filterSizes,
       (state: RootState) => state.filters.filterBuckets,
       (state: RootState) => state.filters.filterExtensions,
+      (state: RootState) => state.filters.filenamePatterns,
       (state: RootState) => state.filters.filterMode,
       (state: RootState) => state.filters.showModified,
       (state: RootState) => state.filters.searchQuery,
@@ -218,6 +219,7 @@ export const selectFilteredAssets = wrapSelector(
       filterSizes,
       filterBuckets,
       filterExtensions,
+      filenamePatterns,
       filterMode,
       showModified,
       searchQuery,
@@ -231,6 +233,7 @@ export const selectFilteredAssets = wrapSelector(
         filterSizes,
         filterBuckets,
         filterExtensions,
+        filenamePatterns,
         filterMode,
         showModified,
         searchQuery,
@@ -313,6 +316,32 @@ export const selectFilterTagsDeleteState = createSelector(
 export const selectFilteredAssetsCount = createSelector(
   [selectFilteredAssets],
   (filteredAssets) => filteredAssets.length,
+);
+
+// Selector to count how many files match each filename pattern
+// Returns a map of pattern -> count
+export const selectFilenamePatternCounts = createSelector(
+  [selectAllImages, (state: RootState) => state.filters.filenamePatterns],
+  (images, patterns): Record<string, number> => {
+    if (!patterns || patterns.length === 0) return {};
+
+    const counts: Record<string, number> = {};
+
+    for (const pattern of patterns) {
+      counts[pattern] = 0;
+    }
+
+    for (const image of images) {
+      const lowerFileId = image.fileId.toLowerCase();
+      for (const pattern of patterns) {
+        if (lowerFileId.includes(pattern)) {
+          counts[pattern]++;
+        }
+      }
+    }
+
+    return counts;
+  },
 );
 
 // Optimized selector for asset-specific highlighted tags

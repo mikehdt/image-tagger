@@ -1,7 +1,14 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { selectAllExtensions } from '@/app/store/assets';
 import {
+  selectAllExtensions,
+  selectFilenamePatternCounts,
+} from '@/app/store/assets';
+import {
+  addFilenamePattern,
+  removeFilenamePattern,
+  selectFilenamePatterns,
   selectFilterExtensions,
   toggleExtensionFilter,
 } from '@/app/store/filters';
@@ -53,9 +60,31 @@ export const FileView = () => {
   const dispatch = useAppDispatch();
   const allExtensions = useAppSelector(selectAllExtensions);
   const activeExtensions = useAppSelector(selectFilterExtensions);
+  const filenamePatterns = useAppSelector(selectFilenamePatterns);
+  const patternCounts = useAppSelector(selectFilenamePatternCounts);
+
+  const [patternInput, setPatternInput] = useState('');
 
   const { sortType, sortDirection, updateListLength, selectedIndex } =
     useFilterContext();
+
+  // Sort the filename patterns based on current sort settings
+  const sortedPatterns = useMemo(() => {
+    if (filenamePatterns.length === 0) return [];
+
+    return [...filenamePatterns].sort((a, b) => {
+      // For 'active' sort, patterns are always "active" so just sort by count
+      if (sortType === 'active' || sortType === 'count') {
+        const countA = patternCounts[a] || 0;
+        const countB = patternCounts[b] || 0;
+        return sortDirection === 'asc' ? countA - countB : countB - countA;
+      }
+      // Alphabetical
+      return sortDirection === 'asc'
+        ? a.localeCompare(b)
+        : b.localeCompare(a);
+    });
+  }, [filenamePatterns, patternCounts, sortType, sortDirection]);
 
   // Get extension data from store
   const extensionList = useMemo(() => {
@@ -111,48 +140,123 @@ export const FileView = () => {
     [dispatch],
   );
 
-  return extensionList.length === 0 ? (
-    <div className="px-4 py-2 text-sm text-slate-500">
-      No file extensions available
+  // Pattern input handlers
+  const handlePatternKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && patternInput.trim()) {
+        dispatch(addFilenamePattern(patternInput.trim()));
+        setPatternInput('');
+        e.preventDefault();
+      } else if (e.key === 'Escape') {
+        setPatternInput('');
+        e.preventDefault();
+      }
+    },
+    [dispatch, patternInput],
+  );
+
+  const handleRemovePattern = useCallback(
+    (pattern: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      dispatch(removeFilenamePattern(pattern));
+    },
+    [dispatch],
+  );
+
+  return (
+    <div className="flex flex-col">
+      {/* Filename pattern search section */}
+      <div className="border-b border-slate-200 px-3 py-2">
+        <input
+          type="text"
+          value={patternInput}
+          onChange={(e) => setPatternInput(e.target.value)}
+          onKeyDown={handlePatternKeyDown}
+          placeholder="Search filenames..."
+          className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Filename patterns list */}
+      {sortedPatterns.length > 0 && (
+        <ul className="divide-y divide-slate-100">
+          {sortedPatterns.map((pattern) => (
+            <li
+              key={pattern}
+              className="flex cursor-default items-center justify-between bg-blue-50 px-3 py-2 transition-colors"
+            >
+              <span className="text-sm font-medium text-blue-800">
+                {pattern}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-xs tabular-nums text-blue-600">
+                  {patternCounts[pattern] || 0}
+                </span>
+                <button
+                  onClick={(e) => handleRemovePattern(pattern, e)}
+                  className="rounded p-0.5 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                  title="Remove pattern"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Divider with label */}
+      <div className="flex items-center gap-2 px-3 py-1.5">
+        <div className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs text-slate-400">File Types</span>
+        <div className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      {/* Extension list */}
+      {extensionList.length === 0 ? (
+        <div className="px-4 py-2 text-sm text-slate-500">
+          No file extensions available
+        </div>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {extensionList.map((item, index) => (
+            <li
+              id={`tag-${item.ext}`}
+              key={item.ext}
+              onClick={() => handleToggle(item.ext)}
+              className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+                index === selectedIndex
+                  ? item.isActive
+                    ? 'bg-stone-200'
+                    : 'bg-blue-100'
+                  : item.isActive
+                    ? 'bg-stone-100'
+                    : 'hover:bg-blue-50'
+              }`}
+              title={
+                item.isActive
+                  ? 'Click to remove from filters'
+                  : 'Click to add to filters'
+              }
+            >
+              <span
+                className={`text-sm ${
+                  item.isActive ? 'font-medium text-stone-700' : 'text-slate-800'
+                }`}
+              >
+                {item.ext}
+              </span>
+              <span
+                className={`text-xs tabular-nums ${
+                  item.isActive ? 'text-stone-600' : 'text-slate-500'
+                }`}
+              >
+                {item.count}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-  ) : (
-    <ul className="divide-y divide-slate-100">
-      {extensionList.map((item, index) => (
-        <li
-          id={`tag-${item.ext}`}
-          key={item.ext}
-          onClick={() => handleToggle(item.ext)}
-          className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
-            index === selectedIndex
-              ? item.isActive
-                ? 'bg-stone-200'
-                : 'bg-blue-100'
-              : item.isActive
-                ? 'bg-stone-100'
-                : 'hover:bg-blue-50'
-          }`}
-          title={
-            item.isActive
-              ? 'Click to remove from filters'
-              : 'Click to add to filters'
-          }
-        >
-          <span
-            className={`text-sm ${
-              item.isActive ? 'font-medium text-stone-700' : 'text-slate-800'
-            }`}
-          >
-            {item.ext}
-          </span>
-          <span
-            className={`text-xs tabular-nums ${
-              item.isActive ? 'text-stone-600' : 'text-slate-500'
-            }`}
-          >
-            {item.count}
-          </span>
-        </li>
-      ))}
-    </ul>
   );
 };

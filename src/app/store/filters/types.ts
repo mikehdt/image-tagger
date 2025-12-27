@@ -22,6 +22,7 @@ export type Filters = {
   filterSizes: string[];
   filterBuckets: string[];
   filterExtensions: string[];
+  filenamePatterns: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
   searchQuery: string;

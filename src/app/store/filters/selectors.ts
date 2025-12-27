@@ -12,6 +12,8 @@ const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
 const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
 const selectFilterExtensions = (state: RootState) =>
   state.filters.filterExtensions;
+const selectFilenamePatterns = (state: RootState) =>
+  state.filters.filenamePatterns;
 const selectShowModified = (state: RootState) => state.filters.showModified;
 
 export const selectHasActiveFilters = createSelector(
@@ -19,12 +21,21 @@ export const selectHasActiveFilters = createSelector(
   selectFilterSizes,
   selectFilterBuckets,
   selectFilterExtensions,
+  selectFilenamePatterns,
   selectShowModified,
-  (filterTags, filterSizes, filterBuckets, filterExtensions, showModified) =>
+  (
+    filterTags,
+    filterSizes,
+    filterBuckets,
+    filterExtensions,
+    filenamePatterns,
+    showModified,
+  ) =>
     filterTags.length > 0 ||
     filterSizes.length > 0 ||
     filterBuckets.length > 0 ||
     filterExtensions.length > 0 ||
+    filenamePatterns.length > 0 ||
     showModified,
 );
 

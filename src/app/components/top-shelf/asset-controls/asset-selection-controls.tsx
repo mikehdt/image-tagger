@@ -27,7 +27,6 @@ import {
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
-import { SearchDropdown } from './search-dropdown';
 
 /**
  * Get the appropriate sort direction label based on sort type
@@ -165,8 +164,6 @@ export const AssetSelectionControls = () => {
           {getSortDirectionLabel(sortType, sortDirection)}
         </span>
       </Button>
-
-      <SearchDropdown />
 
       <Button
         type="button"

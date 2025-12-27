@@ -69,3 +69,87 @@ export const highlightText = (
 
   return result;
 };
+
+/**
+ * Highlights matching segments of text for multiple patterns
+ * @param text - The text to highlight
+ * @param patterns - Array of patterns to highlight (case-insensitive)
+ * @returns Array of React elements with highlighted matches
+ */
+export const highlightPatterns = (
+  text: string,
+  patterns: string[],
+): React.ReactNode => {
+  if (!patterns || patterns.length === 0) {
+    return text;
+  }
+
+  const normalizedText = text.toLowerCase();
+
+  // Find all match ranges
+  const ranges: Array<{ start: number; end: number }> = [];
+
+  for (const pattern of patterns) {
+    if (!pattern) continue;
+    let index = normalizedText.indexOf(pattern);
+    while (index !== -1) {
+      ranges.push({ start: index, end: index + pattern.length });
+      index = normalizedText.indexOf(pattern, index + 1);
+    }
+  }
+
+  // If no matches, return text
+  if (ranges.length === 0) {
+    return text;
+  }
+
+  // Sort by start position
+  ranges.sort((a, b) => a.start - b.start);
+
+  // Merge overlapping ranges
+  const mergedRanges: Array<{ start: number; end: number }> = [];
+  for (const range of ranges) {
+    const last = mergedRanges[mergedRanges.length - 1];
+    if (last && range.start <= last.end) {
+      // Overlapping or adjacent - extend the previous range
+      last.end = Math.max(last.end, range.end);
+    } else {
+      mergedRanges.push({ ...range });
+    }
+  }
+
+  // Build result with highlighted segments
+  const result: React.ReactNode[] = [];
+  let lastIndex = 0;
+
+  for (const range of mergedRanges) {
+    // Add text before the match
+    if (range.start > lastIndex) {
+      result.push(
+        <Fragment key={`text-${lastIndex}`}>
+          {text.substring(lastIndex, range.start)}
+        </Fragment>,
+      );
+    }
+
+    // Add the highlighted match
+    result.push(
+      <span key={`match-${range.start}`} className="font-bold">
+        {text.substring(range.start, range.end)}
+      </span>,
+    );
+
+    lastIndex = range.end;
+  }
+
+  // Add any remaining text
+  if (lastIndex < text.length) {
+    result.push(
+      <Fragment key={`text-${lastIndex}`}>
+        {text.substring(lastIndex)}
+      </Fragment>,
+    );
+  }
+
+  return result;
+};

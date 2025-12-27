@@ -19,6 +19,7 @@ export const applyFilters = ({
   filterSizes,
   filterBuckets,
   filterExtensions,
+  filenamePatterns,
   filterMode,
   showModified,
   searchQuery,
@@ -31,6 +32,7 @@ export const applyFilters = ({
   filterSizes: string[];
   filterBuckets: string[];
   filterExtensions: string[];
+  filenamePatterns?: string[];
   filterMode: FilterMode;
   showModified?: boolean;
   searchQuery?: string;
@@ -61,6 +63,8 @@ export const applyFilters = ({
 
   // Handle the case where no filters are active - show everything
   // BUT not for SELECTED_ASSETS or TAGLESS modes, which have their own logic
+  const hasFilenamePatterns = filenamePatterns && filenamePatterns.length > 0;
+  const hasSearchQuery = searchQuery && searchQuery.trim() !== '';
   if (
     filterMode !== FilterMode.SELECTED_ASSETS &&
     filterMode !== FilterMode.TAGLESS &&
@@ -68,8 +72,9 @@ export const applyFilters = ({
     filterSizes.length === 0 &&
     filterBuckets.length === 0 &&
     filterExtensions.length === 0 &&
+    !hasFilenamePatterns &&
     !showModified &&
-    (!searchQuery || searchQuery.trim() === '')
+    !hasSearchQuery
   ) {
     // Return all sorted assets with correct indices
     return sortedAssetsWithCorrectIndex;
@@ -80,10 +85,18 @@ export const applyFilters = ({
   const filterBucketsSet = new Set(filterBuckets);
   const filterExtensionsSet = new Set(filterExtensions);
 
+  // Helper to check if filename matches any of the patterns (OR'd together, case-insensitive)
+  const matchesFilenamePatterns = (filename: string): boolean => {
+    if (!hasFilenamePatterns) return true;
+    const lowerFilename = filename.toLowerCase();
+    // Patterns match if ANY pattern is found in the filename
+    return filenamePatterns!.some((pattern) => lowerFilename.includes(pattern));
+  };
+
   const filteredAssets = sortedAssetsWithCorrectIndex.filter(
     (img: ImageAssetWithIndex) => {
       // SELECTED_ASSETS mode - only show assets that are selected
-      // Apply search and modified filters to selected assets if needed
+      // Apply filename patterns and modified filters to selected assets if needed
       if (filterMode === FilterMode.SELECTED_ASSETS) {
         if (!selectedAssets || selectedAssets.length === 0) {
           return false; // No assets selected, so show nothing
@@ -94,9 +107,14 @@ export const applyFilters = ({
           return false;
         }
 
-        // Apply search filter if provided
-        if (searchQuery && searchQuery.trim() !== '') {
-          const query = searchQuery.trim().toLowerCase();
+        // Apply filename patterns filter if provided
+        if (!matchesFilenamePatterns(img.fileId)) {
+          return false;
+        }
+
+        // Apply legacy search filter if provided (for backwards compatibility)
+        if (hasSearchQuery) {
+          const query = searchQuery!.trim().toLowerCase();
           const assetName = img.fileId.toLowerCase();
           if (!assetName.includes(query)) {
             return false;
@@ -117,9 +135,14 @@ export const applyFilters = ({
       }
 
       // For all other filter modes, apply the standard logic
-      // Apply search filter first (if provided)
-      if (searchQuery && searchQuery.trim() !== '') {
-        const query = searchQuery.trim().toLowerCase();
+      // Apply filename patterns filter first (if provided)
+      if (!matchesFilenamePatterns(img.fileId)) {
+        return false; // Skip this asset if it doesn't match any pattern
+      }
+
+      // Apply legacy search filter (for backwards compatibility)
+      if (hasSearchQuery) {
+        const query = searchQuery!.trim().toLowerCase();
         const assetName = img.fileId.toLowerCase();
         if (!assetName.includes(query)) {
           return false; // Skip this asset if it doesn't match the search
