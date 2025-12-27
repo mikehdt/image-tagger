@@ -12,9 +12,9 @@ import { memo, useCallback, useRef, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
+import { EditableTag } from './editable-tag';
 import { InputTag } from './input-tag';
 import { SortableTag } from './sortable-tag';
-import { Tag } from './tag';
 
 type TagData = {
   name: string;
@@ -129,15 +129,21 @@ const TagsDisplayComponent = ({
       />
     ) : (
       <div key={tag.name} className="mr-2 mb-2">
-        <Tag
+        <EditableTag
           tagName={tag.name}
           tagState={tag.state}
           count={tag.count}
           isHighlighted={tag.isHighlighted}
           fade={editingTagName !== null && editingTagName !== tag.name}
+          isEditing={editingTagName === tag.name}
+          editValue={editValue}
           onToggle={onToggleTag}
           onEdit={onEditTag}
           onDelete={onDeleteTag}
+          onEditChange={onEditChange}
+          onEditSubmit={onEditSubmit}
+          onEditCancel={onEditCancel}
+          isDuplicateEdit={isDuplicateEdit}
         />
       </div>
     ),

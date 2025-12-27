@@ -1,10 +1,8 @@
 /**
  * SortableTag Component v2
  *
- * Phase 4: Supports inline editing
- * - Uses useSortable for drag/drop capability
- * - Renders InputTag when editing, Tag otherwise
- * - Disables drag during edit mode
+ * Wraps EditableTag with drag-and-drop capability using useSortable.
+ * The editing UI is handled by EditableTag, keeping concerns separated.
  */
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -12,8 +10,7 @@ import { memo } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
-import { InputTag } from './input-tag';
-import { Tag } from './tag';
+import { EditableTag } from './editable-tag';
 
 type SortableTagProps = {
   id: string;
@@ -79,28 +76,22 @@ const SortableTagComponent = ({
       {...(isEditing ? {} : listeners)}
       className={`mr-2 mb-2 ${isEditing || fade ? '' : 'cursor-grab active:cursor-grabbing'}`}
     >
-      {isEditing ? (
-        <InputTag
-          mode="edit"
-          value={editValue}
-          onChange={onEditChange}
-          onSubmit={onEditSubmit}
-          onCancel={onEditCancel}
-          placeholder="Edit tag..."
-          isDuplicate={isDuplicateEdit}
-        />
-      ) : (
-        <Tag
-          tagName={tagName}
-          tagState={tagState}
-          count={count}
-          isHighlighted={isHighlighted}
-          fade={fade}
-          onToggle={onToggle}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      )}
+      <EditableTag
+        tagName={tagName}
+        tagState={tagState}
+        count={count}
+        isHighlighted={isHighlighted}
+        fade={fade}
+        isEditing={isEditing}
+        editValue={editValue}
+        onToggle={onToggle}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onEditChange={onEditChange}
+        onEditSubmit={onEditSubmit}
+        onEditCancel={onEditCancel}
+        isDuplicateEdit={isDuplicateEdit}
+      />
     </div>
   );
 };

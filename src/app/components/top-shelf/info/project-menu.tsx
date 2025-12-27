@@ -12,10 +12,7 @@ import { memo, useCallback, useId, useRef, useState } from 'react';
 import { Popup, usePopup } from '@/app/components/shared/popup-v2';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  selectProjectName,
-  selectProjectThumbnail,
-} from '@/app/store/project';
+import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 
@@ -236,12 +233,6 @@ const ProjectMenuComponent = () => {
       >
         <div className="divide-y divide-slate-100">
           <MenuItem
-            icon={<ArrowLeftCircleIcon className="w-5" />}
-            label="Back to Projects"
-            onClick={handleBackToProjects}
-            disabled={ioInProgress}
-          />
-          <MenuItem
             icon={<ArrowPathIcon className="w-5" />}
             label="Refresh Assets"
             onClick={handleRefresh}
@@ -251,6 +242,12 @@ const ProjectMenuComponent = () => {
             icon={<CalculatorIcon className="w-5" />}
             label="Bucket Crop Tool"
             onClick={handleOpenBucketModal}
+          />
+          <MenuItem
+            icon={<ArrowLeftCircleIcon className="w-5" />}
+            label="Back to Projects"
+            onClick={handleBackToProjects}
+            disabled={ioInProgress}
           />
         </div>
       </Popup>
