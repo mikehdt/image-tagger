@@ -1,8 +1,9 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { RootState } from '@/app/store';
 import { selectFilteredAssets } from '@/app/store/assets';
 import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -113,63 +114,65 @@ export const EditTagsModal = ({
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasSelectedAssets = selectedAssetsCount > 0;
 
-  // Compute tag status info using cached selectors
-  // Using useCallback to memoize the selector function and custom equality to prevent re-renders
-  const memoizedTagsStatus = useAppSelector(
-    useCallback(
-      (state) => {
-        // Return empty object for empty tags to avoid unnecessary processing
-        if (Object.keys(editedTags).length === 0) return {};
+  // Create a memoized selector for computing tag status info
+  // The selector is recreated when editedTags change, but returns cached results for unchanged tags
+  const tagsStatusSelector = useMemo(
+    () => (state: RootState) => {
+      // Return empty object for empty tags to avoid unnecessary processing
+      if (Object.keys(editedTags).length === 0) return {};
 
-        const result: Record<
-          string,
-          {
-            isDuplicate: boolean;
-            isAllDuplicates: boolean;
-            duplicateCount: number;
-            totalSelected: number;
-            wouldCreateDuplicates?: boolean;
-            assetsWithBothTags?: number;
-            assetsWithOriginalTag?: number;
-          }
-        > = {};
+      const result: Record<
+        string,
+        {
+          isDuplicate: boolean;
+          isAllDuplicates: boolean;
+          duplicateCount: number;
+          totalSelected: number;
+          wouldCreateDuplicates?: boolean;
+          assetsWithBothTags?: number;
+          assetsWithOriginalTag?: number;
+        }
+      > = {};
 
-        // Process all edited tags at once
-        Object.entries(editedTags).forEach(([originalTag, newValue]) => {
-          // Skip checks for undefined, unchanged or empty tags
-          if (!newValue || originalTag === newValue || newValue.trim() === '') {
-            result[originalTag] = {
-              isDuplicate: false,
-              isAllDuplicates: false,
-              duplicateCount: 0,
-              totalSelected: 0,
-              wouldCreateDuplicates: false,
-              assetsWithBothTags: 0,
-              assetsWithOriginalTag: 0,
-            };
-            return;
-          }
-
-          // Check for existing tag duplicates using cached selector
-          const duplicateInfo = selectDuplicateTagInfo(newValue)(state);
-
-          // Check for tag co-existence using cached selector
-          const coExistenceInfo = selectTagCoExistence(
-            originalTag.trim(),
-            newValue.trim(),
-          )(state);
-
+      // Process all edited tags at once
+      Object.entries(editedTags).forEach(([originalTag, newValue]) => {
+        // Skip checks for undefined, unchanged or empty tags
+        if (!newValue || originalTag === newValue || newValue.trim() === '') {
           result[originalTag] = {
-            ...duplicateInfo,
-            ...coExistenceInfo,
+            isDuplicate: false,
+            isAllDuplicates: false,
+            duplicateCount: 0,
+            totalSelected: 0,
+            wouldCreateDuplicates: false,
+            assetsWithBothTags: 0,
+            assetsWithOriginalTag: 0,
           };
-        });
+          return;
+        }
 
-        return result;
-      },
-      [editedTags],
-    ),
-    // Custom equality check to prevent re-renders when object contents are the same
+        // Check for existing tag duplicates using cached selector
+        const duplicateInfo = selectDuplicateTagInfo(newValue)(state);
+
+        // Check for tag co-existence using cached selector
+        const coExistenceInfo = selectTagCoExistence(
+          originalTag.trim(),
+          newValue.trim(),
+        )(state);
+
+        result[originalTag] = {
+          ...duplicateInfo,
+          ...coExistenceInfo,
+        };
+      });
+
+      return result;
+    },
+    [editedTags],
+  );
+
+  // Get tag status info - uses custom equality to prevent unnecessary re-renders
+  const memoizedTagsStatus = useAppSelector(
+    tagsStatusSelector,
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
 

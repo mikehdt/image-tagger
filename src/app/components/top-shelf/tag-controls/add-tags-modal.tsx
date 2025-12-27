@@ -3,9 +3,9 @@
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { RootState } from '@/app/store';
 import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
-import type { RootState } from '@/app/store';
 import {
   selectAssetsWithActiveFilters,
   selectDuplicateTagInfo,
@@ -81,7 +81,7 @@ export const AddTagsModal = ({
   // Create a memoized selector for getting all tag statuses
   // The selector is recreated when tags change, but returns cached results for unchanged tags
   const tagsStatusSelector = useMemo(
-    () => (state: Parameters<typeof selectDuplicateTagInfo>[0] extends string ? Parameters<ReturnType<typeof selectDuplicateTagInfo>>[0] : never) =>
+    () => (state: RootState) =>
       tags.map((tag) => {
         const info = selectDuplicateTagInfo(tag)(state);
         let status: 'all' | 'some' | 'none' = 'none';
