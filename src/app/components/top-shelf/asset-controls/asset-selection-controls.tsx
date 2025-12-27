@@ -1,16 +1,11 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  CalculatorIcon,
-  EyeIcon,
-  EyeSlashIcon,
   IdentificationIcon,
-  MagnifyingGlassIcon,
   NoSymbolIcon,
   SquaresPlusIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
@@ -23,12 +18,7 @@ import {
   SortType,
   toggleSortDirection,
 } from '@/app/store/assets';
-import { selectSearchQuery, setSearchQuery } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  selectShowCropVisualization,
-  toggleCropVisualization,
-} from '@/app/store/project';
 import {
   clearSelection,
   selectMultipleAssets,
@@ -37,7 +27,7 @@ import {
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
-import { BucketCropModal } from './bucket-crop-modal';
+import { SearchDropdown } from './search-dropdown';
 
 /**
  * Get the appropriate sort direction label based on sort type
@@ -55,9 +45,9 @@ const getSortDirectionLabel = (
     case SortType.BUCKET_SIZE:
       return isAsc ? '0-9' : '9-0';
     case SortType.SCALED:
-      return isAsc ? '1:1' : 'Diff'; // 1:1 for identical first, Diff for different first
+      return isAsc ? '1:1' : 'Diff';
     case SortType.SELECTED:
-      return isAsc ? '✓' : '○'; // ✓ for selected first, ○ for unselected first
+      return isAsc ? '✓' : '○';
     default:
       return isAsc ? 'A-Z' : 'Z-A';
   }
@@ -65,39 +55,21 @@ const getSortDirectionLabel = (
 
 export const AssetSelectionControls = () => {
   const dispatch = useAppDispatch();
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = selectedAssets.length;
   const filteredAssets = useAppSelector(selectFilteredAssets);
-  const searchQuery = useAppSelector(selectSearchQuery);
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
+  const allAssetsCount = useAppSelector(selectImageCount);
 
-  const showCropVisualization = useAppSelector(selectShowCropVisualization);
-
-  const handleToggleCropVisualization = () => {
-    dispatch(toggleCropVisualization());
-  };
-
-  const handleOpenBucketModal = () => {
-    setIsBucketModalOpen(true);
-  };
-
-  const handleCloseBucketModal = () => {
-    setIsBucketModalOpen(false);
-  };
-
-  const handleClearSelection = () => {
+  const handleClearSelection = useCallback(() => {
     dispatch(clearSelection());
     // If currently sorted by "Selected", switch back to "Name" when clearing selection
     if (sortType === SortType.SELECTED) {
       dispatch(setSortType(SortType.NAME));
       dispatch(setSortDirection(SortDirection.ASC));
     }
-  };
+  }, [dispatch, sortType]);
 
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {
@@ -112,92 +84,6 @@ export const AssetSelectionControls = () => {
     dispatch(toggleSortDirection());
   }, [dispatch]);
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch(setSearchQuery(e.target.value));
-    },
-    [dispatch],
-  );
-
-  const handleSearchClear = useCallback(() => {
-    // Clear any pending blur timeout
-    if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
-      blurTimeoutRef.current = null;
-    }
-    dispatch(setSearchQuery(''));
-    // Add a small delay to let animations complete before closing (helps with Firefox jumping)
-    setTimeout(() => {
-      setIsSearchActive(false);
-    }, 100);
-  }, [dispatch]);
-
-  const handleSearchFocus = useCallback(() => {
-    // Clear any pending blur timeout when focusing
-    if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
-      blurTimeoutRef.current = null;
-    }
-    setIsSearchActive(true);
-
-    // Find and focus the visible input (handles responsive design with duplicate inputs)
-    setTimeout(() => {
-      const allInputs = document.querySelectorAll(
-        'input[data-search-input="asset-name"]',
-      );
-
-      const visibleInput = Array.from(allInputs).find((element) => {
-        const inp = element as HTMLInputElement;
-        const styles = getComputedStyle(inp);
-        return (
-          inp.offsetWidth > 0 && inp.offsetHeight > 0 && styles.opacity !== '0'
-        );
-      }) as HTMLInputElement | undefined;
-
-      if (visibleInput) {
-        visibleInput.focus();
-      }
-    }, 100);
-  }, []);
-
-  const handleSearchBlur = useCallback(() => {
-    // Add a slight delay before closing the search to allow for re-focusing
-    blurTimeoutRef.current = setTimeout(() => {
-      setIsSearchActive(false);
-    }, 250);
-  }, []);
-
-  const handleInputFocus = useCallback(() => {
-    // Cancel any pending blur timeout when input is focused
-    if (blurTimeoutRef.current) {
-      clearTimeout(blurTimeoutRef.current);
-      blurTimeoutRef.current = null;
-    }
-  }, []);
-
-  const handleInputKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Escape') {
-        setIsSearchActive(false);
-        // Blur the input to remove focus
-        e.currentTarget.blur();
-      }
-    },
-    [],
-  );
-
-  // Get filtered assets directly from the selector
-  const allAssetsCount = useAppSelector(selectImageCount);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (blurTimeoutRef.current) {
-        clearTimeout(blurTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Auto-switch from "Selected" sort to "Name" when no assets are selected
   useEffect(() => {
     if (sortType === SortType.SELECTED && selectedAssetsCount === 0) {
@@ -208,16 +94,16 @@ export const AssetSelectionControls = () => {
 
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
-    if (filteredAssets.length === 0) return true; // No assets to select
+    if (filteredAssets.length === 0) return true;
     return filteredAssets.every((asset) =>
       selectedAssets.includes(asset.fileId),
     );
   }, [filteredAssets, selectedAssets]);
 
-  const handleAddAllToSelection = () => {
+  const handleAddAllToSelection = useCallback(() => {
     const assetIds = filteredAssets.map((asset) => asset.fileId);
     dispatch(selectMultipleAssets(assetIds));
-  };
+  }, [dispatch, filteredAssets]);
 
   // Create sort type dropdown items
   const sortTypeItems: DropdownItem<SortType>[] = [
@@ -247,37 +133,10 @@ export const AssetSelectionControls = () => {
   return (
     <ResponsiveToolbarGroup
       icon={<IdentificationIcon className="w-4" />}
-      title="Asset Selection"
+      title="Assets"
       position="left"
       breakpoint="large"
     >
-      <Button
-        variant="ghost"
-        color="slate"
-        size="medium"
-        onClick={handleToggleCropVisualization}
-        isPressed={showCropVisualization}
-        title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
-      >
-        {showCropVisualization ? (
-          <EyeSlashIcon className="w-4" />
-        ) : (
-          <EyeIcon className="w-4" />
-        )}
-      </Button>
-
-      <Button
-        variant="ghost"
-        color="slate"
-        size="medium"
-        onClick={handleOpenBucketModal}
-        title="Open bucket crop visualization"
-      >
-        <CalculatorIcon className="w-4" />
-      </Button>
-
-      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
-
       <Dropdown
         items={sortTypeItems}
         selectedValue={sortType}
@@ -307,93 +166,42 @@ export const AssetSelectionControls = () => {
         </span>
       </Button>
 
-      <span className="h-7 w-0 border-r border-l border-r-slate-300 border-l-white" />
+      <SearchDropdown />
 
-      <span className="relative flex items-center">
-        <Button
-          className={`absolute top-0.5 bottom-0.5 my-auto px-1 ${isSearchActive ? 'pointer-events-none opacity-0' : ''}`}
-          size="small"
-          variant="ghost"
-          isPressed={searchQuery.length > 0 && !isSearchActive}
-          onClick={handleSearchFocus}
-        >
-          <MagnifyingGlassIcon className="w-5" />
-        </Button>
+      <Button
+        type="button"
+        onClick={handleAddAllToSelection}
+        disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+        variant="ghost"
+        color="slate"
+        size="medium"
+        title={
+          allFilteredAssetsSelected
+            ? 'All filtered assets already selected'
+            : filteredAssets.length === allAssetsCount
+              ? 'Add all assets to selection'
+              : 'Add all filtered assets to selection'
+        }
+      >
+        <SquaresPlusIcon className="w-4" />
+        <span className="ml-2 max-xl:hidden">
+          {filteredAssets.length === allAssetsCount
+            ? 'Select All'
+            : 'Select Filtered'}
+        </span>
+      </Button>
 
-        <input
-          ref={searchInputRef}
-          data-search-input="asset-name"
-          className={`rounded-sm border border-white/0 bg-white px-2 py-1 text-sm inset-shadow-sm inset-shadow-slate-300 transition-all ${
-            isSearchActive
-              ? 'w-50 pe-7 opacity-100'
-              : 'pointer-events-none w-7 opacity-0'
-          }`}
-          placeholder="Find by asset name..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          onBlur={handleSearchBlur}
-          onFocus={handleInputFocus}
-          onKeyDown={handleInputKeyDown}
-        />
-
-        {isSearchActive ? (
-          <span
-            // In edit mode, the cancel button should always be active regardless of input value
-            className="absolute top-0 right-1 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 cursor-pointer rounded-full p-0.5 text-slate-600 transition-colors hover:bg-slate-500 hover:text-white"
-            onClick={handleSearchClear}
-            tabIndex={0}
-            title="Clear search"
-          >
-            <XMarkIcon />
-          </span>
-        ) : null}
-      </span>
-
-      {!isSearchActive ? (
-        <>
-          <Button
-            type="button"
-            onClick={handleAddAllToSelection}
-            disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
-            variant="ghost"
-            color="slate"
-            size="medium"
-            title={
-              allFilteredAssetsSelected
-                ? 'All filtered assets already selected'
-                : filteredAssets.length === allAssetsCount
-                  ? 'Add all assets to selection'
-                  : 'Add all filtered assets to selection'
-            }
-          >
-            <SquaresPlusIcon className="w-4" />
-            <span
-              className={`ml-2 max-xl:hidden ${isSearchActive ? 'hidden' : ''}`}
-            >
-              {filteredAssets.length === allAssetsCount
-                ? 'Select All'
-                : 'Select Filtered'}
-            </span>
-          </Button>
-
-          <Button
-            type="button"
-            onClick={handleClearSelection}
-            disabled={selectedAssetsCount === 0}
-            variant="ghost"
-            color="slate"
-            size="medium"
-            title="Clear selection"
-          >
-            <NoSymbolIcon className="w-4" />
-          </Button>
-        </>
-      ) : null}
-
-      <BucketCropModal
-        isOpen={isBucketModalOpen}
-        onClose={handleCloseBucketModal}
-      />
+      <Button
+        type="button"
+        onClick={handleClearSelection}
+        disabled={selectedAssetsCount === 0}
+        variant="ghost"
+        color="slate"
+        size="medium"
+        title="Clear selection"
+      >
+        <NoSymbolIcon className="w-4" />
+      </Button>
     </ResponsiveToolbarGroup>
   );
 };

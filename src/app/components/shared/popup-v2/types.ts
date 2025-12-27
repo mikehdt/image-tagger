@@ -46,4 +46,6 @@ export interface PopupProps {
   offset?: number;
   className?: string;
   children: ReactNode;
+  /** Skip maxHeight/overflow handling - useful for popups containing nested popups */
+  disableOverflowHandling?: boolean;
 }

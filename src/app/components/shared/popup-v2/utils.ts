@@ -57,6 +57,7 @@ export function adjustForViewport(
   triggerElement: HTMLElement,
   desiredPosition: PopupPosition,
   offset: number = DEFAULT_OFFSET,
+  disableOverflowHandling: boolean = false,
 ): ViewportAdjustmentResult {
   const popupRect = popupElement.getBoundingClientRect();
   const triggerRect = triggerElement.getBoundingClientRect();
@@ -125,27 +126,30 @@ export function adjustForViewport(
   }
 
   // --- Vertical adjustment ---
-  // Always cap maxHeight to 80vh or available space, whichever is smaller
-  // This ensures proper scrolling and responsive resize behavior
-  const maxPreferredHeight = viewportHeight * MAX_HEIGHT_VH;
+  // Skip overflow handling if disabled (useful for popups containing nested popups)
+  if (!disableOverflowHandling) {
+    // Always cap maxHeight to 80vh or available space, whichever is smaller
+    // This ensures proper scrolling and responsive resize behavior
+    const maxPreferredHeight = viewportHeight * MAX_HEIGHT_VH;
 
-  if (verticalPart === 'bottom') {
-    const availableHeight =
-      viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
-    const maxHeight = Math.min(maxPreferredHeight, availableHeight);
+    if (verticalPart === 'bottom') {
+      const availableHeight =
+        viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
+      const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
-    if (maxHeight > 0) {
-      styles.maxHeight = `${maxHeight}px`;
-      styles.overflowY = 'auto';
-    }
-  } else {
-    // For top-opening popups, cap based on space above trigger
-    const availableHeight = triggerRect.top - offset - VIEWPORT_MARGIN;
-    const maxHeight = Math.min(maxPreferredHeight, availableHeight);
+      if (maxHeight > 0) {
+        styles.maxHeight = `${maxHeight}px`;
+        styles.overflowY = 'auto';
+      }
+    } else {
+      // For top-opening popups, cap based on space above trigger
+      const availableHeight = triggerRect.top - offset - VIEWPORT_MARGIN;
+      const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
-    if (maxHeight > 0) {
-      styles.maxHeight = `${maxHeight}px`;
-      styles.overflowY = 'auto';
+      if (maxHeight > 0) {
+        styles.maxHeight = `${maxHeight}px`;
+        styles.overflowY = 'auto';
+      }
     }
   }
 

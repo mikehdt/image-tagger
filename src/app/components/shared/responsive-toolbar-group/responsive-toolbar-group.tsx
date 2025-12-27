@@ -104,6 +104,7 @@ function ResponsiveToolbarGroupInternal({
           position={popupPosition}
           triggerRef={buttonRef}
           className="rounded-md border border-slate-200 bg-white shadow-lg focus:outline-none"
+          disableOverflowHandling
         >
           <div className="flex items-center gap-1 bg-slate-50 p-2">
             {children}

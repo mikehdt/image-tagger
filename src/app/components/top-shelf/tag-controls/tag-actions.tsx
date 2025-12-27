@@ -1,4 +1,6 @@
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   DocumentMinusIcon,
   DocumentPlusIcon,
   PencilIcon,
@@ -12,6 +14,15 @@ import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
 import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
+  selectTagSortDirection,
+  selectTagSortType,
+  setTagSortDirection,
+  setTagSortType,
+  TagSortDirection,
+  TagSortType,
+  toggleTagSortDirection,
+} from '@/app/store/project';
+import {
   addMultipleTagsToAssetsWithDualSelection,
   addTagToAssetsWithDualSelection,
   clearSelection,
@@ -20,10 +31,31 @@ import {
 import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
+import { Dropdown, DropdownItem } from '../../shared/dropdown';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { AddTagsModal } from './add-tags-modal';
 import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';
+
+/**
+ * Get the appropriate sort direction label based on sort type
+ */
+const getTagSortDirectionLabel = (
+  sortType: TagSortType,
+  sortDirection: TagSortDirection,
+): string => {
+  const isAsc = sortDirection === TagSortDirection.ASC;
+
+  switch (sortType) {
+    case TagSortType.ALPHABETICAL:
+      return isAsc ? 'A-Z' : 'Z-A';
+    case TagSortType.FREQUENCY:
+      return isAsc ? '0-9' : '9-0';
+    case TagSortType.SORTABLE:
+    default:
+      return 'Saved';
+  }
+};
 
 const TagActionsComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -38,8 +70,11 @@ const TagActionsComponent = () => {
     selectAssetsWithActiveFiltersCount,
   );
 
+  // Tag sort state
+  const tagSortType = useAppSelector(selectTagSortType);
+  const tagSortDirection = useAppSelector(selectTagSortDirection);
+
   // Determine if Add Tags button should be enabled
-  // Enable if we have selected assets OR if we have any active filters
   const canAddTags = selectedAssetsCount > 0 || hasActiveFilters;
 
   const handleMarkFilterTagsToDelete = useCallback(
@@ -113,13 +148,74 @@ const TagActionsComponent = () => {
     setIsEditModalOpen(false);
   }, []);
 
+  // Tag sort handlers
+  const handleSortTypeChange = useCallback(
+    (newSortType: TagSortType) => {
+      dispatch(setTagSortType(newSortType));
+      const defaultDirection =
+        newSortType === TagSortType.FREQUENCY
+          ? TagSortDirection.DESC
+          : TagSortDirection.ASC;
+      dispatch(setTagSortDirection(defaultDirection));
+    },
+    [dispatch],
+  );
+
+  const handleToggleSortDirection = useCallback(() => {
+    dispatch(toggleTagSortDirection());
+  }, [dispatch]);
+
+  // Tag sort dropdown items
+  const tagSortTypeItems: DropdownItem<TagSortType>[] = [
+    {
+      value: TagSortType.SORTABLE,
+      label: 'Sort Order',
+    },
+    {
+      value: TagSortType.ALPHABETICAL,
+      label: 'Alphabetical',
+    },
+    {
+      value: TagSortType.FREQUENCY,
+      label: 'Frequency',
+    },
+  ];
+
+  const showDirectionToggle = tagSortType !== TagSortType.SORTABLE;
+
   return (
     <>
       <ResponsiveToolbarGroup
         icon={<SwatchIcon className="w-4" />}
-        title="Tag Actions"
+        title="Tags"
         position="center"
       >
+        <Dropdown
+          items={tagSortTypeItems}
+          selectedValue={tagSortType}
+          onChange={handleSortTypeChange}
+        />
+
+        {showDirectionToggle && (
+          <Button
+            type="button"
+            onClick={handleToggleSortDirection}
+            variant="ghost"
+            size="medium"
+            title={`Sort ${tagSortDirection === TagSortDirection.ASC ? 'ascending' : 'descending'}`}
+          >
+            {tagSortDirection === TagSortDirection.ASC ? (
+              <ArrowUpIcon className="w-4" />
+            ) : (
+              <ArrowDownIcon className="w-4" />
+            )}
+
+            <span className="ml-1 max-xl:hidden">
+              {getTagSortDirectionLabel(tagSortType, tagSortDirection)}
+            </span>
+          </Button>
+        )}
+
         <Button
           type="button"
           onClick={openAddModel}

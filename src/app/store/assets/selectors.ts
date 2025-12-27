@@ -5,6 +5,7 @@ import { applyFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { wrapSelector } from '../../utils/selector-perf';
 import type { RootState } from '../';
+import { TagSortDirection, TagSortType } from '../project';
 import { ImageAsset, KeyedCountList, TagState } from './types';
 import { buildTagCountsCache, hasState } from './utils';
 
@@ -50,11 +51,22 @@ export const selectAssetHasModifiedTags = createSelector(
   },
 );
 
+// Selectors for tag sorting from project store
+const selectTagSortType = (state: RootState) => state.project.config.tagSortType;
+const selectTagSortDirection = (state: RootState) =>
+  state.project.config.tagSortDirection;
+
 export const selectOrderedTagsWithStatus = createSelector(
   // Input selectors
-  [selectAllImages, (_, fileId: string) => fileId],
+  [
+    selectAllImages,
+    selectTagCounts,
+    selectTagSortType,
+    selectTagSortDirection,
+    (_, fileId: string) => fileId,
+  ],
   // Result function
-  (images, fileId) => {
+  (images, tagCounts, sortType, sortDirection, fileId) => {
     const selectedImage = images.find(
       (item: { fileId: string }) => item.fileId === fileId,
     );
@@ -62,11 +74,34 @@ export const selectOrderedTagsWithStatus = createSelector(
     if (!selectedImage) return [];
 
     // Create an array of objects with tag name and status
-    // This preserves the order from tagList
-    return selectedImage.tagList.map((tagName: string) => ({
+    const tagsWithStatus = selectedImage.tagList.map((tagName: string) => ({
       name: tagName,
       status: selectedImage.tagStatus[tagName] || TagState.SAVED,
     }));
+
+    // Apply sorting based on sort type
+    if (sortType === TagSortType.SORTABLE) {
+      // Saved/drag order - already in correct order from tagList
+      return tagsWithStatus;
+    }
+
+    // Sort the tags
+    const sorted = [...tagsWithStatus].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortType === TagSortType.ALPHABETICAL) {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortType === TagSortType.FREQUENCY) {
+        const countA = tagCounts[a.name] || 0;
+        const countB = tagCounts[b.name] || 0;
+        comparison = countA - countB;
+      }
+
+      // Apply direction
+      return sortDirection === TagSortDirection.ASC ? comparison : -comparison;
+    });
+
+    return sorted;
   },
 );
 

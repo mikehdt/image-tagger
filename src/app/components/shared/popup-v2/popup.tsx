@@ -18,6 +18,7 @@ export const Popup: React.FC<PopupProps> = ({
   offset = DEFAULT_OFFSET,
   className = '',
   children,
+  disableOverflowHandling = false,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const { getPopupState, getPopupConfig, setPopupConfig, finishPositioning } =
@@ -67,12 +68,13 @@ export const Popup: React.FC<PopupProps> = ({
       trigger,
       desiredPosition,
       currentOffset,
+      disableOverflowHandling,
     );
 
     // Apply adjusted styles and transform origin
     setPositionStyles(styles);
     popup.style.transformOrigin = getTransformOrigin(adjustedPosition);
-  }, [position, offset, triggerRef]);
+  }, [position, offset, triggerRef, disableOverflowHandling]);
 
   // Handle the positioning phase when popup opens
   useEffect(() => {

@@ -27,6 +27,7 @@ import {
 } from '@/app/store/assets';
 import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectTagSortType, TagSortType } from '@/app/store/project';
 import { track } from '@/app/utils/render-tracker';
 
 import { TagList } from './components';
@@ -55,6 +56,9 @@ const TaggingManagerComponent = ({
   const highlightedTags = useAppSelector((state) =>
     selectAssetHighlightedTags(state, assetId),
   );
+  // Only enable drag-and-drop when in "Sort Order" mode
+  const tagSortType = useAppSelector(selectTagSortType);
+  const isSortable = tagSortType === TagSortType.SORTABLE;
 
   // Transform to the shape TagList expects - memoized to maintain reference stability
   const tags = useMemo(
@@ -137,7 +141,7 @@ const TaggingManagerComponent = ({
   return (
     <TagList
       tags={tags}
-      sortable={true}
+      sortable={isSortable}
       assetId={assetId}
       sensors={sensors}
       onDragEnd={handleDragEnd}

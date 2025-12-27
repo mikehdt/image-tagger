@@ -12,11 +12,10 @@ import { selectSelectedAssetsCount } from '@/app/store/selection';
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
 import { CategoryNavigation } from './category-navigation';
 import { FilterModeControls } from './filter-controls/filter-mode-controls';
-import { TagSortControls } from './filter-controls/tag-sort-controls';
 import { FilterListButton } from './filter-list/filter-list-button';
 import { AssetCounts } from './info/asset-counts';
 import { FilterIndicatorsInfo } from './info/filter-counts';
-import { ProjectInfo } from './info/project-info';
+import { ProjectMenu } from './info/project-menu';
 import { TagActions } from './tag-controls/tag-actions';
 
 type TopShelfProps = {
@@ -47,10 +46,10 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
 
   return (
     <div className="fixed top-0 left-0 z-20 w-full">
-      {/* Top information row */}
-      <div className="border-b border-b-slate-300/50 bg-white/90 shadow-xs shadow-slate-300 backdrop-blur-md">
+      {/* Top information row - z-10 ensures popups appear above the toolbar row */}
+      <div className="relative z-10 border-b border-b-slate-300/50 bg-white/90 shadow-xs shadow-slate-300 backdrop-blur-md">
         <div className="mx-auto flex max-w-400 items-center gap-2 px-4 py-1 text-sm text-slate-500">
-          <ProjectInfo />
+          <ProjectMenu />
 
           <AssetCounts />
 
@@ -68,8 +67,6 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
           <div className="mr-auto!">
             <AssetSelectionControls />
           </div>
-
-          <TagSortControls />
 
           <TagActions />
 
