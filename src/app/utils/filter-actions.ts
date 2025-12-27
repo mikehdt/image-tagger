@@ -22,7 +22,6 @@ export const applyFilters = ({
   filenamePatterns,
   filterMode,
   showModified,
-  searchQuery,
   selectedAssets,
   sortType,
   sortDirection,
@@ -35,7 +34,6 @@ export const applyFilters = ({
   filenamePatterns?: string[];
   filterMode: FilterMode;
   showModified?: boolean;
-  searchQuery?: string;
   selectedAssets?: string[];
   sortType?: SortType;
   sortDirection?: SortDirection;
@@ -64,7 +62,6 @@ export const applyFilters = ({
   // Handle the case where no filters are active - show everything
   // BUT not for SELECTED_ASSETS or TAGLESS modes, which have their own logic
   const hasFilenamePatterns = filenamePatterns && filenamePatterns.length > 0;
-  const hasSearchQuery = searchQuery && searchQuery.trim() !== '';
   if (
     filterMode !== FilterMode.SELECTED_ASSETS &&
     filterMode !== FilterMode.TAGLESS &&
@@ -73,8 +70,7 @@ export const applyFilters = ({
     filterBuckets.length === 0 &&
     filterExtensions.length === 0 &&
     !hasFilenamePatterns &&
-    !showModified &&
-    !hasSearchQuery
+    !showModified
   ) {
     // Return all sorted assets with correct indices
     return sortedAssetsWithCorrectIndex;
@@ -112,15 +108,6 @@ export const applyFilters = ({
           return false;
         }
 
-        // Apply legacy search filter if provided (for backwards compatibility)
-        if (hasSearchQuery) {
-          const query = searchQuery!.trim().toLowerCase();
-          const assetName = img.fileId.toLowerCase();
-          if (!assetName.includes(query)) {
-            return false;
-          }
-        }
-
         // Apply modified filter if needed
         if (showModified) {
           const hasModifiedTags = img.tagList.some(
@@ -138,15 +125,6 @@ export const applyFilters = ({
       // Apply filename patterns filter first (if provided)
       if (!matchesFilenamePatterns(img.fileId)) {
         return false; // Skip this asset if it doesn't match any pattern
-      }
-
-      // Apply legacy search filter (for backwards compatibility)
-      if (hasSearchQuery) {
-        const query = searchQuery!.trim().toLowerCase();
-        const assetName = img.fileId.toLowerCase();
-        if (!assetName.includes(query)) {
-          return false; // Skip this asset if it doesn't match the search
-        }
       }
 
       // Check modified status first if needed (applies to all filter modes)

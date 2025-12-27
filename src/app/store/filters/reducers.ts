@@ -65,11 +65,6 @@ export const coreReducers = {
     state.filterExtensions = [];
     state.filenamePatterns = [];
     state.showModified = false;
-    state.searchQuery = '';
-  },
-
-  setSearchQuery: (state: Filters, { payload }: PayloadAction<string>) => {
-    state.searchQuery = payload;
   },
 
   addFilenamePattern: (state: Filters, { payload }: PayloadAction<string>) => {
@@ -85,10 +80,6 @@ export const coreReducers = {
     { payload }: PayloadAction<string>,
   ) => {
     state.filenamePatterns = state.filenamePatterns.filter((p) => p !== payload);
-  },
-
-  clearFilenamePatterns: (state: Filters) => {
-    state.filenamePatterns = [];
   },
 
   clearModifiedFilter: (state: Filters) => {

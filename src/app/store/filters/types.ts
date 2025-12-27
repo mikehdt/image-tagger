@@ -25,7 +25,6 @@ export type Filters = {
   filenamePatterns: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
-  searchQuery: string;
 };
 
 export type FilterCount = {
