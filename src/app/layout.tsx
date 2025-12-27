@@ -54,7 +54,7 @@ export default function Root({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={geistSans.className}>
         <StoreProvider>
           <AppProvider>

@@ -1,11 +1,11 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { createSelector } from '@reduxjs/toolkit';
-import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
+import type { RootState } from '@/app/store';
 import {
   selectAssetsWithActiveFilters,
   selectDuplicateTagInfo,
@@ -72,59 +72,32 @@ export const AddTagsModal = ({
         ).length
       : 0;
 
-  // For duplicate checking, we'll get the current tag from the multitagInput
-  // by using an Effect instead of setting state during render
+  // For duplicate checking in the input field
   const [checkTag, setCheckTag] = useState('');
 
-  // Get duplicate info for the current check tag
+  // Get duplicate info for the current check tag (cached selector)
   const tagDuplicateInfo = useAppSelector(selectDuplicateTagInfo(checkTag));
 
-  // Create a real memoized selector outside of render
-  // This ensures we're not creating a new selector on each render
-  const makeTagStatusSelector = () =>
-    createSelector(
-      [(state) => state, (_state, tagsList: string[]) => tagsList],
-      (state, tagsList) => {
-        // Return empty array for empty tags to avoid unnecessary processing
-        if (!tagsList.length) return [];
-
-        // Process all tags at once inside the memoized function
-        return tagsList.map((tag) => {
-          const selector = selectDuplicateTagInfo(tag);
-          const info = selector(state);
-
-          // Map the tag info to a status
-          let status: 'all' | 'some' | 'none' = 'none';
-          if (info.isDuplicate) {
-            status = info.isAllDuplicates ? 'all' : 'some';
-          }
-
-          return { tag, status };
-        });
-      },
-    );
-
-  // Keep the selector instance stable across renders with useRef
-  const tagStatusSelectorRef = useRef<ReturnType<typeof makeTagStatusSelector>>(
-    makeTagStatusSelector(),
-  );
-  // Note: No need for initialization check since we provide the initial value above
-
-  // Use the stable selector with the current tags array
-  const tagsStatus = useAppSelector((state) =>
-    tagStatusSelectorRef.current!(state, tags),
+  // Create a memoized selector for getting all tag statuses
+  // The selector is recreated when tags change, but returns cached results for unchanged tags
+  const tagsStatusSelector = useMemo(
+    () => (state: Parameters<typeof selectDuplicateTagInfo>[0] extends string ? Parameters<ReturnType<typeof selectDuplicateTagInfo>>[0] : never) =>
+      tags.map((tag) => {
+        const info = selectDuplicateTagInfo(tag)(state);
+        let status: 'all' | 'some' | 'none' = 'none';
+        if (info.isDuplicate) {
+          status = info.isAllDuplicates ? 'all' : 'some';
+        }
+        return { tag, status };
+      }),
+    [tags],
   );
 
-  // Use ref and state for tracking input changes (for duplicate checking)
-  const lastInputRef = useRef('');
-  const [inputChanged, setInputChanged] = useState(false);
-
-  useEffect(() => {
-    if (inputChanged) {
-      setCheckTag(lastInputRef.current);
-      setInputChanged(false);
-    }
-  }, [inputChanged]);
+  // Get status for all tags - uses custom equality to prevent unnecessary re-renders
+  const memoizedTagsStatus = useAppSelector(
+    tagsStatusSelector,
+    (a, b) => JSON.stringify(a) === JSON.stringify(b),
+  );
 
   // Reset the form state when modal is closed
   useEffect(() => {
@@ -133,8 +106,6 @@ export const AddTagsModal = ({
       setTags([]);
       setCheckTag('');
       setAddToStart(false);
-      lastInputRef.current = '';
-      setInputChanged(false);
     }
   }, [isOpen]);
 
@@ -164,7 +135,7 @@ export const AddTagsModal = ({
 
     // Get valid tags that aren't marked as "all"
     const validTags = tags.filter((tag) => {
-      const tagInfo = tagsStatus.find((t) => t.tag === tag);
+      const tagInfo = memoizedTagsStatus.find((t) => t.tag === tag);
       return !tagInfo || tagInfo.status !== 'all';
     });
 
@@ -199,34 +170,19 @@ export const AddTagsModal = ({
     onClose();
   };
 
-  // Safe duplicate check function that doesn't set state during render
+  // Duplicate check function for the input field
   const handleDuplicateCheck = (tag: string) => {
-    // Only update if the tag changed
-    if (lastInputRef.current !== tag) {
-      lastInputRef.current = tag;
-      // Schedule an update after render is complete
-      setTimeout(() => setInputChanged(true), 0);
+    // Update the check tag if it changed (for real-time feedback)
+    if (checkTag !== tag) {
+      setCheckTag(tag);
     }
-
-    // Return the appropriate result
-    if (checkTag === tag) {
-      // If we're currently checking this exact tag, return its info
-      return tagDuplicateInfo;
-    }
-
-    // Otherwise return a default state
-    return {
-      isDuplicate: false,
-      isAllDuplicates: false,
-      duplicateCount: 0,
-      totalSelected: selectedAssetsCount,
-    };
+    return tagDuplicateInfo;
   };
 
   // Determine if the form is submittable
   // A tag is valid if it's not marked as "all" (exists on all assets)
   const validTags = tags.filter((tag) => {
-    const status = tagsStatus.find((t) => t.tag === tag)?.status;
+    const status = memoizedTagsStatus.find((t) => t.tag === tag)?.status;
     return status !== 'all';
   });
 
@@ -307,7 +263,7 @@ export const AddTagsModal = ({
             tags={tags}
             onTagsChange={setTags}
             duplicateCheck={handleDuplicateCheck}
-            tagStatus={tagsStatus}
+            tagStatus={memoizedTagsStatus}
             autoFocus
             className="w-full"
           />
@@ -317,17 +273,17 @@ export const AddTagsModal = ({
               Tags to add to selected assets. Press Enter, Tab, or use commas to
               add new tags.
             </p>
-          ) : tagsStatus.some(
+          ) : memoizedTagsStatus.some(
               (t) => t.status === 'some' || t.status === 'all',
             ) ? (
             <TagStatusLegend
               all={{
-                show: tagsStatus.some((t) => t.status === 'all'),
+                show: memoizedTagsStatus.some((t) => t.status === 'all'),
                 message:
                   'Red tags exist on all selected assets and will be disregarded.',
               }}
               some={{
-                show: tagsStatus.some((t) => t.status === 'some'),
+                show: memoizedTagsStatus.some((t) => t.status === 'some'),
                 message:
                   'Yellow tags exist on some assets and will only be added to assets without them.',
               }}

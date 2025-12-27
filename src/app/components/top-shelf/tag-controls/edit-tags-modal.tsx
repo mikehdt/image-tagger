@@ -1,8 +1,7 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { createSelector } from '@reduxjs/toolkit';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { selectFilteredAssets } from '@/app/store/assets';
 import { selectHasActiveFilters } from '@/app/store/filters';
@@ -114,19 +113,13 @@ export const EditTagsModal = ({
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasSelectedAssets = selectedAssetsCount > 0;
 
-  // For duplicate checking - used to track tag changes
-  const lastInputRef = useRef<{ tag: string; value: string }>({
-    tag: '',
-    value: '',
-  });
-
-  // Create a memoized selector for checking duplicates of multiple tags
-  const makeTagStatusSelector = () =>
-    createSelector(
-      [(state) => state, (_state, tagsMap: Record<string, string>) => tagsMap],
-      (state, tagsMap) => {
+  // Compute tag status info using cached selectors
+  // Using useCallback to memoize the selector function and custom equality to prevent re-renders
+  const memoizedTagsStatus = useAppSelector(
+    useCallback(
+      (state) => {
         // Return empty object for empty tags to avoid unnecessary processing
-        if (Object.keys(tagsMap).length === 0) return {};
+        if (Object.keys(editedTags).length === 0) return {};
 
         const result: Record<
           string,
@@ -142,7 +135,7 @@ export const EditTagsModal = ({
         > = {};
 
         // Process all edited tags at once
-        Object.entries(tagsMap).forEach(([originalTag, newValue]) => {
+        Object.entries(editedTags).forEach(([originalTag, newValue]) => {
           // Skip checks for undefined, unchanged or empty tags
           if (!newValue || originalTag === newValue || newValue.trim() === '') {
             result[originalTag] = {
@@ -157,16 +150,14 @@ export const EditTagsModal = ({
             return;
           }
 
-          // Check for existing tag duplicates
-          const duplicateSelector = selectDuplicateTagInfo(newValue);
-          const duplicateInfo = duplicateSelector(state);
+          // Check for existing tag duplicates using cached selector
+          const duplicateInfo = selectDuplicateTagInfo(newValue)(state);
 
-          // Check for tag co-existence (critical for catching duplicates within the same assets)
-          const coExistenceSelector = selectTagCoExistence(
+          // Check for tag co-existence using cached selector
+          const coExistenceInfo = selectTagCoExistence(
             originalTag.trim(),
             newValue.trim(),
-          );
-          const coExistenceInfo = coExistenceSelector(state);
+          )(state);
 
           result[originalTag] = {
             ...duplicateInfo,
@@ -176,16 +167,10 @@ export const EditTagsModal = ({
 
         return result;
       },
-    );
-
-  // Keep the selector stable across renders
-  const tagStatusSelectorRef = useRef<ReturnType<typeof makeTagStatusSelector>>(
-    makeTagStatusSelector(),
-  );
-
-  // Get duplicate info for all edited tags
-  const tagsStatus = useAppSelector((state) =>
-    tagStatusSelectorRef.current!(state, editedTags),
+      [editedTags],
+    ),
+    // Custom equality check to prevent re-renders when object contents are the same
+    (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
 
   // Reset the form when the modal opens or when filter tags change
@@ -222,9 +207,6 @@ export const EditTagsModal = ({
         ...prev,
         [originalTag]: safeValue,
       }));
-
-      // Update the current tag reference for tracking changes
-      lastInputRef.current = { tag: originalTag, value: safeValue };
     },
     [],
   );
@@ -232,7 +214,7 @@ export const EditTagsModal = ({
   // Helper function to determine tag status based on duplicate info
   const getTagStatus = useCallback(
     (originalTag: string): 'none' | 'some' | 'all' | 'duplicate' => {
-      const tagInfo = tagsStatus[originalTag];
+      const tagInfo = memoizedTagsStatus[originalTag];
       const newValue = editedTags[originalTag];
 
       // If newValue is undefined or unchanged or empty, no status
@@ -293,7 +275,7 @@ export const EditTagsModal = ({
 
       return 'none';
     },
-    [tagsStatus, editedTags, filterTags],
+    [memoizedTagsStatus, editedTags, filterTags],
   );
 
   // Submit the form
@@ -415,7 +397,7 @@ export const EditTagsModal = ({
               };
 
               // Get duplicate info for tooltips
-              const info = tagsStatus[tag] || {
+              const info = memoizedTagsStatus[tag] || {
                 isDuplicate: false,
                 duplicateCount: 0,
                 totalSelected: 0,

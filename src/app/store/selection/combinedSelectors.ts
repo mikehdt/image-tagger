@@ -9,11 +9,24 @@ import {
 } from '../filters';
 import { selectSelectedAssets } from '../selection';
 
+// Cache for memoized selectors - prevents creating new selector instances
+const duplicateTagInfoCache = new Map<
+  string,
+  ReturnType<typeof createDuplicateTagInfoSelector>
+>();
+const tagCoExistenceCache = new Map<
+  string,
+  ReturnType<typeof createTagCoExistenceSelector>
+>();
+
+// Helper to create a cache key for tag co-existence (two tags)
+const makeCoExistenceKey = (originalTag: string, newTagValue: string) =>
+  `${originalTag}::${newTagValue}`;
+
 /**
- * Returns information about duplicates in selected assets
- * @returns An object with information about tag duplication status
+ * Creates the actual selector for duplicate tag info
  */
-export const selectDuplicateTagInfo = (tagName: string) =>
+const createDuplicateTagInfoSelector = (tagName: string) =>
   createSelector(
     [selectSelectedAssets, selectAllImages],
     (selectedAssets, allImages) => {
@@ -47,11 +60,9 @@ export const selectDuplicateTagInfo = (tagName: string) =>
   );
 
 /**
- * Checks if two tags co-exist in the same assets
- * This is useful to determine if renaming one tag to another would create duplicates
- * @returns Information about tag co-existence
+ * Creates the actual selector for tag co-existence
  */
-export const selectTagCoExistence = (
+const createTagCoExistenceSelector = (
   originalTag: string,
   newTagValue: string,
 ) =>
@@ -80,6 +91,46 @@ export const selectTagCoExistence = (
       assetsWithBothTags: assetsWithBothTags.length,
     };
   });
+
+/**
+ * Returns a cached selector for duplicate tag info.
+ * The same selector instance is returned for the same tagName,
+ * enabling proper memoization.
+ */
+export const selectDuplicateTagInfo = (tagName: string) => {
+  if (!duplicateTagInfoCache.has(tagName)) {
+    duplicateTagInfoCache.set(tagName, createDuplicateTagInfoSelector(tagName));
+  }
+  return duplicateTagInfoCache.get(tagName)!;
+};
+
+/**
+ * Returns a cached selector for tag co-existence.
+ * The same selector instance is returned for the same tag pair,
+ * enabling proper memoization.
+ */
+export const selectTagCoExistence = (
+  originalTag: string,
+  newTagValue: string,
+) => {
+  const key = makeCoExistenceKey(originalTag, newTagValue);
+  if (!tagCoExistenceCache.has(key)) {
+    tagCoExistenceCache.set(
+      key,
+      createTagCoExistenceSelector(originalTag, newTagValue),
+    );
+  }
+  return tagCoExistenceCache.get(key)!;
+};
+
+/**
+ * Clears the selector caches. Call this if you need to free memory
+ * or reset memoization (e.g., when switching projects).
+ */
+export const clearSelectorCaches = () => {
+  duplicateTagInfoCache.clear();
+  tagCoExistenceCache.clear();
+};
 
 /**
  * Selector to get assets that have at least one of the selected tags
