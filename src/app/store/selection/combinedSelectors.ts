@@ -124,15 +124,6 @@ export const selectTagCoExistence = (
 };
 
 /**
- * Clears the selector caches. Call this if you need to free memory
- * or reset memoization (e.g., when switching projects).
- */
-export const clearSelectorCaches = () => {
-  duplicateTagInfoCache.clear();
-  tagCoExistenceCache.clear();
-};
-
-/**
  * Selector to get assets that have at least one of the selected tags
  * @returns Array of assets that contain at least one selected tag
  */
