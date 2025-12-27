@@ -243,38 +243,46 @@ export const selectFilteredAssets = wrapSelector(
 );
 
 // Selector to analyze the TO_DELETE state of filter tags
+// Optimized to avoid creating intermediate arrays per asset
 export const selectFilterTagsDeleteState = createSelector(
   [selectAllImages, (state: RootState) => state.filters.filterTags],
   (images, filterTags) => {
     if (!filterTags.length || !images.length) {
       return {
-        state: 'none',
+        state: 'none' as const,
         hasAllToDelete: false,
         hasSomeToDelete: false,
         hasMixed: false,
       };
     }
 
+    // Pre-convert filterTags to a Set for O(1) lookups
+    const filterTagsSet = new Set(filterTags);
+
     let assetsWithAnyFilterTag = 0;
     let assetsWithAllFilterTagsToDelete = 0;
     let assetsWithSomeFilterTagsToDelete = 0;
 
     for (const asset of images) {
-      // Check if this asset has any of the filter tags
-      const assetFilterTags = filterTags.filter(
-        (tag) => tag in asset.tagStatus,
-      );
+      // Count filter tags on this asset and how many are TO_DELETE
+      // Avoids creating intermediate arrays
+      let filterTagCount = 0;
+      let toDeleteCount = 0;
 
-      if (assetFilterTags.length === 0) continue;
+      for (const tag of asset.tagList) {
+        if (filterTagsSet.has(tag)) {
+          filterTagCount++;
+          if (hasState(asset.tagStatus[tag], TagState.TO_DELETE)) {
+            toDeleteCount++;
+          }
+        }
+      }
+
+      if (filterTagCount === 0) continue;
 
       assetsWithAnyFilterTag++;
 
-      // Count how many of the filter tags are marked TO_DELETE
-      const toDeleteCount = assetFilterTags.filter((tag) =>
-        hasState(asset.tagStatus[tag], TagState.TO_DELETE),
-      ).length;
-
-      if (toDeleteCount === assetFilterTags.length) {
+      if (toDeleteCount === filterTagCount) {
         assetsWithAllFilterTagsToDelete++;
       } else if (toDeleteCount > 0) {
         assetsWithSomeFilterTagsToDelete++;
@@ -341,27 +349,28 @@ export const selectFilenamePatternCounts = createSelector(
   },
 );
 
+// Cached Set of filter tags - avoids recreating the Set on every per-asset call
+const selectFilterTagsSet = createSelector(
+  [(state: RootState) => state.filters.filterTags],
+  (filterTags): Set<string> => new Set(filterTags),
+);
+
 // Optimized selector for asset-specific highlighted tags
 // Returns a Set of tag names that are both on this asset AND in the filter
 // Only triggers re-renders when the intersection changes, not when unrelated filters change
 export const selectAssetHighlightedTags = wrapSelector(
   'selectAssetHighlightedTags',
   createSelector(
-    [
-      selectAllImages,
-      (state: RootState) => state.filters.filterTags,
-      (_, assetId: string) => assetId,
-    ],
-    (imageAssets, filterTags, assetId) => {
+    [selectAllImages, selectFilterTagsSet, (_, assetId: string) => assetId],
+    (imageAssets, filterTagsSet, assetId) => {
       const asset = imageAssets.find((img) => img.fileId === assetId);
-      if (!asset || filterTags.length === 0) return new Set<string>();
+      if (!asset || filterTagsSet.size === 0) return new Set<string>();
 
       // Only return tags that exist on this asset AND are in the filter
-      const filterSet = new Set(filterTags);
       const highlighted = new Set<string>();
 
       for (const tag of asset.tagList) {
-        if (filterSet.has(tag)) {
+        if (filterTagsSet.has(tag)) {
           highlighted.add(tag);
         }
       }
