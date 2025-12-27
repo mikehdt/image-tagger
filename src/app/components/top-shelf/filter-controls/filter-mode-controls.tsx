@@ -113,7 +113,7 @@ const FilterModeControlsComponent = () => {
   return (
     <ResponsiveToolbarGroup
       icon={<FunnelIcon className="w-4" />}
-      title="Tag Actions"
+      title="Tag Filtering"
       position="right"
     >
       <Dropdown
