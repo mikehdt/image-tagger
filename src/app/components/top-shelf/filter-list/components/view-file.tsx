@@ -1,5 +1,11 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   selectAllExtensions,
@@ -80,9 +86,7 @@ export const FileView = () => {
         return sortDirection === 'asc' ? countA - countB : countB - countA;
       }
       // Alphabetical
-      return sortDirection === 'asc'
-        ? a.localeCompare(b)
-        : b.localeCompare(a);
+      return sortDirection === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
     });
   }, [filenamePatterns, patternCounts, sortType, sortDirection]);
 
@@ -166,14 +170,14 @@ export const FileView = () => {
   return (
     <div className="flex flex-col">
       {/* Filename pattern search section */}
-      <div className="border-b border-slate-200 px-3 py-2">
+      <div className="border-b border-slate-200 bg-slate-50 px-2 pb-2">
         <input
           type="text"
           value={patternInput}
           onChange={(e) => setPatternInput(e.target.value)}
           onKeyDown={handlePatternKeyDown}
           placeholder="Search filenames..."
-          className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
         />
       </div>
 
@@ -189,7 +193,7 @@ export const FileView = () => {
                 {pattern}
               </span>
               <span className="flex items-center gap-2">
-                <span className="text-xs tabular-nums text-blue-600">
+                <span className="text-xs text-blue-600 tabular-nums">
                   {patternCounts[pattern] || 0}
                 </span>
                 <button
@@ -241,7 +245,9 @@ export const FileView = () => {
             >
               <span
                 className={`text-sm ${
-                  item.isActive ? 'font-medium text-stone-700' : 'text-slate-800'
+                  item.isActive
+                    ? 'font-medium text-stone-700'
+                    : 'text-slate-800'
                 }`}
               >
                 {item.ext}

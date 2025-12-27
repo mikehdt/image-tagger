@@ -23,6 +23,9 @@ import {
   SortType,
 } from './types';
 
+// Persist the last active view across popup open/close cycles
+let persistedActiveView: FilterView = 'tag';
+
 interface FilterContextType {
   // Close handler (provided by popup system)
   onClose: () => void;
@@ -73,7 +76,7 @@ export const FilterProvider = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Persistent state for view and sort settings
-  const [activeView, setActiveView] = useState<FilterView>('tag');
+  const [activeView, setActiveView] = useState<FilterView>(persistedActiveView);
   const [sizeSubView, setSizeSubView] = useState<SizeSubViewType>('dimensions');
   const [sortSettings, setSortSettings] = useState({
     tag: { type: 'count' as SortType, direction: 'desc' as SortDirection },
@@ -192,8 +195,9 @@ export const FilterProvider = ({
     setSelectedIndex(-1);
   }, []);
 
-  // Reset search when view changes
+  // Reset search when view changes, and persist the view
   const handleViewChange = useCallback((view: FilterView) => {
+    persistedActiveView = view;
     setActiveView(view);
     setSearchTerm('');
     setSelectedIndex(-1);

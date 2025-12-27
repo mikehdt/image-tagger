@@ -1,3 +1,4 @@
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ReactNode, useCallback, useEffect, useMemo } from 'react';
 
 import { selectImageSizes } from '@/app/store/assets';
@@ -270,9 +271,11 @@ export const SizesView = () => {
     sortType,
     sortDirection,
     searchTerm,
+    setSearchTerm,
     updateListLength,
     selectedIndex,
     inputRef,
+    handleKeyDown,
   } = useFilterContext();
 
   // Filter and sort sizes based on search term and sort settings
@@ -429,38 +432,65 @@ export const SizesView = () => {
     };
   }, [selectedIndex, filteredSizes, handleToggle]);
 
-  // Reference the formatMegaPixels function defined above
-
-  return filteredSizes.length === 0 ? (
-    <div className="truncate p-4 text-center text-sm text-slate-500">
-      {searchTerm ? `No sizes match "${searchTerm}"` : 'No sizes available'}
-    </div>
-  ) : (
-    <ul className="divide-y divide-slate-100">
-      {filteredSizes.map((item, index) => (
-        <li
-          id={`size-${item.dimensions}`}
-          key={item.dimensions}
-          onClick={() => handleToggle(item.dimensions)}
-          className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
-            index === selectedIndex
-              ? item.isActive
-                ? 'bg-sky-200'
-                : 'bg-blue-100'
-              : item.isActive
-                ? 'bg-sky-100'
-                : 'hover:bg-blue-50'
+  return (
+    <div className="flex flex-col">
+      {/* Search input section */}
+      <div className="relative border-b border-slate-200 bg-slate-50 px-2 pb-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          placeholder="Search sizes..."
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all"
+        />
+        <span
+          className={`absolute top-1.5 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
+            searchTerm.trim() !== ''
+              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
+              : 'pointer-events-none text-white'
           }`}
+          onClick={searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined}
         >
-          <div className="mr-2 flex w-10 justify-center">
-            <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
-          </div>
+          <XMarkIcon />
+        </span>
+      </div>
 
-          <div className="flex flex-1 flex-col">
-            <SizeInfo item={item} sortType={sortType} searchTerm={searchTerm} />
-          </div>
-        </li>
-      ))}
-    </ul>
+      {/* Sizes list */}
+      {filteredSizes.length === 0 ? (
+        <div className="truncate p-4 text-center text-sm text-slate-500">
+          {searchTerm ? `No sizes match "${searchTerm}"` : 'No sizes available'}
+        </div>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {filteredSizes.map((item, index) => (
+            <li
+              id={`size-${item.dimensions}`}
+              key={item.dimensions}
+              onClick={() => handleToggle(item.dimensions)}
+              className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+                index === selectedIndex
+                  ? item.isActive
+                    ? 'bg-sky-200'
+                    : 'bg-blue-100'
+                  : item.isActive
+                    ? 'bg-sky-100'
+                    : 'hover:bg-blue-50'
+              }`}
+            >
+              <div className="mr-2 flex w-10 justify-center">
+                <SizeVisualizer size={item.dimensions} isActive={item.isActive} />
+              </div>
+
+              <div className="flex flex-1 flex-col">
+                <SizeInfo item={item} sortType={sortType} searchTerm={searchTerm} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };
