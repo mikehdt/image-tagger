@@ -28,11 +28,11 @@ export const FilterPanel = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 p-2">
+      <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-2 pt-2">
         <FilterControls />
       </div>
 
-      <div className="overflow-y-auto border-t border-slate-200">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {activeView === 'tag' ? (
           <TagsView />
         ) : activeView === 'size' ? (

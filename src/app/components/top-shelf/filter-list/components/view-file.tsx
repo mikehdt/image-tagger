@@ -1,4 +1,4 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import {
   KeyboardEvent,
   useCallback,
@@ -167,102 +167,125 @@ export const FileView = () => {
     [dispatch],
   );
 
+  const handleAddPattern = useCallback(() => {
+    if (patternInput.trim()) {
+      dispatch(addFilenamePattern(patternInput.trim()));
+      setPatternInput('');
+    }
+  }, [dispatch, patternInput]);
+
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Filename pattern search section */}
-      <div className="border-b border-slate-200 bg-slate-50 px-2 pb-2">
+      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2">
         <input
           type="text"
           value={patternInput}
           onChange={(e) => setPatternInput(e.target.value)}
           onKeyDown={handlePatternKeyDown}
           placeholder="Search filenames..."
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded border border-slate-300 bg-white py-1.5 ps-2 pe-8 text-sm placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
         />
+        <button
+          type="button"
+          onClick={handleAddPattern}
+          disabled={!patternInput.trim()}
+          className={`absolute top-3.5 right-4 h-5 w-5 rounded-full p-0.5 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:outline-none ${
+            patternInput.trim()
+              ? 'cursor-pointer text-slate-600 hover:bg-blue-500 hover:text-white'
+              : 'pointer-events-none text-slate-300'
+          }`}
+          title="Add pattern"
+        >
+          <PlusIcon />
+        </button>
       </div>
 
-      {/* Filename patterns list */}
-      {sortedPatterns.length > 0 && (
-        <ul className="divide-y divide-slate-100">
-          {sortedPatterns.map((pattern) => (
-            <li
-              key={pattern}
-              className="flex cursor-default items-center justify-between bg-blue-50 px-3 py-2 transition-colors"
-            >
-              <span className="text-sm font-medium text-blue-800">
-                {pattern}
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="text-xs text-blue-600 tabular-nums">
-                  {patternCounts[pattern] || 0}
+      {/* Scrollable content area */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* Filename patterns list */}
+        {sortedPatterns.length > 0 && (
+          <ul className="divide-y divide-slate-100">
+            {sortedPatterns.map((pattern) => (
+              <li
+                key={pattern}
+                className="flex cursor-default items-center justify-between bg-stone-50 px-3 py-2 transition-colors"
+              >
+                <span className="text-sm font-medium text-stone-800">
+                  {pattern}
                 </span>
-                <button
-                  onClick={(e) => handleRemovePattern(pattern, e)}
-                  className="rounded p-0.5 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
-                  title="Remove pattern"
-                >
-                  <XMarkIcon className="h-4 w-4" />
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span className="flex items-center gap-2">
+                  <span className="text-xs text-stone-600 tabular-nums">
+                    {patternCounts[pattern] || 0}
+                  </span>
+                  <button
+                    onClick={(e) => handleRemovePattern(pattern, e)}
+                    className="hover:text-blue-80 cursor-pointer rounded-full bg-stone-100 p-0.5 text-stone-600 transition-colors hover:bg-slate-200 hover:text-slate-800"
+                    title="Remove pattern"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {/* Divider with label */}
-      <div className="flex items-center gap-2 px-3 py-1.5">
-        <div className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs text-slate-400">File Types</span>
-        <div className="h-px flex-1 bg-slate-200" />
-      </div>
-
-      {/* Extension list */}
-      {extensionList.length === 0 ? (
-        <div className="px-4 py-2 text-sm text-slate-500">
-          No file extensions available
+        {/* Divider with label */}
+        <div className="flex cursor-default items-center gap-2 py-1.5">
+          <div className="h-px flex-1 bg-stone-200" />
+          <span className="text-xs text-stone-400">File Types</span>
+          <div className="h-px flex-1 bg-stone-200" />
         </div>
-      ) : (
-        <ul className="divide-y divide-slate-100">
-          {extensionList.map((item, index) => (
-            <li
-              id={`tag-${item.ext}`}
-              key={item.ext}
-              onClick={() => handleToggle(item.ext)}
-              className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
-                index === selectedIndex
-                  ? item.isActive
-                    ? 'bg-stone-200'
-                    : 'bg-blue-100'
-                  : item.isActive
-                    ? 'bg-stone-100'
-                    : 'hover:bg-blue-50'
-              }`}
-              title={
-                item.isActive
-                  ? 'Click to remove from filters'
-                  : 'Click to add to filters'
-              }
-            >
-              <span
-                className={`text-sm ${
+
+        {/* Extension list */}
+        {extensionList.length === 0 ? (
+          <div className="px-4 py-2 text-sm text-slate-500">
+            No file extensions available
+          </div>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {extensionList.map((item, index) => (
+              <li
+                id={`tag-${item.ext}`}
+                key={item.ext}
+                onClick={() => handleToggle(item.ext)}
+                className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+                  index === selectedIndex
+                    ? item.isActive
+                      ? 'bg-stone-200'
+                      : 'bg-blue-100'
+                    : item.isActive
+                      ? 'bg-stone-100'
+                      : 'hover:bg-blue-50'
+                }`}
+                title={
                   item.isActive
-                    ? 'font-medium text-stone-700'
-                    : 'text-slate-800'
-                }`}
+                    ? 'Click to remove from filters'
+                    : 'Click to add to filters'
+                }
               >
-                {item.ext}
-              </span>
-              <span
-                className={`text-xs tabular-nums ${
-                  item.isActive ? 'text-stone-600' : 'text-slate-500'
-                }`}
-              >
-                {item.count}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span
+                  className={`text-sm ${
+                    item.isActive
+                      ? 'font-medium text-stone-700'
+                      : 'text-slate-800'
+                  }`}
+                >
+                  {item.ext}
+                </span>
+                <span
+                  className={`text-xs tabular-nums ${
+                    item.isActive ? 'text-stone-600' : 'text-slate-500'
+                  }`}
+                >
+                  {item.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

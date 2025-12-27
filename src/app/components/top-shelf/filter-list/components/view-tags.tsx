@@ -172,9 +172,9 @@ export const TagsView = () => {
   }, [selectedIndex, filteredTags, handleToggle]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Search input section */}
-      <div className="relative border-b border-slate-200 bg-slate-50 px-2 pb-2">
+      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2">
         <input
           ref={inputRef}
           type="text"
@@ -185,16 +185,18 @@ export const TagsView = () => {
           placeholder="Search tags..."
           className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all"
         />
-        <span
-          className={`absolute top-1.5 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
+        <button
+          className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
             searchTerm.trim() !== ''
               ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
               : 'pointer-events-none text-white'
           }`}
-          onClick={searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined}
+          onClick={
+            searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
+          }
         >
           <XMarkIcon />
-        </span>
+        </button>
       </div>
 
       {/* Tags list */}
@@ -203,44 +205,48 @@ export const TagsView = () => {
           {searchTerm ? `No tags match "${searchTerm}"` : 'No tags found'}
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100">
-          {filteredTags.map((item, index) => (
-            <li
-              id={`tag-${item.tag}`}
-              key={item.tag}
-              onClick={() => handleToggle(item.tag)}
-              className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
-                index === selectedIndex
-                  ? item.isActive
-                    ? 'bg-emerald-200'
-                    : 'bg-blue-100'
-                  : item.isActive
-                    ? 'bg-emerald-100'
-                    : 'hover:bg-blue-50'
-              }`}
-              title={
-                item.isActive
-                  ? 'Click to remove from filters'
-                  : 'Click to add to filters'
-              }
-            >
-              <span
-                className={`text-sm ${
-                  item.isActive ? 'font-medium text-emerald-700' : 'text-slate-800'
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <ul className="divide-y divide-slate-100">
+            {filteredTags.map((item, index) => (
+              <li
+                id={`tag-${item.tag}`}
+                key={item.tag}
+                onClick={() => handleToggle(item.tag)}
+                className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+                  index === selectedIndex
+                    ? item.isActive
+                      ? 'bg-emerald-200'
+                      : 'bg-blue-100'
+                    : item.isActive
+                      ? 'bg-emerald-100'
+                      : 'hover:bg-blue-50'
                 }`}
+                title={
+                  item.isActive
+                    ? 'Click to remove from filters'
+                    : 'Click to add to filters'
+                }
               >
-                {searchTerm ? highlightText(item.tag, searchTerm) : item.tag}
-              </span>
-              <span
-                className={`text-xs tabular-nums ${
-                  item.isActive ? 'text-emerald-600' : 'text-slate-500'
-                }`}
-              >
-                {item.count}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <span
+                  className={`text-sm ${
+                    item.isActive
+                      ? 'font-medium text-emerald-700'
+                      : 'text-slate-800'
+                  }`}
+                >
+                  {searchTerm ? highlightText(item.tag, searchTerm) : item.tag}
+                </span>
+                <span
+                  className={`text-xs tabular-nums ${
+                    item.isActive ? 'text-emerald-600' : 'text-slate-500'
+                  }`}
+                >
+                  {item.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
