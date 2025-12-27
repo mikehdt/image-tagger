@@ -6,62 +6,65 @@ This document provides an overview of the component architecture used in the Ima
 
 ```
 /components
-  /asset                  # Asset-related components
-    /components           # Asset subcomponents
+  /asset                  # Asset display and metadata
+    /components
       asset-metadata.tsx  # Displays asset metadata
-      asset-tags.tsx      # Adapter to tagging functionality
-    asset.tsx             # Main asset component
+      crop-visualization.tsx # Visual crop overlay
+    asset.tsx             # Main asset component with image and tagging
+
+  /bottom-shelf           # Bottom toolbar components
+
+  /pagination             # Pagination controls
 
   /shared                 # Shared, reusable components
-    /dnd                  # Drag and drop functionality
-      /hooks
-        use-sortable.ts   # Hook for sortable items
-      sortable-provider.tsx # Provider for sortable context
+    /button               # Button with variants (toggle, ghost, etc.)
+    /checkbox             # Custom styled checkbox
+    /dropdown             # Accessible dropdown with keyboard nav
+    /modal                # Modal dialog with portal rendering
+    /responsive-toolbar-group # Responsive toolbar layout
+    /toast                # Toast notification system
 
-  /tagging                # Tag management components
-    /components           # Tag subcomponents
-      tag.tsx             # Base tag UI
-      input-tag.tsx       # Tag input for adding/editing tags
-      sortable-tag.tsx    # Draggable tag wrapper
-      tag-list.tsx        # List of tags with input
-    /hooks                # Tag-related hooks
-      use-asset-tags.ts   # Connect asset tags to store
-      use-tag-actions.ts  # Tag action functions
-      use-tag-calculations.ts # Tag computed properties
-      use-tag-state.ts    # Tag state management
-    tagging-context.tsx   # Context provider for tag state
-    tagging-manager.tsx   # Orchestrates tag functionality
+  /tagging-v2             # Tag management (v2 architecture)
+    /components
+      tag.tsx             # Base tag UI with state styling
+      input-tag.tsx       # Tag input for adding/editing
+      sortable-tag.tsx    # Draggable tag wrapper (@dnd-kit)
+      editable-tag.tsx    # Mode switcher (display/edit)
+      tag-list.tsx        # Tag list with add/edit state management
+    tagging-manager.tsx   # Redux integration layer
+
+  /top-shelf              # Top toolbar components
+    /category-navigation  # Category dropdown navigation
+    /filter-list          # Filter panel (tags, sizes, filetypes)
 ```
 
 ## Architecture Principles
 
-1. **Separation of Concerns**: Components are organized by feature (asset, tagging) with clear boundaries
+1. **Separation of Concerns**: Components are organised by feature with clear boundaries
 2. **Composition over Inheritance**: Components are composed together rather than extended
-3. **Context for State Management**: React context is used to reduce prop drilling
-4. **Adapter Pattern**: AssetTags serves as an adapter between Asset and TaggingManager
-5. **Reusability**: Common functionality is extracted to shared components
+3. **Redux for State Management**: Redux Toolkit for global state, local state for UI concerns
+4. **Memoization for Performance**: Strategic use of React.memo with custom comparators
+5. **Conditional Rendering**: DnD context only rendered when needed (on hover)
 
 ## Data Flow
 
-1. Asset components request and display asset data including images and metadata
-2. Tagging components provide tag management functionality:
-   - TaggingManager orchestrates tag operations
-   - TaggingContext provides tag state and actions
-   - Hooks connect to the Redux store
-3. Shared components provide reusable functionality like drag-and-drop
+1. Asset components display images and metadata from Redux store
+2. TaggingManager connects to Redux for tag data and dispatches actions
+3. TagList manages local UI state (add input, edit state, duplicate detection)
+4. Tag components receive data as props and call handlers for interactions
 
 ## Component Relationships
 
 ```
-Asset -> AssetTags -> TaggingManager -> TaggingProvider -> TagList -> SortableTag -> Tag
-                                      |                  -> InputTag
-                                      |-> SortableProvider
+Asset -> TaggingManager -> TagList -> TagsDisplay -> SortableTag -> EditableTag -> Tag
+                                   |             |              |              -> InputTag
+                                   |             -> EditableTag (when not sortable)
+                                   -> InputTag (add new tag)
 ```
 
-## Hooks Usage
+## Key Patterns
 
-- **useAssetTags**: Connects to the store for tag data and operations
-- **useSortable**: Provides drag-drop functionality
-- **useTagState**: Manages local tag editing state
-- **useTagCalculations**: Provides computed values for tag display
-- **useTagActions**: Encapsulates tag operations (add, edit, delete)
+- **Memoized Components**: Custom memo comparators prevent unnecessary re-renders
+- **Conditional DnD**: DndContext only mounts when tag area is hovered
+- **Duplicate Detection**: Visual feedback when entering duplicate tag names
+- **State Colocation**: Edit state lives in TagList, close to where it's used
