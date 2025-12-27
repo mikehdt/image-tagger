@@ -6,6 +6,12 @@ import type { RootState } from '../';
 export const selectSelectedAssets = (state: RootState) =>
   state.selection.selectedAssets;
 
+export const selectLastClickedAssetId = (state: RootState) =>
+  state.selection.lastClickedAssetId;
+
+export const selectLastClickAction = (state: RootState) =>
+  state.selection.lastClickAction;
+
 // Optimized selector for checking if a specific asset is selected
 // This avoids creating new selector instances per asset
 export const selectAssetIsSelected = createSelector(

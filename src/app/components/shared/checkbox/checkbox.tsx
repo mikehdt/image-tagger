@@ -1,11 +1,11 @@
-import React, { SyntheticEvent, useCallback } from 'react';
+import React, { KeyboardEvent, MouseEvent, useCallback } from 'react';
 
 /**
  * Props for the Checkbox component
  */
 interface CheckboxProps {
   isSelected: boolean;
-  onChange: (e: SyntheticEvent) => void;
+  onChange: (e: MouseEvent) => void;
   className?: string;
   tabIndex?: number;
   disabled?: boolean;
@@ -28,8 +28,26 @@ export const Checkbox = ({
   size = 'medium',
 }: CheckboxProps) => {
   const onClick = useCallback(
-    (e: SyntheticEvent) => {
+    (e: MouseEvent) => {
       if (!disabled) onChange(e);
+    },
+    [disabled, onChange],
+  );
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        // Create a synthetic mouse event for keyboard activation
+        // This ensures consistent handling - keyboard toggles don't support shift-selection
+        const syntheticEvent = {
+          stopPropagation: () => e.stopPropagation(),
+          preventDefault: () => e.preventDefault(),
+          shiftKey: false,
+        } as MouseEvent;
+        onChange(syntheticEvent);
+      }
     },
     [disabled, onChange],
   );
@@ -68,13 +86,7 @@ export const Checkbox = ({
         aria-checked={isSelected}
         aria-label={ariaLabel}
         tabIndex={disabled ? -1 : tabIndex}
-        onKeyDown={(e) => {
-          if (disabled) return;
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onChange(e);
-          }
-        }}
+        onKeyDown={onKeyDown}
       >
         {isSelected && (
           <svg

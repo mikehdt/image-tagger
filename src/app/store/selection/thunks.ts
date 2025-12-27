@@ -9,11 +9,18 @@ import {
   selectFilteredAssets,
 } from '../assets';
 import { updateTagFilters } from '../filters';
-import { RootState } from '../index';
+import { selectPaginationSize } from '../filters';
+import { type AppThunk, RootState } from '../index';
 import {
   selectAssetsWithActiveFilters,
   selectAssetsWithSelectedTags,
 } from './combinedSelectors';
+import {
+  setAssetsSelectionState,
+  toggleAssetSelection,
+  trackAssetClick,
+} from './reducers';
+import { selectLastClickAction, selectLastClickedAssetId } from './selectors';
 
 /**
  * Thunk action to edit multiple tags in all filtered assets
@@ -394,3 +401,72 @@ export const addMultipleTagsToAssetsWithDualSelection = createAsyncThunk(
     };
   },
 );
+
+/**
+ * Thunk to handle asset click with shift-selection support.
+ * If shift is held and there's a previous click, selects/deselects the range.
+ * Otherwise, toggles the single asset and tracks it for future shift-clicks.
+ */
+export const handleAssetClick =
+  ({
+    assetId,
+    isShiftHeld,
+    currentPage,
+  }: {
+    assetId: string;
+    isShiftHeld: boolean;
+    currentPage: number;
+  }): AppThunk =>
+  (dispatch, getState) => {
+    const state = getState();
+    const lastClickedAssetId = selectLastClickedAssetId(state);
+    const lastClickAction = selectLastClickAction(state);
+
+    // Get current page's visible assets
+    const filteredAssets = selectFilteredAssets(state);
+    const paginationSize = selectPaginationSize(state);
+
+    // Calculate paginated assets for the current page
+    let paginatedAssetIds: string[];
+    if (paginationSize === -1) {
+      // -1 is PaginationSize.ALL
+      paginatedAssetIds = filteredAssets.map((a) => a.fileId);
+    } else {
+      const start = (currentPage - 1) * paginationSize;
+      const end = start + paginationSize;
+      paginatedAssetIds = filteredAssets.slice(start, end).map((a) => a.fileId);
+    }
+
+    // If shift is held and we have a previous click on this page
+    if (isShiftHeld && lastClickedAssetId && lastClickAction) {
+      const lastIndex = paginatedAssetIds.indexOf(lastClickedAssetId);
+      const currentIndex = paginatedAssetIds.indexOf(assetId);
+
+      // Both assets must be on the current page for range selection
+      if (lastIndex !== -1 && currentIndex !== -1) {
+        // Get the range of assets between the two clicks (inclusive)
+        const startIndex = Math.min(lastIndex, currentIndex);
+        const endIndex = Math.max(lastIndex, currentIndex);
+        const rangeAssetIds = paginatedAssetIds.slice(startIndex, endIndex + 1);
+
+        // Apply the same action (select/deselect) as the last click
+        dispatch(
+          setAssetsSelectionState({
+            assetIds: rangeAssetIds,
+            selected: lastClickAction === 'select',
+          }),
+        );
+
+        // Update tracking to the current click (maintaining the same action)
+        dispatch(trackAssetClick({ assetId, action: lastClickAction }));
+        return;
+      }
+    }
+
+    // No shift or no valid previous click - do a normal toggle
+    const isCurrentlySelected = state.selection.selectedAssets.includes(assetId);
+    const newAction = isCurrentlySelected ? 'deselect' : 'select';
+
+    dispatch(toggleAssetSelection(assetId));
+    dispatch(trackAssetClick({ assetId, action: newAction }));
+  };

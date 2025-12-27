@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardEventHandler, ReactNode, Ref, SyntheticEvent } from 'react';
+import { KeyboardEventHandler, MouseEvent, ReactNode, Ref } from 'react';
 
 /**
  * Shared button component that provides consistent styling and behavior
@@ -27,8 +27,8 @@ type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
 
 interface ButtonProps {
   children: ReactNode;
-  onClick?: (e: SyntheticEvent) => void;
-  onSubmit?: (e: SyntheticEvent) => void;
+  onClick?: (e: MouseEvent) => void;
+  onSubmit?: (e: MouseEvent) => void;
   onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   type?: 'button' | 'submit';
   disabled?: boolean;
@@ -185,7 +185,7 @@ export const Button = ({
   ref,
   ...props
 }: ButtonProps) => {
-  const handleClick = (e: SyntheticEvent) => {
+  const handleClick = (e: MouseEvent) => {
     if (disabled || inert) return;
     if (type === 'submit' && onSubmit) {
       onSubmit(e);

@@ -1,14 +1,11 @@
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { memo, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { memo, MouseEvent, useCallback, useMemo, useState } from 'react';
 
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectShowCropVisualization } from '@/app/store/project';
-import {
-  selectAssetIsSelected,
-  toggleAssetSelection,
-} from '@/app/store/selection';
+import { handleAssetClick, selectAssetIsSelected } from '@/app/store/selection';
 import { composeDimensions, getAspectRatio } from '@/app/utils/helpers';
 import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 
@@ -26,6 +23,7 @@ type AssetProps = {
   bucket: KohyaBucket;
   ioState: IoState;
   lastModified: number;
+  currentPage: number;
 };
 
 const AssetComponent = ({
@@ -37,6 +35,7 @@ const AssetComponent = ({
   bucket,
   ioState,
   lastModified,
+  currentPage,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   // Track if any tag is currently being edited or added
@@ -95,15 +94,25 @@ const AssetComponent = ({
   }, []);
 
   const onToggleAssetSelection = useCallback(
-    (e: SyntheticEvent) => {
+    (e: MouseEvent) => {
       e.stopPropagation();
-      dispatch(toggleAssetSelection(assetId));
+      // Prevent text selection when shift+clicking
+      if (e.shiftKey) {
+        e.preventDefault();
+      }
+      dispatch(
+        handleAssetClick({
+          assetId,
+          isShiftHeld: e.shiftKey,
+          currentPage,
+        }),
+      );
     },
-    [assetId, dispatch],
+    [assetId, currentPage, dispatch],
   );
 
   const onToggleLocalCropVisualization = useCallback(
-    (e: SyntheticEvent) => {
+    (e: MouseEvent) => {
       e.stopPropagation();
       setLocalCropOverride((prev) =>
         prev === null ? !globalShowCropVisualization : !prev,
@@ -117,7 +126,7 @@ const AssetComponent = ({
       className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
     >
       <div
-        className={`flex cursor-pointer flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
+        className={`flex cursor-pointer select-none flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
         onClick={onToggleAssetSelection}
       >
         <Checkbox
@@ -220,7 +229,8 @@ const assetPropsAreEqual = (
     prevProps.assetNumber !== nextProps.assetNumber ||
     prevProps.filteredIndex !== nextProps.filteredIndex ||
     prevProps.ioState !== nextProps.ioState ||
-    prevProps.lastModified !== nextProps.lastModified
+    prevProps.lastModified !== nextProps.lastModified ||
+    prevProps.currentPage !== nextProps.currentPage
   ) {
     return false;
   }

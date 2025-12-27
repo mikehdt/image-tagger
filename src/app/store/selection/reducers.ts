@@ -1,6 +1,16 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { initialState } from './types';
+import { initialState, type LastClickAction } from './types';
+
+type SetAssetsSelectionPayload = {
+  assetIds: string[];
+  selected: boolean;
+};
+
+type TrackClickPayload = {
+  assetId: string;
+  action: LastClickAction;
+};
 
 const selectionSlice = createSlice({
   name: 'selection',
@@ -27,10 +37,45 @@ const selectionSlice = createSlice({
     clearSelection: (state) => {
       state.selectedAssets = [];
     },
+    // Set multiple assets to a specific selection state (for shift-click range)
+    setAssetsSelectionState: (
+      state,
+      action: PayloadAction<SetAssetsSelectionPayload>,
+    ) => {
+      const { assetIds, selected } = action.payload;
+      if (selected) {
+        // Add all assets that aren't already selected
+        const uniqueAssets = [
+          ...new Set([...state.selectedAssets, ...assetIds]),
+        ];
+        state.selectedAssets = uniqueAssets;
+      } else {
+        // Remove all specified assets from selection
+        state.selectedAssets = state.selectedAssets.filter(
+          (id) => !assetIds.includes(id),
+        );
+      }
+    },
+    // Track the last clicked asset for shift-click range selection
+    trackAssetClick: (state, action: PayloadAction<TrackClickPayload>) => {
+      state.lastClickedAssetId = action.payload.assetId;
+      state.lastClickAction = action.payload.action;
+    },
+    // Clear shift-click tracking (e.g., on page change)
+    clearClickTracking: (state) => {
+      state.lastClickedAssetId = null;
+      state.lastClickAction = null;
+    },
   },
 });
 
-export const { toggleAssetSelection, selectMultipleAssets, clearSelection } =
-  selectionSlice.actions;
+export const {
+  toggleAssetSelection,
+  selectMultipleAssets,
+  clearSelection,
+  setAssetsSelectionState,
+  trackAssetClick,
+  clearClickTracking,
+} = selectionSlice.actions;
 
 export const selectionReducer = selectionSlice.reducer;

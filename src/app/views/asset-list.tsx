@@ -1,7 +1,7 @@
 'use client';
 
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { Asset } from '../components/asset/asset';
 import {
@@ -12,8 +12,8 @@ import {
   SortType,
 } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
-import { useAppSelector } from '../store/hooks';
-import { selectSelectedAssets } from '../store/selection';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { clearClickTracking, selectSelectedAssets } from '../store/selection';
 import {
   getCategoryAnchorId,
   getSortCategory,
@@ -36,6 +36,13 @@ type AssetListProps = {
 export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   // Handle anchor scrolling for cross-page navigation
   useAnchorScrolling();
+
+  const dispatch = useAppDispatch();
+
+  // Clear shift-click tracking when page changes
+  useEffect(() => {
+    dispatch(clearClickTracking());
+  }, [currentPage, dispatch]);
 
   // Get pagination size from Redux
   const paginationSize = useAppSelector(selectPaginationSize);
@@ -157,13 +164,14 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
                   bucket={asset.bucket}
                   ioState={asset.ioState}
                   lastModified={asset.lastModified}
+                  currentPage={currentPage}
                 />
               );
             })}
           </div>
         );
       }),
-    [groupedAssets, showCategoryHeaders],
+    [groupedAssets, showCategoryHeaders, currentPage],
   );
 
   return filteredAssets.length ? (
