@@ -21,6 +21,7 @@ type TagProps = {
   count: number;
   isHighlighted: boolean;
   fade: boolean;
+  isMatchingDuplicate?: boolean;
   onToggle: (tagName: string) => void;
   onEdit: (tagName: string) => void;
   onDelete: (tagName: string) => void;
@@ -32,41 +33,44 @@ export const Tag = ({
   count,
   isHighlighted,
   fade,
+  isMatchingDuplicate = false,
   onToggle,
   onEdit,
   onDelete,
 }: TagProps) => {
   track('Tag', 'render');
 
+  // Non-interactive when faded OR when shown as matching duplicate
+  const isNonInteractive = fade || isMatchingDuplicate;
+
   const handleClick = useCallback(() => {
-    if (!fade) {
+    if (!isNonInteractive) {
       onToggle(tagName);
     }
-  }, [onToggle, tagName, fade]);
+  }, [onToggle, tagName, isNonInteractive]);
 
   const handleEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      // Don't allow editing if faded or marked for deletion
-      if (!fade && !hasState(tagState, TagState.TO_DELETE)) {
+      // Don't allow editing if non-interactive or marked for deletion
+      if (!isNonInteractive && !hasState(tagState, TagState.TO_DELETE)) {
         onEdit(tagName);
       }
     },
-    [onEdit, tagName, tagState, fade],
+    [onEdit, tagName, tagState, isNonInteractive],
   );
 
   const handleDelete = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      if (!fade) {
+      if (!isNonInteractive) {
         onDelete(tagName);
       }
     },
-    [onDelete, tagName, fade],
+    [onDelete, tagName, isNonInteractive],
   );
 
   const isMarkedForDeletion = hasState(tagState, TagState.TO_DELETE);
-  const isNonInteractive = fade;
 
   // Determine visual styling based on state
   const getStateStyles = () => {
@@ -100,9 +104,17 @@ export const Tag = ({
 
   track('Tag', 'render-end');
 
+  // Matching duplicate: visible but non-interactive (pointer-events-none, no opacity change)
+  // Faded: non-interactive AND faded (pointer-events-none, opacity-25)
+  const getInteractionStyles = () => {
+    if (fade) return 'pointer-events-none opacity-25';
+    if (isMatchingDuplicate) return 'pointer-events-none';
+    return 'cursor-pointer';
+  };
+
   return (
     <div
-      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${fade ? 'pointer-events-none opacity-25' : 'cursor-pointer'}`}
+      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()}`}
       onClick={handleClick}
     >
       <span

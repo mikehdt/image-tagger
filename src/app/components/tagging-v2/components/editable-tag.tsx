@@ -18,6 +18,7 @@ type EditableTagProps = {
   count: number;
   isHighlighted: boolean;
   fade: boolean;
+  isMatchingDuplicate?: boolean;
   isEditing: boolean;
   editValue: string;
   onToggle: (tagName: string) => void;
@@ -35,6 +36,7 @@ const EditableTagComponent = ({
   count,
   isHighlighted,
   fade,
+  isMatchingDuplicate,
   isEditing,
   editValue,
   onToggle,
@@ -68,6 +70,7 @@ const EditableTagComponent = ({
       count={count}
       isHighlighted={isHighlighted}
       fade={fade}
+      isMatchingDuplicate={isMatchingDuplicate}
       onToggle={onToggle}
       onEdit={onEdit}
       onDelete={onDelete}
@@ -104,6 +107,7 @@ const editableTagPropsAreEqual = (
     prevProps.count === nextProps.count &&
     prevProps.isHighlighted === nextProps.isHighlighted &&
     prevProps.fade === nextProps.fade &&
+    prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
     prevProps.onToggle === nextProps.onToggle &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&

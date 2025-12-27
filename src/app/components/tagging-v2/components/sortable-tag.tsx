@@ -19,6 +19,7 @@ type SortableTagProps = {
   count: number;
   isHighlighted: boolean;
   fade: boolean;
+  isMatchingDuplicate?: boolean;
   isEditing: boolean;
   editValue: string;
   onToggle: (tagName: string) => void;
@@ -37,6 +38,7 @@ const SortableTagComponent = ({
   count,
   isHighlighted,
   fade,
+  isMatchingDuplicate,
   isEditing,
   editValue,
   onToggle,
@@ -49,9 +51,12 @@ const SortableTagComponent = ({
 }: SortableTagProps) => {
   track('SortableTag', 'render');
 
+  // Disable drag while editing, faded, or when shown as matching duplicate
+  const isDragDisabled = isEditing || fade || isMatchingDuplicate;
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-    disabled: isEditing || fade, // Disable drag while editing or when faded
+    disabled: isDragDisabled,
     transition: {
       duration: 200,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
@@ -72,9 +77,9 @@ const SortableTagComponent = ({
     <div
       ref={setNodeRef}
       style={style}
-      {...(isEditing ? {} : attributes)}
-      {...(isEditing ? {} : listeners)}
-      className={`mr-2 mb-2 ${isEditing || fade ? '' : 'cursor-grab active:cursor-grabbing'}`}
+      {...(isDragDisabled ? {} : attributes)}
+      {...(isDragDisabled ? {} : listeners)}
+      className={`mr-2 mb-2 ${isDragDisabled ? '' : 'cursor-grab active:cursor-grabbing'}`}
     >
       <EditableTag
         tagName={tagName}
@@ -82,6 +87,7 @@ const SortableTagComponent = ({
         count={count}
         isHighlighted={isHighlighted}
         fade={fade}
+        isMatchingDuplicate={isMatchingDuplicate}
         isEditing={isEditing}
         editValue={editValue}
         onToggle={onToggle}
@@ -126,6 +132,7 @@ const sortableTagPropsAreEqual = (
     prevProps.count === nextProps.count &&
     prevProps.isHighlighted === nextProps.isHighlighted &&
     prevProps.fade === nextProps.fade &&
+    prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
     prevProps.onToggle === nextProps.onToggle &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&

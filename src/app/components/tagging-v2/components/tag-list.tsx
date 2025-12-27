@@ -52,6 +52,8 @@ type TagsDisplayProps = {
   editingTagName: string | null;
   editValue: string;
   isDuplicateEdit: boolean;
+  // Duplicate match state (for fading non-matching tags)
+  matchingTagName: string | null;
   // Handlers
   onToggleTag: (tagName: string) => void;
   onEditTag: (tagName: string) => void;
@@ -70,6 +72,7 @@ const TagsDisplayComponent = ({
   editingTagName,
   editValue,
   isDuplicateEdit,
+  matchingTagName,
   onToggleTag,
   onEditTag,
   onDeleteTag,
@@ -107,8 +110,16 @@ const TagsDisplayComponent = ({
   // Keep DnD enabled (which renders SortableTag with InputTag) when editing
   const dndEnabled = sortable && (isHovered || editingTagName !== null);
 
-  const tagElements = tags.map((tag) =>
-    dndEnabled ? (
+  // Fade logic: when editing or when add input matches an existing tag,
+  // fade all tags except the one being edited and the one that matches
+  const isInputActive = editingTagName !== null || matchingTagName !== null;
+
+  const tagElements = tags.map((tag) => {
+    const isBeingEdited = editingTagName === tag.name;
+    const isMatchingTag = matchingTagName === tag.name;
+    const fade = isInputActive && !isBeingEdited && !isMatchingTag;
+
+    return dndEnabled ? (
       <SortableTag
         key={tag.name}
         id={tag.name}
@@ -116,8 +127,9 @@ const TagsDisplayComponent = ({
         tagState={tag.state}
         count={tag.count}
         isHighlighted={tag.isHighlighted}
-        fade={editingTagName !== null && editingTagName !== tag.name}
-        isEditing={editingTagName === tag.name}
+        fade={fade}
+        isMatchingDuplicate={isMatchingTag}
+        isEditing={isBeingEdited}
         editValue={editValue}
         onToggle={onToggleTag}
         onEdit={onEditTag}
@@ -134,8 +146,9 @@ const TagsDisplayComponent = ({
           tagState={tag.state}
           count={tag.count}
           isHighlighted={tag.isHighlighted}
-          fade={editingTagName !== null && editingTagName !== tag.name}
-          isEditing={editingTagName === tag.name}
+          fade={fade}
+          isMatchingDuplicate={isMatchingTag}
+          isEditing={isBeingEdited}
           editValue={editValue}
           onToggle={onToggleTag}
           onEdit={onEditTag}
@@ -146,8 +159,8 @@ const TagsDisplayComponent = ({
           isDuplicateEdit={isDuplicateEdit}
         />
       </div>
-    ),
-  );
+    );
+  });
 
   track('TagsDisplay', 'render-end');
 
@@ -172,7 +185,7 @@ const TagsDisplayComponent = ({
   );
 };
 
-// Memo comparison - skip re-render only when NOT editing
+// Memo comparison - skip re-render only when NOT editing and no matching tag
 const tagsDisplayPropsAreEqual = (
   prevProps: TagsDisplayProps,
   nextProps: TagsDisplayProps,
@@ -183,6 +196,11 @@ const tagsDisplayPropsAreEqual = (
   if (prevProps.editingTagName !== null || nextProps.editingTagName !== null) {
     // But if editing the same tag and only editValue changed, we still need to re-render
     // So just return false to always re-render during edit mode
+    return false;
+  }
+
+  // If matchingTagName changes, need to re-render for fade effect
+  if (prevProps.matchingTagName !== nextProps.matchingTagName) {
     return false;
   }
 
@@ -255,6 +273,28 @@ const TagListComponent = ({
     editValue.trim().toLowerCase() !== editingTagName?.toLowerCase() &&
     tags.some((tag) => tag.name.toLowerCase() === editValue.trim().toLowerCase());
 
+  // Find the matching tag name for fading other tags
+  // When adding: show which tag already exists with that name
+  // When editing: show which tag conflicts with the new name
+  const matchingTagName = (() => {
+    const addInputTrimmed = inputValue.trim().toLowerCase();
+    const editInputTrimmed = editValue.trim().toLowerCase();
+
+    // Check add input first (if there's content and it matches)
+    if (addInputTrimmed) {
+      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === addInputTrimmed);
+      if (matchingTag) return matchingTag.name;
+    }
+
+    // Check edit input (if editing and the new value conflicts with another tag)
+    if (editingTagName && editInputTrimmed !== editingTagName.toLowerCase()) {
+      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === editInputTrimmed);
+      if (matchingTag) return matchingTag.name;
+    }
+
+    return null;
+  })();
+
   // Add input handlers
   const handleInputChange = useCallback((value: string) => {
     setInputValue(value);
@@ -309,6 +349,7 @@ const TagListComponent = ({
         editingTagName={editingTagName}
         editValue={editValue}
         isDuplicateEdit={isDuplicateEdit}
+        matchingTagName={matchingTagName}
         onToggleTag={onToggleTag}
         onEditTag={handleStartEdit}
         onDeleteTag={onDeleteTag}
