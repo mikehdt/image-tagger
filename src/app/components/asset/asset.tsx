@@ -14,6 +14,8 @@ import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging-v2';
 import { AssetMetadata, CropVisualization } from './components';
 
+type PreviewState = 'select' | 'deselect' | null;
+
 type AssetProps = {
   assetId: string;
   fileExtension: string;
@@ -24,6 +26,9 @@ type AssetProps = {
   ioState: IoState;
   lastModified: number;
   currentPage: number;
+  // Shift-hover preview state
+  previewState?: PreviewState;
+  onHover?: (assetId: string | null) => void;
 };
 
 const AssetComponent = ({
@@ -36,6 +41,8 @@ const AssetComponent = ({
   ioState,
   lastModified,
   currentPage,
+  previewState,
+  onHover,
 }: AssetProps) => {
   const [imageZoom, setImageZoom] = useState<boolean>(false);
   // Track if any tag is currently being edited or added
@@ -121,18 +128,48 @@ const AssetComponent = ({
     [globalShowCropVisualization],
   );
 
+  // Hover handlers for shift-hover preview
+  const handleMouseEnter = useCallback(() => {
+    onHover?.(assetId);
+  }, [onHover, assetId]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHover?.(null);
+  }, [onHover]);
+
+  // Determine visual state: preview overrides actual selection for display
+  // previewState 'select' means "would become selected" (show as selected)
+  // previewState 'deselect' means "would become deselected" (show as deselected)
+  const showAsSelected =
+    previewState === 'select' ? true : previewState === 'deselect' ? false : isSelected;
+  const isPreview = previewState !== null && previewState !== undefined;
+
+  // Build class names for the selection panel
+  const selectionPanelClasses = `flex cursor-pointer select-none flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${
+    showAsSelected
+      ? isPreview
+        ? 'bg-purple-50 text-purple-300' // Lighter purple for preview-select
+        : 'bg-purple-100 text-purple-400' // Normal selected
+      : isPreview
+        ? 'bg-slate-50 text-slate-300' // Lighter grey for preview-deselect
+        : 'bg-slate-100 text-slate-400' // Normal unselected
+  }`;
+
   return (
     <div
       className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
     >
       <div
-        className={`flex cursor-pointer select-none flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${isSelected ? 'bg-purple-100 text-purple-400' : 'bg-slate-100 text-slate-400'}`}
+        className={selectionPanelClasses}
         onClick={onToggleAssetSelection}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <Checkbox
           isSelected={isSelected}
           onChange={onToggleAssetSelection}
           ariaLabel={`Select asset ${assetId}`}
+          previewState={previewState}
         />
 
         {wouldCrop ? (
@@ -230,7 +267,9 @@ const assetPropsAreEqual = (
     prevProps.filteredIndex !== nextProps.filteredIndex ||
     prevProps.ioState !== nextProps.ioState ||
     prevProps.lastModified !== nextProps.lastModified ||
-    prevProps.currentPage !== nextProps.currentPage
+    prevProps.currentPage !== nextProps.currentPage ||
+    prevProps.previewState !== nextProps.previewState ||
+    prevProps.onHover !== nextProps.onHover
   ) {
     return false;
   }

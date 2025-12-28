@@ -65,6 +65,11 @@ const selectionSlice = createSlice({
     clearClickTracking: (state) => {
       state.lastClickedAssetId = null;
       state.lastClickAction = null;
+      state.shiftHoverAssetId = null;
+    },
+    // Track hovered asset for shift-hover preview
+    setShiftHoverAssetId: (state, action: PayloadAction<string | null>) => {
+      state.shiftHoverAssetId = action.payload;
     },
   },
 });
@@ -76,6 +81,7 @@ export const {
   setAssetsSelectionState,
   trackAssetClick,
   clearClickTracking,
+  setShiftHoverAssetId,
 } = selectionSlice.actions;
 
 export const selectionReducer = selectionSlice.reducer;

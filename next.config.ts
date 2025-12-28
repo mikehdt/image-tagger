@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: false,
 
+  // Allow larger uploads for thumbnail creation
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '3mb',
+    },
+  },
+
   // Allow images from our API route
   images: {
     remotePatterns: [

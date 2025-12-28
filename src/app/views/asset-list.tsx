@@ -1,7 +1,7 @@
 'use client';
 
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Asset } from '../components/asset/asset';
 import {
@@ -13,7 +13,12 @@ import {
 } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { clearClickTracking, selectSelectedAssets } from '../store/selection';
+import {
+  clearClickTracking,
+  selectSelectedAssets,
+  selectShiftHoverPreview,
+  setShiftHoverAssetId,
+} from '../store/selection';
 import {
   getCategoryAnchorId,
   getSortCategory,
@@ -39,10 +44,49 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
 
   const dispatch = useAppDispatch();
 
+  // Track whether shift key is currently held
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
+  // Track currently hovered asset (using ref to avoid re-renders on hover)
+  const hoveredAssetRef = useRef<string | null>(null);
+
   // Clear shift-click tracking when page changes
   useEffect(() => {
     dispatch(clearClickTracking());
   }, [currentPage, dispatch]);
+
+  // Track shift key state globally
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift' && !isShiftHeld) {
+        setIsShiftHeld(true);
+        // If already hovering an asset when shift is pressed, update Redux
+        if (hoveredAssetRef.current) {
+          dispatch(setShiftHoverAssetId(hoveredAssetRef.current));
+        }
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setIsShiftHeld(false);
+        dispatch(setShiftHoverAssetId(null));
+      }
+    };
+    // Also clear on blur (window loses focus)
+    const handleBlur = () => {
+      setIsShiftHeld(false);
+      dispatch(setShiftHoverAssetId(null));
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [dispatch, isShiftHeld]);
 
   // Get pagination size from Redux
   const paginationSize = useAppSelector(selectPaginationSize);
@@ -78,6 +122,28 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       return filteredAssets.slice(0, 100);
     }
   }, [filteredAssets, currentPage, paginationSize]);
+
+  // Get paginated asset IDs for shift-hover preview calculation
+  const paginatedAssetIds = useMemo(
+    () => paginatedAssets.map((a) => a.fileId),
+    [paginatedAssets],
+  );
+
+  // Get shift-hover preview state
+  const shiftHoverPreview = useAppSelector((state) =>
+    selectShiftHoverPreview(state, paginatedAssetIds),
+  );
+
+  // Handler for asset hover - always track in ref, dispatch to Redux only if shift is held
+  const handleAssetHover = useCallback(
+    (assetId: string | null) => {
+      hoveredAssetRef.current = assetId;
+      if (isShiftHeld) {
+        dispatch(setShiftHoverAssetId(assetId));
+      }
+    },
+    [dispatch, isShiftHeld],
+  );
 
   // Group assets by sort category
   const groupedAssets = useMemo(() => {
@@ -153,6 +219,13 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
             )}
 
             {assets.map((asset) => {
+              // Determine preview state for this asset
+              const previewState = shiftHoverPreview?.previewAssetIds.has(
+                asset.fileId,
+              )
+                ? shiftHoverPreview.previewAction
+                : null;
+
               return (
                 <Asset
                   key={asset.fileId}
@@ -165,13 +238,15 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
                   ioState={asset.ioState}
                   lastModified={asset.lastModified}
                   currentPage={currentPage}
+                  previewState={previewState}
+                  onHover={handleAssetHover}
                 />
               );
             })}
           </div>
         );
       }),
-    [groupedAssets, showCategoryHeaders, currentPage],
+    [groupedAssets, showCategoryHeaders, currentPage, shiftHoverPreview, handleAssetHover],
   );
 
   return filteredAssets.length ? (

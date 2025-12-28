@@ -360,7 +360,8 @@ export const createProjectThumbnail = async (
     // Update the project config to enable thumbnail
     await updateProject(projectName, { thumbnail: true });
 
-    return { success: true, thumbnail: thumbnailFilename };
+    // Include cache-busting timestamp in returned filename
+    return { success: true, thumbnail: `${thumbnailFilename}?v=${Date.now()}` };
   } catch (error) {
     console.error('Error creating project thumbnail:', error);
     throw error;

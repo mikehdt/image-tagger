@@ -1,7 +1,7 @@
 'use client';
 
 import { BookmarkIcon } from '@heroicons/react/24/outline';
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { RootState } from '@/app/store';
 import { selectHasActiveFilters } from '@/app/store/filters';
@@ -74,9 +74,17 @@ export const AddTagsModal = ({
 
   // For duplicate checking in the input field
   const [checkTag, setCheckTag] = useState('');
+  const pendingCheckTagRef = useRef('');
 
   // Get duplicate info for the current check tag (cached selector)
   const tagDuplicateInfo = useAppSelector(selectDuplicateTagInfo(checkTag));
+
+  // Sync checkTag with pending value after render to avoid setState-during-render
+  useEffect(() => {
+    if (pendingCheckTagRef.current !== checkTag) {
+      setCheckTag(pendingCheckTagRef.current);
+    }
+  });
 
   // Create a memoized selector for getting all tag statuses
   // The selector is recreated when tags change, but returns cached results for unchanged tags
@@ -105,6 +113,7 @@ export const AddTagsModal = ({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form reset on modal close
       setTags([]);
       setCheckTag('');
+      pendingCheckTagRef.current = '';
       setAddToStart(false);
     }
   }, [isOpen]);
@@ -172,10 +181,8 @@ export const AddTagsModal = ({
 
   // Duplicate check function for the input field
   const handleDuplicateCheck = (tag: string) => {
-    // Update the check tag if it changed (for real-time feedback)
-    if (checkTag !== tag) {
-      setCheckTag(tag);
-    }
+    // Store the tag in a ref to be synced via useEffect (avoids setState during render)
+    pendingCheckTagRef.current = tag;
     return tagDuplicateInfo;
   };
 
