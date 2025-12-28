@@ -209,7 +209,7 @@ export const FileView = () => {
             {sortedPatterns.map((pattern) => (
               <li
                 key={pattern}
-                className="flex cursor-default items-center justify-between bg-stone-50 px-3 py-2 transition-colors"
+                className="flex cursor-default items-center justify-between bg-stone-100 px-3 py-2 transition-colors"
               >
                 <span className="text-sm font-medium text-stone-800">
                   {pattern}
@@ -232,10 +232,12 @@ export const FileView = () => {
         )}
 
         {/* Divider with label */}
-        <div className="flex cursor-default items-center gap-2 py-1.5">
-          <div className="h-px flex-1 bg-stone-200" />
-          <span className="text-xs text-stone-400">File Types</span>
-          <div className="h-px flex-1 bg-stone-200" />
+        <div className="flex cursor-default items-center gap-2 bg-stone-50 py-1.5">
+          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white" />
+          <span className="text-xs text-stone-400 text-shadow-white text-shadow-xs">
+            File Types
+          </span>
+          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white" />
         </div>
 
         {/* Extension list */}

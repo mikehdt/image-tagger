@@ -23,8 +23,23 @@ import {
   SortType,
 } from './types';
 
-// Persist the last active view across popup open/close cycles
+// Persist state across popup open/close cycles (module-level variables)
 let persistedActiveView: FilterView = 'tag';
+let persistedSizeSubView: SizeSubViewType = 'dimensions';
+let persistedSortSettings = {
+  tag: { type: 'count' as SortType, direction: 'desc' as SortDirection },
+  size: {
+    dimensions: {
+      type: 'count' as SortType,
+      direction: 'desc' as SortDirection,
+    },
+    buckets: {
+      type: 'count' as SortType,
+      direction: 'desc' as SortDirection,
+    },
+  },
+  filetype: { type: 'count' as SortType, direction: 'desc' as SortDirection },
+};
 
 interface FilterContextType {
   // Close handler (provided by popup system)
@@ -75,23 +90,11 @@ export const FilterProvider = ({
 }: FilterProviderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Persistent state for view and sort settings
+  // Persistent state for view and sort settings (initialized from module-level variables)
   const [activeView, setActiveView] = useState<FilterView>(persistedActiveView);
-  const [sizeSubView, setSizeSubView] = useState<SizeSubViewType>('dimensions');
-  const [sortSettings, setSortSettings] = useState({
-    tag: { type: 'count' as SortType, direction: 'desc' as SortDirection },
-    size: {
-      dimensions: {
-        type: 'count' as SortType,
-        direction: 'desc' as SortDirection,
-      },
-      buckets: {
-        type: 'count' as SortType,
-        direction: 'desc' as SortDirection,
-      },
-    },
-    filetype: { type: 'count' as SortType, direction: 'desc' as SortDirection },
-  });
+  const [sizeSubView, setSizeSubViewState] =
+    useState<SizeSubViewType>(persistedSizeSubView);
+  const [sortSettings, setSortSettingsState] = useState(persistedSortSettings);
 
   // Transient state for search and navigation
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,6 +108,28 @@ export const FilterProvider = ({
     }
     return sortSettings[activeView];
   }, [activeView, sizeSubView, sortSettings]);
+
+  // Wrapper for setSizeSubView that also persists to module-level variable
+  const setSizeSubView = useCallback((subView: SizeSubViewType) => {
+    persistedSizeSubView = subView;
+    setSizeSubViewState(subView);
+  }, []);
+
+  // Helper to update sort settings and persist to module-level variable
+  const setSortSettings = useCallback(
+    (
+      updater: (
+        prev: typeof persistedSortSettings,
+      ) => typeof persistedSortSettings,
+    ) => {
+      setSortSettingsState((prev) => {
+        const next = updater(prev);
+        persistedSortSettings = next;
+        return next;
+      });
+    },
+    [],
+  );
 
   // Sort setters that update the correct view settings
   const setSortDirection = useCallback(
@@ -125,7 +150,7 @@ export const FilterProvider = ({
         };
       });
     },
-    [activeView, sizeSubView],
+    [activeView, sizeSubView, setSortSettings],
   );
 
   const setSortType = useCallback(
@@ -146,7 +171,7 @@ export const FilterProvider = ({
         };
       });
     },
-    [activeView, sizeSubView],
+    [activeView, sizeSubView, setSortSettings],
   );
 
   // Update list length
