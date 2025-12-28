@@ -6,7 +6,12 @@
  * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Edit state managed here to keep it close to where it's used
  */
-import { closestCenter, DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+} from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -15,7 +20,6 @@ import { track } from '@/app/utils/render-tracker';
 
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
-
 import { EditableTag } from './editable-tag';
 import { InputTag } from './input-tag';
 import { SortableTag } from './sortable-tag';
@@ -170,7 +174,11 @@ const TagsDisplayComponent = ({
 
   // DndContext only rendered when hovered - eliminates dnd-kit overhead when not needed
   return (
-    <div className="flex flex-wrap" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div
+      className="flex flex-wrap"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {dndEnabled ? (
         <DndContext
           sensors={sensors}
@@ -178,7 +186,11 @@ const TagsDisplayComponent = ({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={tagNames} strategy={rectSortingStrategy} id={`taglist-${assetId}`}>
+          <SortableContext
+            items={tagNames}
+            strategy={rectSortingStrategy}
+            id={`taglist-${assetId}`}
+          >
             {tagElements}
           </SortableContext>
         </DndContext>
@@ -277,7 +289,9 @@ const TagListComponent = ({
   // Check if edit input would be a duplicate (excluding the tag being edited)
   const isDuplicateEdit =
     editValue.trim().toLowerCase() !== editingTagName?.toLowerCase() &&
-    tags.some((tag) => tag.name.toLowerCase() === editValue.trim().toLowerCase());
+    tags.some(
+      (tag) => tag.name.toLowerCase() === editValue.trim().toLowerCase(),
+    );
 
   // Find the matching tag name for fading other tags
   // When adding: show which tag already exists with that name
@@ -288,13 +302,17 @@ const TagListComponent = ({
 
     // Check add input first (if there's content and it matches)
     if (addInputTrimmed) {
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === addInputTrimmed);
+      const matchingTag = tags.find(
+        (tag) => tag.name.toLowerCase() === addInputTrimmed,
+      );
       if (matchingTag) return matchingTag.name;
     }
 
     // Check edit input (if editing and the new value conflicts with another tag)
     if (editingTagName && editInputTrimmed !== editingTagName.toLowerCase()) {
-      const matchingTag = tags.find((tag) => tag.name.toLowerCase() === editInputTrimmed);
+      const matchingTag = tags.find(
+        (tag) => tag.name.toLowerCase() === editInputTrimmed,
+      );
       if (matchingTag) return matchingTag.name;
     }
 
@@ -345,11 +363,15 @@ const TagListComponent = ({
   // Determine which tags to copy and whether it's a partial copy
   const copyInfo = useMemo(() => {
     // Get highlighted tags (those matching filter) that are in this asset
-    const highlightedTagsInAsset = tags.filter((tag) => tag.isHighlighted).map((tag) => tag.name);
+    const highlightedTagsInAsset = tags
+      .filter((tag) => tag.isHighlighted)
+      .map((tag) => tag.name);
 
     // If we have highlighted tags, copy only those; otherwise copy all
     const shouldCopySelection = highlightedTagsInAsset.length > 0;
-    const tagsToCopy = shouldCopySelection ? highlightedTagsInAsset : tags.map((tag) => tag.name);
+    const tagsToCopy = shouldCopySelection
+      ? highlightedTagsInAsset
+      : tags.map((tag) => tag.name);
 
     return {
       tagsToCopy,
@@ -435,16 +457,25 @@ const TagListComponent = ({
   );
 };
 
-const tagListPropsAreEqual = (prevProps: TagListProps, nextProps: TagListProps): boolean => {
+const tagListPropsAreEqual = (
+  prevProps: TagListProps,
+  nextProps: TagListProps,
+): boolean => {
   track('TagList', 'memo-check');
 
   // Check sortable mode and assetId
-  if (prevProps.sortable !== nextProps.sortable || prevProps.assetId !== nextProps.assetId) {
+  if (
+    prevProps.sortable !== nextProps.sortable ||
+    prevProps.assetId !== nextProps.assetId
+  ) {
     return false;
   }
 
   // Check DnD callback references (sensors is stable from useSensors)
-  if (prevProps.sensors !== nextProps.sensors || prevProps.onDragEnd !== nextProps.onDragEnd) {
+  if (
+    prevProps.sensors !== nextProps.sensors ||
+    prevProps.onDragEnd !== nextProps.onDragEnd
+  ) {
     return false;
   }
 
