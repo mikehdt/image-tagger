@@ -6,7 +6,18 @@
  * - Placeholder for edit mode (to be added later)
  */
 import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChangeEvent, KeyboardEvent, memo, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  ClipboardEvent,
+  KeyboardEvent,
+  memo,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { track } from '@/app/utils/render-tracker';
 
@@ -42,6 +53,7 @@ type InputTagProps = {
   placeholder?: string;
   isDuplicate?: boolean;
   disabled?: boolean;
+  onMultipleTagsSubmit?: (tags: string[]) => void;
 };
 
 const InputTagComponent = ({
@@ -53,12 +65,54 @@ const InputTagComponent = ({
   placeholder = 'Add tag...',
   isDuplicate = false,
   disabled = false,
+  onMultipleTagsSubmit,
 }: InputTagProps) => {
   track('InputTag', 'render');
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(mode === 'edit');
   const inputWidth = useInputWidth(value.length);
+
+  // Helper function to process comma-separated tags
+  const processMultipleTags = useCallback(
+    (tagsString: string): boolean => {
+      if (mode === 'edit' || !onMultipleTagsSubmit) {
+        return false;
+      }
+
+      const tags = tagsString
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
+      if (tags.length > 0) {
+        onMultipleTagsSubmit(tags);
+        return true;
+      }
+
+      return false;
+    },
+    [mode, onMultipleTagsSubmit],
+  );
+
+  // Handle paste events to detect comma-separated content
+  const handlePaste = useCallback(
+    (e: ClipboardEvent<HTMLInputElement>) => {
+      if (mode === 'edit' || disabled) {
+        return;
+      }
+
+      const pastedText = e.clipboardData.getData('text');
+      const fullText = value + pastedText;
+
+      // If the pasted content contains commas, process it as multiple tags
+      if (pastedText.includes(',')) {
+        e.preventDefault();
+        processMultipleTags(fullText);
+      }
+    },
+    [mode, disabled, value, processMultipleTags],
+  );
 
   // Auto-focus input in edit mode, cursor at end
   useEffect(() => {
@@ -79,14 +133,24 @@ const InputTagComponent = ({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && value.trim() && !isDuplicate) {
+      // Handle Enter and comma as submission triggers
+      if (e.key === 'Enter' || (e.key === ',' && mode === 'add')) {
         e.preventDefault();
-        onSubmit();
+
+        // First check if we have comma-separated tags (only in add mode)
+        if (mode === 'add' && processMultipleTags(value)) {
+          return;
+        }
+
+        // Handle single tag submission
+        if (value.trim() && !isDuplicate) {
+          onSubmit();
+        }
       } else if (e.key === 'Escape') {
         onCancel();
       }
     },
-    [value, isDuplicate, onSubmit, onCancel],
+    [value, isDuplicate, onSubmit, onCancel, mode, processMultipleTags],
   );
 
   const handleSubmitClick = useCallback(
@@ -128,6 +192,7 @@ const InputTagComponent = ({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         onFocus={handleFocus}
         onBlur={handleBlur}
         type="text"
@@ -180,7 +245,8 @@ const inputTagPropsAreEqual = (prevProps: InputTagProps, nextProps: InputTagProp
     prevProps.disabled === nextProps.disabled &&
     prevProps.onChange === nextProps.onChange &&
     prevProps.onSubmit === nextProps.onSubmit &&
-    prevProps.onCancel === nextProps.onCancel;
+    prevProps.onCancel === nextProps.onCancel &&
+    prevProps.onMultipleTagsSubmit === nextProps.onMultipleTagsSubmit;
 
   if (isEqual) track('InputTag', 'memo-hit');
   return isEqual;

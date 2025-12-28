@@ -335,6 +335,26 @@ const TagListComponent = ({
     setInputValue('');
   }, []);
 
+  // Handle multiple tags from paste or comma-separated input
+  const handleMultipleTagsSubmit = useCallback(
+    (newTags: string[]) => {
+      // Get existing tag names for duplicate checking
+      const existingTagNames = new Set(tags.map((t) => t.name.toLowerCase()));
+
+      // Filter out duplicates and add each unique tag
+      const uniqueTags = newTags.filter(
+        (tag) => !existingTagNames.has(tag.toLowerCase()),
+      );
+
+      uniqueTags.forEach((tag) => {
+        onAddTag(tag);
+      });
+
+      setInputValue('');
+    },
+    [tags, onAddTag],
+  );
+
   // Edit handlers
   const handleStartEdit = useCallback((tagName: string) => {
     setEditingTagName(tagName);
@@ -432,6 +452,7 @@ const TagListComponent = ({
             placeholder="Add tag..."
             isDuplicate={isDuplicateAdd}
             disabled={editingTagName !== null}
+            onMultipleTagsSubmit={handleMultipleTagsSubmit}
           />
         </div>
       </div>
