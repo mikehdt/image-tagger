@@ -8,9 +8,13 @@
  */
 import { closestCenter, DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { memo, useCallback, useRef, useState } from 'react';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import { track } from '@/app/utils/render-tracker';
+
+import { Button } from '../../shared/button';
+import { useToast } from '../../shared/toast';
 
 import { EditableTag } from './editable-tag';
 import { InputTag } from './input-tag';
@@ -256,6 +260,8 @@ const TagListComponent = ({
 }: TagListProps) => {
   track('TagList', 'render');
 
+  const { showToast } = useToast();
+
   // Add new tag input state
   const [inputValue, setInputValue] = useState('');
 
@@ -336,40 +342,95 @@ const TagListComponent = ({
     setEditValue('');
   }, []);
 
+  // Determine which tags to copy and whether it's a partial copy
+  const copyInfo = useMemo(() => {
+    // Get highlighted tags (those matching filter) that are in this asset
+    const highlightedTagsInAsset = tags.filter((tag) => tag.isHighlighted).map((tag) => tag.name);
+
+    // If we have highlighted tags, copy only those; otherwise copy all
+    const shouldCopySelection = highlightedTagsInAsset.length > 0;
+    const tagsToCopy = shouldCopySelection ? highlightedTagsInAsset : tags.map((tag) => tag.name);
+
+    return {
+      tagsToCopy,
+      isPartialCopy: shouldCopySelection,
+      selectedCount: highlightedTagsInAsset.length,
+    };
+  }, [tags]);
+
+  const handleCopyTags = useCallback(async () => {
+    const tagsText = copyInfo.tagsToCopy.join(', ');
+
+    try {
+      await navigator.clipboard.writeText(tagsText);
+
+      if (copyInfo.isPartialCopy) {
+        showToast(
+          `Copied ${copyInfo.selectedCount} selected ${copyInfo.selectedCount === 1 ? 'tag' : 'tags'}`,
+        );
+      } else {
+        showToast('Tags copied to clipboard');
+      }
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      showToast('Failed to copy tags');
+    }
+  }, [copyInfo, showToast]);
+
   track('TagList', 'render-end');
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <TagsDisplay
-        tags={tags}
-        sortable={sortable}
-        assetId={assetId}
-        sensors={sensors}
-        onDragEnd={onDragEnd}
-        editingTagName={editingTagName}
-        editValue={editValue}
-        isDuplicateEdit={isDuplicateEdit}
-        matchingTagName={matchingTagName}
-        onToggleTag={onToggleTag}
-        onEditTag={handleStartEdit}
-        onDeleteTag={onDeleteTag}
-        onEditChange={handleEditChange}
-        onEditSubmit={handleEditSubmit}
-        onEditCancel={handleEditCancel}
-      />
-
-      <div className="mt-2">
-        <InputTag
-          mode="add"
-          value={inputValue}
-          onChange={handleInputChange}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          placeholder="Add tag..."
-          isDuplicate={isDuplicateAdd}
-          disabled={editingTagName !== null}
+    <div className="flex h-full w-full">
+      <div className="flex flex-1 flex-col">
+        <TagsDisplay
+          tags={tags}
+          sortable={sortable}
+          assetId={assetId}
+          sensors={sensors}
+          onDragEnd={onDragEnd}
+          editingTagName={editingTagName}
+          editValue={editValue}
+          isDuplicateEdit={isDuplicateEdit}
+          matchingTagName={matchingTagName}
+          onToggleTag={onToggleTag}
+          onEditTag={handleStartEdit}
+          onDeleteTag={onDeleteTag}
+          onEditChange={handleEditChange}
+          onEditSubmit={handleEditSubmit}
+          onEditCancel={handleEditCancel}
         />
+
+        <div className="mt-2">
+          <InputTag
+            mode="add"
+            value={inputValue}
+            onChange={handleInputChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            placeholder="Add tag..."
+            isDuplicate={isDuplicateAdd}
+            disabled={editingTagName !== null}
+          />
+        </div>
       </div>
+
+      {tags.length > 0 && (
+        <div className="self-end">
+          <Button
+            onClick={handleCopyTags}
+            variant="ghost"
+            size="smallSquare"
+            color={copyInfo.isPartialCopy ? 'emerald' : 'slate'}
+            title={
+              copyInfo.isPartialCopy
+                ? `Copy ${copyInfo.selectedCount} selected ${copyInfo.selectedCount === 1 ? 'tag' : 'tags'} as comma-separated list`
+                : 'Copy all tags as comma-separated list'
+            }
+          >
+            <ClipboardDocumentIcon className="w-4 opacity-50" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
