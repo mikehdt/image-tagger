@@ -28,7 +28,6 @@ import {
 import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectTagSortType, TagSortType } from '@/app/store/project';
-import { track } from '@/app/utils/render-tracker';
 
 import { TagList } from './components';
 
@@ -41,8 +40,6 @@ const TaggingManagerComponent = ({
   assetId,
   onTagEditingChange: _onTagEditingChange, // Unused for now
 }: TaggingManagerProps) => {
-  track('TaggingManager', 'render');
-
   const dispatch = useAppDispatch();
 
   // Get tag data from Redux
@@ -135,8 +132,6 @@ const TaggingManagerComponent = ({
     },
     [dispatch, assetId],
   );
-
-  track('TaggingManager', 'render-end');
 
   return (
     <TagList

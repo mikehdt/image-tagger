@@ -7,8 +7,6 @@
  */
 import { memo } from 'react';
 
-import { track } from '@/app/utils/render-tracker';
-
 import { InputTag } from './input-tag';
 import { Tag } from './tag';
 
@@ -47,8 +45,6 @@ const EditableTagComponent = ({
   onEditCancel,
   isDuplicateEdit,
 }: EditableTagProps) => {
-  track('EditableTag', 'render');
-
   if (isEditing) {
     return (
       <InputTag
@@ -83,8 +79,6 @@ const editableTagPropsAreEqual = (
   prevProps: EditableTagProps,
   nextProps: EditableTagProps,
 ): boolean => {
-  track('EditableTag', 'memo-check');
-
   // If editing state changes, must re-render
   if (prevProps.isEditing !== nextProps.isEditing) {
     return false;
@@ -101,7 +95,7 @@ const editableTagPropsAreEqual = (
   }
 
   // Check all visual/interaction props
-  const isEqual =
+  return (
     prevProps.tagName === nextProps.tagName &&
     prevProps.tagState === nextProps.tagState &&
     prevProps.count === nextProps.count &&
@@ -113,10 +107,8 @@ const editableTagPropsAreEqual = (
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onEditChange === nextProps.onEditChange &&
     prevProps.onEditSubmit === nextProps.onEditSubmit &&
-    prevProps.onEditCancel === nextProps.onEditCancel;
-
-  if (isEqual) track('EditableTag', 'memo-hit');
-  return isEqual;
+    prevProps.onEditCancel === nextProps.onEditCancel
+  );
 };
 
 export const EditableTag = memo(EditableTagComponent, editableTagPropsAreEqual);

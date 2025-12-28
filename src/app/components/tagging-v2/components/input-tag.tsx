@@ -19,8 +19,6 @@ import {
   useState,
 } from 'react';
 
-import { track } from '@/app/utils/render-tracker';
-
 // Calculate dynamic input width based on text length
 // Uses discrete Tailwind classes for proper CSS extraction
 const useInputWidth = (textLength: number): string => {
@@ -36,9 +34,13 @@ const useInputWidth = (textLength: number): string => {
       return 'w-68';
     } else {
       // Dynamic width between min and max based on character count
-      const widthStep = (textLength - MIN_CHAR_LENGTH) / (MAX_CHAR_LENGTH - MIN_CHAR_LENGTH);
+      const widthStep =
+        (textLength - MIN_CHAR_LENGTH) / (MAX_CHAR_LENGTH - MIN_CHAR_LENGTH);
       const widthClasses = ['w-44', 'w-48', 'w-52', 'w-56', 'w-60', 'w-64'];
-      const index = Math.min(Math.floor(widthStep * widthClasses.length), widthClasses.length - 1);
+      const index = Math.min(
+        Math.floor(widthStep * widthClasses.length),
+        widthClasses.length - 1,
+      );
       return widthClasses[index];
     }
   }, [textLength]);
@@ -67,8 +69,6 @@ const InputTagComponent = ({
   disabled = false,
   onMultipleTagsSubmit,
 }: InputTagProps) => {
-  track('InputTag', 'render');
-
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(mode === 'edit');
   const inputWidth = useInputWidth(value.length);
@@ -180,10 +180,9 @@ const InputTagComponent = ({
 
   // Styling
   const borderColour = mode === 'add' ? 'border-amber-300' : 'border-blue-300';
-  const shadowColour = mode === 'add' ? 'inset-shadow-amber-100' : 'inset-shadow-blue-100';
+  const shadowColour =
+    mode === 'add' ? 'inset-shadow-amber-100' : 'inset-shadow-blue-100';
   const canSubmit = value.trim() !== '' && !isDuplicate && !disabled;
-
-  track('InputTag', 'render-end');
 
   return (
     <div className="relative mr-2 inline-flex">
@@ -234,22 +233,18 @@ const InputTagComponent = ({
 };
 
 // Memo comparison
-const inputTagPropsAreEqual = (prevProps: InputTagProps, nextProps: InputTagProps): boolean => {
-  track('InputTag', 'memo-check');
-
-  const isEqual =
-    prevProps.mode === nextProps.mode &&
-    prevProps.value === nextProps.value &&
-    prevProps.placeholder === nextProps.placeholder &&
-    prevProps.isDuplicate === nextProps.isDuplicate &&
-    prevProps.disabled === nextProps.disabled &&
-    prevProps.onChange === nextProps.onChange &&
-    prevProps.onSubmit === nextProps.onSubmit &&
-    prevProps.onCancel === nextProps.onCancel &&
-    prevProps.onMultipleTagsSubmit === nextProps.onMultipleTagsSubmit;
-
-  if (isEqual) track('InputTag', 'memo-hit');
-  return isEqual;
-};
+const inputTagPropsAreEqual = (
+  prevProps: InputTagProps,
+  nextProps: InputTagProps,
+): boolean =>
+  prevProps.mode === nextProps.mode &&
+  prevProps.value === nextProps.value &&
+  prevProps.placeholder === nextProps.placeholder &&
+  prevProps.isDuplicate === nextProps.isDuplicate &&
+  prevProps.disabled === nextProps.disabled &&
+  prevProps.onChange === nextProps.onChange &&
+  prevProps.onSubmit === nextProps.onSubmit &&
+  prevProps.onCancel === nextProps.onCancel &&
+  prevProps.onMultipleTagsSubmit === nextProps.onMultipleTagsSubmit;
 
 export const InputTag = memo(InputTagComponent, inputTagPropsAreEqual);

@@ -13,7 +13,6 @@ import { MinusIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { SyntheticEvent, useCallback } from 'react';
 
 import { hasState, TagState } from '@/app/store/assets';
-import { track } from '@/app/utils/render-tracker';
 
 type TagProps = {
   tagName: string;
@@ -38,8 +37,6 @@ export const Tag = ({
   onEdit,
   onDelete,
 }: TagProps) => {
-  track('Tag', 'render');
-
   // Non-interactive when faded OR when shown as matching duplicate
   const isNonInteractive = fade || isMatchingDuplicate;
 
@@ -102,8 +99,6 @@ export const Tag = ({
     return 'text-emerald-500';
   };
 
-  track('Tag', 'render-end');
-
   // Matching duplicate: visible but non-interactive (pointer-events-none, no opacity change)
   // Faded: non-interactive AND faded (pointer-events-none, opacity-25)
   const getInteractionStyles = () => {
@@ -118,11 +113,13 @@ export const Tag = ({
       onClick={handleClick}
     >
       <span
-        className={`relative -ml-2 mr-1 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white ${getCountColour()}`}
+        className={`relative mr-1 -ml-2 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white ${getCountColour()}`}
       >
         {count}
       </span>
-      <span className={isMarkedForDeletion ? 'line-through' : ''}>{tagName}</span>
+      <span className={isMarkedForDeletion ? 'line-through' : ''}>
+        {tagName}
+      </span>
 
       {/* Edit button */}
       <span
@@ -132,7 +129,11 @@ export const Tag = ({
             : 'text-slate-500 hover:bg-blue-500 hover:text-white'
         }`}
         onClick={handleEdit}
-        title={isMarkedForDeletion ? "Can't edit a tag marked for deletion" : 'Edit tag'}
+        title={
+          isMarkedForDeletion
+            ? "Can't edit a tag marked for deletion"
+            : 'Edit tag'
+        }
         tabIndex={isMarkedForDeletion || isNonInteractive ? -1 : 0}
       >
         <PencilIcon />
@@ -146,7 +147,11 @@ export const Tag = ({
             : `hover:bg-pink-500 hover:text-white ${isMarkedForDeletion ? 'text-pink-500' : ''}`
         }`}
         onClick={handleDelete}
-        title={isMarkedForDeletion ? 'Unmark tag for deletion' : 'Mark tag for deletion'}
+        title={
+          isMarkedForDeletion
+            ? 'Unmark tag for deletion'
+            : 'Mark tag for deletion'
+        }
         tabIndex={isNonInteractive ? -1 : 0}
       >
         {isMarkedForDeletion ? <PlusIcon /> : <MinusIcon />}

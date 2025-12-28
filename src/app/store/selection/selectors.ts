@@ -12,7 +12,7 @@ export const selectLastClickedAssetId = (state: RootState) =>
 export const selectLastClickAction = (state: RootState) =>
   state.selection.lastClickAction;
 
-export const selectShiftHoverAssetId = (state: RootState) =>
+const selectShiftHoverAssetId = (state: RootState) =>
   state.selection.shiftHoverAssetId;
 
 // Optimized selector for checking if a specific asset is selected
@@ -49,7 +49,10 @@ export const selectShiftHoverPreview = createSelector(
     shiftHoverAssetId,
     selectedAssets,
     paginatedAssetIds,
-  ): { previewAssetIds: Set<string>; previewAction: 'select' | 'deselect' } | null => {
+  ): {
+    previewAssetIds: Set<string>;
+    previewAction: 'select' | 'deselect';
+  } | null => {
     // No preview if missing required state
     if (!lastClickedAssetId || !lastClickAction || !shiftHoverAssetId) {
       return null;

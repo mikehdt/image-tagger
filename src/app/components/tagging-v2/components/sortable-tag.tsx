@@ -8,8 +8,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { memo } from 'react';
 
-import { track } from '@/app/utils/render-tracker';
-
 import { EditableTag } from './editable-tag';
 
 type SortableTagProps = {
@@ -49,12 +47,17 @@ const SortableTagComponent = ({
   onEditCancel,
   isDuplicateEdit,
 }: SortableTagProps) => {
-  track('SortableTag', 'render');
-
   // Disable drag while editing, faded, or when shown as matching duplicate
   const isDragDisabled = isEditing || fade || isMatchingDuplicate;
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id,
     disabled: isDragDisabled,
     transition: {
@@ -70,8 +73,6 @@ const SortableTagComponent = ({
     zIndex: isDragging ? 10 : 0,
     touchAction: 'none' as const,
   };
-
-  track('SortableTag', 'render-end');
 
   return (
     <div
@@ -107,8 +108,6 @@ const sortableTagPropsAreEqual = (
   prevProps: SortableTagProps,
   nextProps: SortableTagProps,
 ): boolean => {
-  track('SortableTag', 'memo-check');
-
   // If editing state changes, must re-render
   if (prevProps.isEditing !== nextProps.isEditing) {
     return false;
@@ -125,7 +124,7 @@ const sortableTagPropsAreEqual = (
   }
 
   // Check all visual/interaction props
-  const isEqual =
+  return (
     prevProps.id === nextProps.id &&
     prevProps.tagName === nextProps.tagName &&
     prevProps.tagState === nextProps.tagState &&
@@ -138,10 +137,8 @@ const sortableTagPropsAreEqual = (
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onEditChange === nextProps.onEditChange &&
     prevProps.onEditSubmit === nextProps.onEditSubmit &&
-    prevProps.onEditCancel === nextProps.onEditCancel;
-
-  if (isEqual) track('SortableTag', 'memo-hit');
-  return isEqual;
+    prevProps.onEditCancel === nextProps.onEditCancel
+  );
 };
 
 export const SortableTag = memo(SortableTagComponent, sortableTagPropsAreEqual);

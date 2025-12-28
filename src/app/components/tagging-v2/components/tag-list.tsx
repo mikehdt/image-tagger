@@ -16,8 +16,6 @@ import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
-import { track } from '@/app/utils/render-tracker';
-
 import { Button } from '../../shared/button';
 import { useToast } from '../../shared/toast';
 import { EditableTag } from './editable-tag';
@@ -88,8 +86,6 @@ const TagsDisplayComponent = ({
   onEditSubmit,
   onEditCancel,
 }: TagsDisplayProps) => {
-  track('TagsDisplay', 'render');
-
   // Conditional DnD: only render DndContext when hovered or dragging
   const [isHovered, setIsHovered] = useState(false);
   const isDraggingRef = useRef(false);
@@ -170,8 +166,6 @@ const TagsDisplayComponent = ({
     );
   });
 
-  track('TagsDisplay', 'render-end');
-
   // DndContext only rendered when hovered - eliminates dnd-kit overhead when not needed
   return (
     <div
@@ -206,8 +200,6 @@ const tagsDisplayPropsAreEqual = (
   prevProps: TagsDisplayProps,
   nextProps: TagsDisplayProps,
 ): boolean => {
-  track('TagsDisplay', 'memo-check');
-
   // If either state is editing, don't memo (need to update for keystroke/fade changes)
   if (prevProps.editingTagName !== null || nextProps.editingTagName !== null) {
     // But if editing the same tag and only editValue changed, we still need to re-render
@@ -250,7 +242,6 @@ const tagsDisplayPropsAreEqual = (
     );
   });
 
-  if (isEqual) track('TagsDisplay', 'memo-hit');
   return isEqual;
 };
 
@@ -270,8 +261,6 @@ const TagListComponent = ({
   onEditTag,
   onDeleteTag,
 }: TagListProps) => {
-  track('TagList', 'render');
-
   const { showToast } = useToast();
 
   // Add new tag input state
@@ -419,8 +408,6 @@ const TagListComponent = ({
     }
   }, [copyInfo, showToast]);
 
-  track('TagList', 'render-end');
-
   return (
     <div className="flex h-full w-full">
       <div className="flex flex-1 flex-col">
@@ -482,8 +469,6 @@ const tagListPropsAreEqual = (
   prevProps: TagListProps,
   nextProps: TagListProps,
 ): boolean => {
-  track('TagList', 'memo-check');
-
   // Check sortable mode and assetId
   if (
     prevProps.sortable !== nextProps.sortable ||
@@ -515,7 +500,7 @@ const tagListPropsAreEqual = (
     return false;
   }
 
-  const isEqual = prevProps.tags.every((prevTag, i) => {
+  return prevProps.tags.every((prevTag, i) => {
     const nextTag = nextProps.tags[i];
     return (
       prevTag.name === nextTag.name &&
@@ -524,9 +509,6 @@ const tagListPropsAreEqual = (
       prevTag.isHighlighted === nextTag.isHighlighted
     );
   });
-
-  if (isEqual) track('TagList', 'memo-hit');
-  return isEqual;
 };
 
 export const TagList = memo(TagListComponent, tagListPropsAreEqual);
