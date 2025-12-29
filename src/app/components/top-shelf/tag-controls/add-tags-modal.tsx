@@ -84,7 +84,7 @@ export const AddTagsModal = ({
     if (pendingCheckTagRef.current !== checkTag) {
       setCheckTag(pendingCheckTagRef.current);
     }
-  });
+  }, [checkTag]);
 
   // Create a memoized selector for getting all tag statuses
   // The selector is recreated when tags change, but returns cached results for unchanged tags

@@ -16,12 +16,7 @@ import {
   getTagSortOptions,
 } from './components';
 import { useKeyboardNavigation } from './hooks';
-import {
-  FilterView,
-  SizeSubViewType,
-  SortDirection,
-  SortType,
-} from './types';
+import { FilterView, SizeSubViewType, SortDirection, SortType } from './types';
 
 // Persist state across popup open/close cycles (module-level variables)
 let persistedActiveView: FilterView = 'tag';
@@ -84,10 +79,7 @@ interface FilterProviderProps {
   onClose: () => void;
 }
 
-export const FilterProvider = ({
-  children,
-  onClose,
-}: FilterProviderProps) => {
+export const FilterProvider = ({ children, onClose }: FilterProviderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Persistent state for view and sort settings (initialized from module-level variables)
@@ -266,6 +258,7 @@ export const FilterProvider = ({
       updateListLength,
       handleKeyDown,
       getSortOptions,
+      setSizeSubView,
     ],
   );
 
