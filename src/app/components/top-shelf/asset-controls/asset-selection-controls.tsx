@@ -3,10 +3,12 @@ import {
   ArrowUpIcon,
   IdentificationIcon,
   NoSymbolIcon,
+  SparklesIcon,
   SquaresPlusIcon,
 } from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import {
@@ -18,15 +20,22 @@ import {
   SortType,
   toggleSortDirection,
 } from '@/app/store/assets';
+import {
+  selectHasReadyModel,
+  selectIsInitialised,
+  setModelsAndProviders,
+} from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   clearSelection,
   selectMultipleAssets,
   selectSelectedAssets,
 } from '@/app/store/selection';
+import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ToolbarDivider } from '../../shared/toolbar-divider';
 
 /**
  * Get the appropriate sort direction label based on sort type
@@ -56,10 +65,48 @@ export const AssetSelectionControls = () => {
   const dispatch = useAppDispatch();
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = selectedAssets.length;
+  const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
   const allAssetsCount = useAppSelector(selectImageCount);
+
+  // Auto-tagger state
+  const [isAutoTaggerModalOpen, setIsAutoTaggerModalOpen] = useState(false);
+  const hasReadyModel = useAppSelector(selectHasReadyModel);
+  const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
+
+  // Fetch auto-tagger models on mount to determine if any are ready
+  useEffect(() => {
+    if (!isAutoTaggerInitialised) {
+      fetch('/api/auto-tagger/models')
+        .then((res) => res.json())
+        .then((data) => {
+          dispatch(setModelsAndProviders(data));
+        })
+        .catch(console.error);
+    }
+  }, [isAutoTaggerInitialised, dispatch]);
+
+  // Prepare selected assets for auto-tagger (only need fileId and extension)
+  const selectedAssetsForTagger = useMemo(
+    () =>
+      selectedAssetsData.map((asset) => ({
+        fileId: asset.fileId,
+        fileExtension: asset.fileExtension,
+      })),
+    [selectedAssetsData],
+  );
+
+  const openAutoTaggerModal = useCallback(
+    () => setIsAutoTaggerModalOpen(true),
+    [],
+  );
+
+  const handleOnCloseAutoTaggerModal = useCallback(
+    () => setIsAutoTaggerModalOpen(false),
+    [],
+  );
 
   const handleClearSelection = useCallback(() => {
     dispatch(clearSelection());
@@ -130,75 +177,104 @@ export const AssetSelectionControls = () => {
   ];
 
   return (
-    <ResponsiveToolbarGroup
-      icon={<IdentificationIcon className="w-4" />}
-      title="Assets"
-      position="left"
-      breakpoint="large"
-    >
-      <Dropdown
-        items={sortTypeItems}
-        selectedValue={sortType}
-        onChange={handleSortTypeChange}
-        buttonClassName={
-          sortType === SortType.SELECTED && selectedAssetsCount === 0
-            ? 'text-slate-300'
-            : ''
-        }
+    <>
+      <ResponsiveToolbarGroup
+        icon={<IdentificationIcon className="w-4" />}
+        title="Assets"
+        position="left"
+        breakpoint="large"
+      >
+        <Dropdown
+          items={sortTypeItems}
+          selectedValue={sortType}
+          onChange={handleSortTypeChange}
+          buttonClassName={
+            sortType === SortType.SELECTED && selectedAssetsCount === 0
+              ? 'text-slate-300'
+              : ''
+          }
+        />
+
+        <Button
+          type="button"
+          onClick={handleToggleSortDirection}
+          variant="ghost"
+          size="medium"
+          title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
+        >
+          {sortDirection === SortDirection.ASC ? (
+            <ArrowUpIcon className="w-4" />
+          ) : (
+            <ArrowDownIcon className="w-4" />
+          )}
+
+          <span className="ml-1 max-xl:hidden">
+            {getSortDirectionLabel(sortType, sortDirection)}
+          </span>
+        </Button>
+
+        <ToolbarDivider />
+
+        <Button
+          type="button"
+          onClick={handleAddAllToSelection}
+          disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title={
+            allFilteredAssetsSelected
+              ? 'All filtered assets already selected'
+              : filteredAssets.length === allAssetsCount
+                ? 'Add all assets to selection'
+                : 'Add all filtered assets to selection'
+          }
+        >
+          <SquaresPlusIcon className="w-4" />
+          <span className="ml-2 max-xl:hidden">
+            {filteredAssets.length === allAssetsCount
+              ? 'Select All'
+              : 'Select Filtered'}
+          </span>
+        </Button>
+
+        <Button
+          type="button"
+          onClick={openAutoTaggerModal}
+          disabled={!hasReadyModel || selectedAssetsCount === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title={
+            !hasReadyModel
+              ? 'Set up auto-tagger first (Project menu)'
+              : selectedAssetsCount === 0
+                ? 'Select assets to auto-tag'
+                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
+          }
+        >
+          <SparklesIcon className="w-4" />
+          <span className="ml-2 max-xl:hidden">Tag</span>
+        </Button>
+
+        <Button
+          type="button"
+          onClick={handleClearSelection}
+          disabled={selectedAssetsCount === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title="Clear selection"
+        >
+          <NoSymbolIcon className="w-4" />
+        </Button>
+      </ResponsiveToolbarGroup>
+
+      <AutoTaggerModal
+        isOpen={isAutoTaggerModalOpen}
+        onClose={handleOnCloseAutoTaggerModal}
+        selectedAssets={selectedAssetsForTagger}
       />
-
-      <Button
-        type="button"
-        onClick={handleToggleSortDirection}
-        variant="ghost"
-        size="medium"
-        title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
-      >
-        {sortDirection === SortDirection.ASC ? (
-          <ArrowUpIcon className="w-4" />
-        ) : (
-          <ArrowDownIcon className="w-4" />
-        )}
-
-        <span className="ml-1 max-xl:hidden">
-          {getSortDirectionLabel(sortType, sortDirection)}
-        </span>
-      </Button>
-
-      <Button
-        type="button"
-        onClick={handleAddAllToSelection}
-        disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
-        variant="ghost"
-        color="slate"
-        size="medium"
-        title={
-          allFilteredAssetsSelected
-            ? 'All filtered assets already selected'
-            : filteredAssets.length === allAssetsCount
-              ? 'Add all assets to selection'
-              : 'Add all filtered assets to selection'
-        }
-      >
-        <SquaresPlusIcon className="w-4" />
-        <span className="ml-2 max-xl:hidden">
-          {filteredAssets.length === allAssetsCount
-            ? 'Select All'
-            : 'Select Filtered'}
-        </span>
-      </Button>
-
-      <Button
-        type="button"
-        onClick={handleClearSelection}
-        disabled={selectedAssetsCount === 0}
-        variant="ghost"
-        color="slate"
-        size="medium"
-        title="Clear selection"
-      >
-        <NoSymbolIcon className="w-4" />
-      </Button>
-    </ResponsiveToolbarGroup>
+    </>
   );
 };

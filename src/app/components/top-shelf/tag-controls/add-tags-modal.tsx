@@ -17,6 +17,7 @@ import { Button } from '../../shared/button';
 import { Checkbox } from '../../shared/checkbox';
 import { Modal } from '../../shared/modal';
 import { MultiTagInput } from '../../shared/multi-tag-input';
+import { RadioGroup } from '../../shared/radio-group';
 import { ScopingCheckboxes } from '../../shared/scoping-checkboxes';
 import { TagStatusLegend } from '../../shared/tag-status-legend';
 
@@ -303,12 +304,19 @@ export const AddTagsModal = ({
           )}
 
           {/* Tag position */}
-          <div className="flex items-center">
-            <Checkbox
-              isSelected={addToStart}
-              onChange={() => setAddToStart((v) => !v)}
-              label="Add new tags to the start"
-              ariaLabel="Add new tags to the start"
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">
+              New tags
+            </label>
+            <RadioGroup
+              name="tagPosition"
+              options={[
+                { value: 'append', label: 'Append to end' },
+                { value: 'prepend', label: 'Prepend to start' },
+              ]}
+              value={addToStart ? 'prepend' : 'append'}
+              onChange={(mode) => setAddToStart(mode === 'prepend')}
+              size="small"
             />
           </div>
 

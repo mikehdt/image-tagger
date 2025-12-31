@@ -4,20 +4,13 @@ import {
   DocumentMinusIcon,
   DocumentPlusIcon,
   PencilIcon,
-  SparklesIcon,
   SwatchIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
-import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { markFilterTagsToDelete } from '@/app/store/assets';
 import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
-import {
-  selectHasReadyModel,
-  selectIsInitialised,
-  setModelsAndProviders,
-} from '@/app/store/auto-tagger';
 import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -35,10 +28,7 @@ import {
   clearSelection,
   selectSelectedAssetsCount,
 } from '@/app/store/selection';
-import {
-  selectAssetsWithActiveFiltersCount,
-  selectSelectedAssetsData,
-} from '@/app/store/selection/combinedSelectors';
+import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { Dropdown, DropdownItem } from '../../shared/dropdown';
@@ -70,45 +60,19 @@ const getTagSortDirectionLabel = (
 const TagActionsComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
-  const [isAutoTaggerModalOpen, setIsAutoTaggerModalOpen] = useState(false);
 
   const dispatch = useAppDispatch();
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
-  const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
   const filterTags = useAppSelector(selectFilterTags);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const filterTagsDeleteState = useAppSelector(selectFilterTagsDeleteState);
   const assetsWithActiveFiltersCount = useAppSelector(
     selectAssetsWithActiveFiltersCount,
   );
-  const hasReadyModel = useAppSelector(selectHasReadyModel);
-  const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
-
-  // Fetch auto-tagger models on mount to determine if any are ready
-  useEffect(() => {
-    if (!isAutoTaggerInitialised) {
-      fetch('/api/auto-tagger/models')
-        .then((res) => res.json())
-        .then((data) => {
-          dispatch(setModelsAndProviders(data));
-        })
-        .catch(console.error);
-    }
-  }, [isAutoTaggerInitialised, dispatch]);
 
   // Tag sort state
   const tagSortType = useAppSelector(selectTagSortType);
   const tagSortDirection = useAppSelector(selectTagSortDirection);
-
-  // Prepare selected assets for auto-tagger (only need fileId and extension)
-  const selectedAssetsForTagger = useMemo(
-    () =>
-      selectedAssetsData.map((asset) => ({
-        fileId: asset.fileId,
-        fileExtension: asset.fileExtension,
-      })),
-    [selectedAssetsData],
-  );
 
   // Determine if Add Tags button should be enabled
   const canAddTags = selectedAssetsCount > 0 || hasActiveFilters;
@@ -183,16 +147,6 @@ const TagActionsComponent = () => {
   const handleOnCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
   }, []);
-
-  const openAutoTaggerModal = useCallback(
-    () => setIsAutoTaggerModalOpen(true),
-    [],
-  );
-
-  const handleOnCloseAutoTaggerModal = useCallback(
-    () => setIsAutoTaggerModalOpen(false),
-    [],
-  );
 
   // Tag sort handlers
   const handleSortTypeChange = useCallback(
@@ -317,22 +271,6 @@ const TagActionsComponent = () => {
           <span className="ml-2 max-xl:hidden">Delete</span>
         </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={openAutoTaggerModal}
-          disabled={!hasReadyModel || selectedAssetsCount === 0}
-          title={
-            !hasReadyModel
-              ? 'Set up auto-tagger first (Project menu)'
-              : selectedAssetsCount === 0
-                ? 'Select assets to auto-tag'
-                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
-          }
-        >
-          <SparklesIcon className="w-4" />
-          <span className="ml-2 max-xl:hidden">Tag</span>
-        </Button>
       </ResponsiveToolbarGroup>
 
       <AddTagsModal
@@ -347,12 +285,6 @@ const TagActionsComponent = () => {
         isOpen={isEditModalOpen}
         onClose={handleOnCloseEditModal}
         filterTags={filterTags}
-      />
-
-      <AutoTaggerModal
-        isOpen={isAutoTaggerModalOpen}
-        onClose={handleOnCloseAutoTaggerModal}
-        selectedAssets={selectedAssetsForTagger}
       />
     </>
   );
