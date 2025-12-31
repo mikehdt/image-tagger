@@ -161,7 +161,12 @@ export const saveAsset = createAsyncThunk<
     const newTagStatus = createCleanTagStatus(updateTags);
 
     // Create and return the save result object
-    return createSaveAssetResult(asset, updateTags, newTagStatus, imageIndexById);
+    return createSaveAssetResult(
+      asset,
+      updateTags,
+      newTagStatus,
+      imageIndexById,
+    );
   }
 
   throw new Error(`Unable to save the asset ${fileId}`);

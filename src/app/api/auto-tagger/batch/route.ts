@@ -51,10 +51,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (!assets || !Array.isArray(assets) || assets.length === 0) {
-      return new Response(JSON.stringify({ error: 'assets array is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'assets array is required' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     const model = getModel(modelId);
@@ -88,7 +91,9 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         const sendEvent = (event: BatchProgressEvent) => {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(event)}\n\n`),
+          );
         };
 
         try {
@@ -168,7 +173,8 @@ export async function POST(request: NextRequest) {
         } catch (err) {
           sendEvent({
             type: 'error',
-            error: err instanceof Error ? err.message : 'Batch processing failed',
+            error:
+              err instanceof Error ? err.message : 'Batch processing failed',
           });
           controller.close();
         }

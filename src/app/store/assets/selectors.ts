@@ -20,18 +20,15 @@ const selectTagCountsCache = (state: RootState) => state.assets.tagCountsCache;
 // Exported for direct use by components that need global tag counts
 export const selectTagCounts = wrapSelector(
   'selectTagCounts',
-  createSelector(
-    [selectAllImages, selectTagCountsCache],
-    (images, cache) => {
-      // If cache exists, use it; otherwise rebuild
-      // Note: The rebuilt cache is returned but not stored in state here
-      // The cache is populated on load and invalidated on mutations
-      if (cache !== null) {
-        return cache;
-      }
-      return buildTagCountsCache(images);
-    },
-  ),
+  createSelector([selectAllImages, selectTagCountsCache], (images, cache) => {
+    // If cache exists, use it; otherwise rebuild
+    // Note: The rebuilt cache is returned but not stored in state here
+    // The cache is populated on load and invalidated on mutations
+    if (cache !== null) {
+      return cache;
+    }
+    return buildTagCountsCache(images);
+  }),
 );
 
 // Derived selectors
@@ -52,7 +49,8 @@ export const selectAssetHasModifiedTags = createSelector(
 );
 
 // Selectors for tag sorting from project store
-const selectTagSortType = (state: RootState) => state.project.config.tagSortType;
+const selectTagSortType = (state: RootState) =>
+  state.project.config.tagSortType;
 const selectTagSortDirection = (state: RootState) =>
   state.project.config.tagSortDirection;
 

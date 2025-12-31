@@ -93,37 +93,41 @@ const cleanupInvalidFilters = (
   let hasChanges = false;
 
   // Clean up each filter type using the generic helper
-  hasChanges = cleanupFilterType(
-    filters.filterTags,
-    existing.tags,
-    clearTagFilters,
-    toggleTagFilter,
-    dispatch,
-  ) || hasChanges;
+  hasChanges =
+    cleanupFilterType(
+      filters.filterTags,
+      existing.tags,
+      clearTagFilters,
+      toggleTagFilter,
+      dispatch,
+    ) || hasChanges;
 
-  hasChanges = cleanupFilterType(
-    filters.filterSizes,
-    existing.sizes,
-    clearSizeFilters,
-    toggleSizeFilter,
-    dispatch,
-  ) || hasChanges;
+  hasChanges =
+    cleanupFilterType(
+      filters.filterSizes,
+      existing.sizes,
+      clearSizeFilters,
+      toggleSizeFilter,
+      dispatch,
+    ) || hasChanges;
 
-  hasChanges = cleanupFilterType(
-    filters.filterBuckets,
-    existing.buckets,
-    clearBucketFilters,
-    toggleBucketFilter,
-    dispatch,
-  ) || hasChanges;
+  hasChanges =
+    cleanupFilterType(
+      filters.filterBuckets,
+      existing.buckets,
+      clearBucketFilters,
+      toggleBucketFilter,
+      dispatch,
+    ) || hasChanges;
 
-  hasChanges = cleanupFilterType(
-    filters.filterExtensions,
-    existing.extensions,
-    clearExtensionFilters,
-    toggleExtensionFilter,
-    dispatch,
-  ) || hasChanges;
+  hasChanges =
+    cleanupFilterType(
+      filters.filterExtensions,
+      existing.extensions,
+      clearExtensionFilters,
+      toggleExtensionFilter,
+      dispatch,
+    ) || hasChanges;
 
   return hasChanges;
 };

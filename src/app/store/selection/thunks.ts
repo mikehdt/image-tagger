@@ -464,7 +464,8 @@ export const handleAssetClick =
     }
 
     // No shift or no valid previous click - do a normal toggle
-    const isCurrentlySelected = state.selection.selectedAssets.includes(assetId);
+    const isCurrentlySelected =
+      state.selection.selectedAssets.includes(assetId);
     const newAction = isCurrentlySelected ? 'deselect' : 'select';
 
     dispatch(toggleAssetSelection(assetId));
