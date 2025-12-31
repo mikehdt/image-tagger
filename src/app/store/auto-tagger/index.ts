@@ -3,7 +3,7 @@
  * Manages model availability, download state, and tagging configuration
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import type {
   AutoTaggerState,
@@ -161,15 +161,7 @@ const autoTaggerSlice = createSlice({
     selectDownloadProgress: (state) => state.downloadProgress,
     selectIsSetupModalOpen: (state) => state.isSetupModalOpen,
     selectError: (state) => state.error,
-
-    // Derived selectors
     selectIsDownloading: (state) => state.downloadProgress !== null,
-    selectHasReadyModel: (state) =>
-      state.models.some((m) => m.status === 'ready'),
-    selectReadyModels: (state) =>
-      state.models.filter((m) => m.status === 'ready'),
-    selectSelectedModel: (state) =>
-      state.models.find((m) => m.id === state.selectedModelId) || null,
   },
 });
 
@@ -193,7 +185,7 @@ export const {
   clearError,
 } = autoTaggerSlice.actions;
 
-// Export selectors
+// Export basic selectors from slice
 export const {
   selectIsInitialised,
   selectIsLoading,
@@ -204,10 +196,22 @@ export const {
   selectIsSetupModalOpen,
   selectError,
   selectIsDownloading,
-  selectHasReadyModel,
-  selectReadyModels,
-  selectSelectedModel,
 } = autoTaggerSlice.selectors;
+
+// Memoized derived selectors (to avoid creating new arrays/objects on each call)
+export const selectHasReadyModel = createSelector([selectModels], (models) =>
+  models.some((m) => m.status === 'ready'),
+);
+
+export const selectReadyModels = createSelector([selectModels], (models) =>
+  models.filter((m) => m.status === 'ready'),
+);
+
+export const selectSelectedModel = createSelector(
+  [selectModels, selectSelectedModelId],
+  (models, selectedModelId) =>
+    models.find((m) => m.id === selectedModelId) || null,
+);
 
 // Export types
 export * from './types';

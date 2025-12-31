@@ -166,23 +166,23 @@ export function AutoTaggerSetupModal() {
       preventClose={isDownloading}
       className="max-w-lg"
     >
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-slate-800">
           Set Up Auto-Tagger
         </h2>
 
         {isDownloading ? (
           // Download progress view
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <p className="text-sm text-slate-600">
               Downloading {selectedModel?.name}...
             </p>
 
             {/* Progress bar */}
-            <div className="space-y-2">
-              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+            <div className="flex flex-col gap-2">
+              <div className="h-3 w-full overflow-hidden rounded-full bg-linear-to-t from-slate-200 to-slate-300 inset-shadow-xs inset-shadow-slate-400">
                 <div
-                  className="h-full bg-indigo-500 transition-all duration-300"
+                  className="h-full bg-linear-to-t from-indigo-600 to-indigo-500 inset-shadow-xs inset-shadow-indigo-300 transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -220,7 +220,7 @@ export function AutoTaggerSetupModal() {
             )}
 
             {/* Model list */}
-            <div className="max-h-64 space-y-2 overflow-y-auto">
+            <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
               {models.map((model) => (
                 <ModelOption
                   key={model.id}

@@ -8,6 +8,7 @@ import { Checkbox } from '@/app/components/shared/checkbox';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { Modal } from '@/app/components/shared/modal';
 import { MultiTagInput } from '@/app/components/shared/multi-tag-input';
+import { RadioGroup } from '@/app/components/shared/radio-group';
 import type {
   AutoTaggerSettings,
   TaggerOptions,
@@ -39,6 +40,12 @@ type TaggingProgress = {
 type TaggingResult = {
   fileId: string;
   tags: string[];
+};
+
+type TaggingSummary = {
+  imagesProcessed: number;
+  imagesWithNewTags: number;
+  totalTagsFound: number;
 };
 
 type AutoTaggerModalProps = {
@@ -76,6 +83,7 @@ export function AutoTaggerModal({
   const [isTagging, setIsTagging] = useState(false);
   const [progress, setProgress] = useState<TaggingProgress | null>(null);
   const [results, setResults] = useState<TaggingResult[]>([]);
+  const [summary, setSummary] = useState<TaggingSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch models callback
@@ -116,7 +124,12 @@ export function AutoTaggerModal({
             includeRatingTags:
               savedSettings.includeRatingTags ?? prev.includeRatingTags,
             excludeTags: savedSettings.excludeTags ?? prev.excludeTags,
-            tagInsertMode: savedSettings.tagInsertMode ?? prev.tagInsertMode,
+            // Validate tagInsertMode is still a valid option (we removed 'confidence')
+            tagInsertMode:
+              savedSettings.tagInsertMode === 'prepend' ||
+              savedSettings.tagInsertMode === 'append'
+                ? savedSettings.tagInsertMode
+                : prev.tagInsertMode,
           }));
 
           // Apply saved model selection
@@ -139,11 +152,10 @@ export function AutoTaggerModal({
     [readyModels],
   );
 
-  // Insert mode dropdown items
-  const insertModeItems: DropdownItem<TagInsertMode>[] = [
-    { value: 'confidence', label: 'By Confidence' },
-    { value: 'prepend', label: 'Prepend to Start' },
-    { value: 'append', label: 'Append to End' },
+  // Insert mode options for radio group
+  const insertModeOptions: { value: TagInsertMode; label: string }[] = [
+    { value: 'prepend', label: 'Prepend to start' },
+    { value: 'append', label: 'Append to end' },
   ];
 
   const handleModelChange = useCallback(
@@ -166,6 +178,7 @@ export function AutoTaggerModal({
       // Reset state after closing
       setProgress(null);
       setResults([]);
+      setSummary(null);
       setError(null);
       setSettingsLoaded(false);
     }
@@ -194,6 +207,7 @@ export function AutoTaggerModal({
     setIsTagging(true);
     setProgress({ current: 0, total: selectedAssets.length });
     setResults([]);
+    setSummary(null);
     setError(null);
 
     try {
@@ -220,58 +234,128 @@ export function AutoTaggerModal({
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       const collectedResults: TaggingResult[] = [];
+      let buffer = '';
+      let receivedComplete = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const text = decoder.decode(value);
-        const lines = text.split('\n');
+        // Append new data to buffer
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete lines from buffer
+        const lines = buffer.split('\n');
+        // Keep the last potentially incomplete line in the buffer
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const event = JSON.parse(line.slice(6));
+            try {
+              const event = JSON.parse(line.slice(6));
 
-            if (event.type === 'progress') {
-              setProgress({
-                current: event.current,
-                total: event.total,
-                currentFileId: event.fileId,
-              });
-            } else if (event.type === 'result') {
-              collectedResults.push({
-                fileId: event.fileId,
-                tags: event.tags,
-              });
-            } else if (event.type === 'error' && event.fileId) {
-              // Per-image error, continue processing
-              console.warn(`Error tagging ${event.fileId}:`, event.error);
-            } else if (event.type === 'error') {
-              // Global error
-              throw new Error(event.error);
-            } else if (event.type === 'complete') {
-              // Apply all collected tags to assets
-              applyTagsToAssets(collectedResults);
+              if (event.type === 'progress') {
+                setProgress({
+                  current: event.current,
+                  total: event.total,
+                  currentFileId: event.fileId,
+                });
+              } else if (event.type === 'result') {
+                collectedResults.push({
+                  fileId: event.fileId,
+                  tags: event.tags || [],
+                });
+              } else if (event.type === 'error' && event.fileId) {
+                // Per-image error, continue processing
+                console.warn(`Error tagging ${event.fileId}:`, event.error);
+              } else if (event.type === 'error') {
+                // Global error
+                throw new Error(event.error);
+              } else if (event.type === 'complete') {
+                receivedComplete = true;
+                // Calculate summary before applying tags
+                const imagesWithNewTags = collectedResults.filter(
+                  (r) => r.tags.length > 0,
+                ).length;
+                const totalTagsFound = collectedResults.reduce(
+                  (sum, r) => sum + r.tags.length,
+                  0,
+                );
 
-              // Save settings as defaults for this project
-              if (projectInfo.projectName) {
-                const settingsToSave: AutoTaggerSettings = {
-                  defaultModelId: selectedModelId,
-                  generalThreshold: options.generalThreshold,
-                  characterThreshold: options.characterThreshold,
-                  removeUnderscore: options.removeUnderscore,
-                  includeCharacterTags: options.includeCharacterTags,
-                  includeRatingTags: options.includeRatingTags,
-                  excludeTags: options.excludeTags,
-                  tagInsertMode: options.tagInsertMode,
-                };
-                saveAutoTaggerSettings(
-                  projectInfo.projectName,
-                  settingsToSave,
-                ).catch(console.error);
+                setSummary({
+                  imagesProcessed: collectedResults.length,
+                  imagesWithNewTags,
+                  totalTagsFound,
+                });
+
+                // Apply all collected tags to assets
+                applyTagsToAssets(collectedResults);
+
+                // Save settings as defaults for this project
+                if (projectInfo.projectName) {
+                  const settingsToSave: AutoTaggerSettings = {
+                    defaultModelId: selectedModelId,
+                    generalThreshold: options.generalThreshold,
+                    characterThreshold: options.characterThreshold,
+                    removeUnderscore: options.removeUnderscore,
+                    includeCharacterTags: options.includeCharacterTags,
+                    includeRatingTags: options.includeRatingTags,
+                    excludeTags: options.excludeTags,
+                    tagInsertMode: options.tagInsertMode,
+                  };
+                  saveAutoTaggerSettings(
+                    projectInfo.projectName,
+                    settingsToSave,
+                  ).catch(console.error);
+                }
               }
+            } catch (parseErr) {
+              console.warn('Failed to parse SSE event:', line, parseErr);
             }
           }
+        }
+      }
+
+      // Process any remaining data in buffer
+      if (buffer.startsWith('data: ')) {
+        try {
+          const event = JSON.parse(buffer.slice(6));
+
+          if (event.type === 'result') {
+            collectedResults.push({
+              fileId: event.fileId,
+              tags: event.tags,
+            });
+          } else if (event.type === 'complete') {
+            receivedComplete = true;
+          }
+        } catch (parseErr) {
+          console.warn('Failed to parse final SSE event:', buffer, parseErr);
+        }
+      }
+
+      // If we exit the loop without a complete event, still set the summary
+      // (this can happen if the stream ends unexpectedly)
+      if (!receivedComplete) {
+        if (collectedResults.length > 0) {
+          const imagesWithNewTags = collectedResults.filter(
+            (r) => r.tags.length > 0,
+          ).length;
+          const totalTagsFound = collectedResults.reduce(
+            (sum, r) => sum + r.tags.length,
+            0,
+          );
+          setSummary({
+            imagesProcessed: collectedResults.length,
+            imagesWithNewTags,
+            totalTagsFound,
+          });
+          applyTagsToAssets(collectedResults);
+        } else {
+          // No results received at all - something went wrong
+          throw new Error(
+            'No results received from tagger. Check server logs for errors.',
+          );
         }
       }
 
@@ -295,8 +379,6 @@ export function AutoTaggerModal({
     ? Math.round((progress.current / progress.total) * 100)
     : 0;
 
-  const totalTagsAdded = results.reduce((sum, r) => sum + r.tags.length, 0);
-
   return (
     <Modal
       isOpen={isOpen}
@@ -304,7 +386,7 @@ export function AutoTaggerModal({
       preventClose={isTagging}
       className="max-w-xl"
     >
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-slate-800">
           Auto-Tag Images
         </h2>
@@ -319,16 +401,16 @@ export function AutoTaggerModal({
           </div>
         ) : isTagging ? (
           // Tagging in progress
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <p className="text-sm text-slate-600">
               Tagging image {progress?.current || 0} of {progress?.total || 0}
               ...
             </p>
 
-            <div className="space-y-2">
-              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+            <div className="flex flex-col gap-2">
+              <div className="h-3 w-full overflow-hidden rounded-full bg-linear-to-t from-slate-200 to-slate-300 inset-shadow-xs inset-shadow-slate-400">
                 <div
-                  className="h-full bg-indigo-500 transition-all duration-300"
+                  className="h-full bg-linear-to-t from-indigo-600 to-indigo-500 inset-shadow-xs inset-shadow-indigo-300 transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -341,19 +423,37 @@ export function AutoTaggerModal({
               Please wait while images are being tagged.
             </p>
           </div>
-        ) : results.length > 0 ? (
-          // Tagging complete
-          <div className="space-y-4">
+        ) : summary ? (
+          // Tagging complete - show summary
+          <div className="flex flex-col gap-4">
             <div className="rounded-md bg-emerald-50 p-4 text-sm text-emerald-800">
               <p className="font-medium">Tagging complete!</p>
-              <p className="mt-1">
-                Added {totalTagsAdded} tags across {results.length} images.
-              </p>
+              <ul className="mt-2 space-y-1">
+                <li>
+                  Processed {summary.imagesProcessed} image
+                  {summary.imagesProcessed !== 1 ? 's' : ''}
+                </li>
+                <li>
+                  Found {summary.totalTagsFound} tag
+                  {summary.totalTagsFound !== 1 ? 's' : ''} across{' '}
+                  {summary.imagesWithNewTags} image
+                  {summary.imagesWithNewTags !== 1 ? 's' : ''}
+                </li>
+                {summary.imagesProcessed > summary.imagesWithNewTags && (
+                  <li className="text-emerald-600">
+                    {summary.imagesProcessed - summary.imagesWithNewTags} image
+                    {summary.imagesProcessed - summary.imagesWithNewTags !== 1
+                      ? 's'
+                      : ''}{' '}
+                    had no new tags (threshold not met or already tagged)
+                  </li>
+                )}
+              </ul>
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={handleClose} color="slate" size="medium">
-                Close
+              <Button onClick={handleClose} color="indigo" size="medium">
+                Done
               </Button>
             </div>
           </div>
@@ -372,7 +472,7 @@ export function AutoTaggerModal({
             )}
 
             {/* Model selection */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
                 Model
               </label>
@@ -385,7 +485,7 @@ export function AutoTaggerModal({
 
             {/* Thresholds */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-slate-700">
                   General Threshold: {options.generalThreshold.toFixed(2)}
                 </label>
@@ -405,7 +505,7 @@ export function AutoTaggerModal({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-slate-700">
                   Character Threshold: {options.characterThreshold.toFixed(2)}
                 </label>
@@ -464,19 +564,21 @@ export function AutoTaggerModal({
             </div>
 
             {/* Tag insert mode */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
-                Tag Ordering
+                New tags
               </label>
-              <Dropdown
-                items={insertModeItems}
-                selectedValue={options.tagInsertMode}
+              <RadioGroup
+                name="tagInsertMode"
+                options={insertModeOptions}
+                value={options.tagInsertMode}
                 onChange={(mode) => handleOptionChange('tagInsertMode', mode)}
+                size="small"
               />
             </div>
 
             {/* Exclude tags */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
                 Exclude Tags
               </label>
@@ -489,7 +591,7 @@ export function AutoTaggerModal({
             </div>
 
             {/* Include tags */}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">
                 Always Include Tags
               </label>

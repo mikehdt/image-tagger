@@ -327,11 +327,11 @@ const TagActionsComponent = () => {
               ? 'Set up auto-tagger first (Project menu)'
               : selectedAssetsCount === 0
                 ? 'Select assets to auto-tag'
-                : `Auto-tag ${selectedAssetsCount} selected assets`
+                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
           }
         >
           <SparklesIcon className="w-4" />
-          <span className="ml-2 max-xl:hidden">Auto</span>
+          <span className="ml-2 max-xl:hidden">Tag</span>
         </Button>
       </ResponsiveToolbarGroup>
 

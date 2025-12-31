@@ -52,7 +52,7 @@ export type TaggerOutput = {
   rating: TagResult[];
 };
 
-export type TagInsertMode = 'confidence' | 'prepend' | 'append';
+export type TagInsertMode = 'prepend' | 'append';
 
 export type TaggerOptions = {
   generalThreshold: number; // Default 0.35
@@ -73,7 +73,7 @@ export const DEFAULT_TAGGER_OPTIONS: TaggerOptions = {
   includeRatingTags: false, // Excluded by default
   excludeTags: [],
   includeTags: [],
-  tagInsertMode: 'confidence',
+  tagInsertMode: 'append',
 };
 
 /**

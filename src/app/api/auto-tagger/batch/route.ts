@@ -3,6 +3,7 @@
  * Tag multiple images with streaming progress updates via SSE
  */
 
+import fs from 'fs';
 import { NextRequest } from 'next/server';
 import path from 'path';
 
@@ -10,6 +11,25 @@ import type { TaggerOptions, TagResult } from '@/app/services/auto-tagger';
 import { DEFAULT_TAGGER_OPTIONS, getModel } from '@/app/services/auto-tagger';
 import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
 import { tagImage } from '@/app/services/auto-tagger/providers/wd14/inference';
+
+// Server-side config reading function
+const getServerConfig = () => {
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const configContent = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(configContent);
+      return {
+        projectsFolder: config.projectsFolder || 'public/assets',
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to read server config:', error);
+  }
+  return {
+    projectsFolder: 'public/assets',
+  };
+};
 
 type BatchTagRequest = {
   modelId: string;
@@ -30,7 +50,27 @@ type BatchProgressEvent = {
 export async function POST(request: NextRequest) {
   try {
     const body: BatchTagRequest = await request.json();
-    const { modelId, projectPath, assets, options: userOptions } = body;
+    const { modelId, projectPath: rawProjectPath, assets, options: userOptions } = body;
+
+    // Resolve to absolute path
+    // The projectPath from client could be:
+    // 1. An absolute path (e.g., "C:\images\project")
+    // 2. A path relative to cwd (e.g., "public/assets/project")
+    // 3. Just the project folder name if config uses an absolute projectsFolder
+    let projectPath: string;
+    if (path.isAbsolute(rawProjectPath)) {
+      projectPath = rawProjectPath;
+    } else {
+      // Check if the path exists as-is (relative to cwd)
+      const resolvedPath = path.resolve(rawProjectPath);
+      if (fs.existsSync(resolvedPath)) {
+        projectPath = resolvedPath;
+      } else {
+        // Try with the configured projects folder
+        const config = getServerConfig();
+        projectPath = path.resolve(path.join(config.projectsFolder, rawProjectPath));
+      }
+    }
 
     // Validation
     if (!modelId) {
@@ -40,7 +80,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!projectPath) {
+    if (!rawProjectPath) {
       return new Response(
         JSON.stringify({ error: 'projectPath is required' }),
         {
@@ -101,7 +141,7 @@ export async function POST(request: NextRequest) {
             const asset = assets[i];
             const imagePath = path.join(
               projectPath,
-              `${asset.fileId}${asset.fileExtension}`,
+              `${asset.fileId}.${asset.fileExtension}`,
             );
 
             // Send progress update
@@ -139,16 +179,9 @@ export async function POST(request: NextRequest) {
               }));
               allTags.push(...includedTags);
 
-              // Sort and extract tag names based on insert mode
-              let tagNames: string[];
-              if (options.tagInsertMode === 'confidence') {
-                // Sort by confidence descending
-                allTags.sort((a, b) => b.confidence - a.confidence);
-                tagNames = allTags.map((t) => t.tag);
-              } else {
-                // For prepend/append, keep model's confidence order
-                tagNames = allTags.map((t) => t.tag);
-              }
+              // Sort by confidence descending and extract tag names
+              allTags.sort((a, b) => b.confidence - a.confidence);
+              let tagNames = allTags.map((t) => t.tag);
 
               // Remove duplicates while preserving order
               tagNames = [...new Set(tagNames)];

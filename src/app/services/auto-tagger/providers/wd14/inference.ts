@@ -41,6 +41,8 @@ async function loadTagLabels(model: TaggerModel): Promise<TagLabels> {
   const lines = csvContent.trim().split('\n');
 
   // Skip header row
+  // The model output index corresponds to the row order in the CSV (0-indexed, after header)
+  // tag_id column is NOT the model output index - it's just a reference ID
   const names: string[] = [];
   const ratingIndices: number[] = [];
   const generalIndices: number[] = [];
@@ -49,22 +51,24 @@ async function loadTagLabels(model: TaggerModel): Promise<TagLabels> {
   for (let i = 1; i < lines.length; i++) {
     const parts = lines[i].split(',');
     if (parts.length >= 3) {
-      const tagId = parseInt(parts[0], 10);
+      // Model output index is (row number - 1) since we skip header
+      const modelIndex = i - 1;
       const name = parts[1];
       const category = parseInt(parts[2], 10);
 
-      names.push(name);
+      // Store name at the model output index
+      names[modelIndex] = name;
 
       // Categories: 0 = general, 4 = character, 9 = rating
       switch (category) {
         case 0:
-          generalIndices.push(tagId);
+          generalIndices.push(modelIndex);
           break;
         case 4:
-          characterIndices.push(tagId);
+          characterIndices.push(modelIndex);
           break;
         case 9:
-          ratingIndices.push(tagId);
+          ratingIndices.push(modelIndex);
           break;
       }
     }
