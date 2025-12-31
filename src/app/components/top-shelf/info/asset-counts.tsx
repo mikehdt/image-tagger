@@ -4,7 +4,11 @@ import {
   selectFilteredAssetsCount,
   selectImageCount,
 } from '@/app/store/assets';
-import { selectFilterMode, selectHasActiveFilters } from '@/app/store/filters';
+import {
+  selectFilterMode,
+  selectHasActiveFilters,
+  selectShowModified,
+} from '@/app/store/filters';
 import { FilterMode } from '@/app/store/filters/types';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
@@ -13,6 +17,7 @@ const AssetCountsComponent = () => {
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
   const filtersActive = useAppSelector(selectHasActiveFilters);
   const filterMode = useAppSelector(selectFilterMode);
+  const showModified = useAppSelector(selectShowModified);
   const allAssetsCount = useAppSelector(selectImageCount);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
@@ -23,7 +28,7 @@ const AssetCountsComponent = () => {
         <span className="text-slate-400">images total</span>
       </div>
 
-      {filtersActive && filterMode !== FilterMode.SHOW_ALL ? (
+      {filtersActive && (filterMode !== FilterMode.SHOW_ALL || showModified) ? (
         <div className="flex items-center gap-1 border-l border-l-slate-300 pl-2">
           <span className="text-emerald-600">{filteredCount}</span>
           <span className="text-slate-400">filtered</span>
