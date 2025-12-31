@@ -18,8 +18,10 @@ import {
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterMode,
+  selectFilenamePatterns,
   selectFilterSizes,
   selectFilterTags,
+  selectHasActiveFilters,
   selectShowModified,
   setTagFilterMode,
   toggleModifiedFilter,
@@ -39,9 +41,11 @@ const FilterModeControlsComponent = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filenamePatterns = useAppSelector(selectFilenamePatterns);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
   const filterModifiedActive = useAppSelector(selectShowModified);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const hasActiveFilters = useAppSelector(selectHasActiveFilters);
 
   // Action handlers
   const handleSetTagFilterMode = useCallback(
@@ -57,25 +61,17 @@ const FilterModeControlsComponent = () => {
     [dispatch],
   );
 
-  // Derive filter selection active state (for traditional tag/size/bucket/extension filters)
+  // Derive filter selection active state (for traditional tag/size/bucket/extension/filename filters)
   const filterSelectionActive = !!(
     filterTags.length ||
     filterSizes.length ||
     filterBuckets.length ||
-    filterExtensions.length
+    filterExtensions.length ||
+    filenamePatterns.length
   );
 
   // Check if we have selected assets
   const hasSelectedAssets = selectedAssetsCount > 0;
-
-  // Derive overall filter active state
-  const filterActive = !!(
-    filterTags.length ||
-    filterSizes.length ||
-    filterBuckets.length ||
-    filterExtensions.length ||
-    filterModifiedActive
-  );
 
   // Create filter mode dropdown items
   const filterModeItems: DropdownItem<FilterMode>[] = [
@@ -155,8 +151,8 @@ const FilterModeControlsComponent = () => {
         variant="ghost"
         type="button"
         onClick={handleClearFilters}
-        disabled={!filterActive}
-        ghostDisabled={!filterActive}
+        disabled={!hasActiveFilters}
+        ghostDisabled={!hasActiveFilters}
         size="medium"
         className="flex items-center"
       >
