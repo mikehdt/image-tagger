@@ -4,6 +4,7 @@ import {
   CalculatorIcon,
   ChevronDownIcon,
   CubeIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -11,6 +12,7 @@ import { memo, useCallback, useId, useRef, useState } from 'react';
 
 import { Popup, usePopup } from '@/app/components/shared/popup-v2';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
+import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
 
@@ -191,6 +193,11 @@ const ProjectMenuComponent = () => {
     setIsBucketModalOpen(false);
   }, []);
 
+  const handleOpenAutoTaggerSetup = useCallback(() => {
+    closePopup(popupId);
+    dispatch(openSetupModal());
+  }, [closePopup, popupId, dispatch]);
+
   if (!projectName) {
     return null;
   }
@@ -242,6 +249,11 @@ const ProjectMenuComponent = () => {
             icon={<CalculatorIcon className="w-5" />}
             label="Bucket Crop Tool"
             onClick={handleOpenBucketModal}
+          />
+          <MenuItem
+            icon={<SparklesIcon className="w-5" />}
+            label="Set Up Auto-Tagger"
+            onClick={handleOpenAutoTaggerSetup}
           />
           <MenuItem
             icon={<ArrowLeftCircleIcon className="w-5" />}

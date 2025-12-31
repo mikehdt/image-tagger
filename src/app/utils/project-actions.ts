@@ -6,6 +6,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 import { isSupportedImageExtension } from '@/app/constants';
+import type { AutoTaggerSettings } from '@/app/services/auto-tagger';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -34,6 +35,7 @@ export type ProjectConfig = {
   thumbnail?: boolean;
   hidden?: boolean;
   featured?: boolean;
+  autoTagger?: AutoTaggerSettings;
 };
 
 type CentralizedProjectInfo = ProjectConfig;
@@ -392,6 +394,37 @@ export const removeProjectThumbnail = async (
     return { success: true };
   } catch (error) {
     console.error('Error removing project thumbnail:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get auto-tagger settings for a project
+ */
+export const getAutoTaggerSettings = async (
+  projectName: string,
+): Promise<AutoTaggerSettings | null> => {
+  try {
+    const config = readCentralizedProjectInfo(projectName);
+    return config?.autoTagger || null;
+  } catch (error) {
+    console.error('Error reading auto-tagger settings:', error);
+    return null;
+  }
+};
+
+/**
+ * Save auto-tagger settings for a project
+ */
+export const saveAutoTaggerSettings = async (
+  projectName: string,
+  settings: AutoTaggerSettings,
+): Promise<{ success: boolean }> => {
+  try {
+    await updateProject(projectName, { autoTagger: settings });
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving auto-tagger settings:', error);
     throw error;
   }
 };

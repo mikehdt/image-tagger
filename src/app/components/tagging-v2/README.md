@@ -35,6 +35,7 @@ TaggingManager           # Redux integration layer, provides handlers
 ## Visual States
 
 Tags display different colours based on their state:
+
 - **Saved** (teal): Tag exists in the source file
 - **To Add** (amber): New tag pending save
 - **Dirty** (indigo): Tag modified pending save
@@ -43,6 +44,7 @@ Tags display different colours based on their state:
 ## Duplicate Detection
 
 When typing in the add or edit input matches an existing tag:
+
 1. All other tags fade out (opacity 25%, non-interactive)
 2. The matching tag remains visible but non-interactive (no edit/delete/drag)
 3. Submit is disabled until the duplicate is resolved
@@ -51,20 +53,20 @@ When typing in the add or edit input matches an existing tag:
 
 ### TaggingManager
 
-| Prop      | Type     | Description                        |
-| --------- | -------- | ---------------------------------- |
-| `assetId` | `string` | The asset ID to manage tags for    |
+| Prop      | Type     | Description                     |
+| --------- | -------- | ------------------------------- |
+| `assetId` | `string` | The asset ID to manage tags for |
 
 ### TagList
 
-| Prop          | Type                          | Description                         |
-| ------------- | ----------------------------- | ----------------------------------- |
-| `tags`        | `TagData[]`                   | Array of tag objects to display     |
-| `sortable`    | `boolean`                     | Enable drag-and-drop reordering     |
-| `assetId`     | `string`                      | Asset identifier for DnD context    |
-| `sensors`     | `SensorDescriptor[]`          | DnD sensors from useSensors         |
-| `onDragEnd`   | `(event: DragEndEvent) => void` | Called when drag completes        |
-| `onAddTag`    | `(tagName: string) => void`   | Called to add a new tag             |
-| `onToggleTag` | `(tagName: string) => void`   | Called to toggle tag filter         |
-| `onEditTag`   | `(old: string, new: string) => void` | Called to rename a tag       |
-| `onDeleteTag` | `(tagName: string) => void`   | Called to mark tag for deletion     |
+| Prop          | Type                                 | Description                      |
+| ------------- | ------------------------------------ | -------------------------------- |
+| `tags`        | `TagData[]`                          | Array of tag objects to display  |
+| `sortable`    | `boolean`                            | Enable drag-and-drop reordering  |
+| `assetId`     | `string`                             | Asset identifier for DnD context |
+| `sensors`     | `SensorDescriptor[]`                 | DnD sensors from useSensors      |
+| `onDragEnd`   | `(event: DragEndEvent) => void`      | Called when drag completes       |
+| `onAddTag`    | `(tagName: string) => void`          | Called to add a new tag          |
+| `onToggleTag` | `(tagName: string) => void`          | Called to toggle tag filter      |
+| `onEditTag`   | `(old: string, new: string) => void` | Called to rename a tag           |
+| `onDeleteTag` | `(tagName: string) => void`          | Called to mark tag for deletion  |

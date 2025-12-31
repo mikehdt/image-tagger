@@ -141,7 +141,11 @@ const AssetComponent = ({
   // previewState 'select' means "would become selected" (show as selected)
   // previewState 'deselect' means "would become deselected" (show as deselected)
   const showAsSelected =
-    previewState === 'select' ? true : previewState === 'deselect' ? false : isSelected;
+    previewState === 'select'
+      ? true
+      : previewState === 'deselect'
+        ? false
+        : isSelected;
   const isPreview = previewState !== null && previewState !== undefined;
 
   // Build class names for the selection panel

@@ -49,7 +49,8 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
   const closingPopupsRef = useRef<Set<string>>(new Set());
 
   // The active popup is the top of the stack
-  const activePopupId = popupStack.length > 0 ? popupStack[popupStack.length - 1] : null;
+  const activePopupId =
+    popupStack.length > 0 ? popupStack[popupStack.length - 1] : null;
 
   const getPopupState = useCallback(
     (id: string): PopupState => {
@@ -239,7 +240,8 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
       if (
         activeElement &&
         popupElement?.contains(activeElement) &&
-        (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')
+        (activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA')
       ) {
         // Focus is on an input inside the popup - don't close, let the input handle it
         // The input's onKeyDown can blur itself or call closePopup when ready
@@ -276,7 +278,10 @@ export const PopupProvider: React.FC<PopupProviderProps> = ({ children }) => {
         );
 
         // If click is inside this popup or its trigger, don't close anything
-        if (triggerElement?.contains(target) || popupElement?.contains(target)) {
+        if (
+          triggerElement?.contains(target) ||
+          popupElement?.contains(target)
+        ) {
           return;
         }
       }

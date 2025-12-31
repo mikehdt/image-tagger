@@ -5,6 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 
 import { assetsReducer } from './assets';
+import { autoTaggerReducer } from './auto-tagger';
 import { filtersReducer } from './filters';
 import { filterManagerMiddleware } from './middleware/filter-manager';
 import { projectReducer } from './project';
@@ -16,6 +17,7 @@ export const makeStore = () => {
     devTools: true,
     reducer: {
       assets: assetsReducer,
+      autoTagger: autoTaggerReducer,
       filters: filtersReducer,
       project: projectReducer,
       selection: selectionReducer,

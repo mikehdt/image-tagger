@@ -3,6 +3,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist /* Geist_Mono */ } from 'next/font/google';
 
+import { AutoTaggerSetupModal } from './components/auto-tagger';
 import { ModalProvider } from './components/shared/modal';
 import { PopupProvider } from './components/shared/popup-v2';
 import { ToastContainer } from './components/shared/toast';
@@ -63,6 +64,7 @@ export default function Root({
                 <StableLayout>{children}</StableLayout>
               </PopupProvider>
               <ToastContainer />
+              <AutoTaggerSetupModal />
             </ModalProvider>
           </AppProvider>
         </StoreProvider>

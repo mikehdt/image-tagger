@@ -93,7 +93,8 @@ export function getSelectorStats(): void {
       calls: s.calls,
       cacheHits: s.cacheHits,
       cacheMisses: s.cacheMisses,
-      hitRate: s.calls > 0 ? `${((s.cacheHits / s.calls) * 100).toFixed(1)}%` : '-',
+      hitRate:
+        s.calls > 0 ? `${((s.cacheHits / s.calls) * 100).toFixed(1)}%` : '-',
       totalMs: s.totalMs.toFixed(2),
       avgMs: s.avgMs.toFixed(3),
       maxMs: s.maxMs.toFixed(3),

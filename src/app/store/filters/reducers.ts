@@ -79,7 +79,9 @@ export const coreReducers = {
     state: Filters,
     { payload }: PayloadAction<string>,
   ) => {
-    state.filenamePatterns = state.filenamePatterns.filter((p) => p !== payload);
+    state.filenamePatterns = state.filenamePatterns.filter(
+      (p) => p !== payload,
+    );
   },
 
   clearModifiedFilter: (state: Filters) => {

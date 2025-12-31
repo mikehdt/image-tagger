@@ -3,6 +3,9 @@
 config.json
 /public/projects
 
+# Auto-tagger downloaded models
+/.auto-tagger
+
 # dependencies
 /node_modules
 /.pnp

@@ -17,6 +17,8 @@ type ModalProps = {
   children: React.ReactNode;
   className?: string;
   animationDuration?: never;
+  /** Prevent closing via backdrop click, ESC key, or X button */
+  preventClose?: boolean;
 };
 
 /**
@@ -33,6 +35,7 @@ export const Modal = ({
   onClose,
   children,
   className = '',
+  preventClose = false,
 }: ModalProps) => {
   // State to control the visibility of the modal for animation purposes
   const [isVisible, setIsVisible] = useState(false);
@@ -49,11 +52,11 @@ export const Modal = ({
   // Handle ESC key press to close the modal
   const handleEscapeKey = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !preventClose) {
         onClose();
       }
     },
-    [isOpen, onClose],
+    [isOpen, onClose, preventClose],
   );
 
   const handleStopPropagation = useCallback(
@@ -150,12 +153,12 @@ export const Modal = ({
           aria-modal="true"
           role="dialog"
         >
-          {/* Backdrop overlay - clickable to close */}
+          {/* Backdrop overlay - clickable to close (unless preventClose) */}
           <div
             className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${
               isVisible ? 'opacity-60' : 'opacity-0'
             }`}
-            onClick={onClose}
+            onClick={preventClose ? undefined : onClose}
           />
 
           {/* Modal container */}
@@ -168,27 +171,29 @@ export const Modal = ({
             } ${className}`}
             onClick={handleStopPropagation}
           >
-            {/* Close button */}
-            <button
-              className="absolute top-3 right-3 z-1 cursor-pointer rounded-full border border-slate-300/0 bg-white p-1 text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus:outline-none"
-              onClick={onClose}
-              aria-label="Close modal"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {/* Close button (hidden when preventClose is true) */}
+            {!preventClose && (
+              <button
+                className="absolute top-3 right-3 z-1 cursor-pointer rounded-full border border-slate-300/0 bg-white p-1 text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus:outline-none"
+                onClick={onClose}
+                aria-label="Close modal"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
 
             {/* Modal content */}
             <div className="mt-2">{children}</div>

@@ -246,7 +246,13 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
           </div>
         );
       }),
-    [groupedAssets, showCategoryHeaders, currentPage, shiftHoverPreview, handleAssetHover],
+    [
+      groupedAssets,
+      showCategoryHeaders,
+      currentPage,
+      shiftHoverPreview,
+      handleAssetHover,
+    ],
   );
 
   return filteredAssets.length ? (

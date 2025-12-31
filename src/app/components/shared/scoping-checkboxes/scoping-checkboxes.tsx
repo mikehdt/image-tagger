@@ -44,15 +44,14 @@ export const ScopingCheckboxes = ({
   requireBothConstraints = false,
   requireAtLeastOne = false,
 }: ScopingCheckboxesProps) => {
-  const showBothMode = requireBothConstraints && hasSelectedAssets && hasActiveFilters;
-  const showIndependentMode = !requireBothConstraints && (hasSelectedAssets || hasActiveFilters);
+  const showBothMode =
+    requireBothConstraints && hasSelectedAssets && hasActiveFilters;
+  const showIndependentMode =
+    !requireBothConstraints && (hasSelectedAssets || hasActiveFilters);
 
   // Check if validation error should show
   const hasInvalidConstraints =
-    requireAtLeastOne &&
-    showBothMode &&
-    !scopeToSelected &&
-    !scopeToFiltered;
+    requireAtLeastOne && showBothMode && !scopeToSelected && !scopeToFiltered;
 
   if (!showBothMode && !showIndependentMode) {
     return null;
