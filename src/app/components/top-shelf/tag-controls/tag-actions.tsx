@@ -3,6 +3,7 @@ import {
   ArrowUpIcon,
   DocumentMinusIcon,
   DocumentPlusIcon,
+  NoSymbolIcon,
   PencilIcon,
   SwatchIcon,
   TagIcon,
@@ -11,7 +12,11 @@ import { memo, useCallback, useState } from 'react';
 
 import { markFilterTagsToDelete } from '@/app/store/assets';
 import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
-import { selectFilterTags, selectHasActiveFilters } from '@/app/store/filters';
+import {
+  clearFilters,
+  selectFilterTags,
+  selectHasActiveFilters,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectTagSortDirection,
@@ -33,6 +38,7 @@ import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combin
 import { Button } from '../../shared/button';
 import { Dropdown, DropdownItem } from '../../shared/dropdown';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
+import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AddTagsModal } from './add-tags-modal';
 import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';
@@ -147,6 +153,11 @@ const TagActionsComponent = () => {
   const handleOnCloseEditModal = useCallback(() => {
     setIsEditModalOpen(false);
   }, []);
+
+  const handleClearFilters = useCallback(
+    () => dispatch(clearFilters()),
+    [dispatch],
+  );
 
   // Tag sort handlers
   const handleSortTypeChange = useCallback(
@@ -271,6 +282,19 @@ const TagActionsComponent = () => {
           <span className="ml-2 max-xl:hidden">Delete</span>
         </Button>
 
+        <ToolbarDivider />
+
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={handleClearFilters}
+          disabled={!hasActiveFilters}
+          ghostDisabled={!hasActiveFilters}
+          size="medium"
+          title="Clear all filters"
+        >
+          <NoSymbolIcon className="w-4" />
+        </Button>
       </ResponsiveToolbarGroup>
 
       <AddTagsModal

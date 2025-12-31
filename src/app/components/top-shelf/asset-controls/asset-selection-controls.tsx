@@ -1,16 +1,23 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  CubeIcon,
+  CubeTransparentIcon,
   IdentificationIcon,
   NoSymbolIcon,
   SparklesIcon,
   SquaresPlusIcon,
 } from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
-import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import {
+  selectFilteredAssets,
+  selectHasModifiedAssets,
+  selectHasTaglessAssets,
+  selectImageCount,
+} from '@/app/store/assets';
 import {
   selectSortDirection,
   selectSortType,
@@ -25,6 +32,18 @@ import {
   selectIsInitialised,
   setModelsAndProviders,
 } from '@/app/store/auto-tagger';
+import {
+  FilterMode,
+  selectFilenamePatterns,
+  selectFilterBuckets,
+  selectFilterExtensions,
+  selectFilterMode,
+  selectFilterSizes,
+  selectFilterTags,
+  selectShowModified,
+  setTagFilterMode,
+  toggleModifiedFilter,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   clearSelection,
@@ -61,7 +80,7 @@ const getSortDirectionLabel = (
   }
 };
 
-export const AssetSelectionControls = () => {
+const AssetSelectionControlsComponent = () => {
   const dispatch = useAppDispatch();
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = selectedAssets.length;
@@ -70,6 +89,36 @@ export const AssetSelectionControls = () => {
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
   const allAssetsCount = useAppSelector(selectImageCount);
+
+  // Filter mode state
+  const filterMode = useAppSelector(selectFilterMode);
+  const filterModifiedActive = useAppSelector(selectShowModified);
+  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
+  const filterTags = useAppSelector(selectFilterTags);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filenamePatterns = useAppSelector(selectFilenamePatterns);
+
+  // Check if any filters are active (for enabling Match modes)
+  const filterSelectionActive = useMemo(
+    () =>
+      !!(
+        filterTags.length ||
+        filterSizes.length ||
+        filterBuckets.length ||
+        filterExtensions.length ||
+        filenamePatterns.length
+      ),
+    [
+      filterTags.length,
+      filterSizes.length,
+      filterBuckets.length,
+      filterExtensions.length,
+      filenamePatterns.length,
+    ],
+  );
 
   // Auto-tagger state
   const [isAutoTaggerModalOpen, setIsAutoTaggerModalOpen] = useState(false);
@@ -130,6 +179,16 @@ export const AssetSelectionControls = () => {
     dispatch(toggleSortDirection());
   }, [dispatch]);
 
+  const handleSetFilterMode = useCallback(
+    (mode: FilterMode) => dispatch(setTagFilterMode(mode)),
+    [dispatch],
+  );
+
+  const handleToggleModifiedFilter = useCallback(
+    () => dispatch(toggleModifiedFilter()),
+    [dispatch],
+  );
+
   // Auto-switch from "Selected" sort to "Name" when no assets are selected
   useEffect(() => {
     if (sortType === SortType.SELECTED && selectedAssetsCount === 0) {
@@ -152,29 +211,68 @@ export const AssetSelectionControls = () => {
   }, [dispatch, filteredAssets]);
 
   // Create sort type dropdown items
-  const sortTypeItems: DropdownItem<SortType>[] = [
-    {
-      value: SortType.NAME,
-      label: 'Name',
-    },
-    {
-      value: SortType.IMAGE_SIZE,
-      label: 'Image Size',
-    },
-    {
-      value: SortType.BUCKET_SIZE,
-      label: 'Bucket Size',
-    },
-    {
-      value: SortType.SCALED,
-      label: 'Scaled',
-    },
-    {
-      value: SortType.SELECTED,
-      label: 'Selected',
-      disabled: selectedAssetsCount === 0,
-    },
-  ];
+  const sortTypeItems: DropdownItem<SortType>[] = useMemo(
+    () => [
+      {
+        value: SortType.NAME,
+        label: 'Name',
+      },
+      {
+        value: SortType.IMAGE_SIZE,
+        label: 'Image Size',
+      },
+      {
+        value: SortType.BUCKET_SIZE,
+        label: 'Bucket Size',
+      },
+      {
+        value: SortType.SCALED,
+        label: 'Scaled',
+      },
+      {
+        value: SortType.SELECTED,
+        label: 'Selected',
+        disabled: selectedAssetsCount === 0,
+      },
+    ],
+    [selectedAssetsCount],
+  );
+
+  // Create filter mode dropdown items
+  const filterModeItems: DropdownItem<FilterMode>[] = useMemo(
+    () => [
+      {
+        value: FilterMode.SHOW_ALL,
+        label: 'Show All',
+      },
+      {
+        value: FilterMode.MATCH_ANY,
+        label: 'Match Any',
+        disabled: !filterSelectionActive,
+      },
+      {
+        value: FilterMode.MATCH_ALL,
+        label: 'Match All',
+        disabled: !filterSelectionActive,
+      },
+      {
+        value: FilterMode.MATCH_NONE,
+        label: 'Exclude Filters',
+        disabled: !filterSelectionActive,
+      },
+      {
+        value: FilterMode.SELECTED_ASSETS,
+        label: 'Selected Only',
+        disabled: selectedAssetsCount === 0,
+      },
+      {
+        value: FilterMode.TAGLESS,
+        label: 'Tagless',
+        disabled: !hasTaglessAssets,
+      },
+    ],
+    [filterSelectionActive, selectedAssetsCount, hasTaglessAssets],
+  );
 
   return (
     <>
@@ -211,6 +309,43 @@ export const AssetSelectionControls = () => {
           <span className="ml-1 max-xl:hidden">
             {getSortDirectionLabel(sortType, sortDirection)}
           </span>
+        </Button>
+
+        <ToolbarDivider />
+
+        <Dropdown
+          items={filterModeItems}
+          selectedValue={filterMode}
+          onChange={handleSetFilterMode}
+          buttonClassName={
+            // Show as disabled if current mode requires something unavailable
+            ((filterMode === FilterMode.MATCH_ANY ||
+              filterMode === FilterMode.MATCH_ALL ||
+              filterMode === FilterMode.MATCH_NONE) &&
+              !filterSelectionActive) ||
+            (filterMode === FilterMode.SELECTED_ASSETS &&
+              selectedAssetsCount === 0) ||
+            (filterMode === FilterMode.TAGLESS && !hasTaglessAssets)
+              ? 'text-slate-300'
+              : ''
+          }
+        />
+
+        <Button
+          type="button"
+          onClick={handleToggleModifiedFilter}
+          variant="deep-toggle"
+          isPressed={filterModifiedActive}
+          disabled={!hasModifiedAssets}
+          ghostDisabled={!hasModifiedAssets}
+          size="medium"
+        >
+          {filterModifiedActive ? (
+            <CubeIcon className="w-4" />
+          ) : (
+            <CubeTransparentIcon className="w-4" />
+          )}
+          <span className="ml-2 max-xl:hidden">Modified</span>
         </Button>
 
         <ToolbarDivider />
@@ -278,3 +413,5 @@ export const AssetSelectionControls = () => {
     </>
   );
 };
+
+export const AssetSelectionControls = memo(AssetSelectionControlsComponent);
