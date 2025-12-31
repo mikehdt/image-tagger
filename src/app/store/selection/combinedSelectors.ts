@@ -180,3 +180,19 @@ export const selectAssetsWithActiveFiltersCount = createSelector(
   [selectAssetsWithActiveFilters],
   (assetsWithActiveFilters) => assetsWithActiveFilters.length,
 );
+
+/**
+ * Selector to get the full data for selected assets
+ * @returns Array of ImageAsset objects for selected assets
+ */
+export const selectSelectedAssetsData = createSelector(
+  [selectSelectedAssets, selectAllImages],
+  (selectedAssets, allImages) => {
+    if (selectedAssets.length === 0) {
+      return [];
+    }
+
+    const selectedSet = new Set(selectedAssets);
+    return allImages.filter((img) => selectedSet.has(img.fileId));
+  },
+);

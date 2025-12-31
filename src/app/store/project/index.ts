@@ -50,6 +50,7 @@ export const {
 export const {
   selectProjectName,
   selectProjectThumbnail,
+  selectProjectInfo,
   selectShowCropVisualization,
   selectTagSortType,
   selectTagSortDirection,
