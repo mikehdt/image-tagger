@@ -311,8 +311,8 @@ export const AddTagsModal = ({
             <RadioGroup
               name="tagPosition"
               options={[
-                { value: 'append', label: 'Append to end' },
                 { value: 'prepend', label: 'Prepend to start' },
+                { value: 'append', label: 'Append to end' },
               ]}
               value={addToStart ? 'prepend' : 'append'}
               onChange={(mode) => setAddToStart(mode === 'prepend')}

@@ -54,12 +54,12 @@ interface ButtonProps {
 
 const sizeStyles: Record<ButtonSize, string> = {
   minimum: '',
-  small: 'px-1 py-0.5',
-  smallSquare: 'px-0.5',
-  smallWide: 'px-2 py-0.5',
-  medium: 'px-2 py-1',
-  mediumWide: 'px-4 py-1',
-  large: 'px-3 py-2',
+  small: 'px-1 py-0.5 [&_svg]:h-4',
+  smallSquare: 'px-0.5 [&_svg]:h-4',
+  smallWide: 'px-2 py-0.5 [&_svg]:h-4',
+  medium: 'px-2 py-1 [&_svg]:h-5',
+  mediumWide: 'px-4 py-1 [&_svg]:h-5',
+  large: 'px-3 py-2 [&_svg]:h-5',
 };
 
 const colorStyles: Record<

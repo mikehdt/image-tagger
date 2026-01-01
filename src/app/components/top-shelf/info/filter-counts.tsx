@@ -5,6 +5,7 @@ import {
   selectFilterExtensions,
   selectFilterSizes,
   selectFilterTags,
+  selectShowModified,
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 
@@ -13,6 +14,7 @@ const FilterIndicatorsInfoComponent = () => {
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterTags = useAppSelector(selectFilterTags);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const showModified = useAppSelector(selectShowModified);
 
   const activeFilters = [
     {
@@ -23,7 +25,7 @@ const FilterIndicatorsInfoComponent = () => {
     {
       count: filterBuckets.length,
       label: filterBuckets.length === 1 ? 'bucket' : 'buckets',
-      color: 'bg-sky-50 border-sky-300 text-sky-600',
+      color: 'bg-slate-50 border-slate-300 text-slate-600',
     },
     {
       count: filterTags.length,
@@ -34,6 +36,12 @@ const FilterIndicatorsInfoComponent = () => {
       count: filterExtensions.length,
       label: filterExtensions.length === 1 ? 'type' : 'types',
       color: 'bg-stone-50 border-stone-300 text-stone-600',
+    },
+    {
+      count: showModified ? 1 : 0,
+      label: 'Modified',
+      color: 'bg-amber-50 border-amber-300 text-amber-600',
+      hideCount: true,
     },
   ].filter((filter) => filter.count > 0);
 
@@ -52,7 +60,7 @@ const FilterIndicatorsInfoComponent = () => {
           key={filter.label}
           className={`flex items-center rounded-full border px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums ${filter.color}`}
         >
-          {filter.count} {filter.label}
+          {filter.hideCount ? filter.label : `${filter.count} ${filter.label}`}
         </div>
       ))}
     </div>
