@@ -221,11 +221,13 @@ const TagActionsComponent = () => {
               <ArrowDownIcon className="w-4" />
             )}
 
-            <span className="ml-1 max-xl:hidden">
+            <span className="ml-1 max-2xl:hidden">
               {getTagSortDirectionLabel(tagSortType, tagSortDirection)}
             </span>
           </Button>
         )}
+
+        <ToolbarDivider />
 
         <Button
           type="button"

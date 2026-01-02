@@ -204,7 +204,28 @@ export const AddTagsModal = ({
     !applyToSelectedAssets &&
     !applyToAssetsWithActiveFilters;
 
-  const isFormInvalid = hasNoValidTags || hasInvalidConstraints;
+  // Calculate the effective asset count that would be affected
+  const effectiveAssetCount = (() => {
+    if (hasSelectedAssets && hasActiveFilters) {
+      if (applyToSelectedAssets && applyToAssetsWithActiveFilters) {
+        return intersectionCount;
+      } else if (applyToSelectedAssets) {
+        return selectedAssetsCount;
+      } else if (applyToAssetsWithActiveFilters) {
+        return assetsWithActiveFiltersCount;
+      }
+      return 0; // Neither selected
+    } else if (hasSelectedAssets) {
+      return selectedAssetsCount;
+    } else if (hasActiveFilters) {
+      return assetsWithActiveFiltersCount;
+    }
+    return 0; // No scoping available
+  })();
+
+  const hasNoAffectedAssets = effectiveAssetCount === 0;
+
+  const isFormInvalid = hasNoValidTags || hasInvalidConstraints || hasNoAffectedAssets;
 
   // Calculate the summary message for how many assets will be affected
   const getSummaryMessage = () => {
@@ -316,7 +337,6 @@ export const AddTagsModal = ({
               ]}
               value={addToStart ? 'prepend' : 'append'}
               onChange={(mode) => setAddToStart(mode === 'prepend')}
-              size="small"
             />
           </div>
 
@@ -345,9 +365,14 @@ export const AddTagsModal = ({
           />
 
           {/* Summary of how many assets will be affected - show for all cases */}
-          {!hasInvalidConstraints && (
-            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
-          )}
+          {!hasInvalidConstraints &&
+            (hasNoAffectedAssets ? (
+              <p className="text-xs text-rose-600">
+                No assets match the current selection and filter combination.
+              </p>
+            ) : (
+              <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+            ))}
 
           {/* Action buttons */}
           <div className="flex w-full justify-end gap-2 pt-2">

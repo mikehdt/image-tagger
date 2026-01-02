@@ -202,7 +202,7 @@ function DropdownInternal<T>({
         position={position}
         triggerRef={buttonRef}
         className={`${
-          fullWidth ? 'min-w-full' : 'min-w-20'
+          fullWidth ? 'min-w-full' : 'min-w-40'
         } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none ${menuClassName}`}
       >
         <div className="divide-y divide-slate-100" role="menu">

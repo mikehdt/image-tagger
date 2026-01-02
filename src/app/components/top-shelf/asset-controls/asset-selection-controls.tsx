@@ -197,6 +197,21 @@ const AssetSelectionControlsComponent = () => {
     }
   }, [sortType, selectedAssetsCount, dispatch]);
 
+  // Auto-switch filter mode to "Show All" when the mode's requirements are no longer met
+  useEffect(() => {
+    const shouldReset =
+      ((filterMode === FilterMode.MATCH_ANY ||
+        filterMode === FilterMode.MATCH_ALL ||
+        filterMode === FilterMode.MATCH_NONE) &&
+        !filterSelectionActive) ||
+      (filterMode === FilterMode.SELECTED_ASSETS && selectedAssetsCount === 0) ||
+      (filterMode === FilterMode.TAGLESS && !hasTaglessAssets);
+
+    if (shouldReset) {
+      dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+    }
+  }, [filterMode, filterSelectionActive, selectedAssetsCount, hasTaglessAssets, dispatch]);
+
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
     if (filteredAssets.length === 0) return true;
@@ -257,12 +272,12 @@ const AssetSelectionControlsComponent = () => {
       },
       {
         value: FilterMode.MATCH_NONE,
-        label: 'Exclude Filters',
+        label: 'Show Inverse',
         disabled: !filterSelectionActive,
       },
       {
         value: FilterMode.SELECTED_ASSETS,
-        label: 'Selected Only',
+        label: 'Selected',
         disabled: selectedAssetsCount === 0,
       },
       {
@@ -282,6 +297,24 @@ const AssetSelectionControlsComponent = () => {
         position="left"
         breakpoint="large"
       >
+        <Dropdown
+          items={filterModeItems}
+          selectedValue={filterMode}
+          onChange={handleSetFilterMode}
+          buttonClassName={
+            // Show as disabled if current mode requires something unavailable
+            ((filterMode === FilterMode.MATCH_ANY ||
+              filterMode === FilterMode.MATCH_ALL ||
+              filterMode === FilterMode.MATCH_NONE) &&
+              !filterSelectionActive) ||
+            (filterMode === FilterMode.SELECTED_ASSETS &&
+              selectedAssetsCount === 0) ||
+            (filterMode === FilterMode.TAGLESS && !hasTaglessAssets)
+              ? 'text-slate-300'
+              : ''
+          }
+        />
+
         <Dropdown
           items={sortTypeItems}
           selectedValue={sortType}
@@ -306,30 +339,10 @@ const AssetSelectionControlsComponent = () => {
             <ArrowDownIcon className="w-4" />
           )}
 
-          <span className="ml-1 max-xl:hidden">
+          <span className="ml-1 max-2xl:hidden">
             {getSortDirectionLabel(sortType, sortDirection)}
           </span>
         </Button>
-
-        <ToolbarDivider />
-
-        <Dropdown
-          items={filterModeItems}
-          selectedValue={filterMode}
-          onChange={handleSetFilterMode}
-          buttonClassName={
-            // Show as disabled if current mode requires something unavailable
-            ((filterMode === FilterMode.MATCH_ANY ||
-              filterMode === FilterMode.MATCH_ALL ||
-              filterMode === FilterMode.MATCH_NONE) &&
-              !filterSelectionActive) ||
-            (filterMode === FilterMode.SELECTED_ASSETS &&
-              selectedAssetsCount === 0) ||
-            (filterMode === FilterMode.TAGLESS && !hasTaglessAssets)
-              ? 'text-slate-300'
-              : ''
-          }
-        />
 
         <Button
           type="button"
@@ -346,6 +359,27 @@ const AssetSelectionControlsComponent = () => {
             <CubeTransparentIcon className="w-4" />
           )}
           <span className="ml-2 max-xl:hidden">Modified</span>
+        </Button>
+
+        <ToolbarDivider />
+
+        <Button
+          type="button"
+          onClick={openAutoTaggerModal}
+          disabled={!hasReadyModel || selectedAssetsCount === 0}
+          variant="ghost"
+          color="slate"
+          size="medium"
+          title={
+            !hasReadyModel
+              ? 'Set up auto-tagger first (Project menu)'
+              : selectedAssetsCount === 0
+                ? 'Select assets to auto-tag'
+                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
+          }
+        >
+          <SparklesIcon className="w-4" />
+          <span className="ml-2 max-2xl:hidden">Tag</span>
         </Button>
 
         <ToolbarDivider />
@@ -369,27 +403,8 @@ const AssetSelectionControlsComponent = () => {
           <span className="ml-2 max-xl:hidden">
             {filteredAssets.length === allAssetsCount
               ? 'Select All'
-              : 'Select Filtered'}
+              : 'Filtered'}
           </span>
-        </Button>
-
-        <Button
-          type="button"
-          onClick={openAutoTaggerModal}
-          disabled={!hasReadyModel || selectedAssetsCount === 0}
-          variant="ghost"
-          color="slate"
-          size="medium"
-          title={
-            !hasReadyModel
-              ? 'Set up auto-tagger first (Project menu)'
-              : selectedAssetsCount === 0
-                ? 'Select assets to auto-tag'
-                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
-          }
-        >
-          <SparklesIcon className="w-4" />
-          <span className="ml-2 max-xl:hidden">Tag</span>
         </Button>
 
         <Button

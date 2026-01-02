@@ -337,6 +337,27 @@ export const EditTagsModal = ({
     },
   );
 
+  // Calculate the effective asset count that would be affected
+  const effectiveAssetCount = (() => {
+    const useFiltered = onlyFilteredAssets && hasActiveFilters;
+    const useSelected = onlySelectedAssets && hasSelectedAssets;
+
+    if (useFiltered && useSelected) {
+      // Intersection of filtered and selected
+      return selectedAssets.filter((assetId) =>
+        filteredAssets.some((asset) => asset.fileId === assetId),
+      ).length;
+    } else if (useFiltered) {
+      return filteredAssets.length;
+    } else if (useSelected) {
+      return selectedAssetsCount;
+    }
+    // No constraints - applies to all assets with these tags (always valid)
+    return -1; // Signal that we're not constraining
+  })();
+
+  const hasNoAffectedAssets = effectiveAssetCount === 0;
+
   // Pre-compute all tag statuses once for use in the UI
   const tagStatuses = filterTags.map((tag) => ({
     tag,
@@ -493,7 +514,13 @@ export const EditTagsModal = ({
             onScopeToSelectedChange={setOnlySelectedAssets}
           />
 
-          <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+          {hasNoAffectedAssets ? (
+            <p className="text-xs text-rose-600">
+              No assets match the current selection and filter combination.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+          )}
 
           {/* Action buttons */}
           <div className="flex w-full justify-end gap-2 pt-2">
@@ -508,7 +535,7 @@ export const EditTagsModal = ({
 
             <Button
               type="submit"
-              disabled={!hasModifiedTags}
+              disabled={!hasModifiedTags || hasNoAffectedAssets}
               neutralDisabled
               color="indigo"
               size="mediumWide"
