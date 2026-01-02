@@ -7,9 +7,91 @@
   }
 }
 
-:root {
+/* Light mode (default) */
+:root,
+html.light {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Surface colours - using Tailwind v4 CSS variables */
+  --surface: var(--color-slate-100);
+  --surface-alt: var(--color-slate-50);
+  --surface-elevated: var(--color-white);
+  --surface-muted: var(--color-slate-300);
+
+  /* Border colours */
+  --border: var(--color-slate-300);
+  --border-selected: var(--color-purple-300);
+
+  /* Selection state colours */
+  --selected-bg: var(--color-purple-100);
+  --selected-bg-preview: var(--color-purple-50);
+  --selected-text: var(--color-purple-400);
+  --selected-text-preview: var(--color-purple-300);
+
+  /* Unselected/neutral state colours */
+  --unselected-bg: var(--color-slate-100);
+  --unselected-bg-preview: var(--color-slate-50);
+  --unselected-text: var(--color-slate-400);
+  --unselected-text-preview: var(--color-slate-300);
+}
+
+/* Dark mode - forced via class */
+html.dark {
+  --background: #171717;
+  --foreground: #ffffff;
+
+  /* Surface colours - dark mode */
+  --surface: var(--color-slate-800);
+  --surface-alt: var(--color-slate-900);
+  --surface-elevated: var(--color-slate-700);
+  --surface-muted: var(--color-slate-600);
+
+  /* Border colours - dark mode */
+  --border: var(--color-slate-600);
+  --border-selected: var(--color-purple-500);
+
+  /* Selection state colours - dark mode */
+  --selected-bg: var(--color-purple-900);
+  --selected-bg-preview: var(--color-purple-950);
+  --selected-text: var(--color-purple-300);
+  --selected-text-preview: var(--color-purple-400);
+
+  /* Unselected/neutral state colours - dark mode */
+  --unselected-bg: var(--color-slate-800);
+  --unselected-bg-preview: var(--color-slate-900);
+  --unselected-text: var(--color-slate-400);
+  --unselected-text-preview: var(--color-slate-500);
+}
+
+/* Auto mode - follows system preference (when no class is set) */
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) {
+    --background: #171717;
+    --foreground: #ffffff;
+
+    /* Surface colours - dark mode */
+    --surface: var(--color-slate-800);
+    --surface-alt: var(--color-slate-900);
+    --surface-elevated: var(--color-slate-700);
+    --surface-muted: var(--color-slate-600);
+
+    /* Border colours - dark mode */
+    --border: var(--color-slate-600);
+    --border-selected: var(--color-purple-500);
+
+    /* Selection state colours - dark mode */
+    --selected-bg: var(--color-purple-900);
+    --selected-bg-preview: var(--color-purple-950);
+    --selected-text: var(--color-purple-300);
+    --selected-text-preview: var(--color-purple-400);
+
+    /* Unselected/neutral state colours - dark mode */
+    --unselected-bg: var(--color-slate-800);
+    --unselected-bg-preview: var(--color-slate-900);
+    --unselected-text: var(--color-slate-400);
+    --unselected-text-preview: var(--color-slate-500);
+  }
 }
 
 html {

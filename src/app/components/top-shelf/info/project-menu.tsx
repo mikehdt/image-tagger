@@ -3,8 +3,11 @@ import {
   ArrowPathIcon,
   CalculatorIcon,
   ChevronDownIcon,
+  ComputerDesktopIcon,
   CubeIcon,
+  MoonIcon,
   SparklesIcon,
+  SunIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -15,6 +18,7 @@ import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
+import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 
@@ -55,6 +59,15 @@ const MenuItem = ({ icon, label, onClick, disabled }: MenuItemProps) => (
   </button>
 );
 
+const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
+  {
+    light: { icon: <SunIcon className="w-5" />, label: 'Light' },
+    dark: { icon: <MoonIcon className="w-5" />, label: 'Dark' },
+    auto: { icon: <ComputerDesktopIcon className="w-5" />, label: 'Auto' },
+  };
+
+const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
+
 const ProjectMenuComponent = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -65,6 +78,7 @@ const ProjectMenuComponent = () => {
   const projectName = useAppSelector(selectProjectName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
   const ioState = useAppSelector(selectIoState);
+  const { theme, setTheme } = useTheme();
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
@@ -198,6 +212,12 @@ const ProjectMenuComponent = () => {
     dispatch(openSetupModal());
   }, [closePopup, popupId, dispatch]);
 
+  const handleCycleTheme = useCallback(() => {
+    const currentIndex = themeOrder.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themeOrder.length;
+    setTheme(themeOrder[nextIndex]);
+  }, [theme, setTheme]);
+
   if (!projectName) {
     return null;
   }
@@ -254,6 +274,11 @@ const ProjectMenuComponent = () => {
             icon={<SparklesIcon className="w-5" />}
             label="Set Up Auto-Tagger"
             onClick={handleOpenAutoTaggerSetup}
+          />
+          <MenuItem
+            icon={themeConfig[theme].icon}
+            label={`Theme: ${themeConfig[theme].label}`}
+            onClick={handleCycleTheme}
           />
           <MenuItem
             icon={<ArrowLeftCircleIcon className="w-5" />}

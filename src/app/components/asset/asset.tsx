@@ -149,19 +149,19 @@ const AssetComponent = ({
   const isPreview = previewState !== null && previewState !== undefined;
 
   // Build class names for the selection panel
-  const selectionPanelClasses = `flex cursor-pointer select-none flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-white transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-slate-300 ${
+  const selectionPanelClasses = `flex cursor-pointer select-none flex-col justify-between px-1 pt-1 pb-2 inset-shadow-sm inset-shadow-(--surface-elevated) transition-colors max-md:flex-row max-md:px-2 max-md:pb-1 md:border-r md:border-r-(--border) ${
     showAsSelected
       ? isPreview
-        ? 'bg-purple-50 text-purple-300' // Lighter purple for preview-select
-        : 'bg-purple-100 text-purple-400' // Normal selected
+        ? 'bg-(--selected-bg-preview) text-(--selected-text-preview)' // Lighter purple for preview-select
+        : 'bg-(--selected-bg) text-(--selected-text)' // Normal selected
       : isPreview
-        ? 'bg-slate-50 text-slate-300' // Lighter grey for preview-deselect
-        : 'bg-slate-100 text-slate-400' // Normal unselected
+        ? 'bg-(--unselected-bg-preview) text-(--unselected-text-preview)' // Lighter grey for preview-deselect
+        : 'bg-(--unselected-bg) text-(--unselected-text)' // Normal unselected
   }`;
 
   return (
     <div
-      className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-purple-300 shadow-sm shadow-purple-200' : 'border-slate-300'}`}
+      className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-(--border-selected) shadow-sm shadow-purple-200' : 'border-(--border)'}`}
     >
       <div
         className={selectionPanelClasses}
@@ -198,18 +198,18 @@ const AssetComponent = ({
           />
         )}
 
-        <span className="text-sm font-medium tabular-nums select-none text-shadow-white text-shadow-xs md:[writing-mode:sideways-lr]">
+        <span className="text-sm font-medium tabular-nums select-none text-shadow-xs text-shadow-(--surface-elevated) md:[writing-mode:sideways-lr]">
           {filteredIndex}
 
           {assetNumber !== filteredIndex ? (
-            <span className="mb-4 text-slate-300">{assetNumber}</span>
+            <span className="mb-4 text-(--unselected-text-preview)">{assetNumber}</span>
           ) : null}
         </span>
       </div>
 
       <div className="flex w-full flex-wrap">
         <div
-          className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-slate-300 transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
+          className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-(--surface-muted) transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
           onClick={toggleImageZoom}
         >
           <span className="relative">
