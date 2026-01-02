@@ -37,7 +37,7 @@ type TagListProps = {
   sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
   onDragEnd: (event: DragEndEvent) => void;
   // Handlers
-  onAddTag: (tagName: string) => void;
+  onAddTag: (tagName: string, prepend?: boolean) => void;
   onToggleTag: (tagName: string) => void;
   onEditTag: (oldName: string, newName: string) => void;
   onDeleteTag: (tagName: string) => void;
@@ -313,12 +313,15 @@ const TagListComponent = ({
     setInputValue(value);
   }, []);
 
-  const handleSubmit = useCallback(() => {
-    if (inputValue.trim() && !isDuplicateAdd) {
-      onAddTag(inputValue.trim());
-      setInputValue('');
-    }
-  }, [inputValue, isDuplicateAdd, onAddTag]);
+  const handleSubmit = useCallback(
+    (prepend?: boolean) => {
+      if (inputValue.trim() && !isDuplicateAdd) {
+        onAddTag(inputValue.trim(), prepend);
+        setInputValue('');
+      }
+    },
+    [inputValue, isDuplicateAdd, onAddTag],
+  );
 
   const handleCancel = useCallback(() => {
     setInputValue('');
@@ -326,7 +329,7 @@ const TagListComponent = ({
 
   // Handle multiple tags from paste or comma-separated input
   const handleMultipleTagsSubmit = useCallback(
-    (newTags: string[]) => {
+    (newTags: string[], prepend?: boolean) => {
       // Get existing tag names for duplicate checking
       const existingTagNames = new Set(tags.map((t) => t.name.toLowerCase()));
 
@@ -335,8 +338,11 @@ const TagListComponent = ({
         (tag) => !existingTagNames.has(tag.toLowerCase()),
       );
 
-      uniqueTags.forEach((tag) => {
-        onAddTag(tag);
+      // When prepending, reverse the order so they appear in the original order at the start
+      const tagsToAdd = prepend ? [...uniqueTags].reverse() : uniqueTags;
+
+      tagsToAdd.forEach((tag) => {
+        onAddTag(tag, prepend);
       });
 
       setInputValue('');

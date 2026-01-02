@@ -50,12 +50,12 @@ type InputTagProps = {
   mode: 'add' | 'edit';
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (prepend?: boolean) => void;
   onCancel: () => void;
   placeholder?: string;
   isDuplicate?: boolean;
   disabled?: boolean;
-  onMultipleTagsSubmit?: (tags: string[]) => void;
+  onMultipleTagsSubmit?: (tags: string[], prepend?: boolean) => void;
 };
 
 const InputTagComponent = ({
@@ -75,7 +75,7 @@ const InputTagComponent = ({
 
   // Helper function to process comma-separated tags
   const processMultipleTags = useCallback(
-    (tagsString: string): boolean => {
+    (tagsString: string, prepend?: boolean): boolean => {
       if (mode === 'edit' || !onMultipleTagsSubmit) {
         return false;
       }
@@ -86,7 +86,7 @@ const InputTagComponent = ({
         .filter((tag) => tag.length > 0);
 
       if (tags.length > 0) {
-        onMultipleTagsSubmit(tags);
+        onMultipleTagsSubmit(tags, prepend);
         return true;
       }
 
@@ -134,17 +134,19 @@ const InputTagComponent = ({
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       // Handle Enter and comma as submission triggers
+      // Shift+Enter or Shift+comma prepends to the start of the list
       if (e.key === 'Enter' || (e.key === ',' && mode === 'add')) {
         e.preventDefault();
+        const prepend = e.shiftKey;
 
         // First check if we have comma-separated tags (only in add mode)
-        if (mode === 'add' && processMultipleTags(value)) {
+        if (mode === 'add' && processMultipleTags(value, prepend)) {
           return;
         }
 
         // Handle single tag submission
         if (value.trim() && !isDuplicate) {
-          onSubmit();
+          onSubmit(prepend);
         }
       } else if (e.key === 'Escape') {
         onCancel();
@@ -154,10 +156,10 @@ const InputTagComponent = ({
   );
 
   const handleSubmitClick = useCallback(
-    (e: SyntheticEvent) => {
+    (e: React.MouseEvent) => {
       e.stopPropagation();
       if (value.trim() && !isDuplicate) {
-        onSubmit();
+        onSubmit(e.shiftKey);
       }
     },
     [value, isDuplicate, onSubmit],

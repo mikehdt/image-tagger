@@ -226,12 +226,33 @@ export const coreReducers = {
 
     // Handle cases based on the current state
     if (hasState(tagState, TagState.TO_ADD)) {
-      // For TO_ADD tags, we still want to remove them completely
-      delete state.images[assetIndex].tagStatus[tagName];
-      state.images[assetIndex].tagList.splice(
-        state.images[assetIndex].tagList.findIndex((item) => item === tagName),
-        1,
-      );
+      // For TO_ADD tags, remove them completely
+      const asset = state.images[assetIndex];
+      const deletedIndex = asset.tagList.findIndex((item) => item === tagName);
+
+      delete asset.tagStatus[tagName];
+      asset.tagList.splice(deletedIndex, 1);
+
+      // Re-evaluate DIRTY state for all tags after the deleted position
+      // since their positions may have shifted back to original
+      const savedTagList = asset.savedTagList || [];
+
+      for (let i = deletedIndex; i < asset.tagList.length; i++) {
+        const tag = asset.tagList[i];
+
+        // Skip TO_ADD tags (they don't have original positions)
+        if (tag && !hasState(asset.tagStatus[tag], TagState.TO_ADD)) {
+          const originalIndex = savedTagList.indexOf(tag);
+
+          // If tag is now in its original position, remove DIRTY flag
+          // Otherwise, ensure DIRTY flag is set
+          if (originalIndex === i) {
+            asset.tagStatus[tag] = removeState(asset.tagStatus[tag], TagState.DIRTY);
+          } else {
+            asset.tagStatus[tag] = addState(asset.tagStatus[tag], TagState.DIRTY);
+          }
+        }
+      }
     } else {
       // Toggle TO_DELETE flag for all other tags
       state.images[assetIndex].tagStatus[tagName] = toggleState(
