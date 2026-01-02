@@ -19,6 +19,11 @@ html.light {
   --surface-elevated: var(--color-white);
   --surface-muted: var(--color-slate-300);
 
+  /* Translucent surfaces for overlays/shelves */
+  --surface-glass: rgb(255 255 255 / 0.8);
+  --surface-glass-alt: rgb(255 255 255 / 0.9);
+  --border-subtle: rgb(255 255 255 / 0.5);
+
   /* Border colours */
   --border: var(--color-slate-300);
   --border-selected: var(--color-purple-300);
@@ -46,6 +51,11 @@ html.dark {
   --surface-alt: var(--color-slate-900);
   --surface-elevated: var(--color-slate-700);
   --surface-muted: var(--color-slate-600);
+
+  /* Translucent surfaces for overlays/shelves - dark mode */
+  --surface-glass: rgb(30 41 59 / 0.85);
+  --surface-glass-alt: rgb(30 41 59 / 0.92);
+  --border-subtle: rgb(71 85 105 / 0.4);
 
   /* Border colours - dark mode */
   --border: var(--color-slate-600);
@@ -75,6 +85,11 @@ html.dark {
     --surface-alt: var(--color-slate-900);
     --surface-elevated: var(--color-slate-700);
     --surface-muted: var(--color-slate-600);
+
+    /* Translucent surfaces for overlays/shelves - dark mode */
+    --surface-glass: rgb(30 41 59 / 0.85);
+    --surface-glass-alt: rgb(30 41 59 / 0.92);
+    --border-subtle: rgb(71 85 105 / 0.4);
 
     /* Border colours - dark mode */
     --border: var(--color-slate-600);

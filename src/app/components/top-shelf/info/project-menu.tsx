@@ -229,7 +229,7 @@ const ProjectMenuComponent = () => {
         type="button"
         onClick={handleToggle}
         className={`flex cursor-pointer items-center gap-2 rounded-sm px-1 py-0.5 transition-colors ${
-          isOpen ? 'bg-slate-200' : 'hover:bg-slate-100'
+          isOpen ? 'bg-(--surface)' : 'hover:bg-(--surface)/50'
         }`}
       >
         {projectThumbnail ? (
@@ -242,11 +242,11 @@ const ProjectMenuComponent = () => {
             className="h-6 w-6 rounded-full object-cover"
           />
         ) : (
-          <CubeIcon className="h-6 w-6 rounded-full bg-slate-200 p-1 text-slate-500" />
+          <CubeIcon className="h-6 w-6 rounded-full bg-(--surface) p-1 text-(--unselected-text)" />
         )}
-        <span className="font-medium text-slate-700">{projectName}</span>
+        <span className="font-medium text-(--foreground)">{projectName}</span>
         <ChevronDownIcon
-          className={`h-3 w-3 text-slate-500 transition-transform ${
+          className={`h-3 w-3 text-(--unselected-text) transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

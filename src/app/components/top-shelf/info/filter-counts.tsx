@@ -47,7 +47,7 @@ const FilterIndicatorsInfoComponent = () => {
 
   if (activeFilters.length === 0) {
     return (
-      <div className="text-xs text-slate-400">
+      <div className="text-xs text-(--unselected-text)">
         <span>No active filters</span>
       </div>
     );
@@ -58,7 +58,7 @@ const FilterIndicatorsInfoComponent = () => {
       {activeFilters.map((filter) => (
         <div
           key={filter.label}
-          className={`flex items-center rounded-full border px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums ${filter.color}`}
+          className={`flex items-center rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums ${filter.color}`}
         >
           {filter.hideCount ? filter.label : `${filter.count} ${filter.label}`}
         </div>

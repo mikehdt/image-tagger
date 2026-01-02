@@ -46,8 +46,8 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
   return (
     <div className="fixed top-0 left-0 z-20 w-full">
       {/* Top information row - z-10 ensures popups appear above the toolbar row */}
-      <div className="relative z-10 border-b border-b-slate-300/50 bg-white/90 shadow-xs shadow-slate-300 backdrop-blur-md">
-        <div className="mx-auto flex max-w-400 items-center gap-2 px-4 py-1 text-sm text-slate-500">
+      <div className="relative z-10 border-b border-b-(--border)/50 bg-(--surface-glass-alt) shadow-xs shadow-(--border) backdrop-blur-md">
+        <div className="mx-auto flex max-w-400 items-center gap-2 px-4 py-1 text-sm text-(--unselected-text)">
           <ProjectMenu />
 
           <AssetCounts />
@@ -59,7 +59,7 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
       </div>
 
       {/* Main toolbar row */}
-      <div className="border-t border-t-white/50 bg-white/80 shadow-md backdrop-blur-md">
+      <div className="border-t border-t-(--border-subtle) bg-(--surface-glass) shadow-md backdrop-blur-md">
         <div className="mx-auto flex h-12 max-w-400 items-center gap-2 px-4 text-sm">
           <CategoryNavigation currentPage={currentPage} />
 

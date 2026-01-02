@@ -22,23 +22,23 @@ const AssetCountsComponent = () => {
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
   return (
-    <div className="flex items-center gap-2 border-l border-l-slate-400 pl-2 text-xs font-medium tabular-nums">
+    <div className="flex items-center gap-2 border-l border-l-(--border) pl-2 text-xs font-medium tabular-nums">
       <div className="flex items-center gap-1">
-        <span className="text-slate-600">{allAssetsCount}</span>
-        <span className="text-slate-400">images total</span>
+        <span className="text-(--foreground)">{allAssetsCount}</span>
+        <span className="text-(--unselected-text)">images total</span>
       </div>
 
       {filtersActive && (filterMode !== FilterMode.SHOW_ALL || showModified) ? (
-        <div className="flex items-center gap-1 border-l border-l-slate-300 pl-2">
-          <span className="text-emerald-600">{filteredCount}</span>
-          <span className="text-slate-400">filtered</span>
+        <div className="flex items-center gap-1 border-l border-l-(--border) pl-2">
+          <span className="text-emerald-500">{filteredCount}</span>
+          <span className="text-(--unselected-text)">filtered</span>
         </div>
       ) : null}
 
       {selectedAssetsCount > 0 ? (
-        <div className="flex items-center gap-1 border-l border-l-slate-300 pl-2">
-          <span className="text-purple-600">{selectedAssetsCount}</span>
-          <span className="text-slate-400">selected</span>
+        <div className="flex items-center gap-1 border-l border-l-(--border) pl-2">
+          <span className="text-purple-500">{selectedAssetsCount}</span>
+          <span className="text-(--unselected-text)">selected</span>
         </div>
       ) : null}
     </div>
