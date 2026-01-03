@@ -246,7 +246,7 @@ export const BucketsView = () => {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Search input section */}
-      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2">
+      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2 dark:border-slate-700 dark:bg-slate-800">
         <input
           ref={inputRef}
           type="text"
@@ -255,13 +255,13 @@ export const BucketsView = () => {
           onKeyDown={handleKeyDown}
           autoFocus
           placeholder="Search buckets..."
-          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all"
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-slate-800 dark:placeholder-slate-400"
         />
         <button
           className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
             searchTerm.trim() !== ''
-              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-              : 'pointer-events-none text-white'
+              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-300 dark:hover:bg-slate-400'
+              : 'pointer-events-none text-white dark:text-slate-700'
           }`}
           onClick={
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
@@ -273,14 +273,14 @@ export const BucketsView = () => {
 
       {/* Buckets list */}
       {bucketList.length === 0 ? (
-        <div className="truncate p-4 text-center text-sm text-slate-500">
+        <div className="truncate p-4 text-center text-sm text-slate-500 dark:text-slate-400">
           {searchTerm
             ? `No buckets match "${searchTerm}"`
             : 'No buckets available'}
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {bucketList.map((item, index) => (
               <li
                 id={`bucket-${item.name}`}
@@ -289,11 +289,11 @@ export const BucketsView = () => {
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-sky-200'
-                      : 'bg-sky-100'
+                      ? 'bg-sky-200 dark:bg-sky-800'
+                      : 'bg-sky-100 dark:bg-sky-900/50'
                     : item.isActive
-                      ? 'bg-sky-100'
-                      : 'hover:bg-sky-50'
+                      ? 'bg-sky-100 dark:bg-sky-900/50'
+                      : 'hover:bg-sky-50 dark:hover:bg-slate-700'
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">
@@ -304,7 +304,7 @@ export const BucketsView = () => {
                 </div>
 
                 <div className="flex flex-1 items-center justify-between tabular-nums">
-                  <span className="text-slate-800">
+                  <span className="text-slate-800 dark:text-slate-200">
                     {searchTerm
                       ? highlightText(
                           item.name,
@@ -313,7 +313,7 @@ export const BucketsView = () => {
                         )
                       : item.name}
                   </span>
-                  <span className="ml-auto text-xs text-slate-500">
+                  <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
                     {item.count}
                   </span>
                 </div>

@@ -204,7 +204,7 @@ const AssetMetadataComponent = ({
           </Button>
 
           <Button
-            color="emerald"
+            color="teal"
             size="medium"
             onClick={handleSaveAction}
             disabled={isTagEditing || isSaving}

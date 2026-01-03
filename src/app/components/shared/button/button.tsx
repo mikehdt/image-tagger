@@ -11,7 +11,7 @@ type ButtonColor =
   | 'slate'
   | 'rose'
   | 'amber'
-  | 'emerald'
+  | 'teal'
   | 'sky'
   | 'indigo'
   | 'stone';
@@ -94,9 +94,9 @@ const colorStyles: Record<
   },
   amber: {
     normal:
-      'border-amber-300 bg-amber-200 text-amber-800 dark:border-amber-600 dark:bg-amber-700 dark:text-amber-300',
+      'border-amber-300 bg-amber-200 text-amber-800 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-300',
     hover:
-      'hover:bg-amber-100 dark:hover:bg-amber-600 dark:hover:text-amber-100',
+      'hover:bg-amber-100 dark:hover:bg-amber-700 dark:hover:text-amber-100',
     pressed:
       'bg-amber-300 border-amber-400 text-amber-800 hover:text-amber-600 dark:bg-amber-600 dark:border-amber-500 dark:text-amber-300 dark:hover:text-amber-100',
     togglePressed:
@@ -111,8 +111,8 @@ const colorStyles: Record<
   },
   rose: {
     normal:
-      'border-rose-300 bg-rose-200 text-rose-800 dark:border-rose-600 dark:bg-rose-700 dark:text-rose-300',
-    hover: 'hover:bg-rose-100 dark:hover:bg-rose-600 dark:hover:text-rose-100',
+      'border-rose-300 bg-rose-200 text-rose-800 dark:border-rose-600 dark:bg-rose-800 dark:text-rose-300',
+    hover: 'hover:bg-rose-100 dark:hover:bg-rose-700 dark:hover:text-rose-100',
     pressed:
       'bg-rose-300 border-rose-400 text-rose-800 hover:text-rose-600 dark:bg-rose-600 dark:border-rose-500 dark:text-rose-300 dark:hover:text-rose-100',
     togglePressed:
@@ -125,7 +125,7 @@ const colorStyles: Record<
       'border-rose-300/0 text-rose-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-500 dark:text-rose-300 dark:hover:border-rose-500 dark:hover:bg-rose-600 dark:hover:text-rose-100',
     ghostDisabled: 'border-rose-300/0 text-rose-300 dark:text-rose-500',
   },
-  emerald: {
+  teal: {
     normal:
       'border-teal-300 bg-teal-200 text-teal-800 dark:border-teal-600 dark:bg-teal-700 dark:text-teal-300',
     hover: 'hover:bg-teal-100 dark:hover:bg-teal-600 dark:hover:text-teal-100',
@@ -143,8 +143,8 @@ const colorStyles: Record<
   },
   sky: {
     normal:
-      'border-sky-300 bg-sky-200 text-sky-800 dark:border-sky-600 dark:bg-sky-700 dark:text-sky-300',
-    hover: 'hover:bg-sky-100 dark:hover:bg-sky-600 dark:hover:text-sky-100',
+      'border-sky-300 bg-sky-200 text-sky-800 dark:border-sky-600 dark:bg-sky-800 dark:text-sky-300',
+    hover: 'hover:bg-sky-100 dark:hover:bg-sky-700 dark:hover:text-sky-100',
     pressed:
       'bg-sky-300 border-sky-400 text-sky-800 hover:text-sky-600 dark:bg-sky-600 dark:border-sky-500 dark:text-sky-300 dark:hover:text-sky-100',
     togglePressed:
@@ -159,9 +159,9 @@ const colorStyles: Record<
   },
   indigo: {
     normal:
-      'border-indigo-300 bg-indigo-200 text-indigo-800 dark:border-indigo-600 dark:bg-indigo-700 dark:text-indigo-300',
+      'border-indigo-300 bg-indigo-200 text-indigo-800 dark:border-indigo-600 dark:bg-indigo-800 dark:text-indigo-300',
     hover:
-      'hover:bg-indigo-100 dark:hover:bg-indigo-600 dark:hover:text-indigo-100',
+      'hover:bg-indigo-100 dark:hover:bg-indigo-700 dark:hover:text-indigo-100',
     pressed:
       'bg-indigo-300 border-indigo-400 text-indigo-800 hover:text-indigo-600 dark:bg-indigo-600 dark:border-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-100',
     togglePressed:
@@ -238,8 +238,8 @@ export const Button = ({
   // Size-specific styles
   const sizeClasses = sizeStyles[size];
 
-  // Color and state-specific styles
-  const colorConfig = colorStyles[color];
+  // Color and state-specific styles - fallback to slate if invalid color provided
+  const colorConfig = colorStyles[color] || colorStyles.slate;
   let styleClasses = '';
 
   if (disabled) {

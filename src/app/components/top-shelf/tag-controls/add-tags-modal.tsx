@@ -299,7 +299,7 @@ export const AddTagsModal = ({
           />
 
           {tags.length === 0 ? (
-            <p className="text-xs text-slate-700">
+            <p className="text-xs text-slate-500">
               Tags to add to selected assets. Press Enter, Tab, or use commas to
               add new tags.
             </p>
@@ -327,7 +327,7 @@ export const AddTagsModal = ({
 
           {/* Tag position */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-slate-500">
               New tags
             </label>
             <RadioGroup

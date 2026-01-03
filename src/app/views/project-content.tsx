@@ -6,7 +6,7 @@ import { Checkbox } from '../components/shared/checkbox';
 type Project = {
   name: string;
   title?: string;
-  color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
+  color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
   imageCount?: number;
   hidden?: boolean;
   private?: boolean;
@@ -51,8 +51,8 @@ const colors: {
     activeClass: 'border-amber-800 bg-amber-500 shadow-amber-500',
   },
   {
-    value: 'emerald',
-    label: 'Emerald',
+    value: 'teal',
+    label: 'teal',
     class: 'border-teal-400 bg-teal-100 hover:bg-teal-500',
     activeClass: 'border-teal-800 bg-teal-500 shadow-teal-500',
   },
@@ -117,13 +117,15 @@ const ProjectContentComponent = ({
             value={editTitle}
             onChange={(e) => onTitleChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-slate-500 dark:bg-slate-600 dark:text-slate-100 dark:placeholder-slate-400"
             placeholder="Project title"
           />
 
           {/* Color picker */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-600">Colour:</span>
+            <span className="text-xs text-slate-600 dark:text-slate-300">
+              Colour:
+            </span>
             <div className="mr-auto flex gap-1">
               {colors.map((color) => (
                 <div
@@ -168,7 +170,7 @@ const ProjectContentComponent = ({
               e.stopPropagation();
               onSaveEdit();
             }}
-            className="cursor-pointer rounded border border-teal-300/0 p-1 text-teal-600 transition-colors hover:border-teal-300 hover:bg-teal-50"
+            className="cursor-pointer rounded border border-teal-300/0 p-1 text-teal-600 transition-colors hover:border-teal-300 hover:bg-teal-50 dark:text-teal-400 dark:hover:border-teal-500 dark:hover:bg-teal-900/50"
             title="Save changes"
             role="button"
             tabIndex={0}
@@ -187,7 +189,7 @@ const ProjectContentComponent = ({
               e.stopPropagation();
               onCancelEdit();
             }}
-            className="cursor-pointer rounded border border-rose-300/0 p-1 text-rose-600 transition-colors hover:border-rose-300 hover:bg-red-50"
+            className="cursor-pointer rounded border border-rose-300/0 p-1 text-rose-600 transition-colors hover:border-rose-300 hover:bg-red-50 dark:text-rose-400 dark:hover:border-rose-500 dark:hover:bg-rose-900/50"
             title="Cancel"
             role="button"
             tabIndex={0}
@@ -208,14 +210,16 @@ const ProjectContentComponent = ({
 
   return (
     <div className="flex min-w-0 flex-1 items-center justify-between">
-      <div className="flex flex-wrap font-medium text-slate-900">
+      <div className="flex flex-wrap font-medium text-slate-900 dark:text-slate-100">
         <span className="w-full truncate">{project.title || project.name}</span>
-        <span className="w-full text-xs text-black/40">{project.name}</span>
+        <span className="w-full text-xs text-black/40 dark:text-white/40">
+          {project.name}
+        </span>
       </div>
 
       <div className="relative flex items-center">
         {project.imageCount !== undefined && (
-          <div className="text-sm text-slate-500 tabular-nums transition-transform duration-200 group-hover:-translate-x-8">
+          <div className="text-sm text-slate-500 tabular-nums transition-transform duration-200 group-hover:-translate-x-8 dark:text-slate-400">
             {project.imageCount} images
           </div>
         )}
@@ -224,7 +228,7 @@ const ProjectContentComponent = ({
             e.stopPropagation();
             onStartEdit();
           }}
-          className="absolute right-0 cursor-pointer rounded border border-slate-300/0 p-1 text-slate-400 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:border-slate-300 hover:bg-white hover:text-slate-600"
+          className="absolute right-0 cursor-pointer rounded border border-slate-300/0 p-1 text-slate-400 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:border-slate-300 hover:bg-white hover:text-slate-600 dark:hover:border-slate-500 dark:hover:bg-slate-600 dark:hover:text-slate-200"
           title="Edit project"
           role="button"
           tabIndex={0}

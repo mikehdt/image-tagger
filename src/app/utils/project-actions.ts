@@ -31,7 +31,7 @@ const getServerConfig = () => {
 
 export type ProjectConfig = {
   title?: string;
-  color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
+  color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
   thumbnail?: boolean;
   hidden?: boolean;
   featured?: boolean;
@@ -49,7 +49,7 @@ type Project = {
   path: string;
   imageCount?: number;
   title?: string;
-  color?: 'slate' | 'rose' | 'amber' | 'emerald' | 'sky' | 'indigo' | 'stone';
+  color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
   thumbnail?: string;
   hidden?: boolean;
   private?: boolean;
@@ -243,7 +243,7 @@ export const updateProject = async (
         'slate',
         'rose',
         'amber',
-        'emerald',
+        'teal',
         'sky',
         'indigo',
         'stone',
