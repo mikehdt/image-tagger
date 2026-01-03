@@ -23,16 +23,36 @@ export const useTheme = () => {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark');
+    const applyTheme = (mode: ThemeMode, systemPrefersDark: boolean) => {
+      // Remove existing theme classes
+      root.classList.remove('light', 'dark');
 
-    // Apply class based on preference
-    if (theme === 'light') {
-      root.classList.add('light');
-    } else if (theme === 'dark') {
-      root.classList.add('dark');
-    }
-    // 'auto' = no class, CSS media query handles it
+      if (mode === 'light') {
+        root.classList.add('light');
+      } else if (mode === 'dark') {
+        root.classList.add('dark');
+      } else {
+        // Auto mode: add dark class if system prefers dark
+        // This ensures Tailwind dark: classes work in auto mode
+        if (systemPrefersDark) {
+          root.classList.add('dark');
+        }
+      }
+    };
+
+    // Check system preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    applyTheme(theme, mediaQuery.matches);
+
+    // Listen for system preference changes (only matters in auto mode)
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (theme === 'auto') {
+        applyTheme('auto', e.matches);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
   const setTheme = useCallback((newTheme: ThemeMode) => {

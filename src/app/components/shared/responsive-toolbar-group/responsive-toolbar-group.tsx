@@ -72,10 +72,10 @@ function ResponsiveToolbarGroupInternal({
     <div ref={containerRef} className="relative">
       {/* Desktop: Show icon with inline children */}
       <div
-        className={`hidden min-h-9.5 items-center gap-1 rounded-md bg-slate-100 px-1 py-1 ${showDesktop}`}
+        className={`hidden min-h-9.5 items-center gap-1 rounded-md bg-(--surface-elevated) px-1 py-1 ${showDesktop}`}
       >
         <div
-          className={`mr-1 border-r border-dotted border-r-slate-400 py-1.5 pr-1 text-slate-400 ${hideIconOnMobile}`}
+          className={`mr-1 border-r border-dotted border-r-(--unselected-text) py-1.5 pr-1 text-(--unselected-text) ${hideIconOnMobile}`}
           title={title}
         >
           {icon}
@@ -85,7 +85,7 @@ function ResponsiveToolbarGroupInternal({
 
       {/* Mobile: Show button that opens popover */}
       <div
-        className={`flex items-center rounded-md bg-slate-100 px-1 py-1 ${hideDesktop}`}
+        className={`flex items-center rounded-md bg-(--surface-elevated) px-1 py-1 ${hideDesktop}`}
       >
         <Button
           ref={buttonRef}
@@ -103,10 +103,10 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="rounded-md border border-slate-200 bg-white shadow-lg focus:outline-none"
+          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg focus:outline-none"
           disableOverflowHandling
         >
-          <div className="flex items-center gap-1 bg-slate-50 p-2">
+          <div className="flex items-center gap-1 bg-(--surface) p-2">
             {children}
           </div>
         </Popup>

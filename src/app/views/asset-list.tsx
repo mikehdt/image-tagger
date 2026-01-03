@@ -4,6 +4,7 @@ import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Asset } from '../components/asset/asset';
+import { ButtonPlayground } from '../components/shared/button/button-playground';
 import {
   type ImageAsset,
   selectFilteredAssets,
@@ -256,7 +257,10 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
   );
 
   return filteredAssets.length ? (
-    renderedAssets
+    <>
+      <ButtonPlayground />
+      {renderedAssets}
+    </>
   ) : (
     <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
       <CubeTransparentIcon className="h-24 w-24" />
