@@ -37,7 +37,7 @@ export const Toast = ({ toast, onRemove, duration = 3000 }: ToastProps) => {
 
   return (
     <div
-      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm shadow-lg transition-all duration-300 ease-out ${
+      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm shadow-lg transition-all duration-300 ease-out dark:border-slate-600 dark:bg-slate-900 ${
         isExiting
           ? 'opacity-0'
           : isEntering
