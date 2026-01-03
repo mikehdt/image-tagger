@@ -161,7 +161,7 @@ const AssetComponent = ({
 
   return (
     <div
-      className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-(--border-selected) shadow-sm shadow-purple-200' : 'border-(--border)'}`}
+      className={`my-2 flex w-full overflow-hidden rounded-lg border transition-shadow max-md:flex-col ${isSelected ? 'border-(--border-selected) shadow-sm shadow-purple-200 dark:shadow-purple-700' : 'border-(--border)'}`}
     >
       <div
         className={selectionPanelClasses}
@@ -198,11 +198,13 @@ const AssetComponent = ({
           />
         )}
 
-        <span className="text-sm font-medium tabular-nums select-none text-shadow-xs text-shadow-(--surface-elevated) md:[writing-mode:sideways-lr]">
+        <span className="text-sm font-medium tabular-nums select-none text-shadow-(--surface-elevated) md:[writing-mode:sideways-lr]">
           {filteredIndex}
 
           {assetNumber !== filteredIndex ? (
-            <span className="mb-4 text-(--unselected-text-preview)">{assetNumber}</span>
+            <span className="mb-4 text-(--unselected-text-preview)">
+              {assetNumber}
+            </span>
           ) : null}
         </span>
       </div>

@@ -73,30 +73,30 @@ export const Tag = ({
   const getStateStyles = () => {
     if (isMarkedForDeletion) {
       return isHighlighted
-        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100'
-        : 'border-pink-500 hover:bg-pink-100';
+        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100 dark:bg-pink-600 dark:hover:bg-pink-900'
+        : 'border-pink-500 hover:bg-pink-100 dark:hover:bg-pink-900';
     }
     if (hasState(tagState, TagState.TO_ADD)) {
       return isHighlighted
-        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100'
-        : 'border-amber-500 hover:bg-amber-100';
+        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100 dark:bg-amber-600 dark:hover:bg-amber-900'
+        : 'border-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900';
     }
     if (hasState(tagState, TagState.DIRTY)) {
       return isHighlighted
-        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100'
-        : 'border-indigo-500 hover:bg-indigo-100';
+        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100 dark:bg-indigo-600 dark:hover:bg-indigo-900'
+        : 'border-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-900';
     }
     // SAVED (default)
     return isHighlighted
-      ? 'border-teal-500 bg-emerald-300 shadow-sm shadow-emerald-500/50 hover:bg-emerald-100'
-      : 'border-teal-500 hover:bg-teal-100';
+      ? 'border-teal-500 bg-teal-300 shadow-sm shadow-teal-500/50 hover:bg-teal-100 dark:bg-teal-600 dark:hover:bg-teal-900'
+      : 'border-teal-500 hover:bg-teal-100 dark:hover:bg-teal-900';
   };
 
   const getCountColour = () => {
     if (isMarkedForDeletion) return 'text-pink-500';
     if (hasState(tagState, TagState.TO_ADD)) return 'text-amber-500';
     if (hasState(tagState, TagState.DIRTY)) return 'text-indigo-500';
-    return 'text-emerald-500';
+    return 'text-teal-500';
   };
 
   // Matching duplicate: visible but non-interactive (pointer-events-none, no opacity change)
@@ -113,7 +113,7 @@ export const Tag = ({
       onClick={handleClick}
     >
       <span
-        className={`relative mr-1 -ml-2 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white ${getCountColour()}`}
+        className={`relative mr-1 -ml-2 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white dark:text-shadow-slate-900 ${getCountColour()}`}
       >
         {count}
       </span>

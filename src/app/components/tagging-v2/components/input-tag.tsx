@@ -181,9 +181,14 @@ const InputTagComponent = ({
   }, [mode]);
 
   // Styling
-  const borderColour = mode === 'add' ? 'border-amber-300' : 'border-blue-300';
-  const shadowColour =
-    mode === 'add' ? 'inset-shadow-amber-100' : 'inset-shadow-blue-100';
+  const borderColor =
+    mode === 'add'
+      ? 'border-amber-300 dark:border-amber-600'
+      : 'border-blue-300 dark:border-blue-600';
+  const shadowColor =
+    mode === 'add'
+      ? 'inset-shadow-amber-100 dark:inset-shadow-amber-800'
+      : 'inset-shadow-blue-100 dark:inset-shadow-blue-800';
   const canSubmit = value.trim() !== '' && !isDuplicate && !disabled;
 
   return (
@@ -200,15 +205,15 @@ const InputTagComponent = ({
         placeholder={placeholder}
         disabled={disabled}
         tabIndex={disabled ? -1 : 0}
-        className={`${inputWidth} rounded-full border py-1 ps-4 pe-14 transition-all ${borderColour} ${disabled ? 'pointer-events-none opacity-50' : ''} ${isFocused ? `inset-shadow-sm ${shadowColour} ring-2 ring-blue-500` : ''}`}
+        className={`${inputWidth} rounded-full border py-1 ps-4 pe-14 transition-all ${borderColor} ${disabled ? 'pointer-events-none opacity-50' : ''} ${isFocused ? `inset-shadow-sm ${shadowColor} ring-2 ring-blue-500` : ''}`}
       />
 
       {/* Submit button */}
       <span
         className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
           canSubmit
-            ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white'
-            : 'pointer-events-none text-slate-300'
+            ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white dark:text-green-400'
+            : 'pointer-events-none text-slate-300 dark:text-slate-600'
         }`}
         onClick={canSubmit ? handleSubmitClick : undefined}
         tabIndex={canSubmit ? 0 : -1}
@@ -221,8 +226,8 @@ const InputTagComponent = ({
       <span
         className={`absolute top-0 right-2 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
           value.trim() !== '' && !disabled
-            ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-            : 'pointer-events-none text-slate-300'
+            ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-400'
+            : 'pointer-events-none text-slate-300 dark:text-slate-600'
         }`}
         onClick={value.trim() !== '' ? handleCancelClick : undefined}
         tabIndex={value.trim() !== '' && !disabled ? 0 : -1}

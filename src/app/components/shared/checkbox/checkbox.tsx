@@ -96,10 +96,10 @@ export const Checkbox = ({
     }
     if (isPreview) {
       // Preview-deselect: lighter unselected
-      return 'border-slate-300 bg-slate-50 shadow-white inset-shadow-slate-200';
+      return 'border-slate-300 bg-slate-50 shadow-white inset-shadow-slate-200 dark:shadow-slate-900';
     }
     // Normal unselected
-    return 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50';
+    return 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50 dark:shadow-slate-900';
   };
 
   return (
