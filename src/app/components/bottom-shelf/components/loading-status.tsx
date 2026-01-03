@@ -67,9 +67,9 @@ export const LoadingStatus = ({
 
         {/* Mini progress bar */}
         {hasProgress ? (
-          <div className="mt-1 h-2 w-24 overflow-hidden rounded-full border border-(--border) bg-linear-to-t from-(--surface) to-(--surface-alt) inset-shadow-xs inset-shadow-(--border)">
+          <div className="mt-1 h-2 w-24 overflow-hidden rounded-full border border-(--border) bg-linear-to-t from-(--surface) to-(--surface-alt) inset-shadow-(--border) inset-shadow-xs">
             <div
-              className="h-2 rounded-full bg-linear-to-t from-emerald-600 to-emerald-500 transition-all duration-300 ease-out"
+              className="h-2 rounded-full bg-linear-to-t from-teal-600 to-teal-500 transition-all duration-300 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>

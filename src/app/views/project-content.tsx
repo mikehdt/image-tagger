@@ -53,8 +53,8 @@ const colors: {
   {
     value: 'emerald',
     label: 'Emerald',
-    class: 'border-emerald-400 bg-emerald-100 hover:bg-emerald-500',
-    activeClass: 'border-emerald-800 bg-emerald-500 shadow-emerald-500',
+    class: 'border-teal-400 bg-teal-100 hover:bg-teal-500',
+    activeClass: 'border-teal-800 bg-teal-500 shadow-teal-500',
   },
   {
     value: 'sky',
@@ -168,7 +168,7 @@ const ProjectContentComponent = ({
               e.stopPropagation();
               onSaveEdit();
             }}
-            className="cursor-pointer rounded border border-emerald-300/0 p-1 text-emerald-600 transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+            className="cursor-pointer rounded border border-teal-300/0 p-1 text-teal-600 transition-colors hover:border-teal-300 hover:bg-teal-50"
             title="Save changes"
             role="button"
             tabIndex={0}

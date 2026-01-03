@@ -112,8 +112,7 @@ const colorStyles: Record<
   rose: {
     normal:
       'border-rose-300 bg-rose-200 text-rose-800 dark:border-rose-600 dark:bg-rose-700 dark:text-rose-300',
-    hover:
-      'hover:bg-rose-100 dark:hover:bg-rose-600 dark:hover:text-rose-100',
+    hover: 'hover:bg-rose-100 dark:hover:bg-rose-600 dark:hover:text-rose-100',
     pressed:
       'bg-rose-300 border-rose-400 text-rose-800 hover:text-rose-600 dark:bg-rose-600 dark:border-rose-500 dark:text-rose-300 dark:hover:text-rose-100',
     togglePressed:
@@ -128,26 +127,24 @@ const colorStyles: Record<
   },
   emerald: {
     normal:
-      'border-emerald-300 bg-emerald-200 text-emerald-800 dark:border-emerald-600 dark:bg-emerald-700 dark:text-emerald-300',
-    hover:
-      'hover:bg-emerald-100 dark:hover:bg-emerald-600 dark:hover:text-emerald-100',
+      'border-teal-300 bg-teal-200 text-teal-800 dark:border-teal-600 dark:bg-teal-700 dark:text-teal-300',
+    hover: 'hover:bg-teal-100 dark:hover:bg-teal-600 dark:hover:text-teal-100',
     pressed:
-      'bg-emerald-300 border-emerald-400 text-emerald-800 hover:text-emerald-600 dark:bg-emerald-600 dark:border-emerald-500 dark:text-emerald-300 dark:hover:text-emerald-100',
+      'bg-teal-300 border-teal-400 text-teal-800 hover:text-teal-600 dark:bg-teal-600 dark:border-teal-500 dark:text-teal-300 dark:hover:text-teal-100',
     togglePressed:
-      'bg-emerald-100 border-emerald-400 text-emerald-800 shadow-emerald-400 hover:bg-emerald-200 dark:border-emerald-500 dark:bg-emerald-800 dark:text-emerald-300 dark:shadow-emerald-600 dark:hover:bg-emerald-700',
+      'bg-teal-100 border-teal-400 text-teal-800 shadow-teal-400 hover:bg-teal-200 dark:border-teal-500 dark:bg-teal-800 dark:text-teal-300 dark:shadow-teal-600 dark:hover:bg-teal-700',
     deepPressed:
-      'inset-shadow-emerald-300 hover:bg-emerald-300 dark:inset-shadow-emerald-700 dark:hover:bg-emerald-600',
+      'inset-shadow-teal-300 hover:bg-teal-300 dark:inset-shadow-teal-700 dark:hover:bg-teal-600',
     disabled:
-      'border-emerald-200 bg-emerald-100 text-emerald-300 dark:border-emerald-700 dark:bg-emerald-800 dark:text-emerald-500',
+      'border-teal-200 bg-teal-100 text-teal-300 dark:border-teal-700 dark:bg-teal-800 dark:text-teal-500',
     ghost:
-      'border-emerald-300/0 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-500 dark:text-emerald-300 dark:hover:border-emerald-500 dark:hover:bg-emerald-600 dark:hover:text-emerald-100',
-    ghostDisabled: 'border-emerald-300/0 text-emerald-300 dark:text-emerald-500',
+      'border-teal-300/0 text-teal-700 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-500 dark:text-teal-300 dark:hover:border-teal-500 dark:hover:bg-teal-600 dark:hover:text-teal-100',
+    ghostDisabled: 'border-teal-300/0 text-teal-300 dark:text-teal-500',
   },
   sky: {
     normal:
       'border-sky-300 bg-sky-200 text-sky-800 dark:border-sky-600 dark:bg-sky-700 dark:text-sky-300',
-    hover:
-      'hover:bg-sky-100 dark:hover:bg-sky-600 dark:hover:text-sky-100',
+    hover: 'hover:bg-sky-100 dark:hover:bg-sky-600 dark:hover:text-sky-100',
     pressed:
       'bg-sky-300 border-sky-400 text-sky-800 hover:text-sky-600 dark:bg-sky-600 dark:border-sky-500 dark:text-sky-300 dark:hover:text-sky-100',
     togglePressed:
@@ -300,7 +297,7 @@ export const Button = ({
 
       case 'deep-toggle':
         styleClasses = isPressed
-          ? `border-white bg-white ${baseStyle.pressed}`
+          ? `border-white bg-white dark:text-slate-700 ${baseStyle.pressed}`
           : `${baseStyle.deepPressed} ${colorConfig.deepPressed}`;
         break;
 

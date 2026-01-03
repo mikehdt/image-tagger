@@ -275,7 +275,7 @@ function ModelOption({
 }) {
   const statusBadge = {
     ready: (
-      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
+      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700">
         Installed
       </span>
     ),

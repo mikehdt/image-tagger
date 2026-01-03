@@ -73,22 +73,22 @@ export const Tag = ({
   const getStateStyles = () => {
     if (isMarkedForDeletion) {
       return isHighlighted
-        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100 dark:bg-pink-600 dark:hover:bg-pink-900'
+        ? 'border-pink-500 bg-pink-300 shadow-sm shadow-pink-500/50 hover:bg-pink-100 dark:bg-pink-700 dark:hover:bg-pink-900'
         : 'border-pink-500 hover:bg-pink-100 dark:hover:bg-pink-900';
     }
     if (hasState(tagState, TagState.TO_ADD)) {
       return isHighlighted
-        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100 dark:bg-amber-600 dark:hover:bg-amber-900'
+        ? 'border-amber-500 bg-amber-300 shadow-sm shadow-amber-500/50 hover:bg-amber-100 dark:bg-amber-700 dark:hover:bg-amber-900'
         : 'border-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900';
     }
     if (hasState(tagState, TagState.DIRTY)) {
       return isHighlighted
-        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100 dark:bg-indigo-600 dark:hover:bg-indigo-900'
+        ? 'border-indigo-500 bg-indigo-300 shadow-sm shadow-indigo-500/50 hover:bg-indigo-100 dark:bg-indigo-700 dark:hover:bg-indigo-900'
         : 'border-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-900';
     }
     // SAVED (default)
     return isHighlighted
-      ? 'border-teal-500 bg-teal-300 shadow-sm shadow-teal-500/50 hover:bg-teal-100 dark:bg-teal-600 dark:hover:bg-teal-900'
+      ? 'border-teal-500 bg-teal-300 shadow-sm shadow-teal-500/50 hover:bg-teal-100 dark:bg-teal-700 dark:hover:bg-teal-900'
       : 'border-teal-500 hover:bg-teal-100 dark:hover:bg-teal-900';
   };
 
@@ -126,7 +126,7 @@ export const Tag = ({
         className={`ml-1 inline-flex w-5 rounded-full p-0.5 transition-colors ${
           isMarkedForDeletion || isNonInteractive
             ? 'cursor-not-allowed opacity-20'
-            : 'text-slate-500 hover:bg-blue-500 hover:text-white'
+            : 'text-slate-500 hover:bg-blue-500 hover:text-white dark:text-slate-400'
         }`}
         onClick={handleEdit}
         title={
@@ -144,7 +144,7 @@ export const Tag = ({
         className={`ml-1 inline-flex w-5 rounded-full p-0.5 transition-colors ${
           isNonInteractive
             ? 'opacity-20'
-            : `hover:bg-pink-500 hover:text-white ${isMarkedForDeletion ? 'text-pink-500' : ''}`
+            : `hover:bg-pink-500 hover:text-white ${isMarkedForDeletion ? 'text-pink-500 dark:text-pink-400' : ''}`
         }`}
         onClick={handleDelete}
         title={

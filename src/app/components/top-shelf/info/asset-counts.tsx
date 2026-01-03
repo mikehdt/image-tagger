@@ -30,7 +30,7 @@ const AssetCountsComponent = () => {
 
       {filtersActive && (filterMode !== FilterMode.SHOW_ALL || showModified) ? (
         <div className="flex items-center gap-1 border-l border-l-(--border) pl-2">
-          <span className="text-emerald-500">{filteredCount}</span>
+          <span className="text-teal-500">{filteredCount}</span>
           <span className="text-(--unselected-text)">filtered</span>
         </div>
       ) : null}

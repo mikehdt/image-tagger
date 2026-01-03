@@ -426,7 +426,7 @@ export function AutoTaggerModal({
         ) : summary ? (
           // Tagging complete - show summary
           <div className="flex flex-col gap-4">
-            <div className="rounded-md bg-emerald-50 p-4 text-sm text-emerald-800">
+            <div className="rounded-md bg-teal-50 p-4 text-sm text-teal-800">
               <p className="font-medium">Tagging complete!</p>
               <ul className="mt-2 space-y-1">
                 <li>
@@ -440,7 +440,7 @@ export function AutoTaggerModal({
                   {summary.imagesWithNewTags !== 1 ? 's' : ''}
                 </li>
                 {summary.imagesProcessed > summary.imagesWithNewTags && (
-                  <li className="text-emerald-600">
+                  <li className="text-teal-600">
                     {summary.imagesProcessed - summary.imagesWithNewTags} image
                     {summary.imagesProcessed - summary.imagesWithNewTags !== 1
                       ? 's'

@@ -9,15 +9,17 @@ const STORAGE_KEY = 'theme-preference';
  * Persists to localStorage and applies class to document.documentElement.
  */
 export const useTheme = () => {
-  const [theme, setThemeState] = useState<ThemeMode>('auto');
-
-  // Initialise from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-    if (stored && ['light', 'dark', 'auto'].includes(stored)) {
-      setThemeState(stored);
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
+      if (stored && ['light', 'dark', 'auto'].includes(stored)) {
+        return stored;
+      }
     }
-  }, []);
+    return 'auto';
+  });
+
+  // No need for useEffect to initialise from localStorage
 
   // Apply theme class to document element
   useEffect(() => {

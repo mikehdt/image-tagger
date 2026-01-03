@@ -92,7 +92,7 @@ export const Checkbox = ({
         return 'border-sky-400 bg-sky-300 text-white shadow-slate-300 inset-shadow-sky-200';
       }
       // Normal selected
-      return 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600';
+      return 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600 dark:shadow-slate-600';
     }
     if (isPreview) {
       // Preview-deselect: lighter unselected
@@ -104,7 +104,7 @@ export const Checkbox = ({
 
   return (
     <label
-      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
+      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700 dark:text-slate-400'}`}
       onClick={onClick}
       tabIndex={-1} // prevent double tab stop
     >

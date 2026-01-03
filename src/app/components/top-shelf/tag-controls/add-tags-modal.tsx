@@ -225,7 +225,8 @@ export const AddTagsModal = ({
 
   const hasNoAffectedAssets = effectiveAssetCount === 0;
 
-  const isFormInvalid = hasNoValidTags || hasInvalidConstraints || hasNoAffectedAssets;
+  const isFormInvalid =
+    hasNoValidTags || hasInvalidConstraints || hasNoAffectedAssets;
 
   // Calculate the summary message for how many assets will be affected
   const getSummaryMessage = () => {
@@ -255,7 +256,7 @@ export const AddTagsModal = ({
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
       <div className="flex flex-wrap gap-4">
         {/* Title */}
-        <h2 className="w-full text-2xl font-semibold text-slate-700">
+        <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
           Add Tags
         </h2>
 

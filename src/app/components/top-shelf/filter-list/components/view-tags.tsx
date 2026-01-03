@@ -215,10 +215,10 @@ export const TagsView = () => {
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-emerald-200 dark:bg-emerald-800'
+                      ? 'bg-teal-200 dark:bg-teal-800'
                       : 'bg-blue-100 dark:bg-blue-900'
                     : item.isActive
-                      ? 'bg-emerald-100 dark:bg-emerald-900/50'
+                      ? 'bg-teal-100 dark:bg-teal-900/50'
                       : 'hover:bg-blue-50 dark:hover:bg-slate-700'
                 }`}
                 title={
@@ -230,7 +230,7 @@ export const TagsView = () => {
                 <span
                   className={`text-sm ${
                     item.isActive
-                      ? 'font-medium text-emerald-700 dark:text-emerald-300'
+                      ? 'font-medium text-teal-700 dark:text-teal-300'
                       : 'text-slate-800 dark:text-slate-200'
                   }`}
                 >
@@ -238,7 +238,9 @@ export const TagsView = () => {
                 </span>
                 <span
                   className={`text-xs tabular-nums ${
-                    item.isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                    item.isActive
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   {item.count}

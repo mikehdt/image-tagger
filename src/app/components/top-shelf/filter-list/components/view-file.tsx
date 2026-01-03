@@ -232,12 +232,12 @@ export const FileView = () => {
         )}
 
         {/* Divider with label */}
-        <div className="flex cursor-default items-center gap-2 bg-stone-50 py-1.5">
-          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white" />
-          <span className="text-xs text-stone-400 text-shadow-white text-shadow-xs">
+        <div className="flex cursor-default items-center gap-2 bg-stone-50 py-1.5 dark:bg-stone-900">
+          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />
+          <span className="text-xs text-stone-400 text-shadow-white text-shadow-xs dark:text-shadow-stone-900">
             File Types
           </span>
-          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white" />
+          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />
         </div>
 
         {/* Extension list */}
