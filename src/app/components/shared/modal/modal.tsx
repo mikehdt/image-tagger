@@ -164,7 +164,7 @@ export const Modal = ({
           {/* Modal container */}
           <div
             ref={modalRef}
-            className={`relative max-h-[90vh] w-full overflow-auto rounded-lg bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
+            className={`relative max-h-[90vh] w-full overflow-auto rounded-lg bg-white p-6 shadow-lg transition-all duration-300 ease-in-out dark:bg-slate-800 ${
               isVisible
                 ? 'translate-y-0 scale-100 opacity-100'
                 : 'translate-y-4 scale-95 opacity-0'
@@ -174,7 +174,7 @@ export const Modal = ({
             {/* Close button (hidden when preventClose is true) */}
             {!preventClose && (
               <button
-                className="absolute top-3 right-3 z-1 cursor-pointer rounded-full border border-slate-300/0 bg-white p-1 text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus:outline-none"
+                className="absolute top-3 right-3 z-1 cursor-pointer rounded-full border border-slate-300/0 bg-white p-1 text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus:outline-none dark:border-slate-600/0 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                 onClick={onClose}
                 aria-label="Close modal"
               >

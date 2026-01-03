@@ -175,12 +175,12 @@ function DropdownInternal<T>({
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors dark:border-slate-600 dark:bg-slate-700/50 dark:inset-shadow-white/10 ${
           fullWidth ? 'w-full' : ''
         } ${sizeStyles[size]} ${
           isOpen
-            ? 'bg-white shadow-sm'
-            : 'bg-white shadow-sm hover:bg-slate-200'
+            ? 'bg-white shadow-sm dark:bg-slate-700'
+            : 'bg-white shadow-sm hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600'
         } ${buttonClassName}`}
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -203,9 +203,9 @@ function DropdownInternal<T>({
         triggerRef={buttonRef}
         className={`${
           fullWidth ? 'min-w-full' : 'min-w-40'
-        } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none ${menuClassName}`}
+        } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none dark:border-slate-600 dark:bg-slate-800 ${menuClassName}`}
       >
-        <div className="divide-y divide-slate-100" role="menu">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700" role="menu">
           {items.map((item, index) => (
             <button
               key={index}
@@ -214,11 +214,11 @@ function DropdownInternal<T>({
               onKeyDown={(e) => handleItemKeyDown(e, item, index)}
               className={`block w-full px-3 py-2 text-left text-sm ${
                 item.value === selectedValue
-                  ? `bg-slate-100 font-medium ${selectedItemClassName}`
-                  : `hover:bg-blue-50 ${itemClassName}`
+                  ? `bg-slate-100 font-medium dark:bg-slate-700 ${selectedItemClassName}`
+                  : `hover:bg-blue-50 dark:hover:bg-slate-700 ${itemClassName}`
               } ${
                 item.disabled
-                  ? `cursor-not-allowed text-slate-300 ${disabledItemClassName}`
+                  ? `cursor-not-allowed text-slate-300 dark:text-slate-500 ${disabledItemClassName}`
                   : ''
               }`}
               disabled={item.disabled}

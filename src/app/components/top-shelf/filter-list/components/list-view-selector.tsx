@@ -20,12 +20,12 @@ export const ViewSelector = () => {
 
   return (
     <>
-      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300">
+      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900 dark:inset-shadow-slate-600">
         <button
           type="button"
           onClick={() => handleViewChange('tag')}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'tag' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
+            activeView === 'tag' ? 'bg-white shadow-sm dark:bg-slate-600' : 'hover:bg-slate-300 dark:hover:bg-slate-600'
           }`}
         >
           Tag
@@ -34,7 +34,7 @@ export const ViewSelector = () => {
           type="button"
           onClick={() => handleViewChange('size')}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'size' ? 'bg-white shadow-sm' : 'hover:bg-slate-300'
+            activeView === 'size' ? 'bg-white shadow-sm dark:bg-slate-600' : 'hover:bg-slate-300 dark:hover:bg-slate-600'
           }`}
         >
           Size
@@ -44,8 +44,8 @@ export const ViewSelector = () => {
           onClick={() => handleViewChange('filetype')}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
             activeView === 'filetype'
-              ? 'bg-white shadow-sm'
-              : 'hover:bg-slate-300'
+              ? 'bg-white shadow-sm dark:bg-slate-600'
+              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
           }`}
         >
           File
@@ -54,7 +54,7 @@ export const ViewSelector = () => {
 
       <button
         onClick={onClose}
-        className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200"
+        className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200 dark:hover:bg-slate-600"
         title="Close filter list"
       >
         <XMarkIcon className="h-4 w-4" />

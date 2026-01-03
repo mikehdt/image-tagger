@@ -94,7 +94,7 @@ const SizeVisualizer = ({
   return (
     <div
       className={`border transition-colors ${
-        isActive ? 'border-sky-500 bg-sky-200' : 'border-slate-300 bg-slate-50'
+        isActive ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800' : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
     />
@@ -188,22 +188,22 @@ const SizeInfo = ({
       <>
         <div className="flex items-center justify-between tabular-nums">
           <span>
-            <span className="text-slate-800">
+            <span className="text-slate-800 dark:text-slate-200">
               {searchTerm ? highlightText(item.ratio, searchTerm) : item.ratio}
             </span>
-            <span className="mx-1 text-slate-300">•</span>
-            <span className="text-sm text-slate-500">{item.type}</span>
+            <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">{item.type}</span>
           </span>
-          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
         </div>
         <div className="flex text-xs tabular-nums">
-          <span className="text-slate-500">
+          <span className="text-slate-500 dark:text-slate-400">
             {formatDimensions(item.dimensions)}
           </span>
           {item.pixelCount > 100000 && (
             <>
-              <span className="mx-1 text-slate-300">•</span>
-              <span className="text-slate-500">{item.formattedMP}</span>
+              <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-slate-500 dark:text-slate-400">{item.formattedMP}</span>
             </>
           )}
         </div>
@@ -213,21 +213,21 @@ const SizeInfo = ({
     return (
       <>
         <div className="flex items-center justify-between tabular-nums">
-          <span className="text-slate-800">
+          <span className="text-slate-800 dark:text-slate-200">
             {searchTerm
               ? highlightText(item.formattedMP, searchTerm)
               : item.formattedMP}
           </span>
-          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
         </div>
         <div className="flex text-xs tabular-nums">
-          <span className="text-slate-500">
+          <span className="text-slate-500 dark:text-slate-400">
             {formatDimensions(item.dimensions)}
           </span>
-          <span className="mx-1 text-slate-300">•</span>
-          <span className="text-slate-500">{item.ratio}</span>
-          <span className="mx-1 text-slate-300">•</span>
-          <span className="text-slate-500">{item.type}</span>
+          <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+          <span className="text-slate-500 dark:text-slate-400">{item.ratio}</span>
+          <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+          <span className="text-slate-500 dark:text-slate-400">{item.type}</span>
         </div>
       </>
     );
@@ -235,7 +235,7 @@ const SizeInfo = ({
     return (
       <>
         <div className="flex items-center justify-between tabular-nums">
-          <span className="text-slate-800">
+          <span className="text-slate-800 dark:text-slate-200">
             {searchTerm
               ? highlightText(
                   formatDimensions(item.dimensions),
@@ -244,16 +244,16 @@ const SizeInfo = ({
                 )
               : formatDimensions(item.dimensions)}
           </span>
-          <span className="ml-auto text-xs text-slate-500">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
         </div>
         <div className="flex text-xs tabular-nums">
-          <span className="text-slate-500">{item.ratio}</span>
-          <span className="mx-1 text-slate-300">•</span>
-          <span className="text-slate-500">{item.type}</span>
+          <span className="text-slate-500 dark:text-slate-400">{item.ratio}</span>
+          <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+          <span className="text-slate-500 dark:text-slate-400">{item.type}</span>
           {item.pixelCount > 100000 ? (
             <>
-              <span className="mx-1 text-slate-300">•</span>
-              <span className="text-slate-500">{item.formattedMP}</span>
+              <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-slate-500 dark:text-slate-400">{item.formattedMP}</span>
             </>
           ) : null}
         </div>
@@ -435,7 +435,7 @@ export const SizesView = () => {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Search input section */}
-      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2">
+      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2 dark:border-slate-700 dark:bg-slate-800">
         <input
           ref={inputRef}
           type="text"
@@ -444,13 +444,13 @@ export const SizesView = () => {
           onKeyDown={handleKeyDown}
           autoFocus
           placeholder="Search sizes..."
-          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all"
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-slate-800"
         />
         <button
           className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
             searchTerm.trim() !== ''
-              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-              : 'pointer-events-none text-white'
+              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-400 dark:hover:bg-slate-600'
+              : 'pointer-events-none text-white dark:text-slate-800'
           }`}
           onClick={
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
@@ -469,7 +469,7 @@ export const SizesView = () => {
               : 'No sizes available'}
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {filteredSizes.map((item, index) => (
               <li
                 id={`size-${item.dimensions}`}
@@ -478,11 +478,11 @@ export const SizesView = () => {
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-sky-200'
-                      : 'bg-blue-100'
+                      ? 'bg-sky-200 dark:bg-sky-800'
+                      : 'bg-blue-100 dark:bg-blue-900'
                     : item.isActive
-                      ? 'bg-sky-100'
-                      : 'hover:bg-blue-50'
+                      ? 'bg-sky-100 dark:bg-sky-900/50'
+                      : 'hover:bg-blue-50 dark:hover:bg-slate-700'
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">

@@ -92,7 +92,7 @@ const BucketVisualizer = ({
   return (
     <div
       className={`border transition-colors ${
-        isActive ? 'border-sky-500 bg-sky-200' : 'border-slate-300 bg-slate-50'
+        isActive ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800' : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
     />
