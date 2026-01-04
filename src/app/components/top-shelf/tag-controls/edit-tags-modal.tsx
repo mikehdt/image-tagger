@@ -397,7 +397,7 @@ export const EditTagsModal = ({
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
       <div className="flex flex-wrap gap-4">
         {/* Title */}
-        <h2 className="w-full text-2xl font-semibold text-slate-700">
+        <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
           Edit Tags
         </h2>
 
@@ -413,11 +413,11 @@ export const EditTagsModal = ({
             {tagStatuses.map(({ tag, status }, index) => {
               // Define style variants based on status
               const inputStyles = {
-                none: 'border-slate-300 inset-shadow-slate-300/0 focus:inset-shadow-slate-300 focus:border-blue-500 focus:ring-slate-500 focus:outline-slate-500',
-                some: 'border-amber-300 bg-amber-50 text-amber-800 inset-shadow-amber-300/0 focus:inset-shadow-amber-300 focus:border-amber-500 focus:ring-amber-500',
-                all: 'border-rose-300 bg-rose-50 text-rose-800 inset-shadow-rose-300/0 focus:inset-shadow-rose-300 focus:border-rose-500 focus:ring-rose-500',
+                none: 'border-slate-300 inset-shadow-slate-300/0 focus:inset-shadow-slate-300 focus:border-blue-500 focus:ring-slate-500 focus:outline-slate-500 dark:border-slate-500 dark:focus:inset-shadow-slate-600',
+                some: 'border-amber-300 bg-amber-50 text-amber-800 inset-shadow-amber-300/0 focus:inset-shadow-amber-300 focus:border-amber-500 focus:ring-amber-500 dark:border-amber-500 dark:focus:inset-shadow-amber-600',
+                all: 'border-rose-300 bg-rose-50 text-rose-800 inset-shadow-rose-300/0 focus:inset-shadow-rose-300 focus:border-rose-500 focus:ring-rose-500 dark:border-rose-500 dark:focus:inset-shadow-rose-600',
                 duplicate:
-                  'border-purple-300 bg-purple-50 text-purple-800 inset-shadow-purple-300/0 focus:inset-shadow-purple-300 focus:border-purple-500 focus:ring-purple-500',
+                  'border-purple-300 bg-purple-50 text-purple-800 inset-shadow-purple-300/0 focus:inset-shadow-purple-300 focus:border-purple-500 focus:ring-purple-500 dark:border-purple-500 dark:focus:inset-shadow-purple-600',
               };
 
               // Get duplicate info for tooltips
@@ -454,9 +454,9 @@ export const EditTagsModal = ({
               return (
                 <div key={`${tag}-${index}`} className="flex items-center">
                   {/* Original tag */}
-                  <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500">
+                  <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500 dark:text-slate-400">
                     {tag}
-                    <div className="absolute top-0 right-0 w-10 text-center text-slate-700">
+                    <div className="absolute top-0 right-0 w-10 text-center text-slate-700 dark:text-slate-500">
                       -&gt;
                     </div>
                   </div>
@@ -512,6 +512,7 @@ export const EditTagsModal = ({
             selectedCount={selectedAssetsCount}
             scopeToSelected={onlySelectedAssets}
             onScopeToSelectedChange={setOnlySelectedAssets}
+            showBorder
           />
 
           {hasNoAffectedAssets ? (

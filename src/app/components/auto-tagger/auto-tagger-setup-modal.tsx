@@ -167,8 +167,8 @@ export function AutoTaggerSetupModal() {
       className="max-w-lg"
     >
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-slate-800">
-          Set Up Auto-Tagger
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-300">
+          Auto-Tagger Models
         </h2>
 
         {isDownloading ? (
@@ -202,15 +202,15 @@ export function AutoTaggerSetupModal() {
         ) : (
           // Model selection view
           <>
-            <p className="text-sm text-slate-600">
-              Select a model to download. The model will be used for automatic
-              image tagging.
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Select a model to download. The model will then be available for
+              automatic image tagging.
             </p>
 
             {/* Provider info */}
             {providers.length > 0 && (
-              <div className="rounded-md bg-slate-50 p-3">
-                <h3 className="text-sm font-medium text-slate-700">
+              <div className="rounded-md bg-slate-50 p-3 dark:bg-slate-900">
+                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
                   {providers[0].name}
                 </h3>
                 <p className="mt-1 text-xs text-slate-500">
@@ -275,7 +275,7 @@ function ModelOption({
 }) {
   const statusBadge = {
     ready: (
-      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
+      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700">
         Installed
       </span>
     ),

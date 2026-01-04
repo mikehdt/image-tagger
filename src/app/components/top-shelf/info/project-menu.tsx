@@ -3,8 +3,11 @@ import {
   ArrowPathIcon,
   CalculatorIcon,
   ChevronDownIcon,
+  ComputerDesktopIcon,
   CubeIcon,
+  MoonIcon,
   SparklesIcon,
+  SunIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -15,6 +18,7 @@ import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
+import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 
@@ -46,14 +50,23 @@ const MenuItem = ({ icon, label, onClick, disabled }: MenuItemProps) => (
     disabled={disabled}
     className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
       disabled
-        ? 'cursor-not-allowed text-slate-300'
-        : 'text-slate-700 hover:bg-slate-100'
+        ? 'cursor-not-allowed text-slate-300 dark:text-slate-500'
+        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     <span className="w-5">{icon}</span>
     {label}
   </button>
 );
+
+const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
+  {
+    light: { icon: <SunIcon className="w-5" />, label: 'Light' },
+    dark: { icon: <MoonIcon className="w-5" />, label: 'Dark' },
+    auto: { icon: <ComputerDesktopIcon className="w-5" />, label: 'Auto' },
+  };
+
+const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
 
 const ProjectMenuComponent = () => {
   const dispatch = useAppDispatch();
@@ -65,6 +78,7 @@ const ProjectMenuComponent = () => {
   const projectName = useAppSelector(selectProjectName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
   const ioState = useAppSelector(selectIoState);
+  const { theme, setTheme } = useTheme();
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
@@ -198,6 +212,12 @@ const ProjectMenuComponent = () => {
     dispatch(openSetupModal());
   }, [closePopup, popupId, dispatch]);
 
+  const handleCycleTheme = useCallback(() => {
+    const currentIndex = themeOrder.indexOf(theme);
+    const nextIndex = (currentIndex + 1) % themeOrder.length;
+    setTheme(themeOrder[nextIndex]);
+  }, [theme, setTheme]);
+
   if (!projectName) {
     return null;
   }
@@ -209,7 +229,7 @@ const ProjectMenuComponent = () => {
         type="button"
         onClick={handleToggle}
         className={`flex cursor-pointer items-center gap-2 rounded-sm px-1 py-0.5 transition-colors ${
-          isOpen ? 'bg-slate-200' : 'hover:bg-slate-100'
+          isOpen ? 'bg-(--surface)' : 'hover:bg-(--surface)/50'
         }`}
       >
         {projectThumbnail ? (
@@ -222,11 +242,11 @@ const ProjectMenuComponent = () => {
             className="h-6 w-6 rounded-full object-cover"
           />
         ) : (
-          <CubeIcon className="h-6 w-6 rounded-full bg-slate-200 p-1 text-slate-500" />
+          <CubeIcon className="h-6 w-6 rounded-full bg-(--surface) p-1 text-(--unselected-text)" />
         )}
-        <span className="font-medium text-slate-700">{projectName}</span>
+        <span className="font-medium text-(--foreground)">{projectName}</span>
         <ChevronDownIcon
-          className={`h-3 w-3 text-slate-500 transition-transform ${
+          className={`h-3 w-3 text-(--unselected-text) transition-transform ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -236,9 +256,9 @@ const ProjectMenuComponent = () => {
         id={popupId}
         position="bottom-left"
         triggerRef={buttonRef}
-        className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg"
+        className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"
       >
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700">
           <MenuItem
             icon={<ArrowPathIcon className="w-5" />}
             label="Refresh Assets"
@@ -252,8 +272,13 @@ const ProjectMenuComponent = () => {
           />
           <MenuItem
             icon={<SparklesIcon className="w-5" />}
-            label="Set Up Auto-Tagger"
+            label="Auto-Tagger Models"
             onClick={handleOpenAutoTaggerSetup}
+          />
+          <MenuItem
+            icon={themeConfig[theme].icon}
+            label={`${themeConfig[theme].label} Theme`}
+            onClick={handleCycleTheme}
           />
           <MenuItem
             icon={<ArrowLeftCircleIcon className="w-5" />}

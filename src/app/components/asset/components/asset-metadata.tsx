@@ -140,10 +140,10 @@ const AssetMetadataComponent = ({
 
   return (
     <div
-      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-xs inset-shadow-white transition-colors ${
+      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-(--surface-elevated) transition-colors ${
         hasModifiedTags
-          ? 'border-t-amber-300 bg-amber-100'
-          : 'border-t-slate-300 bg-slate-100'
+          ? 'border-t-amber-300 bg-amber-100 dark:border-t-amber-600 dark:bg-amber-900'
+          : 'border-t-(--border) bg-(--surface)'
       }`}
     >
       <span className="inline-flex min-w-0 flex-wrap items-center gap-2 py-0.5 tabular-nums">
@@ -182,8 +182,8 @@ const AssetMetadataComponent = ({
         </Button>
 
         <span
-          className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-slate-500 transition-colors hover:text-slate-700 max-sm:order-1 max-sm:w-full max-sm:pt-2"
-          style={{ textShadow: 'white 0 1px 0' }}
+          className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
+          style={{ textShadow: 'var(--surface-elevated) 0 1px 0' }}
           onClick={handleCopyAssetPath}
           title="Click to copy full file path"
         >
@@ -204,7 +204,7 @@ const AssetMetadataComponent = ({
           </Button>
 
           <Button
-            color="emerald"
+            color="teal"
             size="medium"
             onClick={handleSaveAction}
             disabled={isTagEditing || isSaving}

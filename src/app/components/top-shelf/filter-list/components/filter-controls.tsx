@@ -65,7 +65,7 @@ export const FilterControls = () => {
     <>
       <button
         onClick={handleSortType}
-        className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
+        className="cursor-pointer rounded rounded-tr-none rounded-br-none border border-r-0 border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-white/10 dark:hover:bg-slate-600"
         title="Toggle sort type"
       >
         By {getSortOptions().typeLabel}
@@ -73,7 +73,7 @@ export const FilterControls = () => {
 
       <button
         onClick={handleSortDirection}
-        className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100"
+        className="cursor-pointer rounded rounded-tl-none rounded-bl-none border border-slate-200 bg-white px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-white/10 dark:hover:bg-slate-600"
         title="Toggle sort direction"
       >
         Sort {getSortOptions().directionLabel}
@@ -81,10 +81,10 @@ export const FilterControls = () => {
 
       <button
         onClick={handleClearFilters}
-        className={`ml-auto rounded border border-slate-200 px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors ${
+        className={`ml-auto rounded border border-slate-200 px-2 py-1 text-xs inset-shadow-xs inset-shadow-white transition-colors dark:border-slate-600 dark:inset-shadow-white/10 ${
           !isButtonDisabled
-            ? 'cursor-pointer bg-white hover:bg-slate-100'
-            : 'cursor-not-allowed bg-slate-50 text-slate-400'
+            ? 'cursor-pointer bg-white hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600'
+            : 'cursor-not-allowed bg-slate-50 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
         }`}
         disabled={isButtonDisabled}
         title={`Clear ${activeView} filters`}

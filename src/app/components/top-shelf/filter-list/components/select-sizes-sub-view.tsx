@@ -33,14 +33,14 @@ export const SizeSubViewSelector = () => {
   };
 
   return (
-    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300">
+    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900 dark:inset-shadow-slate-600">
       <button
         type="button"
         onClick={() => handleSubViewChange('dimensions')}
         className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
           sizeSubView === 'dimensions'
-            ? 'bg-white shadow-sm'
-            : 'hover:bg-slate-300'
+            ? 'bg-white shadow-sm dark:bg-slate-600'
+            : 'hover:bg-slate-300 dark:hover:bg-slate-600'
         }`}
       >
         Images
@@ -50,8 +50,8 @@ export const SizeSubViewSelector = () => {
         onClick={() => handleSubViewChange('buckets')}
         className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
           sizeSubView === 'buckets'
-            ? 'bg-white shadow-sm'
-            : 'hover:bg-slate-300'
+            ? 'bg-white shadow-sm dark:bg-slate-600'
+            : 'hover:bg-slate-300 dark:hover:bg-slate-600'
         }`}
       >
         Buckets

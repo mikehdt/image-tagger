@@ -4,7 +4,7 @@ A comprehensive, reusable button component that provides consistent styling and 
 
 ## Features
 
-- **Multiple Color Variants**: slate, amber, rose, emerald, sky
+- **Multiple Color Variants**: slate, amber, rose, teal, sky
 - **Multiple Sizes**: medium, large
 - **Multiple Behaviors**:
   - Standard clickable button
@@ -91,7 +91,7 @@ A comprehensive, reusable button component that provides consistent styling and 
 - **slate**: Neutral gray styling
 - **amber**: Warm yellow/orange styling
 - **rose**: Pink/red styling
-- **emerald**: Green styling
+- **teal**: Green styling
 - **sky**: Blue styling
 
 ## Size Variants

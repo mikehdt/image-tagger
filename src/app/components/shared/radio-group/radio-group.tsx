@@ -71,9 +71,9 @@ export function RadioGroup<T extends string>({
       return 'border-slate-300 bg-slate-50 shadow-slate-200';
     }
     if (isSelected) {
-      return 'border-sky-700 bg-linear-to-t from-sky-600 to-sky-500 shadow-slate-500 inset-shadow-xs inset-shadow-sky-300';
+      return 'border-sky-700 bg-linear-to-t from-sky-600 to-sky-500 shadow-slate-500 inset-shadow-xs inset-shadow-sky-300 dark:shadow-slate-600';
     }
-    return 'border-slate-400 bg-linear-to-t from-slate-100 to-white shadow-white inset-shadow-xs inset-shadow-slate-300 hover:border-sky-500 hover:from-sky-50 hover:to-white';
+    return 'border-slate-400 bg-linear-to-t from-slate-100 to-white shadow-white inset-shadow-xs inset-shadow-slate-300 hover:border-sky-500 hover:from-sky-50 hover:to-white dark:shadow-slate-900';
   };
 
   // Inner dot styling
@@ -102,7 +102,7 @@ export function RadioGroup<T extends string>({
             className={`inline-flex items-center ${currentSize.gap} ${currentSize.label} select-none ${
               disabled
                 ? 'cursor-not-allowed text-slate-400'
-                : 'cursor-pointer text-slate-700'
+                : 'cursor-pointer text-slate-700 dark:text-slate-400'
             }`}
           >
             <div

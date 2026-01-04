@@ -456,7 +456,7 @@ const TagListComponent = ({
             onClick={handleCopyTags}
             variant="ghost"
             size="smallSquare"
-            color={copyInfo.isPartialCopy ? 'emerald' : 'slate'}
+            color={copyInfo.isPartialCopy ? 'teal' : 'slate'}
             title={
               copyInfo.isPartialCopy
                 ? `Copy ${copyInfo.selectedCount} selected ${copyInfo.selectedCount === 1 ? 'tag' : 'tags'} as comma-separated list`

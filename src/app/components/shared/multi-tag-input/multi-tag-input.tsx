@@ -153,8 +153,8 @@ export const MultiTagInput = ({
     <div
       ref={containerRef}
       className={`flex w-full cursor-text flex-wrap items-center rounded-2xl border px-1 py-1 inset-shadow-sm transition-colors focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 ${className} ${
-        hasFocus ? 'border-sky-500' : 'border-slate-400'
-      } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300' : 'inset-shadow-slate-300'}`}
+        hasFocus ? 'border-sky-500' : 'border-slate-400 dark:border-slate-500'
+      } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300 dark:inset-shadow-amber-900' : 'inset-shadow-slate-300 dark:inset-shadow-slate-900'}`}
       data-container="true"
     >
       {tags.map((tag, index) => {
@@ -169,14 +169,14 @@ export const MultiTagInput = ({
         // Define style variants based on status
         const tagStyles = {
           none: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
-            : 'border-slate-300 bg-slate-100 text-slate-800',
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
+            : 'border-slate-300 bg-slate-100 text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300',
           some: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
-            : 'border-amber-300 bg-amber-50 text-amber-800',
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
+            : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-300',
           all: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500'
-            : 'border-rose-300 bg-rose-100 text-rose-800',
+            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
+            : 'border-rose-300 bg-rose-100 text-rose-800 dark:border-rose-600 dark:bg-rose-800 dark:text-rose-300',
         };
 
         const buttonHoverStyles = {
@@ -218,7 +218,7 @@ export const MultiTagInput = ({
         onFocus={() => setHasFocus(true)}
         onBlur={handleInputBlur}
         placeholder={tags.length === 0 ? placeholder : ''}
-        className="min-w-24 flex-grow basis-0 bg-transparent px-2 py-1 outline-none"
+        className="min-w-24 grow basis-0 bg-transparent px-2 py-1 outline-none"
         autoFocus={autoFocus}
         data-container="true"
       />

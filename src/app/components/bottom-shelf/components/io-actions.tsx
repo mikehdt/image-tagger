@@ -42,7 +42,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
       <Button
         type="button"
         size="medium"
-        color="emerald"
+        color="teal"
         ghostDisabled
         neutralDisabled
         onClick={saveAllChanges}

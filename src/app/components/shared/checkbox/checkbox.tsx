@@ -92,19 +92,19 @@ export const Checkbox = ({
         return 'border-sky-400 bg-sky-300 text-white shadow-slate-300 inset-shadow-sky-200';
       }
       // Normal selected
-      return 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600';
+      return 'border-sky-700 bg-sky-500 text-white shadow-slate-500 inset-shadow-sky-300 hover:bg-sky-600 dark:shadow-slate-600';
     }
     if (isPreview) {
       // Preview-deselect: lighter unselected
-      return 'border-slate-300 bg-slate-50 shadow-white inset-shadow-slate-200';
+      return 'border-slate-300 bg-slate-50 shadow-white inset-shadow-slate-200 dark:shadow-slate-900';
     }
     // Normal unselected
-    return 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50';
+    return 'border-slate-400 bg-white shadow-white inset-shadow-slate-300 hover:border-sky-500 hover:bg-sky-50 dark:shadow-slate-900';
   };
 
   return (
     <label
-      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700'}`}
+      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700 dark:text-slate-400'}`}
       onClick={onClick}
       tabIndex={-1} // prevent double tab stop
     >

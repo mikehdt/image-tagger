@@ -174,7 +174,7 @@ export const TagsView = () => {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Search input section */}
-      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2">
+      <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2 dark:border-slate-700 dark:bg-slate-800">
         <input
           ref={inputRef}
           type="text"
@@ -183,13 +183,13 @@ export const TagsView = () => {
           onKeyDown={handleKeyDown}
           autoFocus
           placeholder="Search tags..."
-          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all"
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-slate-800"
         />
         <button
           className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
             searchTerm.trim() !== ''
-              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white'
-              : 'pointer-events-none text-white'
+              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-400 dark:hover:bg-slate-600'
+              : 'pointer-events-none text-white dark:text-slate-800'
           }`}
           onClick={
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
@@ -206,7 +206,7 @@ export const TagsView = () => {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {filteredTags.map((item, index) => (
               <li
                 id={`tag-${item.tag}`}
@@ -215,11 +215,11 @@ export const TagsView = () => {
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-emerald-200'
-                      : 'bg-blue-100'
+                      ? 'bg-teal-200 dark:bg-teal-800'
+                      : 'bg-blue-100 dark:bg-blue-900'
                     : item.isActive
-                      ? 'bg-emerald-100'
-                      : 'hover:bg-blue-50'
+                      ? 'bg-teal-100 dark:bg-teal-900/50'
+                      : 'hover:bg-blue-50 dark:hover:bg-slate-700'
                 }`}
                 title={
                   item.isActive
@@ -230,15 +230,17 @@ export const TagsView = () => {
                 <span
                   className={`text-sm ${
                     item.isActive
-                      ? 'font-medium text-emerald-700'
-                      : 'text-slate-800'
+                      ? 'font-medium text-teal-700 dark:text-teal-300'
+                      : 'text-slate-800 dark:text-slate-200'
                   }`}
                 >
                   {searchTerm ? highlightText(item.tag, searchTerm) : item.tag}
                 </span>
                 <span
                   className={`text-xs tabular-nums ${
-                    item.isActive ? 'text-emerald-600' : 'text-slate-500'
+                    item.isActive
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   {item.count}

@@ -46,7 +46,7 @@ const FilterListButtonComponent = () => {
         id={popupId}
         position="bottom-right"
         triggerRef={buttonRef}
-        className="flex w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+        className="flex w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"
       >
         <FilterProvider onClose={handleClose}>
           <FilterPanel />
