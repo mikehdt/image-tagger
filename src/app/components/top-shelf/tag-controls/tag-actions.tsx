@@ -268,6 +268,8 @@ const TagActionsComponent = () => {
           <span className="ml-2 max-xl:hidden">Edit</span>
         </Button>
 
+        <ToolbarDivider />
+
         <Button
           type="button"
           variant="ghost"
@@ -288,7 +290,6 @@ const TagActionsComponent = () => {
           ) : (
             <DocumentMinusIcon className="w-4" />
           )}
-          <span className="ml-2 max-xl:hidden">Delete</span>
         </Button>
 
         <Button
