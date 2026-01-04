@@ -53,15 +53,22 @@ export const Popup: React.FC<PopupProps> = ({
     const desiredPosition = currentConfig?.position || position;
     const currentOffset = currentConfig?.offset ?? offset;
 
-    // First, apply initial styles so we can measure
+    // First, reset any previous constraints so we can measure natural width
+    popup.style.maxWidth = '';
+    popup.style.minWidth = '';
+    popup.style.left = '';
+    popup.style.right = '';
+    popup.style.transform = '';
+
+    // Apply initial positioning styles
     const initialStyles = calculateInitialStyles(
       desiredPosition,
       currentOffset,
     );
     Object.assign(popup.style, initialStyles);
 
-    // Force a layout so getBoundingClientRect returns accurate values
-    popup.getBoundingClientRect();
+    // Force a reflow so the popup expands to natural width before measuring
+    void popup.offsetWidth;
 
     // Now check viewport and adjust if needed
     const { styles, adjustedPosition, isConstrained: constrained } =

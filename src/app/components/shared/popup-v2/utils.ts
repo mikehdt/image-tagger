@@ -71,54 +71,58 @@ export function adjustForViewport(
   const verticalPart = desiredPosition.startsWith('top') ? 'top' : 'bottom';
 
   // --- Horizontal adjustment ---
-  // Calculate how much the popup overflows on each side
-  const overflowRight = Math.max(
-    0,
-    popupRect.right - (viewportWidth - VIEWPORT_MARGIN),
-  );
-  const overflowLeft = Math.max(0, VIEWPORT_MARGIN - popupRect.left);
+  // Calculate where the popup WOULD be at its natural/desired position
+  // This avoids oscillation from measuring already-adjusted positions
+  const popupWidth = popupRect.width;
+  let naturalLeft: number;
+  let naturalRight: number;
+
+  if (desiredPosition.includes('left')) {
+    // Left-aligned: popup's left edge aligns with trigger's left edge
+    naturalLeft = triggerRect.left;
+    naturalRight = naturalLeft + popupWidth;
+  } else if (desiredPosition.includes('right')) {
+    // Right-aligned: popup's right edge aligns with trigger's right edge
+    naturalRight = triggerRect.right;
+    naturalLeft = naturalRight - popupWidth;
+  } else {
+    // Centered: popup is centered on trigger
+    const triggerCenter = triggerRect.left + triggerRect.width / 2;
+    naturalLeft = triggerCenter - popupWidth / 2;
+    naturalRight = triggerCenter + popupWidth / 2;
+  }
+
+  // Calculate overflow based on natural position
+  const overflowRight = Math.max(0, naturalRight - (viewportWidth - VIEWPORT_MARGIN));
+  const overflowLeft = Math.max(0, VIEWPORT_MARGIN - naturalLeft);
   const maxAvailableWidth = viewportWidth - VIEWPORT_MARGIN * 2;
   const isConstrained = overflowRight > 0 || overflowLeft > 0;
 
   if (overflowRight > 0 && overflowLeft > 0) {
-    // Popup is wider than viewport - constrain width and center it
+    // Popup is wider than viewport - constrain width and pin to left margin
     styles.maxWidth = `${maxAvailableWidth}px`;
     styles.minWidth = `${Math.min(300, maxAvailableWidth)}px`;
     delete styles.right;
     delete styles.transform;
-    // Position relative to trigger: shift left edge to viewport margin
+    // Position so popup's left edge is at viewport margin
     styles.left = VIEWPORT_MARGIN - triggerRect.left;
   } else if (overflowRight > 0) {
-    // Overflowing right edge - shift left by the overflow amount
-    // Keep the original alignment style but apply an offset
-    if (styles.transform === 'translateX(-50%)') {
-      // Centered popup - adjust the transform
-      delete styles.transform;
-      delete styles.left;
-      // Use right alignment with the trigger's right edge as reference
-      styles.right = triggerRect.right - popupRect.right - overflowRight;
-    } else if (styles.left !== undefined) {
-      // Left-aligned popup - shift it left
-      styles.left = -overflowRight;
-    } else {
-      // Right-aligned but still overflowing (trigger near right edge)
-      styles.right = -overflowRight;
-    }
+    // Overflowing right edge only - shift left to fit
+    // We want popup's left edge at: (viewportWidth - VIEWPORT_MARGIN) - popupWidth
+    const targetLeft = viewportWidth - VIEWPORT_MARGIN - popupWidth;
+
+    delete styles.transform;
+    delete styles.right;
+    // Position so popup's left edge is at targetLeft
+    styles.left = targetLeft - triggerRect.left;
   } else if (overflowLeft > 0) {
-    // Overflowing left edge - shift right by the overflow amount
-    if (styles.transform === 'translateX(-50%)') {
-      // Centered popup - adjust the transform
-      delete styles.transform;
-      delete styles.right;
-      styles.left = overflowLeft;
-    } else if (styles.right !== undefined) {
-      // Right-aligned popup - shift it right
-      delete styles.right;
-      styles.left = overflowLeft;
-    } else {
-      // Left-aligned but still overflowing (trigger near left edge)
-      styles.left = overflowLeft;
-    }
+    // Overflowing left edge only - shift right to fit
+    const targetLeft = VIEWPORT_MARGIN;
+
+    delete styles.transform;
+    delete styles.right;
+    // Position so popup's left edge is at targetLeft
+    styles.left = targetLeft - triggerRect.left;
   }
 
   // --- Vertical adjustment ---

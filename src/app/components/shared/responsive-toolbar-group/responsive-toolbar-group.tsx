@@ -103,10 +103,18 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="group rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg focus:outline-none"
+          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg focus:outline-none max-sm:fixed! max-sm:top-12! max-sm:right-4! max-sm:left-4! max-sm:mt-0! max-sm:transform-none!"
           disableOverflowHandling
         >
-          <div className="flex min-w-60 items-center gap-1 bg-(--surface) p-2 group-data-constrained:flex-wrap">
+          <div
+            className={`flex items-center gap-1 bg-(--surface) p-2 max-sm:flex-wrap ${
+              position === 'left'
+                ? 'max-sm:justify-start'
+                : position === 'right'
+                  ? 'max-sm:justify-end'
+                  : 'max-sm:justify-center'
+            }`}
+          >
             {children}
           </div>
         </Popup>

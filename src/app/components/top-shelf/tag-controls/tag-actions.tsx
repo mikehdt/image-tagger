@@ -199,7 +199,7 @@ const TagActionsComponent = () => {
       <ResponsiveToolbarGroup
         icon={<SwatchIcon className="w-4" />}
         title="Tags"
-        position="center"
+        position="right"
       >
         <Dropdown
           items={tagSortTypeItems}
