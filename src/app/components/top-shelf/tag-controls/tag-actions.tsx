@@ -180,7 +180,7 @@ const TagActionsComponent = () => {
   const tagSortTypeItems: DropdownItem<TagSortType>[] = [
     {
       value: TagSortType.SORTABLE,
-      label: 'Sort Order',
+      label: 'Tag Order',
     },
     {
       value: TagSortType.ALPHABETICAL,

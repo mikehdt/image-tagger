@@ -204,13 +204,20 @@ const AssetSelectionControlsComponent = () => {
         filterMode === FilterMode.MATCH_ALL ||
         filterMode === FilterMode.MATCH_NONE) &&
         !filterSelectionActive) ||
-      (filterMode === FilterMode.SELECTED_ASSETS && selectedAssetsCount === 0) ||
+      (filterMode === FilterMode.SELECTED_ASSETS &&
+        selectedAssetsCount === 0) ||
       (filterMode === FilterMode.TAGLESS && !hasTaglessAssets);
 
     if (shouldReset) {
       dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
     }
-  }, [filterMode, filterSelectionActive, selectedAssetsCount, hasTaglessAssets, dispatch]);
+  }, [
+    filterMode,
+    filterSelectionActive,
+    selectedAssetsCount,
+    hasTaglessAssets,
+    dispatch,
+  ]);
 
   // Check if all currently filtered assets are selected
   const allFilteredAssetsSelected = useMemo(() => {
