@@ -20,7 +20,7 @@ html.light {
   /* Surface colours - using Tailwind v4 CSS variables */
   --surface: var(--color-slate-100);
   --surface-alt: var(--color-slate-50);
-  --surface-elevated: var(--color-white);
+  --surface-elevated: var(--color-slate-100);
   --surface-muted: var(--color-slate-300);
 
   /* Translucent surfaces for overlays/shelves */
