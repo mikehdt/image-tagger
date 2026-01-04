@@ -1,6 +1,7 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  BarsArrowUpIcon,
   DocumentMinusIcon,
   DocumentPlusIcon,
   NoSymbolIcon,
@@ -10,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { memo, useCallback, useState } from 'react';
 
-import { markFilterTagsToDelete } from '@/app/store/assets';
+import { gatherTags, markFilterTagsToDelete } from '@/app/store/assets';
 import { selectFilterTagsDeleteState } from '@/app/store/assets/selectors';
 import {
   clearFilters,
@@ -176,6 +177,12 @@ const TagActionsComponent = () => {
     dispatch(toggleTagSortDirection());
   }, [dispatch]);
 
+  const handleGatherTags = useCallback(() => {
+    if (filterTags.length >= 2) {
+      dispatch(gatherTags(filterTags));
+    }
+  }, [dispatch, filterTags]);
+
   // Tag sort dropdown items
   const tagSortTypeItems: DropdownItem<TagSortType>[] = [
     {
@@ -282,6 +289,16 @@ const TagActionsComponent = () => {
             <DocumentMinusIcon className="w-4" />
           )}
           <span className="ml-2 max-xl:hidden">Delete</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleGatherTags}
+          disabled={filterTags.length < 2}
+          title="Gather selected tags together (moves them to be consecutive starting at the first tag's position)"
+        >
+          <BarsArrowUpIcon className="w-4" />
         </Button>
 
         <ToolbarDivider />

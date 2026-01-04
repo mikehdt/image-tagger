@@ -370,4 +370,66 @@ export const coreReducers = {
       SortDirection.DESC,
     );
   },
+
+  /**
+   * Gathers selected tags to be consecutive, starting at the position of the first selected tag.
+   * Works per-asset: gathers whichever of the selected tags are present in that asset.
+   * For example: [a] [b] [c] [d] [e] with [b], [d], [e] selected becomes [a] [b] [d] [e] [c]
+   */
+  gatherTags: (
+    state: ImageAssets,
+    { payload }: PayloadAction<string[]>,
+  ) => {
+    if (!payload || payload.length < 2) return;
+
+    const tagsToGather = payload;
+
+    state.images.forEach((asset) => {
+      // Find which of the selected tags exist in this asset
+      const presentTags = tagsToGather.filter((tag) =>
+        asset.tagList.includes(tag),
+      );
+
+      // Need at least 2 tags present in this asset to gather
+      if (presentTags.length < 2) return;
+
+      // Find the index of the first tag to gather (in current tag order)
+      const firstTagIndex = Math.min(
+        ...presentTags.map((tag) => asset.tagList.indexOf(tag)),
+      );
+
+      // Get tags in their current order within the asset
+      const orderedTagsToGather = asset.tagList.filter((tag) =>
+        presentTags.includes(tag),
+      );
+
+      // Remove all tags to gather from their current positions
+      asset.tagList = asset.tagList.filter(
+        (tag) => !presentTags.includes(tag),
+      );
+
+      // Insert them consecutively at the first tag's original position
+      asset.tagList.splice(firstTagIndex, 0, ...orderedTagsToGather);
+
+      // Update DIRTY flags by comparing with savedTagList
+      const savedTagList = asset.savedTagList || [];
+
+      // Check all tags that might have been affected
+      asset.tagList.forEach((tag, currentIndex) => {
+        // Skip TO_ADD tags (they don't have original positions)
+        if (!hasState(asset.tagStatus[tag], TagState.TO_ADD)) {
+          const originalIndex = savedTagList.indexOf(tag);
+
+          if (originalIndex === currentIndex) {
+            asset.tagStatus[tag] = removeState(
+              asset.tagStatus[tag],
+              TagState.DIRTY,
+            );
+          } else {
+            asset.tagStatus[tag] = addState(asset.tagStatus[tag], TagState.DIRTY);
+          }
+        }
+      });
+    });
+  },
 };
