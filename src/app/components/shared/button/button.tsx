@@ -77,11 +77,11 @@ const colorStyles: Record<
 > = {
   slate: {
     normal:
-      'border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300',
+      'border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400',
     hover:
       'hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:text-slate-100',
     pressed:
-      'bg-slate-300 border-slate-400 text-slate-800 hover:text-slate-600 dark:bg-slate-600 dark:border-slate-500 dark:text-slate-300 dark:hover:text-slate-100',
+      'bg-slate-300 border-slate-400 text-slate-800 hover:text-slate-600 dark:bg-slate-600 dark:border-slate-400 dark:text-slate-200 dark:hover:text-slate-100',
     togglePressed:
       'bg-slate-100 border-slate-400 text-slate-800 shadow-slate-400 hover:bg-slate-200 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-300 dark:shadow-slate-600 dark:hover:bg-slate-700',
     deepPressed:
@@ -94,11 +94,11 @@ const colorStyles: Record<
   },
   amber: {
     normal:
-      'border-amber-300 bg-amber-200 text-amber-800 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-300',
+      'border-amber-300 bg-amber-200 text-amber-800 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-400',
     hover:
       'hover:bg-amber-100 dark:hover:bg-amber-700 dark:hover:text-amber-100',
     pressed:
-      'bg-amber-300 border-amber-400 text-amber-800 hover:text-amber-600 dark:bg-amber-600 dark:border-amber-500 dark:text-amber-300 dark:hover:text-amber-100',
+      'bg-amber-300 border-amber-400 text-amber-800 hover:text-amber-600 dark:bg-amber-600 dark:border-amber-400 dark:text-amber-200 dark:hover:text-amber-100',
     togglePressed:
       'bg-amber-100 border-amber-400 text-amber-800 shadow-amber-400 hover:bg-amber-200 dark:border-amber-500 dark:bg-amber-800 dark:text-amber-300 dark:shadow-amber-600 dark:hover:bg-amber-700',
     deepPressed:
@@ -111,10 +111,10 @@ const colorStyles: Record<
   },
   rose: {
     normal:
-      'border-rose-300 bg-rose-200 text-rose-800 dark:border-rose-600 dark:bg-rose-800 dark:text-rose-300',
+      'border-rose-300 bg-rose-200 text-rose-800 dark:border-rose-600 dark:bg-rose-800 dark:text-rose-400',
     hover: 'hover:bg-rose-100 dark:hover:bg-rose-700 dark:hover:text-rose-100',
     pressed:
-      'bg-rose-300 border-rose-400 text-rose-800 hover:text-rose-600 dark:bg-rose-600 dark:border-rose-500 dark:text-rose-300 dark:hover:text-rose-100',
+      'bg-rose-300 border-rose-400 text-rose-800 hover:text-rose-600 dark:bg-rose-600 dark:border-rose-400 dark:text-rose-200 dark:hover:text-rose-100',
     togglePressed:
       'bg-rose-100 border-rose-400 text-rose-800 shadow-rose-400 hover:bg-rose-200 dark:border-rose-500 dark:bg-rose-800 dark:text-rose-300 dark:shadow-rose-600 dark:hover:bg-rose-700',
     deepPressed:
@@ -127,10 +127,10 @@ const colorStyles: Record<
   },
   teal: {
     normal:
-      'border-teal-300 bg-teal-200 text-teal-800 dark:border-teal-600 dark:bg-teal-700 dark:text-teal-300',
+      'border-teal-300 bg-teal-200 text-teal-800 dark:border-teal-600 dark:bg-teal-700 dark:text-teal-400',
     hover: 'hover:bg-teal-100 dark:hover:bg-teal-600 dark:hover:text-teal-100',
     pressed:
-      'bg-teal-300 border-teal-400 text-teal-800 hover:text-teal-600 dark:bg-teal-600 dark:border-teal-500 dark:text-teal-300 dark:hover:text-teal-100',
+      'bg-teal-300 border-teal-400 text-teal-800 hover:text-teal-600 dark:bg-teal-600 dark:border-teal-400 dark:text-teal-200 dark:hover:text-teal-100',
     togglePressed:
       'bg-teal-100 border-teal-400 text-teal-800 shadow-teal-400 hover:bg-teal-200 dark:border-teal-500 dark:bg-teal-800 dark:text-teal-300 dark:shadow-teal-600 dark:hover:bg-teal-700',
     deepPressed:
@@ -143,10 +143,10 @@ const colorStyles: Record<
   },
   sky: {
     normal:
-      'border-sky-300 bg-sky-200 text-sky-800 dark:border-sky-600 dark:bg-sky-800 dark:text-sky-300',
+      'border-sky-300 bg-sky-200 text-sky-800 dark:border-sky-600 dark:bg-sky-800 dark:text-sky-400',
     hover: 'hover:bg-sky-100 dark:hover:bg-sky-700 dark:hover:text-sky-100',
     pressed:
-      'bg-sky-300 border-sky-400 text-sky-800 hover:text-sky-600 dark:bg-sky-600 dark:border-sky-500 dark:text-sky-300 dark:hover:text-sky-100',
+      'bg-sky-300 border-sky-400 text-sky-800 hover:text-sky-600 dark:bg-sky-600 dark:border-sky-400 dark:text-sky-200 dark:hover:text-sky-100',
     togglePressed:
       'bg-sky-100 border-sky-400 text-sky-800 shadow-sky-400 hover:bg-sky-200 dark:border-sky-500 dark:bg-sky-800 dark:text-sky-300 dark:shadow-sky-600 dark:hover:bg-sky-700',
     deepPressed:
@@ -159,11 +159,11 @@ const colorStyles: Record<
   },
   indigo: {
     normal:
-      'border-indigo-300 bg-indigo-200 text-indigo-800 dark:border-indigo-600 dark:bg-indigo-800 dark:text-indigo-300',
+      'border-indigo-300 bg-indigo-200 text-indigo-800 dark:border-indigo-600 dark:bg-indigo-800 dark:text-indigo-400',
     hover:
       'hover:bg-indigo-100 dark:hover:bg-indigo-700 dark:hover:text-indigo-100',
     pressed:
-      'bg-indigo-300 border-indigo-400 text-indigo-800 hover:text-indigo-600 dark:bg-indigo-600 dark:border-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-100',
+      'bg-indigo-300 border-indigo-400 text-indigo-800 hover:text-indigo-600 dark:bg-indigo-600 dark:border-indigo-400 dark:text-indigo-200 dark:hover:text-indigo-100',
     togglePressed:
       'bg-indigo-100 border-indigo-400 text-indigo-800 shadow-indigo-400 hover:bg-indigo-200 dark:border-indigo-500 dark:bg-indigo-800 dark:text-indigo-300 dark:shadow-indigo-600 dark:hover:bg-indigo-700',
     deepPressed:
@@ -176,11 +176,11 @@ const colorStyles: Record<
   },
   stone: {
     normal:
-      'border-stone-300 bg-stone-200 text-stone-800 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-300',
+      'border-stone-300 bg-stone-200 text-stone-800 dark:border-stone-600 dark:bg-stone-700 dark:text-stone-400',
     hover:
       'hover:bg-stone-100 dark:hover:bg-stone-600 dark:hover:text-stone-100',
     pressed:
-      'bg-stone-300 border-stone-400 text-stone-800 hover:text-stone-600 dark:bg-stone-600 dark:border-stone-500 dark:text-stone-300 dark:hover:text-stone-100',
+      'bg-stone-300 border-stone-400 text-stone-800 hover:text-stone-600 dark:bg-stone-600 dark:border-stone-400 dark:text-stone-200 dark:hover:text-stone-100',
     togglePressed:
       'bg-stone-100 border-stone-400 text-stone-800 shadow-stone-400 hover:bg-stone-200 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300 dark:shadow-stone-600 dark:hover:bg-stone-700',
     deepPressed:
