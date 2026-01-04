@@ -56,9 +56,9 @@ type Project = {
 
 const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
   {
-    light: { icon: <SunIcon className="w-5" />, label: 'Light' },
-    dark: { icon: <MoonIcon className="w-5" />, label: 'Dark' },
-    auto: { icon: <ComputerDesktopIcon className="w-5" />, label: 'Auto' },
+    light: { icon: <SunIcon className="w-4" />, label: 'Light' },
+    dark: { icon: <MoonIcon className="w-4" />, label: 'Dark' },
+    auto: { icon: <ComputerDesktopIcon className="w-4" />, label: 'Auto' },
   };
 
 const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
