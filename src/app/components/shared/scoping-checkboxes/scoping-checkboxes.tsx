@@ -26,6 +26,11 @@ type ScopingCheckboxesProps = {
    * Only applies when requireBothConstraints is true.
    */
   requireAtLeastOne?: boolean;
+
+  /**
+   * When true, shows a border-top separator above the first checkbox.
+   */
+  showBorder?: boolean;
 };
 
 /**
@@ -43,6 +48,7 @@ export const ScopingCheckboxes = ({
   onScopeToSelectedChange,
   requireBothConstraints = false,
   requireAtLeastOne = false,
+  showBorder = false,
 }: ScopingCheckboxesProps) => {
   const showBothMode =
     requireBothConstraints && hasSelectedAssets && hasActiveFilters;
@@ -57,11 +63,15 @@ export const ScopingCheckboxes = ({
     return null;
   }
 
+  const borderClasses = showBorder
+    ? 'w-full border-t border-t-slate-300 pt-4 dark:border-t-slate-600'
+    : '';
+
   // In "both" mode, show checkboxes only when both constraints exist
   if (showBothMode) {
     return (
       <>
-        <div className="flex items-center border-t border-t-slate-300 pt-4">
+        <div className={`flex items-center ${borderClasses}`}>
           <Checkbox
             isSelected={scopeToSelected}
             onChange={() => onScopeToSelectedChange(!scopeToSelected)}
@@ -89,10 +99,15 @@ export const ScopingCheckboxes = ({
   }
 
   // In "independent" mode, show each checkbox when its constraint exists
+  // Apply border to the first visible checkbox
+  const filteredIsFirst = hasActiveFilters;
+
   return (
     <>
       {hasActiveFilters && (
-        <div className="flex w-full items-center border-t border-t-slate-300 pt-4">
+        <div
+          className={`flex w-full items-center ${filteredIsFirst ? borderClasses : ''}`}
+        >
           <Checkbox
             isSelected={scopeToFiltered}
             onChange={() => onScopeToFilteredChange(!scopeToFiltered)}
@@ -104,7 +119,7 @@ export const ScopingCheckboxes = ({
 
       {hasSelectedAssets && (
         <div
-          className={`flex items-center ${!hasActiveFilters ? 'border-t border-t-slate-300 pt-4' : ''}`}
+          className={`flex items-center ${!filteredIsFirst ? borderClasses : ''}`}
         >
           <Checkbox
             isSelected={scopeToSelected}

@@ -454,7 +454,7 @@ export const EditTagsModal = ({
               return (
                 <div key={`${tag}-${index}`} className="flex items-center">
                   {/* Original tag */}
-                  <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500">
+                  <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500 dark:text-slate-400">
                     {tag}
                     <div className="absolute top-0 right-0 w-10 text-center text-slate-700 dark:text-slate-500">
                       -&gt;
@@ -512,6 +512,7 @@ export const EditTagsModal = ({
             selectedCount={selectedAssetsCount}
             scopeToSelected={onlySelectedAssets}
             onScopeToSelectedChange={setOnlySelectedAssets}
+            showBorder
           />
 
           {hasNoAffectedAssets ? (

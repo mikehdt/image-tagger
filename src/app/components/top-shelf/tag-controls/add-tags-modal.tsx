@@ -326,10 +326,7 @@ export const AddTagsModal = ({
           )}
 
           {/* Tag position */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-500">
-              New tags
-            </label>
+          <div className="w-full border-t border-t-slate-300 pt-4 dark:border-t-slate-600">
             <RadioGroup
               name="tagPosition"
               options={[
@@ -342,7 +339,7 @@ export const AddTagsModal = ({
           </div>
 
           {/* Keep selection checkbox */}
-          <div className="flex items-center">
+          <div className="flex w-full items-center">
             <Checkbox
               isSelected={keepSelection}
               onChange={() => setKeepSelection((v) => !v)}
@@ -363,6 +360,7 @@ export const AddTagsModal = ({
             onScopeToSelectedChange={setApplyToSelectedAssets}
             requireBothConstraints
             requireAtLeastOne
+            showBorder
           />
 
           {/* Summary of how many assets will be affected - show for all cases */}
