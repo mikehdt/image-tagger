@@ -103,10 +103,10 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg focus:outline-none"
+          className="group rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg focus:outline-none"
           disableOverflowHandling
         >
-          <div className="flex items-center gap-1 bg-(--surface) p-2">
+          <div className="flex min-w-60 items-center gap-1 bg-(--surface) p-2 group-data-constrained:flex-wrap">
             {children}
           </div>
         </Popup>

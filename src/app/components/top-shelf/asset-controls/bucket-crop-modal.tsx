@@ -310,14 +310,16 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-slate-800">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
           Bucket Crop Visualization
         </h2>
 
         {/* Calculated bucket info */}
-        <div className="rounded-lg bg-slate-50 p-4">
-          <h3 className="mb-2 font-medium text-slate-700">Calculated Bucket</h3>
-          <div className="text-sm text-slate-600">
+        <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
+          <h3 className="mb-2 font-medium text-slate-700 dark:text-slate-400">
+            Calculated Bucket
+          </h3>
+          <div className="text-sm text-slate-600 dark:text-slate-300">
             <p>
               <span className="font-medium">Dimensions:</span> {bucket.width} ×{' '}
               {bucket.height}
@@ -392,7 +394,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
             <div className="mb-2 flex items-center justify-between">
               <label
                 htmlFor="width-input"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-400"
               >
                 Width
               </label>
@@ -448,7 +450,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
             <div className="mb-2 flex items-center justify-between">
               <label
                 htmlFor="height-input"
-                className="block text-sm font-medium text-slate-700"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-400"
               >
                 Height
               </label>

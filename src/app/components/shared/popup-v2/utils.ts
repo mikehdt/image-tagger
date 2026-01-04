@@ -46,6 +46,8 @@ export function calculateInitialStyles(
 interface ViewportAdjustmentResult {
   styles: React.CSSProperties;
   adjustedPosition: PopupPosition;
+  /** True when the popup needed to be constrained to fit the viewport */
+  isConstrained: boolean;
 }
 
 /**
@@ -65,63 +67,57 @@ export function adjustForViewport(
   const viewportHeight = window.innerHeight;
 
   const styles = calculateInitialStyles(desiredPosition, offset);
-  let adjustedPosition = desiredPosition;
-
-  // --- Horizontal adjustment ---
-  const overflowRight = popupRect.right > viewportWidth - VIEWPORT_MARGIN;
-  const overflowLeft = popupRect.left < VIEWPORT_MARGIN;
-
-  // Determine the vertical part of position (top or bottom)
+  const adjustedPosition = desiredPosition;
   const verticalPart = desiredPosition.startsWith('top') ? 'top' : 'bottom';
 
-  if (overflowRight && overflowLeft) {
-    // Overflow both sides - extreme edge case
-    // Left-align to the viewport margin as a fallback
+  // --- Horizontal adjustment ---
+  // Calculate how much the popup overflows on each side
+  const overflowRight = Math.max(
+    0,
+    popupRect.right - (viewportWidth - VIEWPORT_MARGIN),
+  );
+  const overflowLeft = Math.max(0, VIEWPORT_MARGIN - popupRect.left);
+  const maxAvailableWidth = viewportWidth - VIEWPORT_MARGIN * 2;
+  const isConstrained = overflowRight > 0 || overflowLeft > 0;
+
+  if (overflowRight > 0 && overflowLeft > 0) {
+    // Popup is wider than viewport - constrain width and center it
+    styles.maxWidth = `${maxAvailableWidth}px`;
+    styles.minWidth = `${Math.min(300, maxAvailableWidth)}px`;
     delete styles.right;
     delete styles.transform;
+    // Position relative to trigger: shift left edge to viewport margin
     styles.left = VIEWPORT_MARGIN - triggerRect.left;
-    // Keep the horizontal part as 'left' since we're left-aligning
-    adjustedPosition = `${verticalPart}-left` as PopupPosition;
-  } else if (overflowRight) {
-    // Overflowing right edge - try right-aligning
-    if (
-      desiredPosition.includes('left') ||
-      desiredPosition === 'top' ||
-      desiredPosition === 'bottom'
-    ) {
-      // Switch from left/center to right alignment
+  } else if (overflowRight > 0) {
+    // Overflowing right edge - shift left by the overflow amount
+    // Keep the original alignment style but apply an offset
+    if (styles.transform === 'translateX(-50%)') {
+      // Centered popup - adjust the transform
+      delete styles.transform;
       delete styles.left;
-      delete styles.transform;
-      styles.right = 0;
-      adjustedPosition = `${verticalPart}-right` as PopupPosition;
+      // Use right alignment with the trigger's right edge as reference
+      styles.right = triggerRect.right - popupRect.right - overflowRight;
+    } else if (styles.left !== undefined) {
+      // Left-aligned popup - shift it left
+      styles.left = -overflowRight;
+    } else {
+      // Right-aligned but still overflowing (trigger near right edge)
+      styles.right = -overflowRight;
     }
-    // If already right-aligned and still overflowing, we may need to shift it
-    // This happens if the trigger itself is near the right edge
-    if (popupRect.right > viewportWidth - VIEWPORT_MARGIN) {
-      const shiftNeeded = popupRect.right - (viewportWidth - VIEWPORT_MARGIN);
-      delete styles.left;
+  } else if (overflowLeft > 0) {
+    // Overflowing left edge - shift right by the overflow amount
+    if (styles.transform === 'translateX(-50%)') {
+      // Centered popup - adjust the transform
       delete styles.transform;
-      styles.right = -shiftNeeded;
-    }
-  } else if (overflowLeft) {
-    // Overflowing left edge - try left-aligning
-    if (
-      desiredPosition.includes('right') ||
-      desiredPosition === 'top' ||
-      desiredPosition === 'bottom'
-    ) {
-      // Switch from right/center to left alignment
       delete styles.right;
-      delete styles.transform;
-      styles.left = 0;
-      adjustedPosition = `${verticalPart}-left` as PopupPosition;
-    }
-    // If already left-aligned and still overflowing, shift it
-    if (popupRect.left < VIEWPORT_MARGIN) {
-      const shiftNeeded = VIEWPORT_MARGIN - popupRect.left;
+      styles.left = overflowLeft;
+    } else if (styles.right !== undefined) {
+      // Right-aligned popup - shift it right
       delete styles.right;
-      delete styles.transform;
-      styles.left = shiftNeeded;
+      styles.left = overflowLeft;
+    } else {
+      // Left-aligned but still overflowing (trigger near left edge)
+      styles.left = overflowLeft;
     }
   }
 
@@ -153,7 +149,7 @@ export function adjustForViewport(
     }
   }
 
-  return { styles, adjustedPosition };
+  return { styles, adjustedPosition, isConstrained };
 }
 
 /**

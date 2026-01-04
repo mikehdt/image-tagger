@@ -24,6 +24,7 @@ export const Popup: React.FC<PopupProps> = ({
   const { getPopupState, getPopupConfig, setPopupConfig, finishPositioning } =
     usePopup();
   const [positionStyles, setPositionStyles] = useState<React.CSSProperties>({});
+  const [isConstrained, setIsConstrained] = useState(false);
 
   const state = getPopupState(id);
   const config = getPopupConfig(id);
@@ -63,16 +64,18 @@ export const Popup: React.FC<PopupProps> = ({
     popup.getBoundingClientRect();
 
     // Now check viewport and adjust if needed
-    const { styles, adjustedPosition } = adjustForViewport(
-      popup,
-      trigger,
-      desiredPosition,
-      currentOffset,
-      disableOverflowHandling,
-    );
+    const { styles, adjustedPosition, isConstrained: constrained } =
+      adjustForViewport(
+        popup,
+        trigger,
+        desiredPosition,
+        currentOffset,
+        disableOverflowHandling,
+      );
 
     // Apply adjusted styles and transform origin
     setPositionStyles(styles);
+    setIsConstrained(constrained);
     popup.style.transformOrigin = getTransformOrigin(adjustedPosition);
   }, [position, offset, triggerRef, disableOverflowHandling]);
 
@@ -142,6 +145,7 @@ export const Popup: React.FC<PopupProps> = ({
     <div
       ref={popupRef}
       data-popup-id={id}
+      data-constrained={isConstrained || undefined}
       style={positionStyles}
       className={`${
         transitionsEnabled ? 'transition-all duration-150 ease-in-out' : ''
