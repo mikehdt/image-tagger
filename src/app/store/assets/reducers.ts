@@ -432,4 +432,64 @@ export const coreReducers = {
       });
     });
   },
+
+  /**
+   * Copies tags from one asset (donor) to multiple target assets (recipients).
+   * Only adds tags that don't already exist in each target asset.
+   * New tags are marked with TO_ADD state.
+   */
+  copyTagsToAssets: (
+    state: ImageAssets,
+    {
+      payload,
+    }: PayloadAction<{
+      tags: string[];
+      targetAssetIds: string[];
+      position?: 'start' | 'end';
+    }>,
+  ) => {
+    const { tags, targetAssetIds, position = 'end' } = payload;
+
+    if (tags.length === 0 || targetAssetIds.length === 0) return;
+
+    targetAssetIds.forEach((assetId) => {
+      const assetIndex = state.imageIndexById[assetId];
+      if (assetIndex === undefined) return;
+
+      const asset = state.images[assetIndex];
+
+      // Filter to tags that don't already exist in this asset
+      const tagsToAdd = tags.filter(
+        (tag) => tag.trim() !== '' && !asset.tagList.includes(tag),
+      );
+
+      if (tagsToAdd.length === 0) return;
+
+      if (position === 'start') {
+        // Add to the beginning of the list
+        asset.tagList.unshift(...tagsToAdd);
+
+        // Mark all existing tags as DIRTY since their positions have shifted
+        Object.keys(asset.tagStatus).forEach((existingTag) => {
+          if (!hasState(asset.tagStatus[existingTag], TagState.TO_ADD)) {
+            asset.tagStatus[existingTag] = addState(
+              asset.tagStatus[existingTag],
+              TagState.DIRTY,
+            );
+          }
+        });
+      } else {
+        // Append new tags to the end
+        asset.tagList.push(...tagsToAdd);
+      }
+
+      // Mark all new tags as TO_ADD
+      tagsToAdd.forEach((tag) => {
+        asset.tagStatus[tag] = TagState.TO_ADD;
+      });
+    });
+
+    // Invalidate tag counts cache
+    state.tagCountsCache = null;
+  },
 };

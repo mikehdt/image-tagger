@@ -1,6 +1,12 @@
 'use client';
 
-import { KeyboardEventHandler, MouseEvent, ReactNode, Ref } from 'react';
+import {
+  FocusEventHandler,
+  KeyboardEventHandler,
+  MouseEvent,
+  ReactNode,
+  Ref,
+} from 'react';
 
 /**
  * Shared button component that provides consistent styling and behavior
@@ -30,6 +36,7 @@ interface ButtonProps {
   onClick?: (e: MouseEvent) => void;
   onSubmit?: (e: MouseEvent) => void;
   onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
+  onBlur?: FocusEventHandler<HTMLButtonElement>;
   type?: 'button' | 'submit';
   disabled?: boolean;
   className?: string;
@@ -198,6 +205,7 @@ export const Button = ({
   onClick,
   onSubmit,
   onKeyDown,
+  onBlur,
   type = 'button',
   disabled = false,
   className = '',
@@ -321,6 +329,7 @@ export const Button = ({
       type={type}
       onClick={handleClick}
       onKeyDown={onKeyDown}
+      onBlur={onBlur}
       disabled={disabled}
       aria-disabled={disabled}
       tabIndex={disabled ? -1 : undefined}

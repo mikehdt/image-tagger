@@ -47,6 +47,7 @@ export const {
   resetTags,
   markFilterTagsToDelete,
   gatherTags,
+  copyTagsToAssets,
   setSortType,
   setSortDirection,
   toggleSortDirection,

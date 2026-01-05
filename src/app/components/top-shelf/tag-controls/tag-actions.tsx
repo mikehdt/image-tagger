@@ -2,8 +2,10 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   BarsArrowUpIcon,
+  DocumentDuplicateIcon,
   DocumentMinusIcon,
   DocumentPlusIcon,
+  EllipsisVerticalIcon,
   NoSymbolIcon,
   PencilIcon,
   SwatchIcon,
@@ -38,9 +40,11 @@ import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combin
 
 import { Button } from '../../shared/button';
 import { Dropdown, DropdownItem } from '../../shared/dropdown';
+import { MenuButton, MenuItem } from '../../shared/menu-button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AddTagsModal } from './add-tags-modal';
+import { CopyTagsModal } from './copy-tags-modal';
 import { DocumentMixedIcon } from './document-mixed-icon';
 import { EditTagsModal } from './edit-tags-modal';
 
@@ -67,6 +71,7 @@ const getTagSortDirectionLabel = (
 const TagActionsComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddTagsModalOpen, setIsAddTagsModalOpen] = useState(false);
+  const [isCopyTagsModalOpen, setIsCopyTagsModalOpen] = useState(false);
 
   const dispatch = useAppDispatch();
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
@@ -183,6 +188,28 @@ const TagActionsComponent = () => {
     }
   }, [dispatch, filterTags]);
 
+  const openCopyTagsModal = useCallback(() => setIsCopyTagsModalOpen(true), []);
+  const closeCopyTagsModal = useCallback(
+    () => setIsCopyTagsModalOpen(false),
+    [],
+  );
+
+  // Overflow menu items for less-used actions
+  const overflowMenuItems: MenuItem[] = [
+    {
+      label: 'Copy Tags',
+      icon: <DocumentDuplicateIcon className="w-4" />,
+      onClick: openCopyTagsModal,
+      disabled: selectedAssetsCount < 2,
+    },
+    {
+      label: 'Gather Tags',
+      icon: <BarsArrowUpIcon className="w-4" />,
+      onClick: handleGatherTags,
+      disabled: filterTags.length < 2,
+    },
+  ];
+
   // Tag sort dropdown items
   const tagSortTypeItems: DropdownItem<TagSortType>[] = [
     {
@@ -292,15 +319,12 @@ const TagActionsComponent = () => {
           )}
         </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleGatherTags}
-          disabled={filterTags.length < 2}
-          title="Gather selected tags together (moves them to be consecutive starting at the first tag's position)"
-        >
-          <BarsArrowUpIcon className="w-4" />
-        </Button>
+        <MenuButton
+          icon={<EllipsisVerticalIcon className="w-4" />}
+          items={overflowMenuItems}
+          position="bottom-right"
+          title="More tag actions"
+        />
 
         <ToolbarDivider />
 
@@ -329,6 +353,11 @@ const TagActionsComponent = () => {
         isOpen={isEditModalOpen}
         onClose={handleOnCloseEditModal}
         filterTags={filterTags}
+      />
+
+      <CopyTagsModal
+        isOpen={isCopyTagsModalOpen}
+        onClose={closeCopyTagsModal}
       />
     </>
   );

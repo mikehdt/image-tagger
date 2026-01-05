@@ -1,0 +1,265 @@
+'use client';
+
+import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { copyTagsToAssets } from '@/app/store/assets';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
+
+import { Button } from '../../shared/button';
+import { Modal } from '../../shared/modal';
+import { RadioGroup } from '../../shared/radio-group';
+import { CopyableTagPill } from './copyable-tag-pill';
+
+type CopyTagsModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+/**
+ * Modal for copying tags from one selected asset (donor) to others (recipients).
+ * - User selects which asset to copy from via radio buttons
+ * - Tags from the donor that don't exist in all recipients are shown as copyable
+ * - Selected tags are added to all recipient assets
+ */
+export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
+  const dispatch = useAppDispatch();
+  const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
+
+  // Local state
+  const [donorAssetId, setDonorAssetId] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [addToStart, setAddToStart] = useState(false);
+
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Pre-select first asset as donor
+      if (selectedAssetsData.length > 0) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
+        setDonorAssetId(selectedAssetsData[0].fileId);
+      }
+      setSelectedTags(new Set());
+      setAddToStart(false);
+    } else {
+      setDonorAssetId(null);
+      setSelectedTags(new Set());
+      setAddToStart(false);
+    }
+  }, [isOpen, selectedAssetsData]);
+
+  // Get the donor asset data
+  const donorAsset = useMemo(
+    () => selectedAssetsData.find((a) => a.fileId === donorAssetId),
+    [selectedAssetsData, donorAssetId],
+  );
+
+  // Get recipient assets (all except donor)
+  const recipientAssets = useMemo(
+    () => selectedAssetsData.filter((a) => a.fileId !== donorAssetId),
+    [selectedAssetsData, donorAssetId],
+  );
+
+  // Calculate which tags can be copied and how many recipients need each
+  const copyableTags = useMemo(() => {
+    if (!donorAsset || recipientAssets.length === 0) return [];
+
+    // Get tags from donor that are missing from at least one recipient
+    return donorAsset.tagList
+      .map((tag) => {
+        const recipientsNeedingTag = recipientAssets.filter(
+          (r) => !r.tagList.includes(tag),
+        );
+        return {
+          tagName: tag,
+          recipientCount: recipientsNeedingTag.length,
+        };
+      })
+      .filter((t) => t.recipientCount > 0);
+  }, [donorAsset, recipientAssets]);
+
+  // Calculate tags that are common to all assets (donor + recipients)
+  const commonTags = useMemo(() => {
+    if (selectedAssetsData.length === 0) return [];
+
+    // Start with all tags from first asset, filter to only those in all assets
+    const allAssets = selectedAssetsData;
+    if (allAssets.length === 0) return [];
+
+    const firstAssetTags = new Set(allAssets[0].tagList);
+
+    return Array.from(firstAssetTags).filter((tag) =>
+      allAssets.every((asset) => asset.tagList.includes(tag)),
+    );
+  }, [selectedAssetsData]);
+
+  // Handle tag toggle
+  const handleTagToggle = useCallback((tagName: string) => {
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tagName)) {
+        next.delete(tagName);
+      } else {
+        next.add(tagName);
+      }
+      return next;
+    });
+  }, []);
+
+  // Handle donor change - clear selected tags when donor changes
+  const handleDonorChange = useCallback((assetId: string) => {
+    setDonorAssetId(assetId);
+    setSelectedTags(new Set());
+  }, []);
+
+  // Handle submit
+  const handleSubmit = useCallback(() => {
+    if (selectedTags.size === 0 || recipientAssets.length === 0) return;
+
+    dispatch(
+      copyTagsToAssets({
+        tags: Array.from(selectedTags),
+        targetAssetIds: recipientAssets.map((a) => a.fileId),
+        position: addToStart ? 'start' : 'end',
+      }),
+    );
+
+    onClose();
+  }, [dispatch, selectedTags, recipientAssets, addToStart, onClose]);
+
+  // Build radio options from assets
+  const donorOptions = useMemo(
+    () =>
+      selectedAssetsData.map((asset) => ({
+        value: asset.fileId,
+        label: asset.fileId,
+      })),
+    [selectedAssetsData],
+  );
+
+  // Determine if form is valid
+  const isFormValid = selectedTags.size > 0 && recipientAssets.length > 0;
+
+  // No tags to copy message
+  const hasNoCopyableTags = copyableTags.length === 0 && donorAsset;
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg min-w-[28rem]">
+      <div className="flex flex-wrap gap-4">
+        {/* Title */}
+        <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
+          Copy Tags
+        </h2>
+
+        {/* Description */}
+        <p className="w-full text-sm text-slate-500">
+          Copy tags from one asset to the other{' '}
+          {recipientAssets.length === 1
+            ? 'selected asset'
+            : `${recipientAssets.length} selected assets`}
+          .
+        </p>
+
+        {/* Donor selection */}
+        <div className="w-full">
+          <h3 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+            Copy from:
+          </h3>
+          <div className="max-h-32 overflow-y-auto rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-slate-600 dark:bg-slate-800">
+            <RadioGroup
+              name="donorAsset"
+              options={donorOptions}
+              value={donorAssetId || ''}
+              onChange={handleDonorChange}
+              layout="list"
+              size="small"
+            />
+          </div>
+        </div>
+
+        {/* Tags to copy */}
+        <div className="w-full">
+          <h3 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+            Tags to copy:
+          </h3>
+          {hasNoCopyableTags ? (
+            <p className="text-sm text-slate-400 italic">
+              All tags from this asset already exist on the other assets.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {copyableTags.map(({ tagName, recipientCount }) => (
+                <CopyableTagPill
+                  key={tagName}
+                  tagName={tagName}
+                  recipientCount={recipientCount}
+                  isSelected={selectedTags.has(tagName)}
+                  onToggle={handleTagToggle}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Tag position */}
+        <div className="w-full border-t border-t-slate-200 pt-4 dark:border-t-slate-700">
+          <RadioGroup
+            name="tagPosition"
+            options={[
+              { value: 'prepend', label: 'Prepend to start' },
+              { value: 'append', label: 'Append to end' },
+            ]}
+            value={addToStart ? 'prepend' : 'append'}
+            onChange={(mode) => setAddToStart(mode === 'prepend')}
+          />
+        </div>
+
+        {/* Common tags (informational) */}
+        {commonTags.length > 0 && (
+          <div className="w-full">
+            <h3 className="mb-1 text-xs font-medium text-slate-400 dark:text-slate-500">
+              Common to all:
+            </h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              {commonTags.join(', ')}
+            </p>
+          </div>
+        )}
+
+        {/* Summary */}
+        {selectedTags.size > 0 && (
+          <p className="w-full text-xs text-slate-500">
+            {selectedTags.size} {selectedTags.size === 1 ? 'tag' : 'tags'} will
+            be copied to {recipientAssets.length}{' '}
+            {recipientAssets.length === 1 ? 'asset' : 'assets'}.
+          </p>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex w-full justify-end gap-2 pt-2">
+          <Button
+            type="button"
+            onClick={onClose}
+            color="slate"
+            size="mediumWide"
+          >
+            Cancel
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isFormValid}
+            neutralDisabled
+            color="teal"
+            size="mediumWide"
+          >
+            <DocumentDuplicateIcon className="mr-1 w-4" />
+            Copy Tags
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
