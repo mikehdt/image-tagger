@@ -4,7 +4,7 @@ import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { copyTagsToAssets } from '@/app/store/assets';
+import { copyTagsToAssets, selectTagCounts } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
 import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
@@ -13,6 +13,8 @@ import { Button } from '../../shared/button';
 import { Modal } from '../../shared/modal';
 import { RadioGroup } from '../../shared/radio-group';
 import { CopyableTagPill } from './copyable-tag-pill';
+
+type TagSortOption = 'order' | 'alphabetical' | 'frequency';
 
 type CopyTagsModalProps = {
   isOpen: boolean;
@@ -28,11 +30,13 @@ type CopyTagsModalProps = {
 export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
   const dispatch = useAppDispatch();
   const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
+  const tagCounts = useAppSelector(selectTagCounts);
 
   // Local state
   const [donorAssetId, setDonorAssetId] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [addToStart, setAddToStart] = useState(false);
+  const [tagSortOption, setTagSortOption] = useState<TagSortOption>('order');
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -44,10 +48,12 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
       }
       setSelectedTags(new Set());
       setAddToStart(false);
+      setTagSortOption('order');
     } else {
       setDonorAssetId(null);
       setSelectedTags(new Set());
       setAddToStart(false);
+      setTagSortOption('order');
     }
   }, [isOpen, selectedAssetsData]);
 
@@ -68,18 +74,36 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
     if (!donorAsset || recipientAssets.length === 0) return [];
 
     // Get tags from donor that are missing from at least one recipient
-    return donorAsset.tagList
-      .map((tag) => {
+    const tags = donorAsset.tagList
+      .map((tag, index) => {
         const recipientsNeedingTag = recipientAssets.filter(
           (r) => !r.tagList.includes(tag),
         );
         return {
           tagName: tag,
           recipientCount: recipientsNeedingTag.length,
+          originalIndex: index,
         };
       })
       .filter((t) => t.recipientCount > 0);
-  }, [donorAsset, recipientAssets]);
+
+    // Sort based on selected option
+    switch (tagSortOption) {
+      case 'alphabetical':
+        return [...tags].sort((a, b) =>
+          a.tagName.localeCompare(b.tagName, undefined, {
+            sensitivity: 'base',
+          }),
+        );
+      case 'frequency':
+        return [...tags].sort(
+          (a, b) => (tagCounts[b.tagName] ?? 0) - (tagCounts[a.tagName] ?? 0),
+        );
+      case 'order':
+      default:
+        return tags; // Already in original order
+    }
+  }, [donorAsset, recipientAssets, tagSortOption, tagCounts]);
 
   // Calculate tags that are common to all assets (donor + recipients)
   const commonTags = useMemo(() => {
@@ -199,9 +223,22 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
 
         {/* Tags to copy */}
         <div className="w-full">
-          <h3 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
-            Tags to copy:
-          </h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              Tags to copy:
+            </h3>
+            <RadioGroup
+              name="tagSort"
+              options={[
+                { value: 'order', label: 'Tag order' },
+                { value: 'alphabetical', label: 'Alphabetical' },
+                { value: 'frequency', label: 'Frequency' },
+              ]}
+              value={tagSortOption}
+              onChange={setTagSortOption}
+              size="small"
+            />
+          </div>
           {hasNoCopyableTags ? (
             <p className="text-sm text-slate-400 italic">
               All tags from this asset already exist on the other assets.
