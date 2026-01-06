@@ -1,11 +1,13 @@
 'use client';
 
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { copyTagsToAssets } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
+import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../../shared/button';
 import { Modal } from '../../shared/modal';
@@ -128,15 +130,8 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
     onClose();
   }, [dispatch, selectedTags, recipientAssets, addToStart, onClose]);
 
-  // Build radio options from assets
-  const donorOptions = useMemo(
-    () =>
-      selectedAssetsData.map((asset) => ({
-        value: asset.fileId,
-        label: asset.fileId,
-      })),
-    [selectedAssetsData],
-  );
+  // Get project name for image URLs
+  const projectName = useMemo(() => getCurrentProjectName(), []);
 
   // Determine if form is valid
   const isFormValid = selectedTags.size > 0 && recipientAssets.length > 0;
@@ -145,7 +140,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
   const hasNoCopyableTags = copyableTags.length === 0 && donorAsset;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg min-w-[28rem]">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg min-w-md">
       <div className="flex flex-wrap gap-4">
         {/* Title */}
         <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
@@ -161,20 +156,44 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
           .
         </p>
 
-        {/* Donor selection */}
+        {/* Donor selection with thumbnails */}
         <div className="w-full">
           <h3 className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-400">
             Copy from:
           </h3>
-          <div className="max-h-32 overflow-y-auto rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-slate-600 dark:bg-slate-800">
-            <RadioGroup
-              name="donorAsset"
-              options={donorOptions}
-              value={donorAssetId || ''}
-              onChange={handleDonorChange}
-              layout="list"
-              size="small"
-            />
+          <div className="flex flex-wrap gap-2">
+            {selectedAssetsData.map((asset) => {
+              const isSelected = asset.fileId === donorAssetId;
+              const imageUrl = getImageUrl(
+                `${asset.fileId}.${asset.fileExtension}`,
+                projectName || undefined,
+              );
+
+              return (
+                <button
+                  key={asset.fileId}
+                  type="button"
+                  onClick={() => handleDonorChange(asset.fileId)}
+                  className={`relative overflow-hidden rounded-md border-2 transition-all ${
+                    isSelected
+                      ? 'border-teal-500 bg-teal-950 shadow-md shadow-teal-200 dark:shadow-teal-800'
+                      : 'border-slate-200 bg-slate-900 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-400'
+                  }`}
+                  title={asset.fileId}
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={asset.fileId}
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 object-contain"
+                  />
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-teal-500/20" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
