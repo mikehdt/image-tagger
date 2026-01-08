@@ -170,31 +170,24 @@ export const { reducer: autoTaggerReducer } = autoTaggerSlice;
 
 // Export actions
 export const {
-  setLoading,
   setModelsAndProviders,
-  updateModelStatus,
   setSelectedModel,
   startDownload,
   updateDownloadProgress,
   downloadComplete,
   downloadFailed,
-  clearDownload,
   openSetupModal,
   closeSetupModal,
-  setError,
-  clearError,
 } = autoTaggerSlice.actions;
 
 // Export basic selectors from slice
 export const {
   selectIsInitialised,
-  selectIsLoading,
   selectProviders,
   selectModels,
   selectSelectedModelId,
   selectDownloadProgress,
   selectIsSetupModalOpen,
-  selectError,
   selectIsDownloading,
 } = autoTaggerSlice.selectors;
 
@@ -205,12 +198,6 @@ export const selectHasReadyModel = createSelector([selectModels], (models) =>
 
 export const selectReadyModels = createSelector([selectModels], (models) =>
   models.filter((m) => m.status === 'ready'),
-);
-
-export const selectSelectedModel = createSelector(
-  [selectModels, selectSelectedModelId],
-  (models, selectedModelId) =>
-    models.find((m) => m.id === selectedModelId) || null,
 );
 
 // Export types

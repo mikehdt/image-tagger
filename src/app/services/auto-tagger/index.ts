@@ -10,13 +10,7 @@
 // Types (safe for both client and server)
 export type {
   AutoTaggerSettings,
-  DownloadProgress,
-  ModelFile,
-  ModelStatus,
-  TaggerModel,
   TaggerOptions,
-  TaggerOutput,
-  TaggerProvider,
   TagInsertMode,
   TagResult,
 } from './types';
@@ -24,13 +18,10 @@ export { DEFAULT_TAGGER_OPTIONS } from './types';
 
 // Model Registry (client-safe utilities - no fs operations)
 export {
-  formatBytes,
   getAllModels,
   getAllProviders,
-  getDefaultModel,
   getModel,
   getModelTotalSize,
-  getProvider,
 } from './model-registry';
 
 // NOTE: model-manager and providers use Node.js fs module and should only

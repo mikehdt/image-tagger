@@ -14,4 +14,3 @@ export const wd14Provider: TaggerProvider = {
   models: ALL_WD14_MODELS,
 };
 
-export { ALL_WD14_MODELS, WD14_V2_MODELS, WD14_V3_MODELS } from './models';

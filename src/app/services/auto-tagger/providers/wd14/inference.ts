@@ -237,20 +237,3 @@ function processCharacter(
   // Sort by confidence descending
   return results.sort((a, b) => b.confidence - a.confidence);
 }
-
-/**
- * Clear cached session for a model (e.g., when model is deleted)
- */
-export function clearSessionCache(modelId?: string): void {
-  if (modelId) {
-    const session = sessionCache.get(modelId);
-    if (session) {
-      // session.release() if needed
-      sessionCache.delete(modelId);
-    }
-    tagLabelCache.delete(modelId);
-  } else {
-    sessionCache.clear();
-    tagLabelCache.clear();
-  }
-}

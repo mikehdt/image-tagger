@@ -20,13 +20,6 @@ export function getAllProviders(): TaggerProvider[] {
 }
 
 /**
- * Get a provider by ID
- */
-export function getProvider(providerId: string): TaggerProvider | undefined {
-  return providers.find((p) => p.id === providerId);
-}
-
-/**
  * Get a model by its ID (searches across all providers)
  */
 export function getModel(modelId: string): TaggerModel | undefined {
@@ -35,18 +28,6 @@ export function getModel(modelId: string): TaggerModel | undefined {
     if (model) return model;
   }
   return undefined;
-}
-
-/**
- * Get the default model (first model marked as default, or first model overall)
- */
-export function getDefaultModel(): TaggerModel {
-  for (const provider of providers) {
-    const defaultModel = provider.models.find((m) => m.isDefault);
-    if (defaultModel) return defaultModel;
-  }
-  // Fallback to first model of first provider
-  return providers[0].models[0];
 }
 
 /**
@@ -61,15 +42,4 @@ export function getAllModels(): TaggerModel[] {
  */
 export function getModelTotalSize(model: TaggerModel): number {
   return model.files.reduce((sum, file) => sum + file.size, 0);
-}
-
-/**
- * Format bytes as human-readable string
- */
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }

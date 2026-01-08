@@ -63,25 +63,4 @@ export async function preprocessImage(
   return float32Data;
 }
 
-/**
- * Preprocess multiple images in a batch
- * @param imagePaths Array of paths to image files
- * @returns Float32Array containing all images in NHWC format
- */
-export async function preprocessImageBatch(
-  imagePaths: string[],
-): Promise<Float32Array> {
-  const batchSize = imagePaths.length;
-  const imageSize = IMAGE_SIZE * IMAGE_SIZE * 3;
-  const batchData = new Float32Array(batchSize * imageSize);
-
-  const preprocessed = await Promise.all(imagePaths.map(preprocessImage));
-
-  for (let i = 0; i < batchSize; i++) {
-    batchData.set(preprocessed[i], i * imageSize);
-  }
-
-  return batchData;
-}
-
 export { IMAGE_SIZE };

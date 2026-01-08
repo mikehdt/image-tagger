@@ -14,7 +14,7 @@ const MODELS_DIR = path.join(process.cwd(), '.auto-tagger', 'models');
 /**
  * Get the local directory path for a model
  */
-export function getModelDir(model: TaggerModel): string {
+function getModelDir(model: TaggerModel): string {
   return path.join(MODELS_DIR, model.provider, model.id);
 }
 
@@ -47,35 +47,9 @@ export function checkModelStatus(model: TaggerModel): ModelStatus {
 }
 
 /**
- * Get status of all files for a model
- */
-export function getModelFileStatus(
-  model: TaggerModel,
-): { name: string; exists: boolean; size: number }[] {
-  const modelDir = getModelDir(model);
-
-  return model.files.map((file) => {
-    const filePath = path.join(modelDir, file.name);
-    const exists = fs.existsSync(filePath);
-    let size = 0;
-
-    if (exists) {
-      try {
-        const stats = fs.statSync(filePath);
-        size = stats.size;
-      } catch {
-        // Ignore stat errors
-      }
-    }
-
-    return { name: file.name, exists, size };
-  });
-}
-
-/**
  * Ensure the model directory exists
  */
-export function ensureModelDir(model: TaggerModel): void {
+function ensureModelDir(model: TaggerModel): void {
   const modelDir = getModelDir(model);
   fs.mkdirSync(modelDir, { recursive: true });
 }
@@ -206,25 +180,3 @@ export async function* downloadModel(
   };
 }
 
-/**
- * Delete a downloaded model
- */
-export function deleteModel(model: TaggerModel): void {
-  const modelDir = getModelDir(model);
-
-  if (fs.existsSync(modelDir)) {
-    fs.rmSync(modelDir, { recursive: true, force: true });
-  }
-}
-
-/**
- * Get list of all installed models
- */
-export function getInstalledModels(
-  allModels: TaggerModel[],
-): { model: TaggerModel; status: ModelStatus }[] {
-  return allModels.map((model) => ({
-    model,
-    status: checkModelStatus(model),
-  }));
-}

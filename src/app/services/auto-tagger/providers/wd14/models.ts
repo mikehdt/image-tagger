@@ -16,7 +16,7 @@ const WD14_FILES = [
 /**
  * WD14 v2 models - support both TensorFlow and ONNX
  */
-export const WD14_V2_MODELS: TaggerModel[] = [
+const WD14_V2_MODELS: TaggerModel[] = [
   {
     id: 'wd-convnextv2-tagger-v2',
     name: 'ConvNextV2 v2',
@@ -78,7 +78,7 @@ export const WD14_V2_MODELS: TaggerModel[] = [
 /**
  * WD14 v3 models - ONNX only
  */
-export const WD14_V3_MODELS: TaggerModel[] = [
+const WD14_V3_MODELS: TaggerModel[] = [
   {
     id: 'wd-swinv2-tagger-v3',
     name: 'SwinV2 v3',

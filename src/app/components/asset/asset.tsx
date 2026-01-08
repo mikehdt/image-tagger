@@ -214,18 +214,20 @@ const AssetComponent = ({
           className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-(--surface-muted) transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
           onClick={toggleImageZoom}
         >
-          <span className="relative">
+          <span
+            className={`relative inline-flex ${!imageZoom ? 'max-h-64' : ''}`}
+            style={{
+              aspectRatio: getAspectRatio(
+                dimensions.width,
+                dimensions.height,
+              ).join('/'),
+            }}
+          >
             <Image
-              className={`w-auto object-contain ${!imageZoom && 'max-h-64'}`}
+              className="object-contain"
               src={imageUrl}
               width={dimensions.width}
               height={dimensions.height}
-              style={{
-                aspectRatio: getAspectRatio(
-                  dimensions.width,
-                  dimensions.height,
-                ).join('/'),
-              }}
               alt=""
               priority={filteredIndex <= 4}
             />

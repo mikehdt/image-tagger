@@ -78,7 +78,7 @@ export function wrapSelector<T extends (...args: never[]) => unknown>(
 /**
  * Get current stats for all tracked selectors
  */
-export function getSelectorStats(): void {
+function getSelectorStats(): void {
   if (!ENABLED) {
     console.log('Selector perf tracking is disabled');
     return;
@@ -106,7 +106,7 @@ export function getSelectorStats(): void {
 /**
  * Reset all stats
  */
-export function resetSelectorStats(): void {
+function resetSelectorStats(): void {
   Object.keys(stats).forEach((k) => delete stats[k]);
   console.log('Selector stats reset');
 }
@@ -114,7 +114,7 @@ export function resetSelectorStats(): void {
 /**
  * Get raw stats object for programmatic access
  */
-export function getRawSelectorStats(): Record<string, SelectorStats> {
+function getRawSelectorStats(): Record<string, SelectorStats> {
   return { ...stats };
 }
 
