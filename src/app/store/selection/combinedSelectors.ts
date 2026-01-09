@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import { applyFilters } from '../../utils/filter-actions';
-import { selectAllImages } from '../assets';
+import { selectAllImages, selectFilteredAssets } from '../assets';
 import {
   FilterMode,
   selectFilterTags,
@@ -194,5 +194,48 @@ export const selectSelectedAssetsData = createSelector(
 
     const selectedSet = new Set(selectedAssets);
     return allImages.filter((img) => selectedSet.has(img.fileId));
+  },
+);
+
+/**
+ * Returns the effective asset IDs based on scoping priority:
+ * 1. Selected assets visible in current filtered view (intersection)
+ * 2. Filtered assets (if filters active)
+ * 3. All assets
+ *
+ * This determines which assets tag actions (Delete, Gather) should operate on.
+ */
+export const selectEffectiveScopeAssetIds = createSelector(
+  [selectSelectedAssets, selectFilteredAssets, selectAllImages],
+  (selectedAssets, filteredAssets, allImages) => {
+    // Get the intersection of selected and filtered (visible selected assets)
+    const filteredIds = new Set(filteredAssets.map((a) => a.fileId));
+    const visibleSelected = selectedAssets.filter((id) => filteredIds.has(id));
+
+    if (visibleSelected.length > 0) {
+      return visibleSelected;
+    }
+    if (filteredAssets.length > 0) {
+      return filteredAssets.map((a) => a.fileId);
+    }
+    return allImages.map((a) => a.fileId);
+  },
+);
+
+/**
+ * Returns the count of assets that would be affected by delete toggle.
+ * Only counts assets in scope that have at least one of the selected filter tags.
+ */
+export const selectDeleteToggleAffectedCount = createSelector(
+  [selectEffectiveScopeAssetIds, selectAllImages, selectFilterTags],
+  (effectiveIds, allImages, filterTags) => {
+    if (filterTags.length === 0) return 0;
+    const effectiveSet = new Set(effectiveIds);
+    const filterTagsSet = new Set(filterTags);
+    return allImages.filter(
+      (img) =>
+        effectiveSet.has(img.fileId) &&
+        img.tagList.some((tag) => filterTagsSet.has(tag)),
+    ).length;
   },
 );

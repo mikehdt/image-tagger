@@ -36,7 +36,11 @@ import {
   clearSelection,
   selectSelectedAssetsCount,
 } from '@/app/store/selection';
-import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
+import {
+  selectAssetsWithActiveFiltersCount,
+  selectDeleteToggleAffectedCount,
+  selectEffectiveScopeAssetIds,
+} from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { Dropdown, DropdownItem } from '../../shared/dropdown';
@@ -81,6 +85,10 @@ const TagActionsComponent = () => {
   const assetsWithActiveFiltersCount = useAppSelector(
     selectAssetsWithActiveFiltersCount,
   );
+  const effectiveScopeAssetIds = useAppSelector(selectEffectiveScopeAssetIds);
+  const deleteToggleAffectedCount = useAppSelector(
+    selectDeleteToggleAffectedCount,
+  );
 
   // Tag sort state
   const tagSortType = useAppSelector(selectTagSortType);
@@ -90,7 +98,8 @@ const TagActionsComponent = () => {
   const canAddTags = selectedAssetsCount > 0 || hasActiveFilters;
 
   const handleMarkFilterTagsToDelete = useCallback(
-    (tags: string[]) => dispatch(markFilterTagsToDelete(tags)),
+    (tags: string[], assetIds: string[]) =>
+      dispatch(markFilterTagsToDelete({ tags, assetIds })),
     [dispatch],
   );
 
@@ -103,8 +112,8 @@ const TagActionsComponent = () => {
   }, [filterTags.length]);
 
   const toggleFilterTagsDelete = useCallback(() => {
-    handleMarkFilterTagsToDelete(filterTags);
-  }, [filterTags, handleMarkFilterTagsToDelete]);
+    handleMarkFilterTagsToDelete(filterTags, effectiveScopeAssetIds);
+  }, [filterTags, effectiveScopeAssetIds, handleMarkFilterTagsToDelete]);
 
   const handleAddTag = useCallback(
     (
@@ -184,9 +193,9 @@ const TagActionsComponent = () => {
 
   const handleGatherTags = useCallback(() => {
     if (filterTags.length >= 2) {
-      dispatch(gatherTags(filterTags));
+      dispatch(gatherTags({ tags: filterTags, assetIds: effectiveScopeAssetIds }));
     }
-  }, [dispatch, filterTags]);
+  }, [dispatch, filterTags, effectiveScopeAssetIds]);
 
   const openCopyTagsModal = useCallback(() => setIsCopyTagsModalOpen(true), []);
   const closeCopyTagsModal = useCallback(
@@ -301,13 +310,13 @@ const TagActionsComponent = () => {
           type="button"
           variant="ghost"
           onClick={toggleFilterTagsDelete}
-          disabled={!filterTags.length}
+          disabled={!filterTags.length || deleteToggleAffectedCount === 0}
           title={
             filterTagsDeleteState.state === 'all'
-              ? 'Remove TO_DELETE state from selected tags'
+              ? `Remove TO_DELETE state from selected tags on ${deleteToggleAffectedCount} assets`
               : filterTagsDeleteState.state === 'mixed'
-                ? 'Mixed state - some tags marked for deletion'
-                : 'Mark selected tags for deletion'
+                ? `Mixed state - toggle deletion on ${deleteToggleAffectedCount} assets`
+                : `Mark selected tags for deletion on ${deleteToggleAffectedCount} assets`
           }
         >
           {filterTagsDeleteState.state === 'all' ? (
@@ -316,6 +325,11 @@ const TagActionsComponent = () => {
             <DocumentMixedIcon className="w-4" />
           ) : (
             <DocumentMinusIcon className="w-4" />
+          )}
+          {filterTags.length > 0 && deleteToggleAffectedCount > 0 && (
+            <span className="ml-1 text-xs text-slate-500">
+              {deleteToggleAffectedCount}
+            </span>
           )}
         </Button>
 

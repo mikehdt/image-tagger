@@ -27,13 +27,20 @@ export const coreReducers = {
 
   markFilterTagsToDelete: (
     state: ImageAssets,
-    { payload }: PayloadAction<string[]>,
+    { payload }: PayloadAction<{ tags: string[]; assetIds?: string[] }>,
   ) => {
-    if (!payload || payload.length === 0) return;
+    const { tags, assetIds } = payload;
+    if (!tags || tags.length === 0) return;
 
-    // Iterate over all images and mark matching tags for deletion
+    // If assetIds provided, only operate on those assets
+    const targetAssetIds = assetIds ? new Set(assetIds) : null;
+
+    // Iterate over images and mark matching tags for deletion
     state.images.forEach((image) => {
-      payload.forEach((filterTag) => {
+      // Skip if we have a scope and this image isn't in it
+      if (targetAssetIds && !targetAssetIds.has(image.fileId)) return;
+
+      tags.forEach((filterTag) => {
         if (image.tagList.includes(filterTag)) {
           // Only toggle TO_DELETE for tags that are not marked as TO_ADD
           if (!hasState(image.tagStatus[filterTag], TagState.TO_ADD)) {
@@ -378,13 +385,19 @@ export const coreReducers = {
    */
   gatherTags: (
     state: ImageAssets,
-    { payload }: PayloadAction<string[]>,
+    { payload }: PayloadAction<{ tags: string[]; assetIds?: string[] }>,
   ) => {
-    if (!payload || payload.length < 2) return;
+    const { tags, assetIds } = payload;
+    if (!tags || tags.length < 2) return;
 
-    const tagsToGather = payload;
+    const tagsToGather = tags;
+
+    // If assetIds provided, only operate on those assets
+    const targetAssetIds = assetIds ? new Set(assetIds) : null;
 
     state.images.forEach((asset) => {
+      // Skip if we have a scope and this asset isn't in it
+      if (targetAssetIds && !targetAssetIds.has(asset.fileId)) return;
       // Find which of the selected tags exist in this asset
       const presentTags = tagsToGather.filter((tag) =>
         asset.tagList.includes(tag),

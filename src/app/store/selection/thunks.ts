@@ -168,7 +168,9 @@ export const editTagsAcrossAssets = createAsyncThunk(
 
     // Mark tags for deletion in bulk
     if (tagsToDelete.length > 0) {
-      dispatch(markFilterTagsToDelete(tagsToDelete));
+      // Pass the scoped asset IDs so deletion only affects the assets we're operating on
+      const assetIds = allAssets.map((asset) => asset.fileId);
+      dispatch(markFilterTagsToDelete({ tags: tagsToDelete, assetIds }));
 
       // Count deletions - count assets that have each tag
       tagsToDelete.forEach((tagName) => {
