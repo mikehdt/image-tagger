@@ -260,32 +260,30 @@ export const AddTagsModal = ({
           Add Tags
         </h2>
 
-        {/* Selected assets/filters count and description */}
-        {hasSelectedAssets && hasActiveFilters ? (
-          <p className="text-sm text-slate-500">
-            Choose where to add tags:{' '}
-            <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
-            {selectedAssetsCount === 1 ? 'asset' : 'assets'} and/or{' '}
-            <span className="font-medium">{assetsWithActiveFiltersCount}</span>{' '}
-            assets with active filters.
-          </p>
-        ) : hasSelectedAssets ? (
-          <p className="text-sm text-slate-500">
-            Adding tags to{' '}
-            <span className="font-medium">{selectedAssetsCount}</span> selected{' '}
-            {selectedAssetsCount === 1 ? 'asset' : 'assets'}.
-          </p>
-        ) : hasActiveFilters ? (
-          <p className="text-sm text-slate-500">
-            Adding tags to{' '}
-            <span className="font-medium">{assetsWithActiveFiltersCount}</span>{' '}
-            assets with active filters.
-          </p>
-        ) : (
-          <p className="text-sm text-slate-500">
-            No assets or filters selected.
-          </p>
-        )}
+        {/* Scoping checkboxes - at top so user sees scope first */}
+        <ScopingCheckboxes
+          hasActiveFilters={hasActiveFilters}
+          filteredCount={assetsWithActiveFiltersCount}
+          scopeToFiltered={applyToAssetsWithActiveFilters}
+          onScopeToFilteredChange={setApplyToAssetsWithActiveFilters}
+          hasSelectedAssets={hasSelectedAssets}
+          selectedCount={selectedAssetsCount}
+          scopeToSelected={applyToSelectedAssets}
+          onScopeToSelectedChange={setApplyToSelectedAssets}
+          requireBothConstraints
+          requireAtLeastOne
+          showBorder
+        />
+
+        {/* Summary of how many assets will be affected */}
+        {!hasInvalidConstraints &&
+          (hasNoAffectedAssets ? (
+            <p className="text-xs text-rose-600">
+              No assets match the current selection and filter combination.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+          ))}
 
         {/* Tag input form */}
         <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
@@ -347,31 +345,6 @@ export const AddTagsModal = ({
               ariaLabel="Keep asset selection after adding new tags"
             />
           </div>
-
-          {/* Constraint checkboxes - only show when both assets and active filters are available */}
-          <ScopingCheckboxes
-            hasActiveFilters={hasActiveFilters}
-            filteredCount={assetsWithActiveFiltersCount}
-            scopeToFiltered={applyToAssetsWithActiveFilters}
-            onScopeToFilteredChange={setApplyToAssetsWithActiveFilters}
-            hasSelectedAssets={hasSelectedAssets}
-            selectedCount={selectedAssetsCount}
-            scopeToSelected={applyToSelectedAssets}
-            onScopeToSelectedChange={setApplyToSelectedAssets}
-            requireBothConstraints
-            requireAtLeastOne
-            showBorder
-          />
-
-          {/* Summary of how many assets will be affected - show for all cases */}
-          {!hasInvalidConstraints &&
-            (hasNoAffectedAssets ? (
-              <p className="text-xs text-rose-600">
-                No assets match the current selection and filter combination.
-              </p>
-            ) : (
-              <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
-            ))}
 
           {/* Action buttons */}
           <div className="flex w-full justify-end gap-2 pt-2">

@@ -4,7 +4,7 @@ import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { RootState } from '@/app/store';
-import { selectFilteredAssets } from '@/app/store/assets';
+import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
 import { selectHasActiveFilters } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -107,12 +107,58 @@ export const EditTagsModal = ({
   // State for the "only apply to selected assets" checkbox
   const [onlySelectedAssets, setOnlySelectedAssets] = useState(false);
 
-  // Get filtered assets for the checkbox logic
+  // Get assets for the checkbox logic and scoping
+  const allImages = useAppSelector(selectAllImages);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasSelectedAssets = selectedAssetsCount > 0;
+
+  // Compute the effective scoped asset IDs based on checkbox state
+  const scopedAssetIds = useMemo(() => {
+    const useFiltered = onlyFilteredAssets && hasActiveFilters;
+    const useSelected = onlySelectedAssets && hasSelectedAssets;
+
+    if (useFiltered && useSelected) {
+      // Intersection of filtered and selected
+      const filteredIds = new Set(filteredAssets.map((a) => a.fileId));
+      return selectedAssets.filter((id) => filteredIds.has(id));
+    } else if (useFiltered) {
+      return filteredAssets.map((a) => a.fileId);
+    } else if (useSelected) {
+      return selectedAssets;
+    }
+    // No constraints - all assets
+    return allImages.map((a) => a.fileId);
+  }, [
+    onlyFilteredAssets,
+    hasActiveFilters,
+    onlySelectedAssets,
+    hasSelectedAssets,
+    filteredAssets,
+    selectedAssets,
+    allImages,
+  ]);
+
+  // Filter the filterTags to only show tags that exist on assets in scope
+  const scopedFilterTags = useMemo(() => {
+    const scopedIds = new Set(scopedAssetIds);
+    const scopedImages = allImages.filter((img) => scopedIds.has(img.fileId));
+
+    // Get all tags that exist on at least one scoped asset
+    const tagsInScope = new Set<string>();
+    scopedImages.forEach((img) => {
+      img.tagList.forEach((tag) => {
+        if (filterTags.includes(tag)) {
+          tagsInScope.add(tag);
+        }
+      });
+    });
+
+    // Return filterTags in their original order, filtered to those in scope
+    return filterTags.filter((tag) => tagsInScope.has(tag));
+  }, [filterTags, scopedAssetIds, allImages]);
 
   // Create a memoized selector for computing tag status info
   // The selector is recreated when editedTags change, but returns cached results for unchanged tags
@@ -176,29 +222,31 @@ export const EditTagsModal = ({
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
 
-  // Reset the form when the modal opens or when filter tags change
+  // Reset the form when the modal opens
   useEffect(() => {
     if (isOpen) {
-      // Make sure we initialize with valid tag values
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
-      setEditedTags(
-        filterTags.reduce(
-          (acc, tag) => {
-            // Ensure we're not adding undefined tags
-            if (tag) {
-              acc[tag] = tag;
-            }
-            return acc;
-          },
-          {} as Record<string, string>,
-        ),
-      );
-
       // Reset checkboxes based on current state
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
       setOnlyFilteredAssets(hasActiveFilters);
       setOnlySelectedAssets(hasSelectedAssets);
     }
-  }, [isOpen, filterTags, hasActiveFilters, hasSelectedAssets]);
+  }, [isOpen, hasActiveFilters, hasSelectedAssets]);
+
+  // Update editedTags when scopedFilterTags change (due to scope checkbox changes)
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form update when scope changes
+      setEditedTags((prev) => {
+        // Keep existing edits for tags still in scope, add new tags that came into scope
+        const newEditedTags: Record<string, string> = {};
+        scopedFilterTags.forEach((tag) => {
+          // Preserve existing edit if present, otherwise initialize to original value
+          newEditedTags[tag] = prev[tag] !== undefined ? prev[tag] : tag;
+        });
+        return newEditedTags;
+      });
+    }
+  }, [isOpen, scopedFilterTags]);
 
   // Handle tag value change for a specific tag
   const handleTagChange = useCallback(
@@ -262,7 +310,7 @@ export const EditTagsModal = ({
 
       // If the new value is the same as any other original tag (case-sensitive match)
       // but not found in assets, consider it a form duplicate as a warning
-      const isAnyOriginalTag = filterTags.some(
+      const isAnyOriginalTag = scopedFilterTags.some(
         (tag) => tag !== originalTag && tag === trimmedValue,
       );
 
@@ -278,7 +326,7 @@ export const EditTagsModal = ({
 
       return 'none';
     },
-    [memoizedTagsStatus, editedTags, filterTags],
+    [memoizedTagsStatus, editedTags, scopedFilterTags],
   );
 
   // Submit the form
@@ -287,9 +335,10 @@ export const EditTagsModal = ({
       e.preventDefault();
 
       // Process all edited tags with enhanced duplicate handling
+      // Use scopedFilterTags to only process tags in the current scope
       const processedUpdates = processTagUpdatesWithDuplicateHandling(
         editedTags,
-        filterTags,
+        scopedFilterTags,
         getTagStatus,
       );
 
@@ -313,7 +362,7 @@ export const EditTagsModal = ({
     [
       dispatch,
       editedTags,
-      filterTags,
+      scopedFilterTags,
       getTagStatus,
       onClose,
       onlyFilteredAssets,
@@ -359,7 +408,7 @@ export const EditTagsModal = ({
   const hasNoAffectedAssets = effectiveAssetCount === 0;
 
   // Pre-compute all tag statuses once for use in the UI
-  const tagStatuses = filterTags.map((tag) => ({
+  const tagStatuses = scopedFilterTags.map((tag) => ({
     tag,
     status: getTagStatus(tag),
   }));
@@ -401,10 +450,46 @@ export const EditTagsModal = ({
           Edit Tags
         </h2>
 
-        {/* Selected tags count */}
+        {/* Scoping checkboxes - at top so tag list can react to scope changes */}
+        <ScopingCheckboxes
+          hasActiveFilters={hasActiveFilters}
+          filteredCount={filteredAssets.length}
+          scopeToFiltered={onlyFilteredAssets}
+          onScopeToFilteredChange={setOnlyFilteredAssets}
+          hasSelectedAssets={hasSelectedAssets}
+          selectedCount={selectedAssetsCount}
+          scopeToSelected={onlySelectedAssets}
+          onScopeToSelectedChange={setOnlySelectedAssets}
+          showBorder
+        />
+
+        {/* Summary message */}
+        {hasNoAffectedAssets ? (
+          <p className="text-xs text-rose-600">
+            No assets match the current selection and filter combination.
+          </p>
+        ) : (
+          <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
+        )}
+
+        {/* Selected tags count - now shows scoped count */}
         <p className="text-sm text-slate-500">
-          Editing <span className="font-medium">{filterTags.length}</span>{' '}
-          selected {filterTags.length === 1 ? 'tag' : 'tags'}.
+          {scopedFilterTags.length === 0 ? (
+            'No selected tags exist on assets in the current scope.'
+          ) : (
+            <>
+              Editing{' '}
+              <span className="font-medium">{scopedFilterTags.length}</span>{' '}
+              {scopedFilterTags.length === 1 ? 'tag' : 'tags'}
+              {scopedFilterTags.length < filterTags.length && (
+                <span className="text-slate-400">
+                  {' '}
+                  (of {filterTags.length} selected)
+                </span>
+              )}
+              .
+            </>
+          )}
         </p>
 
         {/* Tag editing form */}
@@ -503,26 +588,6 @@ export const EditTagsModal = ({
             />
           </div>
 
-          <ScopingCheckboxes
-            hasActiveFilters={hasActiveFilters}
-            filteredCount={filteredAssets.length}
-            scopeToFiltered={onlyFilteredAssets}
-            onScopeToFilteredChange={setOnlyFilteredAssets}
-            hasSelectedAssets={hasSelectedAssets}
-            selectedCount={selectedAssetsCount}
-            scopeToSelected={onlySelectedAssets}
-            onScopeToSelectedChange={setOnlySelectedAssets}
-            showBorder
-          />
-
-          {hasNoAffectedAssets ? (
-            <p className="text-xs text-rose-600">
-              No assets match the current selection and filter combination.
-            </p>
-          ) : (
-            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
-          )}
-
           {/* Action buttons */}
           <div className="flex w-full justify-end gap-2 pt-2">
             <Button
@@ -536,7 +601,11 @@ export const EditTagsModal = ({
 
             <Button
               type="submit"
-              disabled={!hasModifiedTags || hasNoAffectedAssets}
+              disabled={
+                !hasModifiedTags ||
+                hasNoAffectedAssets ||
+                scopedFilterTags.length === 0
+              }
               neutralDisabled
               color="indigo"
               size="mediumWide"
