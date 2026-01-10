@@ -37,7 +37,7 @@ export const getFiletypeSortOptions = (
       break;
     case 'active':
       typeLabel = 'Active';
-      directionLabel = sortDirection === 'asc' ? '↑ Active' : '↓ Active';
+      directionLabel = sortDirection === 'desc' ? '↑ Active' : '↓ Active';
       break;
     case 'alphabetical':
     default:
@@ -105,13 +105,14 @@ export const FileView = () => {
       if (sortType === 'active') {
         // First compare by active state
         if (a.isActive !== b.isActive) {
-          return sortDirection === 'asc'
+          // Default (desc) puts active items first, asc puts them last
+          return sortDirection === 'desc'
             ? a.isActive
               ? -1
-              : 1 // active items first when ascending
+              : 1 // active items first when descending (default)
             : a.isActive
               ? 1
-              : -1; // active items last when descending
+              : -1; // active items last when ascending
         }
         // If both have same active state, sort by count descending (9-0) as secondary criteria
         return b.count - a.count; // always descending count (9-0) as tie-breaker

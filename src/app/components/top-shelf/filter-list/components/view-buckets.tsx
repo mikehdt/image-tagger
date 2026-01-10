@@ -33,7 +33,7 @@ export const getBucketSortOptions = (
       break;
     case 'active':
       typeLabel = 'Active';
-      directionLabel = sortDirection === 'asc' ? '↑ Active' : '↓ Active';
+      directionLabel = sortDirection === 'desc' ? '↑ Active' : '↓ Active';
       break;
     case 'dimensions':
       typeLabel = 'Size';

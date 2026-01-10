@@ -18,6 +18,21 @@ import {
 import { useKeyboardNavigation } from './hooks';
 import { FilterView, SizeSubViewType, SortDirection, SortType } from './types';
 
+// Get the default sort direction for a given sort type
+const getDefaultDirection = (type: SortType): SortDirection => {
+  switch (type) {
+    case 'alphabetical':
+      return 'asc'; // A-Z
+    case 'count':
+    case 'active':
+    case 'dimensions':
+    case 'aspectRatio':
+    case 'megapixels':
+    default:
+      return 'desc'; // High values first / active first
+  }
+};
+
 // Persist state across popup open/close cycles (module-level variables)
 let persistedActiveView: FilterView = 'tag';
 let persistedSizeSubView: SizeSubViewType = 'dimensions';
@@ -147,19 +162,20 @@ export const FilterProvider = ({ children, onClose }: FilterProviderProps) => {
 
   const setSortType = useCallback(
     (type: SortType) => {
+      const direction = getDefaultDirection(type);
       setSortSettings((prev) => {
         if (activeView === 'size') {
           return {
             ...prev,
             size: {
               ...prev.size,
-              [sizeSubView]: { ...prev.size[sizeSubView], type },
+              [sizeSubView]: { type, direction },
             },
           };
         }
         return {
           ...prev,
-          [activeView]: { ...prev[activeView], type },
+          [activeView]: { type, direction },
         };
       });
     },
