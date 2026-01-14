@@ -74,6 +74,7 @@ const getSortDirectionLabel = (
     case SortType.SCALED:
       return isAsc ? '1:1' : 'Diff';
     case SortType.SELECTED:
+    case SortType.FILTERED:
       return isAsc ? '✓' : '○';
     default:
       return isAsc ? 'A-Z' : 'Z-A';
@@ -119,6 +120,14 @@ const AssetSelectionControlsComponent = () => {
       filenamePatterns.length,
     ],
   );
+
+  // FILTERED sort is disabled when no filters are set, or when filter mode
+  // already hides non-matching assets (Match Any/All/Inverse)
+  const filteredSortDisabled =
+    !filterSelectionActive ||
+    filterMode === FilterMode.MATCH_ANY ||
+    filterMode === FilterMode.MATCH_ALL ||
+    filterMode === FilterMode.MATCH_NONE;
 
   // Auto-tagger state
   const [isAutoTaggerModalOpen, setIsAutoTaggerModalOpen] = useState(false);
@@ -197,6 +206,15 @@ const AssetSelectionControlsComponent = () => {
     }
   }, [sortType, selectedAssetsCount, dispatch]);
 
+  // Auto-switch from "Filtered" sort to "Name" when filters are cleared or
+  // filter mode changes to one that already hides non-matching assets
+  useEffect(() => {
+    if (sortType === SortType.FILTERED && filteredSortDisabled) {
+      dispatch(setSortType(SortType.NAME));
+      dispatch(setSortDirection(SortDirection.ASC));
+    }
+  }, [sortType, filteredSortDisabled, dispatch]);
+
   // Auto-switch filter mode to "Show All" when the mode's requirements are no longer met
   useEffect(() => {
     const shouldReset =
@@ -256,8 +274,13 @@ const AssetSelectionControlsComponent = () => {
         label: 'Selected',
         disabled: selectedAssetsCount === 0,
       },
+      {
+        value: SortType.FILTERED,
+        label: 'Filtered',
+        disabled: filteredSortDisabled,
+      },
     ],
-    [selectedAssetsCount],
+    [selectedAssetsCount, filteredSortDisabled],
   );
 
   // Create filter mode dropdown items
@@ -327,7 +350,8 @@ const AssetSelectionControlsComponent = () => {
           selectedValue={sortType}
           onChange={handleSortTypeChange}
           buttonClassName={
-            sortType === SortType.SELECTED && selectedAssetsCount === 0
+            (sortType === SortType.SELECTED && selectedAssetsCount === 0) ||
+            (sortType === SortType.FILTERED && filteredSortDisabled)
               ? 'text-slate-300'
               : ''
           }

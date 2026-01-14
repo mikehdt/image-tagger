@@ -51,6 +51,7 @@ export const applyFilters = ({
     sortType,
     sortDirection,
     selectedAssets,
+    { filterTags, filterSizes, filterBuckets, filterExtensions },
   );
 
   // Now assign the originalIndex based on the sorted position (this is the "true" asset number)
@@ -263,6 +264,12 @@ const applySorting = (
   sortType?: SortType,
   sortDirection?: SortDirection,
   selectedAssets?: string[],
+  filterCriteria?: {
+    filterTags: string[];
+    filterSizes: string[];
+    filterBuckets: string[];
+    filterExtensions: string[];
+  },
 ): ImageAssetWithIndex[] => {
   if (!sortType || !sortDirection) {
     return assets; // Return unsorted if no sort parameters
@@ -270,6 +277,43 @@ const applySorting = (
 
   const selectedSet = new Set(selectedAssets || []);
   const direction = sortDirection === SortDirection.ASC ? 1 : -1;
+
+  // For FILTERED sort, pre-compute which assets match the filter criteria
+  let filteredSet: Set<string> | null = null;
+  if (sortType === SortType.FILTERED && filterCriteria) {
+    filteredSet = new Set<string>();
+    const { filterTags, filterSizes, filterBuckets, filterExtensions } =
+      filterCriteria;
+    const filterSizesSet = new Set(filterSizes);
+    const filterBucketsSet = new Set(filterBuckets);
+    const filterExtensionsSet = new Set(filterExtensions);
+
+    for (const asset of assets) {
+      const dimensionsComposed = composeDimensions(asset.dimensions);
+      const bucketComposed = `${asset.bucket.width}×${asset.bucket.height}`;
+
+      // Check if asset matches ANY filter criterion (MATCH_ANY logic)
+      const anyTagMatches =
+        filterTags.length > 0 &&
+        filterTags.some((tag) => asset.tagList.includes(tag));
+      const anySizeMatches =
+        filterSizes.length > 0 && filterSizesSet.has(dimensionsComposed);
+      const anyBucketMatches =
+        filterBuckets.length > 0 && filterBucketsSet.has(bucketComposed);
+      const anyExtensionMatches =
+        filterExtensions.length > 0 &&
+        filterExtensionsSet.has(asset.fileExtension);
+
+      if (
+        anyTagMatches ||
+        anySizeMatches ||
+        anyBucketMatches ||
+        anyExtensionMatches
+      ) {
+        filteredSet.add(asset.fileId);
+      }
+    }
+  }
 
   return [...assets].sort((a, b) => {
     let comparison = 0;
@@ -353,6 +397,17 @@ const applySorting = (
         if (aSelected && !bSelected) comparison = -1;
         else if (!aSelected && bSelected) comparison = 1;
         else comparison = 0;
+        break;
+
+      case SortType.FILTERED:
+        // Sort filtered assets first (those matching any filter criterion)
+        if (filteredSet) {
+          const aFiltered = filteredSet.has(a.fileId);
+          const bFiltered = filteredSet.has(b.fileId);
+          if (aFiltered && !bFiltered) comparison = -1;
+          else if (!aFiltered && bFiltered) comparison = 1;
+          else comparison = 0;
+        }
         break;
 
       default:

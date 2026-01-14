@@ -22,6 +22,7 @@ export enum SortType {
   BUCKET_SIZE = 'BucketSize',
   SCALED = 'Scaled',
   SELECTED = 'Selected',
+  FILTERED = 'Filtered',
 }
 
 export enum SortDirection {
