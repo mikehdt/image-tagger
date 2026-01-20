@@ -84,7 +84,7 @@ const colorStyles: Record<
 > = {
   slate: {
     normal:
-      'border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400',
+      'border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300',
     hover:
       'hover:bg-slate-100 dark:hover:bg-slate-600 dark:hover:text-slate-100',
     pressed:
@@ -97,7 +97,7 @@ const colorStyles: Record<
       'border-slate-200 bg-slate-100 text-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500',
     ghost:
       'border-slate-300/0 text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-500 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-600 dark:hover:text-slate-100',
-    ghostDisabled: 'border-slate-300/0 text-slate-300 dark:text-slate-500',
+    ghostDisabled: 'border-slate-300/0 text-slate-300 dark:text-slate-600',
   },
   amber: {
     normal:
