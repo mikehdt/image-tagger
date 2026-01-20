@@ -35,8 +35,8 @@ export const Pagination = ({
         scroll={true}
         className={`mr-1 flex items-center rounded p-1 ${
           currentPage <= 1
-            ? 'pointer-events-none text-slate-300'
-            : 'text-slate-500 hover:bg-sky-100'
+            ? 'pointer-events-none text-slate-300 dark:text-slate-600'
+            : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
         }`}
         aria-disabled={currentPage <= 1}
       >
@@ -63,8 +63,8 @@ export const Pagination = ({
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
             currentPage === 1
-              ? 'bg-sky-500 text-white'
-              : 'text-slate-500 hover:bg-sky-100'
+              ? 'bg-sky-500 text-white dark:bg-sky-700 dark:text-sky-300'
+              : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
           }`}
         >
           1
@@ -74,7 +74,10 @@ export const Pagination = ({
       // Ellipsis only if it covers 2 or more pages
       if (startPage > 3) {
         pages.push(
-          <span key="ellipsis-start" className="px-2 py-0.5 text-slate-300">
+          <span
+            key="ellipsis-start"
+            className="cursor-default px-2 py-0.5 text-slate-300 dark:text-slate-600"
+          >
             &hellip;
           </span>,
         );
@@ -88,8 +91,8 @@ export const Pagination = ({
             scroll={true}
             className={`mx-1 rounded px-2 py-0.5 ${
               currentPage === 2
-                ? 'bg-sky-500 text-white'
-                : 'text-slate-500 hover:bg-sky-100'
+                ? 'bg-sky-500 text-white dark:bg-sky-700 dark:text-sky-300'
+                : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
             }`}
           >
             2
@@ -108,8 +111,8 @@ export const Pagination = ({
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
             currentPage === i
-              ? 'bg-sky-500 text-white'
-              : 'text-slate-500 hover:bg-sky-100'
+              ? 'bg-sky-500 text-white dark:bg-sky-700 dark:text-sky-300'
+              : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
           }`}
         >
           {i}
@@ -122,7 +125,10 @@ export const Pagination = ({
       // Ellipsis only if it covers 2 or more pages
       if (endPage < totalPages - 2) {
         pages.push(
-          <span key="ellipsis-end" className="px-2 py-0.5 text-slate-300">
+          <span
+            key="ellipsis-end"
+            className="cursor-default px-2 py-0.5 text-slate-300 dark:text-slate-600"
+          >
             &hellip;
           </span>,
         );
@@ -136,8 +142,8 @@ export const Pagination = ({
             scroll={true}
             className={`mx-1 rounded px-2 py-0.5 ${
               currentPage === totalPages - 1
-                ? 'bg-sky-500 text-white'
-                : 'text-slate-500 hover:bg-sky-100'
+                ? 'bg-sky-500 text-white dark:bg-sky-700 dark:text-sky-300'
+                : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
             }`}
           >
             {totalPages - 1}
@@ -153,8 +159,8 @@ export const Pagination = ({
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
             currentPage === totalPages
-              ? 'bg-sky-500 text-white'
-              : 'text-slate-500 hover:bg-sky-100'
+              ? 'bg-sky-500 text-white dark:bg-sky-700 dark:text-sky-300'
+              : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
           }`}
         >
           {totalPages}
@@ -172,8 +178,8 @@ export const Pagination = ({
         scroll={true}
         className={`ml-1 flex items-center rounded p-1 ${
           currentPage >= totalPages
-            ? 'pointer-events-none text-slate-300'
-            : 'text-slate-500 hover:bg-sky-100'
+            ? 'pointer-events-none text-slate-300 dark:text-slate-600'
+            : 'text-slate-500 hover:bg-sky-100 dark:text-slate-400 dark:hover:bg-slate-700'
         }`}
         aria-disabled={currentPage >= totalPages}
       >
