@@ -13,4 +13,3 @@ export const wd14Provider: TaggerProvider = {
     'Anime/illustration tagging models trained on Danbooru. Provides general tags, character recognition, and rating classification.',
   models: ALL_WD14_MODELS,
 };
-

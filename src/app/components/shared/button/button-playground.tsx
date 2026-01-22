@@ -69,9 +69,7 @@ export const ButtonPlayground = () => {
 
       {/* Raw test - direct classes */}
       <div className="mb-4">
-        <p className="mb-2 text-xs text-(--unselected-text)">
-          Raw class test:
-        </p>
+        <p className="mb-2 text-xs text-(--unselected-text)">Raw class test:</p>
         <div className="flex items-center gap-4 rounded bg-(--surface-elevated) p-2">
           <span className="text-slate-700">text-slate-700</span>
           <span className="text-slate-400 dark:text-slate-400">

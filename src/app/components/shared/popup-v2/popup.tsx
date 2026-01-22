@@ -71,14 +71,17 @@ export const Popup: React.FC<PopupProps> = ({
     void popup.offsetWidth;
 
     // Now check viewport and adjust if needed
-    const { styles, adjustedPosition, isConstrained: constrained } =
-      adjustForViewport(
-        popup,
-        trigger,
-        desiredPosition,
-        currentOffset,
-        disableOverflowHandling,
-      );
+    const {
+      styles,
+      adjustedPosition,
+      isConstrained: constrained,
+    } = adjustForViewport(
+      popup,
+      trigger,
+      desiredPosition,
+      currentOffset,
+      disableOverflowHandling,
+    );
 
     // Apply adjusted styles and transform origin
     setPositionStyles(styles);

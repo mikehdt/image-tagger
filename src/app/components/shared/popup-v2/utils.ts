@@ -93,7 +93,10 @@ export function adjustForViewport(
   }
 
   // Calculate overflow based on natural position
-  const overflowRight = Math.max(0, naturalRight - (viewportWidth - VIEWPORT_MARGIN));
+  const overflowRight = Math.max(
+    0,
+    naturalRight - (viewportWidth - VIEWPORT_MARGIN),
+  );
   const overflowLeft = Math.max(0, VIEWPORT_MARGIN - naturalLeft);
   const maxAvailableWidth = viewportWidth - VIEWPORT_MARGIN * 2;
   const isConstrained = overflowRight > 0 || overflowLeft > 0;

@@ -193,7 +193,9 @@ const TagActionsComponent = () => {
 
   const handleGatherTags = useCallback(() => {
     if (filterTags.length >= 2) {
-      dispatch(gatherTags({ tags: filterTags, assetIds: effectiveScopeAssetIds }));
+      dispatch(
+        gatherTags({ tags: filterTags, assetIds: effectiveScopeAssetIds }),
+      );
     }
   }, [dispatch, filterTags, effectiveScopeAssetIds]);
 

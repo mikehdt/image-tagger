@@ -104,7 +104,9 @@ const TaggingManagerComponent = ({
   // Handle adding a new tag
   const handleAddTag = useCallback(
     (tagName: string, prepend?: boolean) => {
-      dispatch(addTag({ assetId, tagName, position: prepend ? 'start' : 'end' }));
+      dispatch(
+        addTag({ assetId, tagName, position: prepend ? 'start' : 'end' }),
+      );
     },
     [dispatch, assetId],
   );

@@ -25,7 +25,9 @@ export const ViewSelector = () => {
           type="button"
           onClick={() => handleViewChange('tag')}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'tag' ? 'bg-white shadow-sm dark:bg-slate-600' : 'hover:bg-slate-300 dark:hover:bg-slate-600'
+            activeView === 'tag'
+              ? 'bg-white shadow-sm dark:bg-slate-600'
+              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
           }`}
         >
           Tag
@@ -34,7 +36,9 @@ export const ViewSelector = () => {
           type="button"
           onClick={() => handleViewChange('size')}
           className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'size' ? 'bg-white shadow-sm dark:bg-slate-600' : 'hover:bg-slate-300 dark:hover:bg-slate-600'
+            activeView === 'size'
+              ? 'bg-white shadow-sm dark:bg-slate-600'
+              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
           }`}
         >
           Size

@@ -205,7 +205,10 @@ function DropdownInternal<T>({
           fullWidth ? 'min-w-full' : 'min-w-40'
         } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-lg focus:outline-none dark:border-slate-600 dark:bg-slate-800 ${menuClassName}`}
       >
-        <div className="divide-y divide-slate-100 dark:divide-slate-700" role="menu">
+        <div
+          className="divide-y divide-slate-100 dark:divide-slate-700"
+          role="menu"
+        >
           {items.map((item, index) => (
             <button
               key={index}

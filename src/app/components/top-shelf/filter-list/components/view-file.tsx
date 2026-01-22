@@ -279,7 +279,9 @@ export const FileView = () => {
                 </span>
                 <span
                   className={`text-xs tabular-nums ${
-                    item.isActive ? 'text-stone-600 dark:text-stone-400' : 'text-slate-500 dark:text-slate-400'
+                    item.isActive
+                      ? 'text-stone-600 dark:text-stone-400'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   {item.count}

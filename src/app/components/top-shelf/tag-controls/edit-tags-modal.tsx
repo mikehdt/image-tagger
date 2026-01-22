@@ -537,7 +537,10 @@ export const EditTagsModal = ({
               }
 
               return (
-                <div key={`${tag}-${index}`} className="flex w-full items-center">
+                <div
+                  key={`${tag}-${index}`}
+                  className="flex w-full items-center"
+                >
                   {/* Original tag */}
                   <div className="relative w-1/2 truncate pr-10 font-medium text-slate-500 dark:text-slate-400">
                     {tag}

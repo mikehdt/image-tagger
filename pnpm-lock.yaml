@@ -22,7 +22,7 @@ importers:
         version: 2.2.0(react@19.2.3)
       '@reduxjs/toolkit':
         specifier: ^2.11.2
-        version: 2.11.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
+        version: 2.11.2(react-redux@9.2.0(@types/react@19.2.9)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
       image-dimensions:
         specifier: ^2.5.0
         version: 2.5.0
@@ -40,20 +40,20 @@ importers:
         version: 19.2.3(react@19.2.3)
       react-redux:
         specifier: 9.2.0
-        version: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
+        version: 9.2.0(@types/react@19.2.9)(react@19.2.3)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.1.18
       '@types/node':
-        specifier: ^25.0.9
-        version: 25.0.9
+        specifier: ^25.0.10
+        version: 25.0.10
       '@types/react':
-        specifier: ^19.2.8
-        version: 19.2.8
+        specifier: ^19.2.9
+        version: 19.2.9
       '@types/react-dom':
         specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.8)
+        version: 19.2.3(@types/react@19.2.9)
       eslint:
         specifier: ^9.39.2
         version: 9.39.2(jiti@2.6.1)
@@ -68,16 +68,16 @@ importers:
         version: 12.1.1(eslint@9.39.2(jiti@2.6.1))
       knip:
         specifier: ^5.82.1
-        version: 5.82.1(@types/node@25.0.9)(typescript@5.9.3)
+        version: 5.82.1(@types/node@25.0.10)(typescript@5.9.3)
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
       prettier:
-        specifier: ^3.8.0
-        version: 3.8.0
+        specifier: ^3.8.1
+        version: 3.8.1
       prettier-plugin-tailwindcss:
         specifier: ^0.7.2
-        version: 0.7.2(@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.0))(@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.0))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.0)(typescript@5.9.3))(prettier@3.8.0)
+        version: 0.7.2(@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.1))(@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.1))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.9.3))(prettier@3.8.1)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -737,16 +737,16 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/node@25.0.9':
-    resolution: {integrity: sha512-/rpCXHlCWeqClNBwUhDcusJxXYDjZTyE8v5oTO7WbL8eij2nKhUeU89/6xgjU7N4/Vh3He0BtyhJdQbDyhiXAw==}
+  '@types/node@25.0.10':
+    resolution: {integrity: sha512-zWW5KPngR/yvakJgGOmZ5vTBemDoSqF3AcV/LrO5u5wTWyEAVVh+IT39G4gtyAkh3CtTZs8aX/yRM82OfzHJRg==}
 
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react@19.2.8':
-    resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
+  '@types/react@19.2.9':
+    resolution: {integrity: sha512-Lpo8kgb/igvMIPeNV2rsYKTgaORYdO1XGVZ4Qz3akwOj0ySGYMPlQWa8BaLn0G63D1aSaAQ5ldR06wCpChQCjA==}
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
@@ -1735,8 +1735,8 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -1979,8 +1979,8 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.8.0:
-    resolution: {integrity: sha512-yEPsovQfpxYfgWNhCfECjG5AQaO+K3dp6XERmOepyPDVqcJm+bjyCVO3pmU+nAPe0N5dDvekfGezt/EIiRe1TA==}
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -2557,13 +2557,13 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.0)':
+  '@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.1)':
     dependencies:
       '@babel/generator': 7.28.6
       '@babel/parser': 7.28.6
       '@babel/traverse': 7.28.6
       '@babel/types': 7.28.6
-      prettier: 3.8.0
+      prettier: 3.8.1
       semver: 7.7.3
     transitivePeerDependencies:
       - supports-color
@@ -2804,7 +2804,7 @@ snapshots:
   '@oxc-resolver/binding-win32-x64-msvc@11.16.3':
     optional: true
 
-  '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)':
+  '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@19.2.9)(react@19.2.3)(redux@5.0.1))(react@19.2.3)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -2814,7 +2814,7 @@ snapshots:
       reselect: 5.1.1
     optionalDependencies:
       react: 19.2.3
-      react-redux: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@19.2.9)(react@19.2.3)(redux@5.0.1)
 
   '@rtsao/scc@1.1.0': {}
 
@@ -2895,15 +2895,15 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.1.18
 
-  '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.0)':
+  '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.1)':
     dependencies:
       '@babel/generator': 7.28.6
       '@babel/parser': 7.28.6
       '@babel/traverse': 7.28.6
       '@babel/types': 7.28.6
       javascript-natural-sort: 0.7.1
-      lodash: 4.17.21
-      prettier: 3.8.0
+      lodash: 4.17.23
+      prettier: 3.8.1
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -2919,15 +2919,15 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/node@25.0.9':
+  '@types/node@25.0.10':
     dependencies:
       undici-types: 7.16.0
 
-  '@types/react-dom@19.2.3(@types/react@19.2.8)':
+  '@types/react-dom@19.2.3(@types/react@19.2.9)':
     dependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.9
 
-  '@types/react@19.2.8':
+  '@types/react@19.2.9':
     dependencies:
       csstype: 3.2.3
 
@@ -3990,10 +3990,10 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.82.1(@types/node@25.0.9)(typescript@5.9.3):
+  knip@5.82.1(@types/node@25.0.10)(typescript@5.9.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
-      '@types/node': 25.0.9
+      '@types/node': 25.0.10
       fast-glob: 3.3.3
       formatly: 0.3.0
       jiti: 2.6.1
@@ -4073,7 +4073,7 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lodash@4.17.21:
+  lodash@4.17.23:
     optional: true
 
   loose-envify@1.4.0:
@@ -4273,21 +4273,21 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-organize-imports@4.1.0(prettier@3.8.0)(typescript@5.9.3):
+  prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.9.3):
     dependencies:
-      prettier: 3.8.0
+      prettier: 3.8.1
       typescript: 5.9.3
     optional: true
 
-  prettier-plugin-tailwindcss@0.7.2(@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.0))(@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.0))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.0)(typescript@5.9.3))(prettier@3.8.0):
+  prettier-plugin-tailwindcss@0.7.2(@ianvs/prettier-plugin-sort-imports@4.4.1(prettier@3.8.1))(@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.8.1))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.9.3))(prettier@3.8.1):
     dependencies:
-      prettier: 3.8.0
+      prettier: 3.8.1
     optionalDependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.4.1(prettier@3.8.0)
-      '@trivago/prettier-plugin-sort-imports': 5.2.2(prettier@3.8.0)
-      prettier-plugin-organize-imports: 4.1.0(prettier@3.8.0)(typescript@5.9.3)
+      '@ianvs/prettier-plugin-sort-imports': 4.4.1(prettier@3.8.1)
+      '@trivago/prettier-plugin-sort-imports': 5.2.2(prettier@3.8.1)
+      prettier-plugin-organize-imports: 4.1.0(prettier@3.8.1)(typescript@5.9.3)
 
-  prettier@3.8.0: {}
+  prettier@3.8.1: {}
 
   prop-types@15.8.1:
     dependencies:
@@ -4306,13 +4306,13 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1):
+  react-redux@9.2.0(@types/react@19.2.9)(react@19.2.3)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
       react: 19.2.3
       use-sync-external-store: 1.5.0(react@19.2.3)
     optionalDependencies:
-      '@types/react': 19.2.8
+      '@types/react': 19.2.9
       redux: 5.0.1
 
   react@19.2.3: {}

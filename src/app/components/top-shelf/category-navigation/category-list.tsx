@@ -18,7 +18,9 @@ export const CategoryList = ({
   return (
     <>
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 p-2 dark:border-slate-700 dark:bg-slate-700">
-        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">Jump to Category</h3>
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          Jump to Category
+        </h3>
 
         <button
           onClick={onClose}
@@ -61,7 +63,9 @@ export const CategoryList = ({
                 {showPageNumber && (
                   <span
                     className={`text-xs ${
-                      isCurrentPage ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'
+                      isCurrentPage
+                        ? 'text-sky-600 dark:text-sky-400'
+                        : 'text-slate-500 dark:text-slate-400'
                     }`}
                   >
                     Page {page}

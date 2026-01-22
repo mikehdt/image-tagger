@@ -94,7 +94,9 @@ const SizeVisualizer = ({
   return (
     <div
       className={`border transition-colors ${
-        isActive ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800' : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
+        isActive
+          ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800'
+          : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
     />
@@ -192,9 +194,13 @@ const SizeInfo = ({
               {searchTerm ? highlightText(item.ratio, searchTerm) : item.ratio}
             </span>
             <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-            <span className="text-sm text-slate-500 dark:text-slate-400">{item.type}</span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {item.type}
+            </span>
           </span>
-          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+            {item.count}
+          </span>
         </div>
         <div className="flex text-xs tabular-nums">
           <span className="text-slate-500 dark:text-slate-400">
@@ -203,7 +209,9 @@ const SizeInfo = ({
           {item.pixelCount > 100000 && (
             <>
               <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-              <span className="text-slate-500 dark:text-slate-400">{item.formattedMP}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                {item.formattedMP}
+              </span>
             </>
           )}
         </div>
@@ -218,16 +226,22 @@ const SizeInfo = ({
               ? highlightText(item.formattedMP, searchTerm)
               : item.formattedMP}
           </span>
-          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+            {item.count}
+          </span>
         </div>
         <div className="flex text-xs tabular-nums">
           <span className="text-slate-500 dark:text-slate-400">
             {formatDimensions(item.dimensions)}
           </span>
           <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-          <span className="text-slate-500 dark:text-slate-400">{item.ratio}</span>
+          <span className="text-slate-500 dark:text-slate-400">
+            {item.ratio}
+          </span>
           <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-          <span className="text-slate-500 dark:text-slate-400">{item.type}</span>
+          <span className="text-slate-500 dark:text-slate-400">
+            {item.type}
+          </span>
         </div>
       </>
     );
@@ -244,16 +258,24 @@ const SizeInfo = ({
                 )
               : formatDimensions(item.dimensions)}
           </span>
-          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">{item.count}</span>
+          <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+            {item.count}
+          </span>
         </div>
         <div className="flex text-xs tabular-nums">
-          <span className="text-slate-500 dark:text-slate-400">{item.ratio}</span>
+          <span className="text-slate-500 dark:text-slate-400">
+            {item.ratio}
+          </span>
           <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-          <span className="text-slate-500 dark:text-slate-400">{item.type}</span>
+          <span className="text-slate-500 dark:text-slate-400">
+            {item.type}
+          </span>
           {item.pixelCount > 100000 ? (
             <>
               <span className="mx-1 text-slate-300 dark:text-slate-600">•</span>
-              <span className="text-slate-500 dark:text-slate-400">{item.formattedMP}</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                {item.formattedMP}
+              </span>
             </>
           ) : null}
         </div>

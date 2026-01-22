@@ -50,7 +50,12 @@ type BatchProgressEvent = {
 export async function POST(request: NextRequest) {
   try {
     const body: BatchTagRequest = await request.json();
-    const { modelId, projectPath: rawProjectPath, assets, options: userOptions } = body;
+    const {
+      modelId,
+      projectPath: rawProjectPath,
+      assets,
+      options: userOptions,
+    } = body;
 
     // Resolve to absolute path
     // The projectPath from client could be:
@@ -68,7 +73,9 @@ export async function POST(request: NextRequest) {
       } else {
         // Try with the configured projects folder
         const config = getServerConfig();
-        projectPath = path.resolve(path.join(config.projectsFolder, rawProjectPath));
+        projectPath = path.resolve(
+          path.join(config.projectsFolder, rawProjectPath),
+        );
       }
     }
 

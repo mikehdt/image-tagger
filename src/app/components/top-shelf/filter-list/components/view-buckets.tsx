@@ -92,7 +92,9 @@ const BucketVisualizer = ({
   return (
     <div
       className={`border transition-colors ${
-        isActive ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800' : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
+        isActive
+          ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800'
+          : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
       }`}
       style={{ width: boxWidth, height: boxHeight }}
     />
@@ -255,7 +257,7 @@ export const BucketsView = () => {
           onKeyDown={handleKeyDown}
           autoFocus
           placeholder="Search buckets..."
-          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all dark:border-slate-600 dark:bg-slate-700 dark:inset-shadow-slate-800 dark:placeholder-slate-400"
+          className="w-full rounded-full border border-slate-300 bg-white py-1 ps-4 pe-8 inset-shadow-sm inset-shadow-slate-200 transition-all dark:border-slate-600 dark:bg-slate-700 dark:placeholder-slate-400 dark:inset-shadow-slate-800"
         />
         <button
           className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${

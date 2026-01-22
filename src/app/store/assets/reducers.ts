@@ -254,9 +254,15 @@ export const coreReducers = {
           // If tag is now in its original position, remove DIRTY flag
           // Otherwise, ensure DIRTY flag is set
           if (originalIndex === i) {
-            asset.tagStatus[tag] = removeState(asset.tagStatus[tag], TagState.DIRTY);
+            asset.tagStatus[tag] = removeState(
+              asset.tagStatus[tag],
+              TagState.DIRTY,
+            );
           } else {
-            asset.tagStatus[tag] = addState(asset.tagStatus[tag], TagState.DIRTY);
+            asset.tagStatus[tag] = addState(
+              asset.tagStatus[tag],
+              TagState.DIRTY,
+            );
           }
         }
       }
@@ -417,9 +423,7 @@ export const coreReducers = {
       );
 
       // Remove all tags to gather from their current positions
-      asset.tagList = asset.tagList.filter(
-        (tag) => !presentTags.includes(tag),
-      );
+      asset.tagList = asset.tagList.filter((tag) => !presentTags.includes(tag));
 
       // Insert them consecutively at the first tag's original position
       asset.tagList.splice(firstTagIndex, 0, ...orderedTagsToGather);
@@ -439,7 +443,10 @@ export const coreReducers = {
               TagState.DIRTY,
             );
           } else {
-            asset.tagStatus[tag] = addState(asset.tagStatus[tag], TagState.DIRTY);
+            asset.tagStatus[tag] = addState(
+              asset.tagStatus[tag],
+              TagState.DIRTY,
+            );
           }
         }
       });
