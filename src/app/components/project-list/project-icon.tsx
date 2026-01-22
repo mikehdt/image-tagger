@@ -8,15 +8,10 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { memo, useRef, useState } from 'react';
 
+import type { Project } from './types';
+
 type ProjectIconProps = {
-  project: {
-    name: string;
-    title?: string;
-    thumbnail?: string;
-    featured?: boolean;
-    hidden?: boolean;
-    private?: boolean;
-  };
+  project: Project;
   isEditing?: boolean;
   onToggleFeatured: (projectName: string, currentFeatured: boolean) => void;
   onThumbnailSelect?: (file: File) => void;

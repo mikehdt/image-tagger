@@ -1,0 +1,162 @@
+import { useCallback, useState } from 'react';
+
+import type { Project, ProjectColor } from '@/app/components/project-list/types';
+import {
+  createProjectThumbnail,
+  type ProjectConfig,
+  removeProjectThumbnail,
+  updateProject,
+} from '@/app/utils/project-actions';
+
+export const useEditProject = (
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
+) => {
+  const [editingProject, setEditingProject] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editColor, setEditColor] = useState<ProjectColor | undefined>('slate');
+  const [editHidden, setEditHidden] = useState(false);
+
+  const handleStartEdit = useCallback((project: Project) => {
+    setEditingProject(project.name);
+    setEditTitle(project.title || '');
+    setEditColor(project.color || 'slate');
+    setEditHidden(project.hidden || false);
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingProject(null);
+    setEditTitle('');
+    setEditColor('slate');
+    setEditHidden(false);
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (projectName: string) => {
+      try {
+        const updates: Partial<ProjectConfig> = {};
+
+        // Always include title - empty string will be removed by Server Action, which is what we want
+        updates.title = editTitle.trim();
+
+        // Only include color if it's not the default
+        if (editColor && editColor !== 'slate') {
+          updates.color = editColor;
+        }
+
+        // Include hidden state
+        if (editHidden) {
+          updates.hidden = editHidden;
+        }
+
+        // Update project using Server Action
+        await updateProject(projectName, updates);
+
+        // Update the project in the state
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? {
+                  ...project,
+                  title: editTitle.trim() ? editTitle.trim() : undefined,
+                  color: editColor !== 'slate' ? editColor : undefined,
+                  hidden: editHidden ? editHidden : undefined,
+                }
+              : project,
+          ),
+        );
+
+        // Exit edit mode
+        handleCancelEdit();
+      } catch (error) {
+        console.error('Error saving project edit:', error);
+      }
+    },
+    [editTitle, editColor, editHidden, handleCancelEdit, setProjects],
+  );
+
+  const handleToggleFeatured = useCallback(
+    async (projectName: string, currentFeatured: boolean) => {
+      try {
+        // Optimistically update the UI
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, featured: !currentFeatured }
+              : project,
+          ),
+        );
+
+        // Update project using Server Action
+        await updateProject(projectName, { featured: !currentFeatured });
+      } catch (error) {
+        console.error('Error toggling featured status:', error);
+        // Revert the optimistic update on error
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, featured: currentFeatured }
+              : project,
+          ),
+        );
+      }
+    },
+    [setProjects],
+  );
+
+  const handleThumbnailSelect = useCallback(
+    async (projectName: string, file: File) => {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await createProjectThumbnail(projectName, arrayBuffer);
+
+        // Update the project in state with new thumbnail
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, thumbnail: result.thumbnail }
+              : project,
+          ),
+        );
+      } catch (error) {
+        console.error('Error creating thumbnail:', error);
+      }
+    },
+    [setProjects],
+  );
+
+  const handleThumbnailRemove = useCallback(
+    async (projectName: string) => {
+      try {
+        await removeProjectThumbnail(projectName);
+
+        // Update the project in state to remove thumbnail
+        setProjects((prev) =>
+          prev.map((project) =>
+            project.name === projectName
+              ? { ...project, thumbnail: undefined }
+              : project,
+          ),
+        );
+      } catch (error) {
+        console.error('Error removing thumbnail:', error);
+      }
+    },
+    [setProjects],
+  );
+
+  return {
+    editingProject,
+    editTitle,
+    editColor,
+    editHidden,
+    setEditTitle,
+    setEditColor,
+    setEditHidden,
+    handleStartEdit,
+    handleCancelEdit,
+    handleSaveEdit,
+    handleToggleFeatured,
+    handleThumbnailSelect,
+    handleThumbnailRemove,
+  };
+};

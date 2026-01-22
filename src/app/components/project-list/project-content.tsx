@@ -1,33 +1,26 @@
 import { CheckIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { memo, useEffect, useRef } from 'react';
 
-import { Checkbox } from '../components/shared/checkbox';
+import { Checkbox } from '@/app/components/shared/checkbox';
 
-type Project = {
-  name: string;
-  title?: string;
-  color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
-  imageCount?: number;
-  hidden?: boolean;
-  private?: boolean;
-};
+import type { Project, ProjectColor } from './types';
 
 type ProjectContentProps = {
   project: Project;
   isEditing: boolean;
   editTitle: string;
-  editColor: Project['color'];
+  editColor: ProjectColor | undefined;
   editHidden?: boolean;
   onStartEdit: () => void;
   onCancelEdit: () => void;
   onSaveEdit: () => void;
   onTitleChange: (title: string) => void;
-  onColorChange: (color: Project['color']) => void;
+  onColorChange: (color: ProjectColor | undefined) => void;
   onHiddenChange?: (hidden: boolean) => void;
 };
 
 const colors: {
-  value: Project['color'];
+  value: ProjectColor;
   label: string;
   class: string;
   activeClass: string;
