@@ -39,7 +39,7 @@ export function AutoTaggerSettings({
 }: AutoTaggerSettingsProps) {
   return (
     <>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-slate-400">
         Configure tagging options for {selectedAssetsCount} selected image
         {selectedAssetsCount !== 1 ? 's' : ''}.
       </p>
@@ -52,7 +52,9 @@ export function AutoTaggerSettings({
 
       {/* Model selection */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">Model</label>
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+          Model
+        </label>
         <Dropdown
           items={modelItems}
           selectedValue={selectedModelId || ''}
@@ -63,7 +65,7 @@ export function AutoTaggerSettings({
       {/* Thresholds */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-slate-700">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
             General Threshold: {options.generalThreshold.toFixed(2)}
           </label>
           <input
@@ -80,7 +82,7 @@ export function AutoTaggerSettings({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-slate-700">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
             Character Threshold: {options.characterThreshold.toFixed(2)}
           </label>
           <input
@@ -102,7 +104,10 @@ export function AutoTaggerSettings({
         <Checkbox
           isSelected={options.includeCharacterTags}
           onChange={() =>
-            onOptionChange('includeCharacterTags', !options.includeCharacterTags)
+            onOptionChange(
+              'includeCharacterTags',
+              !options.includeCharacterTags,
+            )
           }
           label="Include character tags"
           size="small"
@@ -127,7 +132,9 @@ export function AutoTaggerSettings({
 
       {/* Tag insert mode */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">New tags</label>
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+          New tags
+        </label>
         <RadioGroup
           name="tagInsertMode"
           options={insertModeOptions}
@@ -139,7 +146,7 @@ export function AutoTaggerSettings({
 
       {/* Include tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
           Always Include Tags
         </label>
         <MultiTagInput
@@ -152,7 +159,7 @@ export function AutoTaggerSettings({
 
       {/* Exclude tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
           Exclude Tags
         </label>
         <MultiTagInput
@@ -164,12 +171,13 @@ export function AutoTaggerSettings({
       </div>
 
       {/* Post-tagging options */}
-      <Checkbox
-        isSelected={unselectOnComplete}
-        onChange={onUnselectOnCompleteChange}
-        label="Unselect successfully tagged assets"
-        size="small"
-      />
+      <div className="mt-2">
+        <Checkbox
+          isSelected={unselectOnComplete}
+          onChange={onUnselectOnCompleteChange}
+          label="Deselect tagged assets once complete"
+        />
+      </div>
 
       {/* Actions */}
       <div className="flex justify-end gap-2 pt-2">

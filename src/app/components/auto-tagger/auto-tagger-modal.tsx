@@ -48,15 +48,16 @@ export function AutoTaggerModal({
       className="max-w-xl"
     >
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-slate-800">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-300">
           Auto-Tag Images
         </h2>
 
         {!hasReadyModel ? (
-          <div className="rounded-md bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="rounded-md border border-amber-600 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
             <p className="font-medium">No models installed</p>
             <p className="mt-1">
-              Please set up an auto-tagger model first using the menu option.
+              Please set up an auto-tagger model first using the project menu
+              option.
             </p>
           </div>
         ) : isTagging ? (
