@@ -21,13 +21,33 @@ const checkIfUsingDefaultProject = async (): Promise<boolean> => {
   }
 };
 
+// Check sessionStorage synchronously to determine if we already have project context.
+// This avoids flashing a loading state on pagination (page changes) when we already
+// know the project is set up.
+const getInitialProjectContext = () => {
+  if (typeof window === 'undefined') return { hasContext: false };
+  const configMode = sessionStorage.getItem('configMode');
+  if (configMode === 'default') return { hasContext: true };
+  if (configMode === 'custom') {
+    return { hasContext: !!sessionStorage.getItem('selectedProject') };
+  }
+  return { hasContext: false };
+};
+
 export default function Page() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const currentPage = parseInt(params.page as string, 10) || 1;
-  const [isLoading, setIsLoading] = useState(true);
-  const [canShowAssets, setCanShowAssets] = useState(false);
+
+  // Initialize from sessionStorage: if we already have project context,
+  // skip the loading state entirely so pagination renders instantly.
+  const [canShowAssets, setCanShowAssets] = useState(
+    () => getInitialProjectContext().hasContext,
+  );
+  const [isLoading, setIsLoading] = useState(
+    () => !getInitialProjectContext().hasContext,
+  );
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Check if a project is selected or if we're using the default project
@@ -142,17 +162,12 @@ export default function Page() {
     }
   }, [currentPage, canShowAssets]);
 
-  if (isLoading || isRedirecting) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+  // If we already have context, render immediately (no loading flash on pagination)
+  if (canShowAssets && !isRedirecting) {
+    return <AssetList currentPage={currentPage} />;
   }
 
-  if (!canShowAssets) {
-    return null; // Will redirect via useEffect
-  }
-
-  return <AssetList currentPage={currentPage} />;
+  // When truly loading (first visit) or redirecting, render nothing.
+  // AppProvider's InitialLoad handles the visible loading state.
+  return null;
 }

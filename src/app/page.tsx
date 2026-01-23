@@ -28,7 +28,7 @@ export default function Home() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const [showProjectList, setShowProjectList] = useState(true);
+  const [showProjectList, setShowProjectList] = useState(false);
 
   useEffect(() => {
     const checkProjectConfig = async () => {
@@ -80,16 +80,10 @@ export default function Home() {
     checkProjectConfig();
   }, [router, dispatch]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!showProjectList) {
-    return null; // Will redirect to /1 via useEffect
+  if (isLoading || !showProjectList) {
+    // Show nothing during the config check — avoids a flash before
+    // either redirecting to /1 or showing the project list (which has its own loading state)
+    return null;
   }
 
   return <ProjectList />;
