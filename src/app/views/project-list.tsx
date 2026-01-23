@@ -7,9 +7,12 @@ import {
   StarIcon,
   SunIcon,
 } from '@heroicons/react/24/outline';
+import { useMemo } from 'react';
 
-import { ProjectContent } from '@/app/components/project-list/project-content';
-import { ProjectIcon } from '@/app/components/project-list/project-icon';
+import {
+  ProjectItem,
+  type ProjectItemActions,
+} from '@/app/components/project-list/project-item';
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { ThemeMode } from '@/app/utils/use-theme';
@@ -50,6 +53,41 @@ export const ProjectList = () => {
     handleThumbnailSelect,
     handleThumbnailRemove,
   } = useProjectList();
+
+  const itemActions: ProjectItemActions = useMemo(
+    () => ({
+      editColor,
+      editTitle,
+      editHidden,
+      showHidden,
+      onSelect: handleProjectSelect,
+      onStartEdit: handleStartEdit,
+      onCancelEdit: handleCancelEdit,
+      onSaveEdit: handleSaveEdit,
+      onTitleChange: setEditTitle,
+      onColorChange: setEditColor,
+      onHiddenChange: setEditHidden,
+      onToggleFeatured: handleToggleFeatured,
+      onThumbnailSelect: handleThumbnailSelect,
+      onThumbnailRemove: handleThumbnailRemove,
+    }),
+    [
+      editColor,
+      editTitle,
+      editHidden,
+      showHidden,
+      handleProjectSelect,
+      handleStartEdit,
+      handleCancelEdit,
+      handleSaveEdit,
+      setEditTitle,
+      setEditColor,
+      setEditHidden,
+      handleToggleFeatured,
+      handleThumbnailSelect,
+      handleThumbnailRemove,
+    ],
+  );
 
   if (loading) {
     return (
@@ -116,47 +154,14 @@ export const ProjectList = () => {
               Featured Projects
             </h2>
             <div className="flex flex-wrap gap-3">
-              {featuredProjects.map((project) => {
-                const isEditing = editingProject === project.name;
-                return (
-                  <Button
-                    key={project.path}
-                    onClick={() => handleProjectSelect(project.path)}
-                    size="large"
-                    color={isEditing ? editColor : project.color || 'slate'}
-                    inert={isEditing}
-                    className={`group w-full justify-start p-4 text-left ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
-                  >
-                    <div className="flex w-full items-center">
-                      <ProjectIcon
-                        project={project}
-                        isEditing={isEditing}
-                        onToggleFeatured={handleToggleFeatured}
-                        onThumbnailSelect={(file) =>
-                          handleThumbnailSelect(project.name, file)
-                        }
-                        onThumbnailRemove={() =>
-                          handleThumbnailRemove(project.name)
-                        }
-                      />
-
-                      <ProjectContent
-                        project={project}
-                        isEditing={isEditing}
-                        editTitle={editTitle}
-                        editColor={editColor}
-                        editHidden={editHidden}
-                        onStartEdit={() => handleStartEdit(project)}
-                        onCancelEdit={handleCancelEdit}
-                        onSaveEdit={() => handleSaveEdit(project.name)}
-                        onTitleChange={setEditTitle}
-                        onColorChange={setEditColor}
-                        onHiddenChange={setEditHidden}
-                      />
-                    </div>
-                  </Button>
-                );
-              })}
+              {featuredProjects.map((project) => (
+                <ProjectItem
+                  key={project.path}
+                  project={project}
+                  isEditing={editingProject === project.name}
+                  actions={itemActions}
+                />
+              ))}
             </div>
           </div>
         )}
@@ -170,47 +175,14 @@ export const ProjectList = () => {
               {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
             </h2>
             <div className="flex flex-wrap gap-3">
-              {regularProjects.map((project) => {
-                const isEditing = editingProject === project.name;
-                return (
-                  <Button
-                    key={project.path}
-                    onClick={() => handleProjectSelect(project.path)}
-                    size="large"
-                    color={isEditing ? editColor : project.color || 'slate'}
-                    inert={isEditing}
-                    className={`group w-full justify-start p-4 text-left ${showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
-                  >
-                    <div className="flex w-full items-center">
-                      <ProjectIcon
-                        project={project}
-                        isEditing={isEditing}
-                        onToggleFeatured={handleToggleFeatured}
-                        onThumbnailSelect={(file) =>
-                          handleThumbnailSelect(project.name, file)
-                        }
-                        onThumbnailRemove={() =>
-                          handleThumbnailRemove(project.name)
-                        }
-                      />
-
-                      <ProjectContent
-                        project={project}
-                        isEditing={isEditing}
-                        editTitle={editTitle}
-                        editColor={editColor}
-                        editHidden={editHidden}
-                        onStartEdit={() => handleStartEdit(project)}
-                        onCancelEdit={handleCancelEdit}
-                        onSaveEdit={() => handleSaveEdit(project.name)}
-                        onTitleChange={setEditTitle}
-                        onColorChange={setEditColor}
-                        onHiddenChange={setEditHidden}
-                      />
-                    </div>
-                  </Button>
-                );
-              })}
+              {regularProjects.map((project) => (
+                <ProjectItem
+                  key={project.path}
+                  project={project}
+                  isEditing={editingProject === project.name}
+                  actions={itemActions}
+                />
+              ))}
             </div>
           </div>
         )}
