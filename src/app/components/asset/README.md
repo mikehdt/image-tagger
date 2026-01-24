@@ -9,7 +9,7 @@ Asset                    # Main asset component
 ├── AssetImage           # Handles image display and loading states
 ├── AssetMetadata        # Displays asset metadata (dimensions, filesize, etc.)
 ├── CropVisualization    # Visual overlay for crop indicators
-└── TaggingManager       # Tag management (from tagging-v2)
+└── TaggingManager       # Tag management (from tagging)
 ```
 
 ## Hook Dependencies

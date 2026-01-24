@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
 import { Button } from '../button';
-import { Popup, usePopup } from '../popup-v2';
+import { Popup, usePopup } from '../popup';
 
 interface ResponsiveToolbarGroupProps {
   /** Icon to display as the visual indicator/button */

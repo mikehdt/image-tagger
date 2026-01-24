@@ -24,7 +24,7 @@ This document provides an overview of the component architecture used in the Ima
     /responsive-toolbar-group # Responsive toolbar layout
     /toast                # Toast notification system
 
-  /tagging-v2             # Tag management (v2 architecture)
+  /tagging                # Tag management (v2 architecture)
     /components
       tag.tsx             # Base tag UI with state styling
       input-tag.tsx       # Tag input for adding/editing

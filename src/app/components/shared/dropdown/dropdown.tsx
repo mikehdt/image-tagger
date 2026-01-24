@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
-import { Popup, usePopup } from '../popup-v2';
+import { Popup, usePopup } from '../popup';
 
 /**
  * Dropdown Item interface - defines the structure of each dropdown option

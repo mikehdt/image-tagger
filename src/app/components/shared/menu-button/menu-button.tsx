@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
 import { Button } from '../button';
-import { Popup, usePopup } from '../popup-v2';
+import { Popup, usePopup } from '../popup';
 
 export type MenuItem = {
   label: string;

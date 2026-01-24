@@ -1,7 +1,7 @@
 import { QueueListIcon } from '@heroicons/react/24/outline';
 import { memo, useCallback, useId, useRef } from 'react';
 
-import { Popup, usePopup } from '@/app/components/shared/popup-v2';
+import { Popup, usePopup } from '@/app/components/shared/popup';
 
 import { Button } from '../../shared/button';
 import { FilterProvider } from './filter-context';

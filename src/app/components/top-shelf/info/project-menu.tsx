@@ -13,7 +13,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useRef, useState } from 'react';
 
-import { Popup, usePopup } from '@/app/components/shared/popup-v2';
+import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';

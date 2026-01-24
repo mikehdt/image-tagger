@@ -11,7 +11,7 @@ import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
-import { TaggingManager } from '../tagging-v2';
+import { TaggingManager } from '../tagging';
 import { AssetMetadata, CropVisualization } from './components';
 
 type PreviewState = 'select' | 'deselect' | null;

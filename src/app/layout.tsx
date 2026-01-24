@@ -5,7 +5,7 @@ import { Geist /* Geist_Mono */ } from 'next/font/google';
 
 import { AutoTaggerSetupModal } from './components/auto-tagger';
 import { ModalProvider } from './components/shared/modal';
-import { PopupProvider } from './components/shared/popup-v2';
+import { PopupProvider } from './components/shared/popup';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
 import { AppProvider } from './providers/AppProvider';
