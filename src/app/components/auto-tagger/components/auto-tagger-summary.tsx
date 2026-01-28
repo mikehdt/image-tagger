@@ -16,7 +16,7 @@ export function AutoTaggerSummary({
   return (
     <div className="flex flex-col gap-4">
       <div
-        className={`rounded-md p-4 text-sm ${wasCancelled ? 'bg-amber-50 text-amber-800' : 'bg-teal-50 text-teal-800'}`}
+        className={`rounded-md border p-4 text-sm ${wasCancelled ? 'border-amber-400 bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200' : 'border-teal-400 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-200'}`}
       >
         <p className="font-medium">
           {wasCancelled ? 'Tagging cancelled' : 'Tagging complete!'}
@@ -33,9 +33,7 @@ export function AutoTaggerSummary({
             {summary.imagesWithNewTags !== 1 ? 's' : ''}
           </li>
           {summary.imagesProcessed > summary.imagesWithNewTags && (
-            <li
-              className={wasCancelled ? 'text-amber-600' : 'text-teal-600'}
-            >
+            <li className={wasCancelled ? 'text-amber-600' : 'text-teal-600'}>
               {summary.imagesProcessed - summary.imagesWithNewTags} image
               {summary.imagesProcessed - summary.imagesWithNewTags !== 1
                 ? 's'

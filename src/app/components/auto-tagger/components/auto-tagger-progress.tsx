@@ -17,7 +17,7 @@ export function AutoTaggerProgress({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-slate-400">
         Tagging image {progress?.current || 0} of {progress?.total || 0}...
       </p>
 

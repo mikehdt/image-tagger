@@ -1,12 +1,12 @@
 'use client';
 
-import { XMarkIcon } from '@heroicons/react/24/solid';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
-// Define a type for tag status
+import { TagChip, TagChipStatus } from './tag-chip';
+
 type TagStatus = {
   tag: string;
-  status: 'all' | 'some' | 'none';
+  status: TagChipStatus;
 };
 
 type MultiTagInputProps = {
@@ -152,63 +152,20 @@ export const MultiTagInput = ({
   return (
     <div
       ref={containerRef}
-      className={`flex w-full cursor-text flex-wrap items-center rounded-2xl border px-1 py-1 inset-shadow-sm transition-colors focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 ${className} ${
+      className={`flex w-full cursor-text flex-wrap items-center rounded-3xl border px-1.5 py-1.5 inset-shadow-sm transition-colors focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 dark:bg-slate-900 ${className} ${
         hasFocus ? 'border-sky-500' : 'border-slate-400 dark:border-slate-500'
-      } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300 dark:inset-shadow-amber-900' : 'inset-shadow-slate-300 dark:inset-shadow-slate-900'}`}
+      } ${isDuplicate ? 'border-amber-400 bg-amber-50 inset-shadow-amber-300 dark:bg-amber-900 dark:inset-shadow-amber-950' : 'inset-shadow-slate-300 dark:inset-shadow-slate-950'}`}
       data-container="true"
     >
-      {tags.map((tag, index) => {
-        // Find the status for this tag
-        const tagInfo = tagStatus.find((t) => t.tag === tag) || {
-          tag,
-          status: 'none',
-        };
-        const status = tagInfo.status;
-        const isHighlighted = highlightedTagIndex === index;
-
-        // Define style variants based on status
-        const tagStyles = {
-          none: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
-            : 'border-slate-300 bg-slate-100 text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300',
-          some: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
-            : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-600 dark:bg-amber-800 dark:text-amber-300',
-          all: isHighlighted
-            ? 'border-blue-500 bg-blue-100 text-blue-800 ring-1 ring-blue-500 dark:bg-blue-800 dark:text-blue-300'
-            : 'border-rose-300 bg-rose-100 text-rose-800 dark:border-rose-600 dark:bg-rose-800 dark:text-rose-300',
-        };
-
-        const buttonHoverStyles = {
-          none: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-slate-300',
-          some: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-amber-200',
-          all: isHighlighted ? 'hover:bg-blue-200' : 'hover:bg-rose-300',
-        };
-
-        const iconStyles = {
-          none: isHighlighted ? 'text-blue-600' : 'text-slate-600',
-          some: isHighlighted ? 'text-blue-600' : 'text-amber-600',
-          all: isHighlighted ? 'text-blue-600' : 'text-rose-600',
-        };
-
-        return (
-          <div
-            key={tag}
-            className={`m-0.5 flex cursor-default items-center gap-1 rounded-full border py-0.5 pr-1 pl-3 text-sm ${tagStyles[status]}`}
-          >
-            <span>{tag}</span>
-
-            <button
-              type="button"
-              onClick={() => removeTag(tag)}
-              className={`ml-1 cursor-pointer rounded-full p-0.5 transition-colors ${buttonHoverStyles[status]}`}
-              aria-label={`Remove tag ${tag}`}
-            >
-              <XMarkIcon className={`h-4 w-4 ${iconStyles[status]}`} />
-            </button>
-          </div>
-        );
-      })}
+      {tags.map((tag, index) => (
+        <TagChip
+          key={tag}
+          tag={tag}
+          status={tagStatus.find((t) => t.tag === tag)?.status ?? 'none'}
+          isHighlighted={highlightedTagIndex === index}
+          onRemove={removeTag}
+        />
+      ))}
       <input
         ref={inputRef}
         type="text"
