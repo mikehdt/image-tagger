@@ -27,6 +27,7 @@ export type ProjectItemActions = {
 type ProjectItemProps = {
   project: Project;
   isEditing: boolean;
+  isDisabled: boolean;
   actions: ProjectItemActions;
 };
 
@@ -96,6 +97,7 @@ const colors: {
 const ProjectItemComponent = ({
   project,
   isEditing,
+  isDisabled,
   actions,
 }: ProjectItemProps) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -121,7 +123,7 @@ const ProjectItemComponent = ({
       size="large"
       color={isEditing ? actions.editColor : project.color || 'slate'}
       inert={isEditing}
-      className={`group w-full justify-start p-4 text-left ${actions.showHidden && project.hidden && !isEditing ? 'opacity-50' : ''}`}
+      className={`group w-full justify-start p-4 text-left transition-opacity duration-200 ${actions.showHidden && project.hidden && !isEditing ? 'opacity-50' : ''} ${isDisabled ? 'pointer-events-none opacity-35' : ''}`}
     >
       <div className="flex w-full items-center">
         <ProjectIcon

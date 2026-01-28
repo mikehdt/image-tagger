@@ -54,6 +54,8 @@ export const ProjectList = () => {
     handleThumbnailRemove,
   } = useProjectList();
 
+  const isAnyEditing = editingProject !== null;
+
   const itemActions: ProjectItemActions = useMemo(
     () => ({
       editColor,
@@ -159,6 +161,7 @@ export const ProjectList = () => {
                   key={project.path}
                   project={project}
                   isEditing={editingProject === project.name}
+                  isDisabled={isAnyEditing && editingProject !== project.name}
                   actions={itemActions}
                 />
               ))}
@@ -180,6 +183,7 @@ export const ProjectList = () => {
                   key={project.path}
                   project={project}
                   isEditing={editingProject === project.name}
+                  isDisabled={isAnyEditing && editingProject !== project.name}
                   actions={itemActions}
                 />
               ))}
