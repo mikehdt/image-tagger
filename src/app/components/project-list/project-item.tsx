@@ -88,7 +88,7 @@ const colors: {
     value: 'stone',
     label: 'Stone',
     class:
-      'border-stone-400 bg-stone-100 hover:bg-stone-500 dark:border-stone-500 dark:bg-stone-600',
+      'border-stone-400 bg-stone-100 hover:bg-stone-500 dark:border-stone-600 dark:bg-stone-700',
     activeClass:
       'border-stone-800 bg-stone-500 shadow-stone-500 dark:border-stone-200',
   },
