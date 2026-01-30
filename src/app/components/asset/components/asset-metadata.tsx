@@ -101,20 +101,16 @@ const AssetMetadataComponent = ({
   );
 
   const handleCopyAssetPath = useCallback(async () => {
-    if (!projectPath) return;
-
-    // Determine the correct path separator based on the project path
-    const separator = projectPath.includes('\\') ? '\\' : '/';
-    const fullPath = `${projectPath}${separator}${assetId}.${fileExtension}`;
+    const fullPath = `${assetId}.${fileExtension}`;
 
     try {
       await navigator.clipboard.writeText(fullPath);
-      showToast('File path copied to clipboard');
+      showToast('Filename copied to clipboard');
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
       showToast('Failed to copy file path');
     }
-  }, [projectPath, assetId, fileExtension, showToast]);
+  }, [assetId, fileExtension, showToast]);
 
   const handleCancelAction = useCallback(() => {
     // Extra guard to prevent clicking during tag editing
@@ -185,7 +181,7 @@ const AssetMetadataComponent = ({
           className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'var(--surface-elevated) 0 1px 0' }}
           onClick={handleCopyAssetPath}
-          title="Click to copy full file path"
+          title="Click to copy the full filename"
         >
           {highlightPatterns(assetId, filenamePatterns)}
         </span>
