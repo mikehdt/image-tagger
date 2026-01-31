@@ -5,12 +5,10 @@ import {
   CubeTransparentIcon,
   IdentificationIcon,
   NoSymbolIcon,
-  SparklesIcon,
   SquaresPlusIcon,
 } from '@heroicons/react/24/outline';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 
-import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
   selectFilteredAssets,
@@ -27,11 +25,6 @@ import {
   SortType,
   toggleSortDirection,
 } from '@/app/store/assets';
-import {
-  selectHasReadyModel,
-  selectIsInitialised,
-  setModelsAndProviders,
-} from '@/app/store/auto-tagger';
 import {
   FilterMode,
   selectFilenamePatterns,
@@ -50,7 +43,6 @@ import {
   selectMultipleAssets,
   selectSelectedAssets,
 } from '@/app/store/selection';
-import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
 
 import { Button } from '../../shared/button';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
@@ -85,7 +77,6 @@ const AssetSelectionControlsComponent = () => {
   const dispatch = useAppDispatch();
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = selectedAssets.length;
-  const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
@@ -128,43 +119,6 @@ const AssetSelectionControlsComponent = () => {
     filterMode === FilterMode.MATCH_ANY ||
     filterMode === FilterMode.MATCH_ALL ||
     filterMode === FilterMode.MATCH_NONE;
-
-  // Auto-tagger state
-  const [isAutoTaggerModalOpen, setIsAutoTaggerModalOpen] = useState(false);
-  const hasReadyModel = useAppSelector(selectHasReadyModel);
-  const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
-
-  // Fetch auto-tagger models on mount to determine if any are ready
-  useEffect(() => {
-    if (!isAutoTaggerInitialised) {
-      fetch('/api/auto-tagger/models')
-        .then((res) => res.json())
-        .then((data) => {
-          dispatch(setModelsAndProviders(data));
-        })
-        .catch(console.error);
-    }
-  }, [isAutoTaggerInitialised, dispatch]);
-
-  // Prepare selected assets for auto-tagger (only need fileId and extension)
-  const selectedAssetsForTagger = useMemo(
-    () =>
-      selectedAssetsData.map((asset) => ({
-        fileId: asset.fileId,
-        fileExtension: asset.fileExtension,
-      })),
-    [selectedAssetsData],
-  );
-
-  const openAutoTaggerModal = useCallback(
-    () => setIsAutoTaggerModalOpen(true),
-    [],
-  );
-
-  const handleOnCloseAutoTaggerModal = useCallback(
-    () => setIsAutoTaggerModalOpen(false),
-    [],
-  );
 
   const handleClearSelection = useCallback(() => {
     dispatch(clearSelection());
@@ -396,27 +350,6 @@ const AssetSelectionControlsComponent = () => {
 
         <Button
           type="button"
-          onClick={openAutoTaggerModal}
-          disabled={!hasReadyModel || selectedAssetsCount === 0}
-          variant="ghost"
-          color="slate"
-          size="medium"
-          title={
-            !hasReadyModel
-              ? 'Set up auto-tagger first (Project menu)'
-              : selectedAssetsCount === 0
-                ? 'Select assets to auto-tag'
-                : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
-          }
-        >
-          <SparklesIcon className="w-4" />
-          <span className="ml-2 max-2xl:hidden">Tag</span>
-        </Button>
-
-        <ToolbarDivider />
-
-        <Button
-          type="button"
           onClick={handleAddAllToSelection}
           disabled={allFilteredAssetsSelected || filteredAssets.length === 0}
           variant="ghost"
@@ -450,12 +383,6 @@ const AssetSelectionControlsComponent = () => {
           <NoSymbolIcon className="w-4" />
         </Button>
       </ResponsiveToolbarGroup>
-
-      <AutoTaggerModal
-        isOpen={isAutoTaggerModalOpen}
-        onClose={handleOnCloseAutoTaggerModal}
-        selectedAssets={selectedAssetsForTagger}
-      />
     </>
   );
 };

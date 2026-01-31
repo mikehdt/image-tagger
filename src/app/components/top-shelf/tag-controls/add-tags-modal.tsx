@@ -173,10 +173,10 @@ export const AddTagsModal = ({
       });
     }
 
-    setTags([]);
     if (!keepSelection && onClearSelection) {
       onClearSelection();
     }
+    // Close modal - form state is reset via useEffect when isOpen becomes false
     onClose();
   };
 
