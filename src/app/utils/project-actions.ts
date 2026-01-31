@@ -33,6 +33,7 @@ export type ProjectConfig = {
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
   thumbnail?: boolean;
+  thumbnailVersion?: number;
   hidden?: boolean;
   featured?: boolean;
   autoTagger?: AutoTaggerSettings;
@@ -51,6 +52,7 @@ type Project = {
   title?: string;
   color?: 'slate' | 'rose' | 'amber' | 'teal' | 'sky' | 'indigo' | 'stone';
   thumbnail?: string;
+  thumbnailVersion?: number;
   hidden?: boolean;
   private?: boolean;
   featured?: boolean;
@@ -197,6 +199,7 @@ export const getProjectList = async (): Promise<Project[]> => {
           title: centralizedInfo?.title,
           color: centralizedInfo?.color,
           thumbnail: thumbnailFile,
+          thumbnailVersion: centralizedInfo?.thumbnailVersion,
           hidden: isHidden,
           private: isPrivate,
           featured: centralizedInfo?.featured || false,
@@ -317,7 +320,7 @@ const THUMBNAIL_SIZE = 80;
 export const createProjectThumbnail = async (
   projectName: string,
   imageData: ArrayBuffer,
-): Promise<{ success: boolean; thumbnail: string }> => {
+): Promise<{ success: boolean; thumbnail: string; thumbnailVersion: number }> => {
   try {
     const projectsDir = path.join(process.cwd(), 'public', 'projects');
 
@@ -359,11 +362,11 @@ export const createProjectThumbnail = async (
       .png()
       .toFile(thumbnailPath);
 
-    // Update the project config to enable thumbnail
-    await updateProject(projectName, { thumbnail: true });
+    // Update the project config to enable thumbnail with version for cache-busting
+    const thumbnailVersion = Date.now();
+    await updateProject(projectName, { thumbnail: true, thumbnailVersion });
 
-    // Include cache-busting timestamp in returned filename
-    return { success: true, thumbnail: `${thumbnailFilename}?v=${Date.now()}` };
+    return { success: true, thumbnail: thumbnailFilename, thumbnailVersion };
   } catch (error) {
     console.error('Error creating project thumbnail:', error);
     throw error;
@@ -388,8 +391,8 @@ export const removeProjectThumbnail = async (
       }
     }
 
-    // Update the project config to disable thumbnail
-    await updateProject(projectName, { thumbnail: false });
+    // Update the project config to disable thumbnail and clear version
+    await updateProject(projectName, { thumbnail: false, thumbnailVersion: undefined });
 
     return { success: true };
   } catch (error) {

@@ -12,6 +12,17 @@ export const InitialLoad = () => {
   const projectName = useAppSelector(selectProjectName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
+  // Get thumbnail version from session storage for cache-busting
+  const thumbnailVersion =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('selectedProjectThumbnailVersion')
+      : null;
+
+  // Build thumbnail src with cache-busting version
+  const thumbnailSrc = projectThumbnail
+    ? `/projects/${encodeURIComponent(projectThumbnail)}${thumbnailVersion ? `?v=${thumbnailVersion}` : ''}`
+    : null;
+
   // Calculate progress percentage safely
   const progressPercentage =
     loadProgress && loadProgress.total > 0
@@ -21,10 +32,10 @@ export const InitialLoad = () => {
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
       <div className="relative">
-        {projectThumbnail ? (
+        {thumbnailSrc ? (
           <span className="absolute top-0 right-0 bottom-0 left-0 m-auto flex h-21 w-21 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white">
             <Image
-              src={`/projects/${encodeURIComponent(projectThumbnail)}`}
+              src={thumbnailSrc}
               alt={projectName || 'Project'}
               width={80}
               height={80}

@@ -28,6 +28,11 @@ const ProjectIconComponent = ({
   const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Build thumbnail src with cache-busting version
+  const thumbnailSrc = project.thumbnail
+    ? `/projects/${project.thumbnail}${project.thumbnailVersion ? `?v=${project.thumbnailVersion}` : ''}`
+    : null;
+
   const handleStarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFeatured(project.name, project.featured || false);
@@ -71,9 +76,9 @@ const ProjectIconComponent = ({
 
         {/* Base circle with thumbnail or folder icon */}
         <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-slate-600">
-          {project.thumbnail ? (
+          {thumbnailSrc ? (
             <Image
-              src={`/projects/${project.thumbnail}`}
+              src={thumbnailSrc}
               alt={project.title || project.name}
               width={40}
               height={40}
@@ -116,9 +121,9 @@ const ProjectIconComponent = ({
     >
       {/* Base circle with thumbnail or folder icon */}
       <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white dark:bg-slate-600">
-        {project.thumbnail ? (
+        {thumbnailSrc ? (
           <Image
-            src={`/projects/${project.thumbnail}`}
+            src={thumbnailSrc}
             alt={project.title || project.name}
             width={40}
             height={40}

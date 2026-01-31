@@ -109,11 +109,15 @@ export const useEditProject = (
         const arrayBuffer = await file.arrayBuffer();
         const result = await createProjectThumbnail(projectName, arrayBuffer);
 
-        // Update the project in state with new thumbnail
+        // Update the project in state with new thumbnail and version
         setProjects((prev) =>
           prev.map((project) =>
             project.name === projectName
-              ? { ...project, thumbnail: result.thumbnail }
+              ? {
+                  ...project,
+                  thumbnail: result.thumbnail,
+                  thumbnailVersion: result.thumbnailVersion,
+                }
               : project,
           ),
         );
@@ -129,11 +133,11 @@ export const useEditProject = (
       try {
         await removeProjectThumbnail(projectName);
 
-        // Update the project in state to remove thumbnail
+        // Update the project in state to remove thumbnail and version
         setProjects((prev) =>
           prev.map((project) =>
             project.name === projectName
-              ? { ...project, thumbnail: undefined }
+              ? { ...project, thumbnail: undefined, thumbnailVersion: undefined }
               : project,
           ),
         );

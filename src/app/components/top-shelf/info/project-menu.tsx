@@ -17,7 +17,10 @@ import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
+import {
+  selectProjectName,
+  selectProjectThumbnail,
+} from '@/app/store/project';
 import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
@@ -78,9 +81,20 @@ const ProjectMenuComponent = () => {
   const projectName = useAppSelector(selectProjectName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
   const ioState = useAppSelector(selectIoState);
+
+  // Get thumbnail version from session storage for cache-busting
+  const thumbnailVersion =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('selectedProjectThumbnailVersion')
+      : null;
   const { theme, setTheme } = useTheme();
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
+
+  // Build thumbnail src with cache-busting version
+  const thumbnailSrc = projectThumbnail
+    ? `/projects/${encodeURIComponent(projectThumbnail)}${thumbnailVersion ? `?v=${thumbnailVersion}` : ''}`
+    : null;
 
   const isOpen = getPopupState(popupId).isOpen;
   const ioInProgress =
@@ -111,6 +125,7 @@ const ProjectMenuComponent = () => {
         sessionStorage.removeItem('selectedProject');
         sessionStorage.removeItem('selectedProjectTitle');
         sessionStorage.removeItem('selectedProjectThumbnail');
+        sessionStorage.removeItem('selectedProjectThumbnailVersion');
         sessionStorage.removeItem('configMode');
         router.push('/');
         return;
@@ -155,6 +170,7 @@ const ProjectMenuComponent = () => {
         sessionStorage.removeItem('selectedProject');
         sessionStorage.removeItem('selectedProjectTitle');
         sessionStorage.removeItem('selectedProjectThumbnail');
+        sessionStorage.removeItem('selectedProjectThumbnailVersion');
         sessionStorage.removeItem('configMode');
         router.push('/');
         return;
@@ -232,9 +248,9 @@ const ProjectMenuComponent = () => {
           isOpen ? 'bg-(--surface)' : 'hover:bg-(--surface)/50'
         }`}
       >
-        {projectThumbnail ? (
+        {thumbnailSrc ? (
           <Image
-            src={`/projects/${encodeURIComponent(projectThumbnail)}`}
+            src={thumbnailSrc}
             alt={`${projectName} thumbnail`}
             width={20}
             height={20}

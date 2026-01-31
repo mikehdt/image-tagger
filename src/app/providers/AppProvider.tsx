@@ -61,6 +61,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             sessionStorage.removeItem('selectedProject');
             sessionStorage.removeItem('selectedProjectTitle');
             sessionStorage.removeItem('selectedProjectThumbnail');
+            sessionStorage.removeItem('selectedProjectThumbnailVersion');
             sessionStorage.removeItem('configMode');
 
             // Clear Redux state

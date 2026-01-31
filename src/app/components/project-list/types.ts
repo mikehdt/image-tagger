@@ -14,6 +14,7 @@ export type Project = {
   title?: string;
   color?: ProjectColor;
   thumbnail?: string;
+  thumbnailVersion?: number;
   featured?: boolean;
   hidden?: boolean;
   private?: boolean;

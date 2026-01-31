@@ -98,6 +98,7 @@ export const useProjectList = () => {
     sessionStorage.removeItem('selectedProject');
     sessionStorage.removeItem('selectedProjectTitle');
     sessionStorage.removeItem('selectedProjectThumbnail');
+    sessionStorage.removeItem('selectedProjectThumbnailVersion');
 
     // Then load the project list
     loadProjects();
@@ -113,27 +114,31 @@ export const useProjectList = () => {
       const folderName = projectPath.split(/[/\\]/).pop() || 'Unknown Project';
       const projectTitle = selectedProject?.title || folderName;
 
-      // Strip cache-bust query params from thumbnail for storage
-      // (cache-busting is applied at render time)
-      const thumbnailBase = selectedProject?.thumbnail?.split('?')[0];
-
       // Set project information in Redux (use title for display)
       dispatch(
         setProjectInfo({
           name: projectTitle,
           path: projectPath,
           folderName,
-          thumbnail: thumbnailBase,
+          thumbnail: selectedProject?.thumbnail,
         }),
       );
 
       // Store just the project folder name (not the full path) for session persistence
       sessionStorage.setItem('selectedProject', folderName);
       sessionStorage.setItem('selectedProjectTitle', projectTitle);
-      if (thumbnailBase) {
-        sessionStorage.setItem('selectedProjectThumbnail', thumbnailBase);
+      if (selectedProject?.thumbnail) {
+        sessionStorage.setItem('selectedProjectThumbnail', selectedProject.thumbnail);
       } else {
         sessionStorage.removeItem('selectedProjectThumbnail');
+      }
+      if (selectedProject?.thumbnailVersion) {
+        sessionStorage.setItem(
+          'selectedProjectThumbnailVersion',
+          String(selectedProject.thumbnailVersion),
+        );
+      } else {
+        sessionStorage.removeItem('selectedProjectThumbnailVersion');
       }
       router.push('/1');
     },

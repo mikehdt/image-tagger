@@ -74,6 +74,7 @@ export default function Page() {
           sessionStorage.removeItem('selectedProject');
           sessionStorage.removeItem('selectedProjectTitle');
           sessionStorage.removeItem('selectedProjectThumbnail');
+          sessionStorage.removeItem('selectedProjectThumbnailVersion');
           sessionStorage.removeItem('configMode');
 
           // Clear the Redux state immediately for both direction changes
@@ -89,6 +90,7 @@ export default function Page() {
           sessionStorage.removeItem('selectedProject');
           sessionStorage.removeItem('selectedProjectTitle');
           sessionStorage.removeItem('selectedProjectThumbnail');
+          sessionStorage.removeItem('selectedProjectThumbnailVersion');
 
           // Reset project state to clear any stale project info
           dispatch(resetProjectState());
