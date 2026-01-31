@@ -1,0 +1,43 @@
+import { PencilIcon } from '@heroicons/react/24/outline';
+import { useCallback, useState } from 'react';
+
+import { Button } from '@/app/components/shared/button';
+import { selectFilterTags } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
+
+import { EditTagsModal } from './edit-tags-modal';
+
+export const EditTagsButton = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const filterTags = useAppSelector(selectFilterTags);
+
+  const openModal = useCallback(() => {
+    if (filterTags.length > 0) {
+      setIsModalOpen(true);
+    }
+  }, [filterTags.length]);
+
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={openModal}
+        disabled={!filterTags.length}
+        title="Edit selected tags"
+      >
+        <PencilIcon className="w-4" />
+        <span className="ml-2 max-xl:hidden">Edit</span>
+      </Button>
+
+      <EditTagsModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        filterTags={filterTags}
+      />
+    </>
+  );
+};
