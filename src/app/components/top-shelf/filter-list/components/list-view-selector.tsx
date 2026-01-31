@@ -20,7 +20,7 @@ export const ViewSelector = () => {
 
   return (
     <>
-      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900 dark:inset-shadow-slate-600">
+      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900/50 dark:inset-shadow-slate-600">
         <button
           type="button"
           onClick={() => handleViewChange('tag')}
