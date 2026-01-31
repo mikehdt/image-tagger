@@ -18,6 +18,9 @@ const AssetSelectionControlsComponent = () => {
       breakpoint="large"
     >
       <FilterModeDropdown />
+
+      <ToolbarDivider />
+
       <AssetSortControls />
       <ModifiedFilterToggle />
 
