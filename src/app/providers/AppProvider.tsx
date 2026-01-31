@@ -80,6 +80,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
               setProjectInfo({
                 name: 'Default Project',
                 path: 'public/assets',
+                folderName: 'assets',
                 thumbnail: undefined,
               }),
             );
@@ -95,23 +96,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             );
           } else {
             // Using custom project folder, check sessionStorage
+            // selectedProject is the folder name (e.g., "dev")
             const selectedProject = sessionStorage.getItem('selectedProject');
             if (selectedProject) {
-              // Get stored project title or fallback to extracted name from path
+              // Get stored project title or fallback to folder name
               const storedProjectTitle = sessionStorage.getItem(
                 'selectedProjectTitle',
               );
               const storedProjectThumbnail = sessionStorage.getItem(
                 'selectedProjectThumbnail',
               );
-              const projectName =
-                selectedProject.split(/[/\\]/).pop() || 'Unknown Project';
-              const projectTitle = storedProjectTitle || projectName;
+              const projectTitle = storedProjectTitle || selectedProject;
 
               dispatch(
                 setProjectInfo({
                   name: projectTitle,
                   path: selectedProject,
+                  folderName: selectedProject,
                   thumbnail: storedProjectThumbnail || undefined,
                 }),
               );
@@ -129,20 +130,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           const selectedProject = sessionStorage.getItem('selectedProject');
           if (selectedProject) {
             // We have a custom project in sessionStorage
+            // selectedProject is the folder name (e.g., "dev")
             const storedProjectTitle = sessionStorage.getItem(
               'selectedProjectTitle',
             );
             const storedProjectThumbnail = sessionStorage.getItem(
               'selectedProjectThumbnail',
             );
-            const projectName =
-              selectedProject.split(/[/\\]/).pop() || 'Unknown Project';
-            const projectTitle = storedProjectTitle || projectName;
+            const projectTitle = storedProjectTitle || selectedProject;
 
             dispatch(
               setProjectInfo({
                 name: projectTitle,
                 path: selectedProject,
+                folderName: selectedProject,
                 thumbnail: storedProjectThumbnail || undefined,
               }),
             );
@@ -153,6 +154,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
               setProjectInfo({
                 name: 'Default Project',
                 path: 'public/assets',
+                folderName: 'assets',
                 thumbnail: undefined,
               }),
             );

@@ -10,10 +10,16 @@ export const coreReducers = {
     state: ProjectState,
     {
       payload,
-    }: PayloadAction<{ name: string; path: string; thumbnail?: string }>,
+    }: PayloadAction<{
+      name: string;
+      path: string;
+      folderName: string;
+      thumbnail?: string;
+    }>,
   ) => {
     state.info.projectName = payload.name;
     state.info.projectPath = payload.path;
+    state.info.projectFolderName = payload.folderName;
     state.info.projectThumbnail = payload.thumbnail;
   },
 
@@ -21,6 +27,7 @@ export const coreReducers = {
   resetProjectState: (state: ProjectState) => {
     state.info.projectName = undefined;
     state.info.projectPath = undefined;
+    state.info.projectFolderName = undefined;
     state.info.projectThumbnail = undefined;
     // Reset config to defaults when switching projects
     state.config.showCropVisualization = false;

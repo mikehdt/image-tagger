@@ -8,6 +8,7 @@ const initialState: ProjectState = {
   info: {
     projectName: undefined,
     projectPath: undefined,
+    projectFolderName: undefined,
     projectThumbnail: undefined,
   },
   config: {
@@ -24,6 +25,7 @@ const projectSlice = createSlice({
   selectors: {
     // Project info selectors
     selectProjectName: (state) => state.info.projectName,
+    selectProjectFolderName: (state) => state.info.projectFolderName,
     selectProjectThumbnail: (state) => state.info.projectThumbnail,
     selectProjectInfo: (state) => state.info,
 
@@ -49,6 +51,7 @@ export const {
 // Export the selectors from the slice
 export const {
   selectProjectName,
+  selectProjectFolderName,
   selectProjectThumbnail,
   selectProjectInfo,
   selectShowCropVisualization,

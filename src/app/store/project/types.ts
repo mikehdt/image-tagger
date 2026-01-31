@@ -1,6 +1,7 @@
 type ProjectInfo = {
   projectName?: string;
   projectPath?: string;
+  projectFolderName?: string;
   projectThumbnail?: string;
 };
 

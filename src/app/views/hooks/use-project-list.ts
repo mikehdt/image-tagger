@@ -109,26 +109,29 @@ export const useProjectList = () => {
       const selectedProject = projects.find(
         (project) => project.path === projectPath,
       );
-      const projectName = projectPath.split(/[/\\]/).pop() || 'Unknown Project';
-      const projectTitle = selectedProject?.title || projectName;
+      // Extract folder name from path (e.g., "dev" from "public/assets/dev")
+      const folderName = projectPath.split(/[/\\]/).pop() || 'Unknown Project';
+      const projectTitle = selectedProject?.title || folderName;
+
+      // Strip cache-bust query params from thumbnail for storage
+      // (cache-busting is applied at render time)
+      const thumbnailBase = selectedProject?.thumbnail?.split('?')[0];
 
       // Set project information in Redux (use title for display)
       dispatch(
         setProjectInfo({
           name: projectTitle,
           path: projectPath,
-          thumbnail: selectedProject?.thumbnail,
+          folderName,
+          thumbnail: thumbnailBase,
         }),
       );
 
       // Store just the project folder name (not the full path) for session persistence
-      sessionStorage.setItem('selectedProject', projectName);
+      sessionStorage.setItem('selectedProject', folderName);
       sessionStorage.setItem('selectedProjectTitle', projectTitle);
-      if (selectedProject?.thumbnail) {
-        sessionStorage.setItem(
-          'selectedProjectThumbnail',
-          selectedProject.thumbnail,
-        );
+      if (thumbnailBase) {
+        sessionStorage.setItem('selectedProjectThumbnail', thumbnailBase);
       } else {
         sessionStorage.removeItem('selectedProjectThumbnail');
       }

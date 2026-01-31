@@ -89,38 +89,41 @@ export function useAutoTagger({
   }, [isOpen, models.length, fetchModels]);
 
   // Load saved settings when modal opens
+  // Use projectFolderName for config file operations (not projectName which is the display title)
   useEffect(() => {
-    if (isOpen && projectInfo.projectName && !settingsLoaded) {
-      getAutoTaggerSettings(projectInfo.projectName).then((savedSettings) => {
-        if (savedSettings) {
-          setOptions((prev) => ({
-            ...prev,
-            generalThreshold:
-              savedSettings.generalThreshold ?? prev.generalThreshold,
-            characterThreshold:
-              savedSettings.characterThreshold ?? prev.characterThreshold,
-            removeUnderscore:
-              savedSettings.removeUnderscore ?? prev.removeUnderscore,
-            includeCharacterTags:
-              savedSettings.includeCharacterTags ?? prev.includeCharacterTags,
-            includeRatingTags:
-              savedSettings.includeRatingTags ?? prev.includeRatingTags,
-            excludeTags: savedSettings.excludeTags ?? prev.excludeTags,
-            tagInsertMode:
-              savedSettings.tagInsertMode === 'prepend' ||
-              savedSettings.tagInsertMode === 'append'
-                ? savedSettings.tagInsertMode
-                : prev.tagInsertMode,
-          }));
+    if (isOpen && projectInfo.projectFolderName && !settingsLoaded) {
+      getAutoTaggerSettings(projectInfo.projectFolderName).then(
+        (savedSettings) => {
+          if (savedSettings) {
+            setOptions((prev) => ({
+              ...prev,
+              generalThreshold:
+                savedSettings.generalThreshold ?? prev.generalThreshold,
+              characterThreshold:
+                savedSettings.characterThreshold ?? prev.characterThreshold,
+              removeUnderscore:
+                savedSettings.removeUnderscore ?? prev.removeUnderscore,
+              includeCharacterTags:
+                savedSettings.includeCharacterTags ?? prev.includeCharacterTags,
+              includeRatingTags:
+                savedSettings.includeRatingTags ?? prev.includeRatingTags,
+              excludeTags: savedSettings.excludeTags ?? prev.excludeTags,
+              tagInsertMode:
+                savedSettings.tagInsertMode === 'prepend' ||
+                savedSettings.tagInsertMode === 'append'
+                  ? savedSettings.tagInsertMode
+                  : prev.tagInsertMode,
+            }));
 
-          if (savedSettings.defaultModelId) {
-            dispatch(setSelectedModel(savedSettings.defaultModelId));
+            if (savedSettings.defaultModelId) {
+              dispatch(setSelectedModel(savedSettings.defaultModelId));
+            }
           }
-        }
-        setSettingsLoaded(true);
-      });
+          setSettingsLoaded(true);
+        },
+      );
     }
-  }, [isOpen, projectInfo.projectName, settingsLoaded, dispatch]);
+  }, [isOpen, projectInfo.projectFolderName, settingsLoaded, dispatch]);
 
   // Model dropdown items
   const modelItems: DropdownItem<string>[] = useMemo(
@@ -287,7 +290,8 @@ export function useAutoTagger({
                 finaliseResults(collectedResults);
 
                 // Save settings as defaults for this project
-                if (projectInfo.projectName) {
+                // Use projectFolderName for config file operations
+                if (projectInfo.projectFolderName) {
                   const settingsToSave: AutoTaggerSettings = {
                     defaultModelId: selectedModelId,
                     generalThreshold: options.generalThreshold,
@@ -299,7 +303,7 @@ export function useAutoTagger({
                     tagInsertMode: options.tagInsertMode,
                   };
                   saveAutoTaggerSettings(
-                    projectInfo.projectName,
+                    projectInfo.projectFolderName,
                     settingsToSave,
                   ).catch(console.error);
                 }
@@ -360,7 +364,7 @@ export function useAutoTagger({
   }, [
     selectedModelId,
     projectInfo.projectPath,
-    projectInfo.projectName,
+    projectInfo.projectFolderName,
     selectedAssets,
     options,
     finaliseResults,

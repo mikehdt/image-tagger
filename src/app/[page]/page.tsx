@@ -97,12 +97,14 @@ export default function Page() {
             setProjectInfo({
               name: 'Default Project',
               path: 'public/assets',
+              folderName: 'assets',
             }),
           );
           sessionStorage.setItem('configMode', 'default');
           setCanShowAssets(true);
         } else {
           // Using custom project folder, check if a project is selected
+          // selectedProject is the folder name (e.g., "dev")
           const selectedProject = sessionStorage.getItem('selectedProject');
           if (!selectedProject) {
             // No project selected, redirect to project selector
@@ -119,6 +121,7 @@ export default function Page() {
             setProjectInfo({
               name: selectedProjectTitle,
               path: selectedProject,
+              folderName: selectedProject,
               thumbnail: selectedProjectThumbnail,
             }),
           );
@@ -143,6 +146,7 @@ export default function Page() {
           setProjectInfo({
             name: selectedProjectTitle,
             path: selectedProject,
+            folderName: selectedProject,
             thumbnail: selectedProjectThumbnail,
           }),
         );
