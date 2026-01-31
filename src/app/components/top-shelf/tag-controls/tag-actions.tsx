@@ -23,11 +23,11 @@ const TagActionsComponent = () => {
       <ToolbarDivider />
 
       <AutoTaggerButton />
-      <AddTagsButton />
-      <EditTagsButton />
 
       <ToolbarDivider />
 
+      <AddTagsButton />
+      <EditTagsButton />
       <DeleteToggleButton />
       <TagActionsMenu />
 
