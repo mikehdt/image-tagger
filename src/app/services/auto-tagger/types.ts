@@ -4,25 +4,25 @@
  */
 
 export type TaggerProvider = {
-  id: string; // 'wd14', 'blip2', etc.
-  name: string; // Display name
+  id: string;
+  name: string;
   description: string;
   models: TaggerModel[];
 };
 
 export type TaggerModel = {
-  id: string; // 'wd-convnextv2-tagger-v2'
-  name: string; // Display name
-  provider: string; // 'wd14'
-  repoId: string; // HuggingFace repo: 'SmilingWolf/wd-v1-4-convnextv2-tagger-v2'
-  files: ModelFile[]; // Files to download
+  id: string;
+  name: string;
+  provider: string;
+  repoId: string;
+  files: ModelFile[];
   description?: string;
   isDefault?: boolean;
 };
 
 export type ModelFile = {
-  name: string; // 'model.onnx'
-  size: number; // Size in bytes (for progress calculation)
+  name: string;
+  size: number;
 };
 
 export type ModelStatus =
@@ -55,22 +55,22 @@ export type TaggerOutput = {
 export type TagInsertMode = 'prepend' | 'append';
 
 export type TaggerOptions = {
-  generalThreshold: number; // Default 0.35
-  characterThreshold: number; // Default 0.85 (higher since usually excluded)
-  removeUnderscore: boolean; // Replace _ with space
-  includeCharacterTags: boolean; // Whether to include character tags
-  includeRatingTags: boolean; // Whether to include rating tags
-  excludeTags: string[]; // Tags to never include
-  includeTags: string[]; // Tags to always include
-  tagInsertMode: TagInsertMode; // How to order/insert new tags
+  generalThreshold: number;
+  characterThreshold: number;
+  removeUnderscore: boolean;
+  includeCharacterTags: boolean;
+  includeRatingTags: boolean;
+  excludeTags: string[];
+  includeTags: string[];
+  tagInsertMode: TagInsertMode;
 };
 
 export const DEFAULT_TAGGER_OPTIONS: TaggerOptions = {
-  generalThreshold: 0.35,
-  characterThreshold: 0.85,
+  generalThreshold: 0.3,
+  characterThreshold: 0.9,
   removeUnderscore: true,
-  includeCharacterTags: false, // Excluded by default
-  includeRatingTags: false, // Excluded by default
+  includeCharacterTags: false,
+  includeRatingTags: false,
   excludeTags: [],
   includeTags: [],
   tagInsertMode: 'append',
