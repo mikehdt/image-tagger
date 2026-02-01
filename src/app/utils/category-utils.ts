@@ -153,17 +153,18 @@ export const sortCategories = (
         break;
 
       case SortType.FOLDER:
-        // Root comes first, then sort by repeat count (descending), then by label (alphabetically)
+        // ASC mode: Root first, then alphabetically by label (a-z), with repeat count as secondary
+        // DESC mode: Root first, then numerically by repeat count (0-9), with label as secondary
         const aIsRoot = a === 'Root';
         const bIsRoot = b === 'Root';
 
         if (aIsRoot && !bIsRoot) {
-          comparison = -1; // Root always first
+          comparison = -1; // Root always first in both modes
         } else if (!aIsRoot && bIsRoot) {
           comparison = 1;
         } else if (!aIsRoot && !bIsRoot) {
           // Both are subfolder categories - parse and compare
-          // Format is "2× sonic", extract repeat count
+          // Format is "2× sonic", extract repeat count and label
           const aMatch = a.match(/^(\d+)×\s+(.+)$/);
           const bMatch = b.match(/^(\d+)×\s+(.+)$/);
 
@@ -173,11 +174,13 @@ export const sortCategories = (
             const aLabel = aMatch[2];
             const bLabel = bMatch[2];
 
-            // Sort by repeat count (descending), then by label (alphabetically)
-            if (aRepeat !== bRepeat) {
-              comparison = bRepeat - aRepeat; // Higher repeat counts first
+            if (sortDirection === SortDirection.ASC) {
+              // ASC: Sort by label (a-z), then by repeat count (0-9)
+              const labelComparison = aLabel.localeCompare(bLabel);
+              comparison = labelComparison !== 0 ? labelComparison : aRepeat - bRepeat;
             } else {
-              comparison = aLabel.localeCompare(bLabel);
+              // DESC: Sort by repeat count (0-9), then by label (a-z)
+              comparison = aRepeat !== bRepeat ? aRepeat - bRepeat : aLabel.localeCompare(bLabel);
             }
           } else {
             // Fallback to alphabetical if parsing fails
@@ -187,7 +190,8 @@ export const sortCategories = (
           // Both are Root - equal
           comparison = 0;
         }
-        break;
+        // Return early for FOLDER to skip the automatic sortDirection reversal below
+        return comparison;
 
       case SortType.IMAGE_SIZE:
       case SortType.BUCKET_SIZE:

@@ -46,7 +46,7 @@ const getSortDirectionLabel = (
     case SortType.FILTERED:
       return isAsc ? '✓' : '○';
     case SortType.FOLDER:
-      return isAsc ? 'Root' : '9×';
+      return isAsc ? 'A-Z' : '0-9';
     default:
       return isAsc ? 'A-Z' : 'Z-A';
   }
