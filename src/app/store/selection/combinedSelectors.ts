@@ -164,6 +164,7 @@ export const selectAssetsWithActiveFilters = createSelector(
       filterSizes: filters.filterSizes,
       filterBuckets: filters.filterBuckets,
       filterExtensions: filters.filterExtensions,
+      filterSubfolders: filters.filterSubfolders,
       filenamePatterns: filters.filenamePatterns,
       filterMode: FilterMode.MATCH_ANY, // Use MATCH_ANY for union behavior
       showModified: filters.showModified,
