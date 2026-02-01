@@ -19,6 +19,7 @@ type PreviewState = 'select' | 'deselect' | null;
 type AssetProps = {
   assetId: string;
   fileExtension: string;
+  subfolder?: string;
   assetNumber: number;
   filteredIndex: number;
   dimensions: ImageDimensions;
@@ -34,6 +35,7 @@ type AssetProps = {
 const AssetComponent = ({
   assetId,
   fileExtension,
+  subfolder,
   assetNumber,
   filteredIndex,
   dimensions,
@@ -251,6 +253,7 @@ const AssetComponent = ({
         <AssetMetadata
           assetId={assetId}
           fileExtension={fileExtension}
+          subfolder={subfolder}
           dimensions={dimensions}
           bucket={bucket}
           ioState={ioState}
@@ -271,6 +274,7 @@ const assetPropsAreEqual = (
   if (
     prevProps.assetId !== nextProps.assetId ||
     prevProps.fileExtension !== nextProps.fileExtension ||
+    prevProps.subfolder !== nextProps.subfolder ||
     prevProps.assetNumber !== nextProps.assetNumber ||
     prevProps.filteredIndex !== nextProps.filteredIndex ||
     prevProps.ioState !== nextProps.ioState ||

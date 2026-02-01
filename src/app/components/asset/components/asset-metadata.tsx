@@ -1,9 +1,10 @@
 import {
   ArchiveBoxIcon,
   BookmarkIcon,
+  FolderIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import type { RootState } from '@/app/store';
 import {
@@ -20,6 +21,7 @@ import {
   toggleSizeFilter,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { parseSubfolder } from '@/app/utils/subfolder-utils';
 import { highlightPatterns } from '@/app/utils/text-highlight';
 
 import { Button } from '../../shared/button';
@@ -37,6 +39,7 @@ const selectFilterExtensions = (state: RootState) =>
 type AssetMetadataProps = {
   assetId: string;
   fileExtension: string;
+  subfolder?: string;
   dimensions: { width: number; height: number };
   bucket: KohyaBucket;
   ioState: IoState;
@@ -47,6 +50,7 @@ type AssetMetadataProps = {
 const AssetMetadataComponent = ({
   assetId,
   fileExtension,
+  subfolder,
   dimensions,
   bucket,
   ioState,
@@ -54,6 +58,22 @@ const AssetMetadataComponent = ({
   isTagEditing = false,
 }: AssetMetadataProps) => {
   const dispatch = useAppDispatch();
+
+  // Parse subfolder to display repeat count and label
+  const subfolderDisplay = useMemo(() => {
+    if (!subfolder) return null;
+    const parsed = parseSubfolder(subfolder);
+    if (!parsed) return null;
+    return `${parsed.repeatCount}× ${parsed.label}`;
+  }, [subfolder]);
+
+  // Extract filename without subfolder path for display
+  const displayFilename = useMemo(() => {
+    if (!subfolder) return assetId;
+    // Remove "subfolder/" prefix from assetId
+    const slashIndex = assetId.indexOf('/');
+    return slashIndex !== -1 ? assetId.substring(slashIndex + 1) : assetId;
+  }, [assetId, subfolder]);
 
   // Individual selector calls - each only triggers re-render when its specific value changes
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
@@ -101,7 +121,8 @@ const AssetMetadataComponent = ({
   );
 
   const handleCopyAssetPath = useCallback(async () => {
-    const fullPath = `${assetId}.${fileExtension}`;
+    // Copy just the filename without subfolder path
+    const fullPath = `${displayFilename}.${fileExtension}`;
 
     try {
       await navigator.clipboard.writeText(fullPath);
@@ -110,7 +131,7 @@ const AssetMetadataComponent = ({
       console.error('Failed to copy to clipboard:', err);
       showToast('Failed to copy file path');
     }
-  }, [assetId, fileExtension, showToast]);
+  }, [displayFilename, fileExtension, showToast]);
 
   const handleCancelAction = useCallback(() => {
     // Extra guard to prevent clicking during tag editing
@@ -177,13 +198,25 @@ const AssetMetadataComponent = ({
           {fileExtension}
         </Button>
 
+        {subfolderDisplay && (
+          <Button
+            type="button"
+            color="indigo"
+            size="smallWide"
+            title={`Repeat folder: ${subfolder}`}
+          >
+            <FolderIcon className="mr-1 w-4" />
+            {subfolderDisplay}
+          </Button>
+        )}
+
         <span
           className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'var(--surface-elevated) 0 1px 0' }}
           onClick={handleCopyAssetPath}
           title="Click to copy the full filename"
         >
-          {highlightPatterns(assetId, filenamePatterns)}
+          {highlightPatterns(displayFilename, filenamePatterns)}
         </span>
       </span>
 

@@ -14,6 +14,7 @@ import {
   TagState,
 } from '../store/assets';
 import { calculateKohyaBucket, KOHYA_CONFIGS } from './image-utils';
+import { isValidRepeatFolder } from './subfolder-utils';
 
 /**
  * Get the current data path - either from provided project path or default
@@ -66,7 +67,8 @@ const getCurrentDataPath = async (projectPath?: string): Promise<string> => {
 
 /**
  * Helper function to detect duplicate fileIds and return filtered results
- * @param files Array of image filenames
+ * Now handles subfolder paths - only detects duplicates within the same folder context
+ * @param files Array of image filenames (may include subfolder paths like "2_sonic/image.jpg")
  * @returns Object with unique files and any duplicate warnings
  */
 const detectDuplicateFileIds = (
@@ -77,7 +79,7 @@ const detectDuplicateFileIds = (
 } => {
   const fileIdMap = new Map<string, string[]>();
 
-  // Group files by their fileId (filename without extension)
+  // Group files by their full fileId including folder path (but without extension)
   files.forEach((file) => {
     const fileId = file.substring(0, file.lastIndexOf('.'));
     if (!fileIdMap.has(fileId)) {
@@ -105,6 +107,7 @@ const detectDuplicateFileIds = (
 };
 
 // Returns just a list of image files without processing them
+// Includes images from root folder and valid repeat subfolders
 export const getImageFileList = async (
   projectPath?: string,
 ): Promise<string[]> => {
@@ -112,14 +115,47 @@ export const getImageFileList = async (
   // Use the path directly if it's absolute, otherwise resolve it relative to cwd
   const dir = path.isAbsolute(dataPath) ? dataPath : path.resolve(dataPath);
 
-  const filenames = fs.readdirSync(dir);
+  const allImageFiles: string[] = [];
 
-  const imageFiles = filenames.filter((file) =>
-    isSupportedImageExtension(path.extname(file)),
-  );
+  // 1. Get images from root directory
+  const rootEntries = fs.readdirSync(dir, { withFileTypes: true });
+
+  const rootImages = rootEntries
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((file) => isSupportedImageExtension(path.extname(file)));
+
+  allImageFiles.push(...rootImages);
+
+  // 2. Get images from valid repeat subfolders
+  const subdirectories = rootEntries.filter((entry) => entry.isDirectory());
+
+  for (const subdir of subdirectories) {
+    const subdirName = subdir.name;
+
+    // Check if this is a valid repeat folder
+    if (!isValidRepeatFolder(subdirName)) {
+      // Skip invalid folders silently
+      continue;
+    }
+
+    try {
+      const subdirPath = path.join(dir, subdirName);
+      const subdirFiles = fs.readdirSync(subdirPath);
+
+      const subdirImages = subdirFiles
+        .filter((file) => isSupportedImageExtension(path.extname(file)))
+        .map((file) => `${subdirName}/${file}`); // Store with relative path
+
+      allImageFiles.push(...subdirImages);
+    } catch (error) {
+      console.warn(`Failed to read subfolder ${subdirName}:`, error);
+    }
+  }
 
   // Check for duplicate fileIds (same base name with different extensions)
-  const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(imageFiles);
+  const { uniqueFiles, duplicateWarnings } =
+    detectDuplicateFileIds(allImageFiles);
 
   // Log warnings if any duplicates were found
   if (duplicateWarnings.length > 0) {
@@ -185,7 +221,15 @@ export const getImageAssetDetails = async (
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
   const currentDataPath = await getCurrentDataPath(projectPath);
-  const fullFilePath = `${currentDataPath}/${file}`;
+
+  // Extract subfolder if present (file may be "2_sonic/image.jpg" or just "image.jpg")
+  let subfolder: string | undefined;
+  const slashIndex = file.indexOf('/');
+  if (slashIndex !== -1) {
+    subfolder = file.substring(0, slashIndex);
+  }
+
+  const fullFilePath = path.join(currentDataPath, file);
 
   // Get file stats for last modified time
   const stats = fs.statSync(fullFilePath);
@@ -209,11 +253,12 @@ export const getImageAssetDetails = async (
   let tagList: string[] = [];
 
   try {
+    // Tag file is co-located with image (in same folder)
+    const tagFilePath = path.join(currentDataPath, `${fileId}.txt`);
+
     // Check if the tag file exists first before trying to read it
-    if (fs.existsSync(`${currentDataPath}/${fileId}.txt`)) {
-      const tagContent = fs
-        .readFileSync(`${currentDataPath}/${fileId}.txt`, 'utf8')
-        .trim();
+    if (fs.existsSync(tagFilePath)) {
+      const tagContent = fs.readFileSync(tagFilePath, 'utf8').trim();
 
       // Only process if the file has actual content
       if (tagContent) {
@@ -243,6 +288,7 @@ export const getImageAssetDetails = async (
     ioState: IoState.COMPLETE,
     fileId,
     fileExtension,
+    subfolder,
     dimensions,
     bucket,
     tagStatus,
@@ -259,7 +305,8 @@ export const saveAssetTags = async (
 ): Promise<boolean> => {
   try {
     const currentDataPath = await getCurrentDataPath(projectPath);
-    fs.writeFileSync(`${currentDataPath}/${fileId}.txt`, composedTags);
+    const tagFilePath = path.join(currentDataPath, `${fileId}.txt`);
+    fs.writeFileSync(tagFilePath, composedTags);
     return true;
   } catch (err) {
     console.error('Disk I/O error:', err);
@@ -292,7 +339,8 @@ export const saveMultipleAssetTags = async (
   const results = await Promise.all(
     operations.map(async ({ fileId, composedTags }) => {
       try {
-        fs.writeFileSync(`${currentDataPath}/${fileId}.txt`, composedTags);
+        const tagFilePath = path.join(currentDataPath, `${fileId}.txt`);
+        fs.writeFileSync(tagFilePath, composedTags);
         return { fileId, success: true };
       } catch (err) {
         console.error(`Disk I/O error for ${fileId}:`, err);

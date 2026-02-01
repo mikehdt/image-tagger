@@ -233,6 +233,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
                   assetNumber={asset.originalIndex}
                   filteredIndex={asset.filteredIndex}
                   fileExtension={asset.fileExtension}
+                  subfolder={asset.subfolder}
                   dimensions={asset.dimensions}
                   bucket={asset.bucket}
                   ioState={asset.ioState}

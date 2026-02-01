@@ -45,6 +45,7 @@ export type ImageAsset = {
   ioState: Extract<IoState, IoState.SAVING | IoState.COMPLETE>;
   fileId: string;
   fileExtension: string;
+  subfolder?: string; // Repeat folder name (e.g., "2_sonic"), undefined for root
   dimensions: ImageDimensions;
   bucket: KohyaBucket;
   tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
