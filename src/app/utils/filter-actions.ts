@@ -19,6 +19,7 @@ export const applyFilters = ({
   filterSizes,
   filterBuckets,
   filterExtensions,
+  filterSubfolders,
   filenamePatterns,
   filterMode,
   showModified,
@@ -31,6 +32,7 @@ export const applyFilters = ({
   filterSizes: string[];
   filterBuckets: string[];
   filterExtensions: string[];
+  filterSubfolders?: string[];
   filenamePatterns?: string[];
   filterMode: FilterMode;
   showModified?: boolean;
@@ -38,6 +40,8 @@ export const applyFilters = ({
   sortType?: SortType;
   sortDirection?: SortDirection;
 }): ImageAssetWithIndex[] => {
+  // Default filterSubfolders to empty array if not provided
+  const safeFilterSubfolders = filterSubfolders || [];
   // First, apply sorting to get the "true" sorted order
   // Add temporary index to preserve original file system order initially
   const assetsWithTempIndex = assets.map((asset, index) => ({
@@ -51,7 +55,7 @@ export const applyFilters = ({
     sortType,
     sortDirection,
     selectedAssets,
-    { filterTags, filterSizes, filterBuckets, filterExtensions },
+    { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders: safeFilterSubfolders },
   );
 
   // Now assign the originalIndex based on the sorted position (this is the "true" asset number)
@@ -70,6 +74,7 @@ export const applyFilters = ({
     filterSizes.length === 0 &&
     filterBuckets.length === 0 &&
     filterExtensions.length === 0 &&
+    safeFilterSubfolders.length === 0 &&
     !hasFilenamePatterns &&
     !showModified
   ) {
@@ -77,10 +82,11 @@ export const applyFilters = ({
     return sortedAssetsWithCorrectIndex;
   }
 
-  // Create a Set for faster lookups when checking dimensions, buckets, and extensions
+  // Create a Set for faster lookups when checking dimensions, buckets, extensions, and subfolders
   const filterSizesSet = new Set(filterSizes);
   const filterBucketsSet = new Set(filterBuckets);
   const filterExtensionsSet = new Set(filterExtensions);
+  const filterSubfoldersSet = new Set(safeFilterSubfolders);
 
   // Helper to check if filename matches any of the patterns (OR'd together, case-insensitive)
   const matchesFilenamePatterns = (filename: string): boolean => {
@@ -144,7 +150,7 @@ export const applyFilters = ({
         return true; // Show everything that passed the modified filter check (if any)
       }
 
-      // For MATCH modes, apply standard dimension, bucket, and extension filters
+      // For MATCH modes, apply standard dimension, bucket, extension, and subfolder filters
       const dimensionsComposed = composeDimensions(img.dimensions);
       const bucketComposed = `${img.bucket.width}×${img.bucket.height}`;
       const sizeMatches =
@@ -154,24 +160,34 @@ export const applyFilters = ({
       const extensionMatches =
         filterExtensions.length === 0 ||
         filterExtensionsSet.has(img.fileExtension);
+      const subfolderMatches =
+        safeFilterSubfolders.length === 0 ||
+        (img.subfolder && filterSubfoldersSet.has(img.subfolder));
 
-      // MATCH_ALL mode - asset must have ALL selected tags and meet size/bucket/extension criteria
+      // MATCH_ALL mode - asset must have ALL selected tags and meet size/bucket/extension/subfolder criteria
       if (filterMode === FilterMode.MATCH_ALL) {
         // For MATCH_ALL, everything must match (intersection)
         const allTagsMatch =
           filterTags.length === 0 ||
           filterTags.every((tag) => img.tagList.includes(tag));
-        return allTagsMatch && sizeMatches && bucketMatches && extensionMatches;
+        return (
+          allTagsMatch &&
+          sizeMatches &&
+          bucketMatches &&
+          extensionMatches &&
+          subfolderMatches
+        );
       }
 
-      // MATCH_ANY mode - asset must match ANY of the selected filters (tags, sizes, buckets, or extensions)
+      // MATCH_ANY mode - asset must match ANY of the selected filters (tags, sizes, buckets, extensions, or subfolders)
       if (filterMode === FilterMode.MATCH_ANY) {
         // If no filters are selected, show all assets
         if (
           filterTags.length === 0 &&
           filterSizes.length === 0 &&
           filterBuckets.length === 0 &&
-          filterExtensions.length === 0
+          filterExtensions.length === 0 &&
+          safeFilterSubfolders.length === 0
         ) {
           return true;
         }
@@ -187,13 +203,18 @@ export const applyFilters = ({
         const anyExtensionMatches =
           filterExtensions.length > 0 &&
           filterExtensionsSet.has(img.fileExtension);
+        const anySubfolderMatches =
+          safeFilterSubfolders.length > 0 &&
+          img.subfolder &&
+          filterSubfoldersSet.has(img.subfolder);
 
         // Return true if ANY of the filter types match (union logic)
         return (
           anyTagMatches ||
           anySizeMatches ||
           anyBucketMatches ||
-          anyExtensionMatches
+          anyExtensionMatches ||
+          anySubfolderMatches
         );
       }
 
@@ -204,7 +225,8 @@ export const applyFilters = ({
           filterTags.length === 0 &&
           filterSizes.length === 0 &&
           filterBuckets.length === 0 &&
-          filterExtensions.length === 0
+          filterExtensions.length === 0 &&
+          safeFilterSubfolders.length === 0
         ) {
           return true;
         }
@@ -220,13 +242,33 @@ export const applyFilters = ({
         const anyExtensionMatches =
           filterExtensions.length > 0 &&
           filterExtensionsSet.has(img.fileExtension);
+        const anySubfolderMatches =
+          safeFilterSubfolders.length > 0 &&
+          img.subfolder &&
+          filterSubfoldersSet.has(img.subfolder);
 
         // Return true only if NONE of the filter types match (exclude logic)
         return !(
           anyTagMatches ||
           anySizeMatches ||
           anyBucketMatches ||
-          anyExtensionMatches
+          anyExtensionMatches ||
+          anySubfolderMatches
+        );
+      }
+
+      // FOLDER mode - asset must be in a subfolder and meet size/bucket/extension/subfolder criteria
+      if (filterMode === FilterMode.FOLDER) {
+        // Check if the asset is in a subfolder (not in root)
+        const isInSubfolder = img.subfolder !== undefined;
+
+        // Size, bucket, extension, and subfolder filters are still combined with AND logic
+        return (
+          isInSubfolder &&
+          sizeMatches &&
+          bucketMatches &&
+          extensionMatches &&
+          subfolderMatches
         );
       }
 
@@ -269,6 +311,7 @@ const applySorting = (
     filterSizes: string[];
     filterBuckets: string[];
     filterExtensions: string[];
+    filterSubfolders?: string[];
   },
 ): ImageAssetWithIndex[] => {
   if (!sortType || !sortDirection) {
@@ -282,11 +325,13 @@ const applySorting = (
   let filteredSet: Set<string> | null = null;
   if (sortType === SortType.FILTERED && filterCriteria) {
     filteredSet = new Set<string>();
-    const { filterTags, filterSizes, filterBuckets, filterExtensions } =
+    const { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders } =
       filterCriteria;
+    const safeFilterSubfolders = filterSubfolders || [];
     const filterSizesSet = new Set(filterSizes);
     const filterBucketsSet = new Set(filterBuckets);
     const filterExtensionsSet = new Set(filterExtensions);
+    const filterSubfoldersSet = new Set(safeFilterSubfolders);
 
     for (const asset of assets) {
       const dimensionsComposed = composeDimensions(asset.dimensions);
@@ -303,12 +348,17 @@ const applySorting = (
       const anyExtensionMatches =
         filterExtensions.length > 0 &&
         filterExtensionsSet.has(asset.fileExtension);
+      const anySubfolderMatches =
+        safeFilterSubfolders.length > 0 &&
+        asset.subfolder &&
+        filterSubfoldersSet.has(asset.subfolder);
 
       if (
         anyTagMatches ||
         anySizeMatches ||
         anyBucketMatches ||
-        anyExtensionMatches
+        anyExtensionMatches ||
+        anySubfolderMatches
       ) {
         filteredSet.add(asset.fileId);
       }

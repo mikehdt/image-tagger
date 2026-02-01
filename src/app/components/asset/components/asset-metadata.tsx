@@ -19,6 +19,7 @@ import {
   toggleBucketFilter,
   toggleExtensionFilter,
   toggleSizeFilter,
+  toggleSubfolderFilter,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { parseSubfolder } from '@/app/utils/subfolder-utils';
@@ -35,6 +36,8 @@ const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
 const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
 const selectFilterExtensions = (state: RootState) =>
   state.filters.filterExtensions;
+const selectFilterSubfolders = (state: RootState) =>
+  state.filters.filterSubfolders;
 
 type AssetMetadataProps = {
   assetId: string;
@@ -81,6 +84,7 @@ const AssetMetadataComponent = ({
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const saveProgress = useAppSelector(selectSaveProgress);
 
   // Use optimised selector - only re-renders when THIS asset's modified state changes
@@ -95,6 +99,7 @@ const AssetMetadataComponent = ({
   const bucketComposed = `${bucket.width}×${bucket.height}`;
   const bucketActive = filterBuckets.includes(bucketComposed);
   const extensionActive = filterExtensions.includes(fileExtension);
+  const subfolderActive = subfolder ? filterSubfolders.includes(subfolder) : false;
 
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =
@@ -118,6 +123,15 @@ const AssetMetadataComponent = ({
   const handleToggleExtension = useCallback(
     () => dispatch(toggleExtensionFilter(fileExtension)),
     [dispatch, fileExtension],
+  );
+
+  const handleToggleSubfolder = useCallback(
+    () => {
+      if (subfolder) {
+        dispatch(toggleSubfolderFilter(subfolder));
+      }
+    },
+    [dispatch, subfolder],
   );
 
   const handleCopyAssetPath = useCallback(async () => {
@@ -203,6 +217,8 @@ const AssetMetadataComponent = ({
             type="button"
             color="indigo"
             size="smallWide"
+            isPressed={subfolderActive}
+            onClick={handleToggleSubfolder}
             title={`Repeat folder: ${subfolder}`}
           >
             <FolderIcon className="mr-1 w-4" />

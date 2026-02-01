@@ -5,6 +5,7 @@ export enum FilterMode {
   MATCH_ALL = 'MatchAll',
   MATCH_NONE = 'MatchNone',
   SELECTED_ASSETS = 'SelectedAssets',
+  FOLDER = 'Folder',
   TAGLESS = 'Tagless',
 }
 
@@ -22,6 +23,7 @@ export type Filters = {
   filterSizes: string[];
   filterBuckets: string[];
   filterExtensions: string[];
+  filterSubfolders: string[];
   filenamePatterns: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
@@ -32,5 +34,6 @@ export type FilterCount = {
   sizes: number;
   buckets: number;
   extensions: number;
+  subfolders: number;
   total: number;
 };

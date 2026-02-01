@@ -9,6 +9,7 @@ import {
 
 import {
   selectAllExtensions,
+  selectAllSubfolders,
   selectFilenamePatternCounts,
 } from '@/app/store/assets';
 import {
@@ -16,7 +17,9 @@ import {
   removeFilenamePattern,
   selectFilenamePatterns,
   selectFilterExtensions,
+  selectFilterSubfolders,
   toggleExtensionFilter,
+  toggleSubfolderFilter,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
@@ -65,7 +68,9 @@ export const getFiletypeSortOptions = (
 export const FileView = () => {
   const dispatch = useAppDispatch();
   const allExtensions = useAppSelector(selectAllExtensions);
+  const allSubfolders = useAppSelector(selectAllSubfolders);
   const activeExtensions = useAppSelector(selectFilterExtensions);
+  const activeSubfolders = useAppSelector(selectFilterSubfolders);
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
   const patternCounts = useAppSelector(selectFilenamePatternCounts);
 
@@ -137,10 +142,52 @@ export const FileView = () => {
     updateListLength(extensionList.length);
   }, [extensionList.length, updateListLength]);
 
-  // Create a memoized toggle handler
+  // Get subfolder data from store
+  const subfolderList = useMemo(() => {
+    // Convert map to array
+    const list = Object.entries(allSubfolders).map(([subfolder, count]) => ({
+      subfolder,
+      count,
+      isActive: activeSubfolders.includes(subfolder),
+    }));
+
+    // Sort the subfolders (same logic as extensions)
+    return list.sort((a, b) => {
+      if (sortType === 'active') {
+        if (a.isActive !== b.isActive) {
+          return sortDirection === 'desc'
+            ? a.isActive
+              ? -1
+              : 1
+            : a.isActive
+              ? 1
+              : -1;
+        }
+        return b.count - a.count;
+      } else if (sortType === 'count') {
+        return sortDirection === 'asc'
+          ? a.count - b.count
+          : b.count - a.count;
+      } else {
+        return sortDirection === 'asc'
+          ? a.subfolder.localeCompare(b.subfolder)
+          : b.subfolder.localeCompare(a.subfolder);
+      }
+    });
+  }, [allSubfolders, activeSubfolders, sortType, sortDirection]);
+
+  // Create a memoized toggle handler for extensions
   const handleToggle = useCallback(
     (ext: string) => {
       dispatch(toggleExtensionFilter(ext));
+    },
+    [dispatch],
+  );
+
+  // Create a memoized toggle handler for subfolders
+  const handleToggleSubfolder = useCallback(
+    (subfolder: string) => {
+      dispatch(toggleSubfolderFilter(subfolder));
     },
     [dispatch],
   );
@@ -230,6 +277,63 @@ export const FileView = () => {
               </li>
             ))}
           </ul>
+        )}
+
+        {/* Subfolder list */}
+        {subfolderList.length > 0 && (
+          <>
+            {/* Divider with label */}
+            <div className="flex cursor-default items-center gap-2 bg-indigo-50 py-1.5 dark:bg-indigo-950">
+              <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
+              <span className="text-xs text-indigo-400 text-shadow-white text-shadow-xs dark:text-shadow-indigo-950">
+                Repeat Folders
+              </span>
+              <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
+            </div>
+
+            <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+              {subfolderList.map((item, index) => (
+                <li
+                  id={`subfolder-${item.subfolder}`}
+                  key={item.subfolder}
+                  onClick={() => handleToggleSubfolder(item.subfolder)}
+                  className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
+                    index === selectedIndex
+                      ? item.isActive
+                        ? 'bg-indigo-200 dark:bg-indigo-800'
+                        : 'bg-blue-100 dark:bg-blue-900/50'
+                      : item.isActive
+                        ? 'bg-indigo-100 dark:bg-indigo-900'
+                        : 'hover:bg-blue-50 dark:hover:bg-slate-700'
+                  }`}
+                  title={
+                    item.isActive
+                      ? 'Click to remove from filters'
+                      : 'Click to add to filters'
+                  }
+                >
+                  <span
+                    className={`text-sm ${
+                      item.isActive
+                        ? 'font-medium text-indigo-700 dark:text-indigo-300'
+                        : 'text-slate-800 dark:text-slate-200'
+                    }`}
+                  >
+                    {item.subfolder}
+                  </span>
+                  <span
+                    className={`text-xs tabular-nums ${
+                      item.isActive
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {item.count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
 
         {/* Divider with label */}

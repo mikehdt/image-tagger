@@ -9,6 +9,7 @@ import {
   selectFilterExtensions,
   selectFilterMode,
   selectFilterSizes,
+  selectFilterSubfolders,
   selectFilterTags,
   setTagFilterMode,
 } from '@/app/store/filters';
@@ -23,6 +24,7 @@ export const FilterModeDropdown = () => {
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
@@ -35,6 +37,7 @@ export const FilterModeDropdown = () => {
         filterSizes.length ||
         filterBuckets.length ||
         filterExtensions.length ||
+        filterSubfolders.length ||
         filenamePatterns.length
       ),
     [
@@ -42,6 +45,7 @@ export const FilterModeDropdown = () => {
       filterSizes.length,
       filterBuckets.length,
       filterExtensions.length,
+      filterSubfolders.length,
       filenamePatterns.length,
     ],
   );
@@ -55,6 +59,7 @@ export const FilterModeDropdown = () => {
         !filterSelectionActive) ||
       (filterMode === FilterMode.SELECTED_ASSETS &&
         selectedAssetsCount === 0) ||
+      (filterMode === FilterMode.FOLDER && filterSubfolders.length === 0) ||
       (filterMode === FilterMode.TAGLESS && !hasTaglessAssets);
 
     if (shouldReset) {
@@ -64,6 +69,7 @@ export const FilterModeDropdown = () => {
     filterMode,
     filterSelectionActive,
     selectedAssetsCount,
+    filterSubfolders.length,
     hasTaglessAssets,
     dispatch,
   ]);
@@ -100,12 +106,17 @@ export const FilterModeDropdown = () => {
         disabled: selectedAssetsCount === 0,
       },
       {
+        value: FilterMode.FOLDER,
+        label: 'Folder',
+        disabled: filterSubfolders.length === 0,
+      },
+      {
         value: FilterMode.TAGLESS,
         label: 'Tagless',
         disabled: !hasTaglessAssets,
       },
     ],
-    [filterSelectionActive, selectedAssetsCount, hasTaglessAssets],
+    [filterSelectionActive, selectedAssetsCount, filterSubfolders.length, hasTaglessAssets],
   );
 
   // Show as disabled styling if current mode requires something unavailable
@@ -115,6 +126,7 @@ export const FilterModeDropdown = () => {
       filterMode === FilterMode.MATCH_NONE) &&
       !filterSelectionActive) ||
     (filterMode === FilterMode.SELECTED_ASSETS && selectedAssetsCount === 0) ||
+    (filterMode === FilterMode.FOLDER && filterSubfolders.length === 0) ||
     (filterMode === FilterMode.TAGLESS && !hasTaglessAssets);
 
   return (

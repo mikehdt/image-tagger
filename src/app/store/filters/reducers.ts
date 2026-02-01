@@ -38,6 +38,13 @@ export const coreReducers = {
     state.filterExtensions = toggleFilter(state.filterExtensions, payload);
   },
 
+  toggleSubfolderFilter: (
+    state: Filters,
+    { payload }: PayloadAction<string>,
+  ) => {
+    state.filterSubfolders = toggleFilter(state.filterSubfolders, payload);
+  },
+
   toggleModifiedFilter: (state: Filters) => {
     state.showModified = !state.showModified;
   },
@@ -58,11 +65,16 @@ export const coreReducers = {
     state.filterExtensions = [];
   },
 
+  clearSubfolderFilters: (state: Filters) => {
+    state.filterSubfolders = [];
+  },
+
   clearFilters: (state: Filters) => {
     state.filterTags = [];
     state.filterSizes = [];
     state.filterBuckets = [];
     state.filterExtensions = [];
+    state.filterSubfolders = [];
     state.filenamePatterns = [];
     state.showModified = false;
   },

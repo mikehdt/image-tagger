@@ -175,6 +175,14 @@ export const selectHasTaglessAssets = createSelector(
   },
 );
 
+export const selectHasSubfolderAssets = createSelector(
+  [selectAllImages],
+  (images) => {
+    // Check if any asset is in a subfolder
+    return images.some((asset: ImageAsset) => asset.subfolder !== undefined);
+  },
+);
+
 // Using selectSaveProgress and selectLoadProgress from the slice
 
 export const selectAllExtensions = createSelector(
@@ -193,6 +201,24 @@ export const selectAllExtensions = createSelector(
   },
 );
 
+export const selectAllSubfolders = createSelector(
+  [selectAllImages],
+  (images) => {
+    if (!images.length) return {};
+
+    // Group by subfolder
+    const subfolderCounts: KeyedCountList = {};
+    for (const item of images) {
+      if (item.subfolder) {
+        subfolderCounts[item.subfolder] =
+          (subfolderCounts[item.subfolder] || 0) + 1;
+      }
+    }
+
+    return subfolderCounts;
+  },
+);
+
 // Combined selector to get filtered assets based on current filter state
 export const selectFilteredAssets = wrapSelector(
   'selectFilteredAssets',
@@ -203,6 +229,7 @@ export const selectFilteredAssets = wrapSelector(
       (state: RootState) => state.filters.filterSizes,
       (state: RootState) => state.filters.filterBuckets,
       (state: RootState) => state.filters.filterExtensions,
+      (state: RootState) => state.filters.filterSubfolders,
       (state: RootState) => state.filters.filenamePatterns,
       (state: RootState) => state.filters.filterMode,
       (state: RootState) => state.filters.showModified,
@@ -216,6 +243,7 @@ export const selectFilteredAssets = wrapSelector(
       filterSizes,
       filterBuckets,
       filterExtensions,
+      filterSubfolders,
       filenamePatterns,
       filterMode,
       showModified,
@@ -229,6 +257,7 @@ export const selectFilteredAssets = wrapSelector(
         filterSizes,
         filterBuckets,
         filterExtensions,
+        filterSubfolders,
         filenamePatterns,
         filterMode,
         showModified,

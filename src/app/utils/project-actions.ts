@@ -7,6 +7,7 @@ import sharp from 'sharp';
 
 import { isSupportedImageExtension } from '@/app/constants';
 import type { AutoTaggerSettings } from '@/app/services/auto-tagger';
+import { isValidRepeatFolder } from './subfolder-utils';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -167,11 +168,45 @@ export const getProjectList = async (): Promise<Project[]> => {
         let imageCount = 0;
 
         try {
-          // Count image files in the project folder
-          const projectFiles = fs.readdirSync(projectPath);
-          imageCount = projectFiles.filter((file) =>
-            isSupportedImageExtension(path.extname(file)),
-          ).length;
+          // Count image files in the project folder root
+          const projectEntries = fs.readdirSync(projectPath, {
+            withFileTypes: true,
+          });
+
+          // Count images in root directory
+          const rootImageCount = projectEntries
+            .filter((entry) => entry.isFile())
+            .filter((entry) => isSupportedImageExtension(path.extname(entry.name)))
+            .length;
+
+          // Count images in valid repeat subfolders
+          const subdirectories = projectEntries.filter((entry) =>
+            entry.isDirectory(),
+          );
+          let subfolderImageCount = 0;
+
+          for (const subdir of subdirectories) {
+            const subdirName = subdir.name;
+            // Only count images in valid repeat folders
+            if (isValidRepeatFolder(subdirName)) {
+              try {
+                const subdirPath = path.join(projectPath, subdirName);
+                const subdirFiles = fs.readdirSync(subdirPath);
+                const subdirImages = subdirFiles.filter((file) =>
+                  isSupportedImageExtension(path.extname(file)),
+                );
+                subfolderImageCount += subdirImages.length;
+              } catch (subdirError) {
+                console.warn(
+                  `Error reading subfolder ${subdirName} in ${projectPath}:`,
+                  subdirError,
+                );
+                // Continue with next subfolder
+              }
+            }
+          }
+
+          imageCount = rootImageCount + subfolderImageCount;
         } catch (error) {
           console.warn(`Error reading project folder ${projectPath}:`, error);
           // Continue with imageCount = 0
