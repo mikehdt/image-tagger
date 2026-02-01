@@ -110,7 +110,6 @@ export function AutoTaggerSettings({
             )
           }
           label="Include character tags"
-          size="small"
         />
         <Checkbox
           isSelected={options.includeRatingTags}
@@ -118,7 +117,6 @@ export function AutoTaggerSettings({
             onOptionChange('includeRatingTags', !options.includeRatingTags)
           }
           label="Include rating tags"
-          size="small"
         />
         <Checkbox
           isSelected={options.removeUnderscore}
@@ -126,7 +124,6 @@ export function AutoTaggerSettings({
             onOptionChange('removeUnderscore', !options.removeUnderscore)
           }
           label="Replace underscores with spaces"
-          size="small"
         />
       </div>
 
@@ -140,7 +137,6 @@ export function AutoTaggerSettings({
           options={insertModeOptions}
           value={options.tagInsertMode}
           onChange={(mode) => onOptionChange('tagInsertMode', mode)}
-          size="small"
         />
       </div>
 
