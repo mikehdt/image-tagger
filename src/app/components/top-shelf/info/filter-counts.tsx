@@ -4,6 +4,7 @@ import {
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSizes,
+  selectFilterSubfolders,
   selectFilterTags,
   selectShowModified,
 } from '@/app/store/filters';
@@ -14,6 +15,7 @@ const FilterIndicatorsInfoComponent = () => {
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterTags = useAppSelector(selectFilterTags);
   const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const showModified = useAppSelector(selectShowModified);
 
   const activeFilters = [
@@ -40,6 +42,12 @@ const FilterIndicatorsInfoComponent = () => {
       label: filterExtensions.length === 1 ? 'type' : 'types',
       color:
         'bg-stone-50 border-stone-300 text-stone-600 dark:bg-stone-900 dark:text-stone-500',
+    },
+    {
+      count: filterSubfolders.length,
+      label: filterSubfolders.length === 1 ? 'folder' : 'folders',
+      color:
+        'bg-indigo-50 border-indigo-300 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-500',
     },
     {
       count: showModified ? 1 : 0,
