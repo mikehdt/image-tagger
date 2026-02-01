@@ -11,13 +11,12 @@ import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
 
 /**
- * Normalization function for sizes - replaces × with x for matching
+ * Normalization function for dimensions - replaces × with x for matching
  * @param text The text to normalize
  * @returns Normalized text
  */
-const normalizeSizeText = (text: string): string => {
-  return text.replace('×', 'x');
-};
+export const normalizeDimensionText = (text: string): string =>
+  text.replace('×', 'x');
 
 // Format aspect ratio as a simplified string
 const formatAspectRatio = (
@@ -67,15 +66,15 @@ const formatAspectRatio = (
   };
 };
 
-// Get a visual representation of size
-const SizeVisualizer = ({
-  size,
+// Get a visual representation of dimensions (used by both sizes and buckets views)
+export const DimensionVisualizer = ({
+  dimensions,
   isActive,
 }: {
-  size: string;
+  dimensions: string;
   isActive: boolean;
 }): ReactNode => {
-  const { width, height } = decomposeDimensions(size);
+  const { width, height } = decomposeDimensions(dimensions);
   const maxSize = 36; // Maximum box size for visualization
   let boxWidth, boxHeight;
 
@@ -254,7 +253,7 @@ const SizeInfo = ({
               ? highlightText(
                   formatDimensions(item.dimensions),
                   searchTerm,
-                  normalizeSizeText,
+                  normalizeDimensionText,
                 )
               : formatDimensions(item.dimensions)}
           </span>
@@ -509,8 +508,8 @@ export const SizesView = () => {
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">
-                  <SizeVisualizer
-                    size={item.dimensions}
+                  <DimensionVisualizer
+                    dimensions={item.dimensions}
                     isActive={item.isActive}
                   />
                 </div>

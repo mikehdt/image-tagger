@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllImages } from '@/app/store/assets';
 import { selectFilterBuckets, toggleBucketFilter } from '@/app/store/filters';
@@ -9,15 +9,7 @@ import { highlightText } from '@/app/utils/text-highlight';
 
 import { useFilterContext } from '../filter-context';
 import { SortDirection, SortType } from '../types';
-
-/**
- * Normalization function for buckets - replaces × with x for matching
- * @param text The text to normalize
- * @returns Normalized text
- */
-const normalizeBucketText = (text: string): string => {
-  return text.replace('×', 'x');
-};
+import { DimensionVisualizer, normalizeDimensionText } from './view-sizes';
 
 // Get sort options for the buckets view (simplified compared to image sizes)
 export const getBucketSortOptions = (
@@ -63,42 +55,6 @@ export const getBucketSortOptions = (
     nextType,
     nextDirection,
   };
-};
-
-// Get a visual representation of bucket size
-const BucketVisualizer = ({
-  bucket,
-  isActive,
-}: {
-  bucket: string;
-  isActive: boolean;
-}): ReactNode => {
-  const { width, height } = decomposeDimensions(bucket);
-  const maxSize = 36; // Maximum box size for visualization
-  let boxWidth, boxHeight;
-
-  if (width >= height) {
-    boxWidth = maxSize;
-    boxHeight = Math.round((height / width) * maxSize);
-  } else {
-    boxHeight = maxSize;
-    boxWidth = Math.round((width / height) * maxSize);
-  }
-
-  // Minimum size to keep box visible
-  boxWidth = Math.max(boxWidth, 8);
-  boxHeight = Math.max(boxHeight, 8);
-
-  return (
-    <div
-      className={`border transition-colors ${
-        isActive
-          ? 'border-sky-500 bg-sky-200 dark:border-sky-400 dark:bg-sky-800'
-          : 'border-slate-300 bg-slate-50 dark:border-slate-500 dark:bg-slate-700'
-      }`}
-      style={{ width: boxWidth, height: boxHeight }}
-    />
-  );
 };
 
 export const BucketsView = () => {
@@ -299,8 +255,8 @@ export const BucketsView = () => {
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">
-                  <BucketVisualizer
-                    bucket={item.name.replace('×', 'x')}
+                  <DimensionVisualizer
+                    dimensions={normalizeDimensionText(item.name)}
                     isActive={item.isActive}
                   />
                 </div>
@@ -311,7 +267,7 @@ export const BucketsView = () => {
                       ? highlightText(
                           item.name,
                           searchTerm,
-                          normalizeBucketText,
+                          normalizeDimensionText,
                         )
                       : item.name}
                   </span>
