@@ -1,4 +1,5 @@
 import { type ImageAsset, SortDirection, SortType } from '@/app/store/assets';
+import { parseSubfolder } from './subfolder-utils';
 
 // Constants for sort category names
 const SCALED_CATEGORIES = {
@@ -33,7 +34,17 @@ export const getSortCategory = (
 ): string => {
   switch (sortType) {
     case SortType.NAME:
-      const firstChar = asset.fileId.charAt(0).toLowerCase();
+      // Extract filename without subfolder prefix for categorization
+      // If asset is in a subfolder (e.g., "2_sonic/abc_image"), use only "abc_image"
+      let filename = asset.fileId;
+      if (asset.subfolder) {
+        const slashIndex = asset.fileId.indexOf('/');
+        if (slashIndex !== -1) {
+          filename = asset.fileId.substring(slashIndex + 1);
+        }
+      }
+
+      const firstChar = filename.charAt(0).toLowerCase();
       if (firstChar >= '0' && firstChar <= '9') {
         return '0-9';
       } else if (firstChar >= 'a' && firstChar <= 'z') {
@@ -77,6 +88,20 @@ export const getSortCategory = (
       return selectedAssets.includes(asset.fileId)
         ? SELECTED_CATEGORIES.SELECTED
         : SELECTED_CATEGORIES.NOT_SELECTED;
+
+    case SortType.FOLDER:
+      // If asset is in a subfolder, use the parsed label as category
+      // Otherwise, use "Root" as category
+      if (asset.subfolder) {
+        const parsed = parseSubfolder(asset.subfolder);
+        if (parsed) {
+          // Format as "2× sonic" for display
+          return `${parsed.repeatCount}× ${parsed.label}`;
+        }
+        // Fallback if parsing fails (shouldn't happen)
+        return asset.subfolder;
+      }
+      return 'Root';
 
     default:
       return 'All Assets';
@@ -125,6 +150,43 @@ export const sortCategories = (
         const aSelectedIndex = getSelectedCategoryIndex(a);
         const bSelectedIndex = getSelectedCategoryIndex(b);
         comparison = aSelectedIndex - bSelectedIndex;
+        break;
+
+      case SortType.FOLDER:
+        // Root comes first, then sort by repeat count (descending), then by label (alphabetically)
+        const aIsRoot = a === 'Root';
+        const bIsRoot = b === 'Root';
+
+        if (aIsRoot && !bIsRoot) {
+          comparison = -1; // Root always first
+        } else if (!aIsRoot && bIsRoot) {
+          comparison = 1;
+        } else if (!aIsRoot && !bIsRoot) {
+          // Both are subfolder categories - parse and compare
+          // Format is "2× sonic", extract repeat count
+          const aMatch = a.match(/^(\d+)×\s+(.+)$/);
+          const bMatch = b.match(/^(\d+)×\s+(.+)$/);
+
+          if (aMatch && bMatch) {
+            const aRepeat = parseInt(aMatch[1], 10);
+            const bRepeat = parseInt(bMatch[1], 10);
+            const aLabel = aMatch[2];
+            const bLabel = bMatch[2];
+
+            // Sort by repeat count (descending), then by label (alphabetically)
+            if (aRepeat !== bRepeat) {
+              comparison = bRepeat - aRepeat; // Higher repeat counts first
+            } else {
+              comparison = aLabel.localeCompare(bLabel);
+            }
+          } else {
+            // Fallback to alphabetical if parsing fails
+            comparison = a.localeCompare(b);
+          }
+        } else {
+          // Both are Root - equal
+          comparison = 0;
+        }
         break;
 
       case SortType.IMAGE_SIZE:

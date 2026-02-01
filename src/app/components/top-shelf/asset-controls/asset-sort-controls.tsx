@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
+  selectHasSubfolderAssets,
   selectSortDirection,
   selectSortType,
   setSortDirection,
@@ -44,6 +45,8 @@ const getSortDirectionLabel = (
     case SortType.SELECTED:
     case SortType.FILTERED:
       return isAsc ? '✓' : '○';
+    case SortType.FOLDER:
+      return isAsc ? 'Root' : '9×';
     default:
       return isAsc ? 'A-Z' : 'Z-A';
   }
@@ -56,6 +59,7 @@ export const AssetSortControls = () => {
   const sortDirection = useAppSelector(selectSortDirection);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const filterMode = useAppSelector(selectFilterMode);
+  const hasSubfolderAssets = useAppSelector(selectHasSubfolderAssets);
 
   // Filter state for determining if "Filtered" sort is available
   const filterTags = useAppSelector(selectFilterTags);
@@ -107,6 +111,14 @@ export const AssetSortControls = () => {
     }
   }, [sortType, filteredSortDisabled, dispatch]);
 
+  // Auto-switch from "Folder" sort to "Name" when no subfolders exist
+  useEffect(() => {
+    if (sortType === SortType.FOLDER && !hasSubfolderAssets) {
+      dispatch(setSortType(SortType.NAME));
+      dispatch(setSortDirection(SortDirection.ASC));
+    }
+  }, [sortType, hasSubfolderAssets, dispatch]);
+
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {
       dispatch(setSortType(newSortType));
@@ -148,14 +160,20 @@ export const AssetSortControls = () => {
         label: 'Filtered',
         disabled: filteredSortDisabled,
       },
+      {
+        value: SortType.FOLDER,
+        label: 'Folder',
+        disabled: !hasSubfolderAssets,
+      },
     ],
-    [selectedAssetsCount, filteredSortDisabled],
+    [selectedAssetsCount, filteredSortDisabled, hasSubfolderAssets],
   );
 
   // Show as disabled styling if current sort type is no longer valid
   const showDisabledStyle =
     (sortType === SortType.SELECTED && selectedAssetsCount === 0) ||
-    (sortType === SortType.FILTERED && filteredSortDisabled);
+    (sortType === SortType.FILTERED && filteredSortDisabled) ||
+    (sortType === SortType.FOLDER && !hasSubfolderAssets);
 
   return (
     <>

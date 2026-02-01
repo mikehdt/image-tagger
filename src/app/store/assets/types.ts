@@ -23,6 +23,7 @@ export enum SortType {
   SCALED = 'Scaled',
   SELECTED = 'Selected',
   FILTERED = 'Filtered',
+  FOLDER = 'Folder',
 }
 
 export enum SortDirection {
