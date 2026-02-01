@@ -1,7 +1,14 @@
+import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
+
 import { useFilterContext } from '../filter-context';
 import { SizeSubViewType } from '../types';
 import { BucketsView } from './view-buckets';
 import { SizesView } from './view-sizes';
+
+const subViewOptions: { value: SizeSubViewType; label: string }[] = [
+  { value: 'dimensions', label: 'Images' },
+  { value: 'buckets', label: 'Buckets' },
+];
 
 export const SizeSubViewSelector = () => {
   const {
@@ -33,30 +40,11 @@ export const SizeSubViewSelector = () => {
   };
 
   return (
-    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900/50 dark:inset-shadow-slate-600">
-      <button
-        type="button"
-        onClick={() => handleSubViewChange('dimensions')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-          sizeSubView === 'dimensions'
-            ? 'bg-white shadow-sm dark:bg-slate-600'
-            : 'hover:bg-slate-300 dark:hover:bg-slate-600'
-        }`}
-      >
-        Images
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSubViewChange('buckets')}
-        className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-          sizeSubView === 'buckets'
-            ? 'bg-white shadow-sm dark:bg-slate-600'
-            : 'hover:bg-slate-300 dark:hover:bg-slate-600'
-        }`}
-      >
-        Buckets
-      </button>
-    </div>
+    <SegmentedControl
+      options={subViewOptions}
+      value={sizeSubView}
+      onChange={handleSubViewChange}
+    />
   );
 };
 

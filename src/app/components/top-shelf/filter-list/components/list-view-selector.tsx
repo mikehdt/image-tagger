@@ -1,16 +1,19 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
+import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
+
 import { useFilterContext } from '../filter-context';
 import { FilterView } from '../types';
 
+const viewOptions: { value: FilterView; label: string }[] = [
+  { value: 'tag', label: 'Tag' },
+  { value: 'size', label: 'Size' },
+  { value: 'filetype', label: 'File' },
+];
+
 export const ViewSelector = () => {
-  const {
-    activeView,
-    setActiveView,
-    setSearchTerm,
-    setSelectedIndex,
-    onClose,
-  } = useFilterContext();
+  const { activeView, setActiveView, setSearchTerm, setSelectedIndex, onClose } =
+    useFilterContext();
 
   const handleViewChange = (view: FilterView) => {
     setActiveView(view);
@@ -20,41 +23,11 @@ export const ViewSelector = () => {
 
   return (
     <>
-      <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-900/50 dark:inset-shadow-slate-600">
-        <button
-          type="button"
-          onClick={() => handleViewChange('tag')}
-          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'tag'
-              ? 'bg-white shadow-sm dark:bg-slate-600'
-              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
-          }`}
-        >
-          Tag
-        </button>
-        <button
-          type="button"
-          onClick={() => handleViewChange('size')}
-          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'size'
-              ? 'bg-white shadow-sm dark:bg-slate-600'
-              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
-          }`}
-        >
-          Size
-        </button>
-        <button
-          type="button"
-          onClick={() => handleViewChange('filetype')}
-          className={`flex-auto cursor-pointer items-center rounded-sm px-2 py-1 transition-colors ${
-            activeView === 'filetype'
-              ? 'bg-white shadow-sm dark:bg-slate-600'
-              : 'hover:bg-slate-300 dark:hover:bg-slate-600'
-          }`}
-        >
-          File
-        </button>
-      </div>
+      <SegmentedControl
+        options={viewOptions}
+        value={activeView}
+        onChange={handleViewChange}
+      />
 
       <button
         onClick={onClose}

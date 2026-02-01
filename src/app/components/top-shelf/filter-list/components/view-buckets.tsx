@@ -262,8 +262,8 @@ export const BucketsView = () => {
         <button
           className={`absolute top-3 right-4 h-5 w-5 rounded-full p-0.5 transition-colors ${
             searchTerm.trim() !== ''
-              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-300 dark:hover:bg-slate-400'
-              : 'pointer-events-none text-white dark:text-slate-700'
+              ? 'cursor-pointer text-slate-600 hover:bg-slate-500 hover:text-white dark:text-slate-400 dark:hover:bg-slate-600'
+              : 'pointer-events-none text-white dark:text-slate-800'
           }`}
           onClick={
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
