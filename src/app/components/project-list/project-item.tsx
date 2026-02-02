@@ -43,7 +43,7 @@ const colors: {
     class:
       'border-slate-400 bg-slate-100 hover:bg-slate-500 dark:border-slate-700 dark:bg-slate-800',
     activeClass:
-      'border-slate-800 bg-slate-500 shadow-slate-500 dark:border-slate-200',
+      'border-slate-800 bg-slate-500 shadow-slate-500 dark:border-slate-200 dark:shadow-slate-300',
   },
   {
     value: 'rose',
@@ -51,7 +51,7 @@ const colors: {
     class:
       'border-rose-400 bg-rose-100 hover:bg-rose-500 dark:border-rose-800 dark:bg-rose-900',
     activeClass:
-      'border-rose-800 bg-rose-500 shadow-rose-500 dark:border-rose-200',
+      'border-rose-800 bg-rose-500 shadow-rose-500 dark:border-rose-200 dark:shadow-rose-300',
   },
   {
     value: 'amber',
@@ -59,7 +59,7 @@ const colors: {
     class:
       'border-amber-400 bg-amber-100 hover:bg-amber-500 dark:border-amber-800 dark:bg-amber-900',
     activeClass:
-      'border-amber-800 bg-amber-500 shadow-amber-500 dark:border-amber-200',
+      'border-amber-800 bg-amber-500 shadow-amber-500 dark:border-amber-200 dark:shadow-amber-300',
   },
   {
     value: 'teal',
@@ -67,14 +67,15 @@ const colors: {
     class:
       'border-teal-400 bg-teal-100 hover:bg-teal-500 dark:border-teal-700 dark:bg-teal-800',
     activeClass:
-      'border-teal-800 bg-teal-500 shadow-teal-500 dark:border-teal-200',
+      'border-teal-800 bg-teal-500 shadow-teal-500 dark:border-teal-200 dark:shadow-teal-300',
   },
   {
     value: 'sky',
     label: 'Sky',
     class:
       'border-sky-400 bg-sky-100 hover:bg-sky-500 dark:border-sky-700 dark:bg-sky-800',
-    activeClass: 'border-sky-700 bg-sky-500 shadow-sky-500 dark:border-sky-200',
+    activeClass:
+      'border-sky-700 bg-sky-500 shadow-sky-500 dark:border-sky-200 dark:shadow-sky-300',
   },
   {
     value: 'indigo',
@@ -82,7 +83,7 @@ const colors: {
     class:
       'border-indigo-400 bg-indigo-100 hover:bg-indigo-500 dark:border-indigo-600 dark:bg-indigo-700',
     activeClass:
-      'border-indigo-800 bg-indigo-500 shadow-indigo-500 dark:border-indigo-200',
+      'border-indigo-800 bg-indigo-500 shadow-indigo-500 dark:border-indigo-200 dark:shadow-indigo-300',
   },
   {
     value: 'stone',
@@ -90,7 +91,7 @@ const colors: {
     class:
       'border-stone-400 bg-stone-100 hover:bg-stone-500 dark:border-stone-600 dark:bg-stone-700',
     activeClass:
-      'border-stone-800 bg-stone-500 shadow-stone-500 dark:border-stone-200',
+      'border-stone-800 bg-stone-500 shadow-stone-500 dark:border-stone-200 dark:shadow-stone-300',
   },
 ];
 

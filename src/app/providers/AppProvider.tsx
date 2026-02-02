@@ -241,10 +241,22 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [loadImageAssets, shouldLoadAssets, pathname]);
 
-  // Redirect to root on I/O error
+  // Redirect to root on I/O error for custom projects
+  // For default projects, we show the Error view instead
+  const [isRedirectingOnError, setIsRedirectingOnError] = useState(false);
   useEffect(() => {
     if (ioState === IoState.ERROR) {
-      router.push('/');
+      const checkAndRedirect = async () => {
+        const isDefault = await checkIfUsingDefaultProject();
+        if (!isDefault) {
+          // Custom project with error - redirect to project list
+          setIsRedirectingOnError(true);
+          router.push('/');
+        }
+      };
+      checkAndRedirect();
+    } else {
+      setIsRedirectingOnError(false);
     }
   }, [ioState, router]);
 
@@ -285,6 +297,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (ioState === IoState.ERROR) {
+    // Don't show Error view if we're redirecting to project list
+    if (isRedirectingOnError) {
+      return <InitialLoad />;
+    }
     return <Error onReload={loadImageAssets} />;
   }
 

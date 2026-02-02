@@ -35,15 +35,20 @@ export const Toast = ({ toast, onRemove, duration = 3000 }: ToastProps) => {
     return () => clearTimeout(timer);
   }, [handleRemove, duration]);
 
+  const variantClasses =
+    toast.variant === 'error'
+      ? 'border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-700 dark:bg-rose-950 dark:text-rose-200'
+      : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900';
+
+  const animationClasses = isExiting
+    ? 'opacity-0'
+    : isEntering
+      ? 'translate-y-4 scale-95 opacity-0'
+      : 'translate-y-0 scale-100 opacity-100';
+
   return (
     <div
-      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm shadow-lg transition-all duration-300 ease-out dark:border-slate-600 dark:bg-slate-900 ${
-        isExiting
-          ? 'opacity-0'
-          : isEntering
-            ? 'translate-y-4 scale-95 opacity-0'
-            : 'translate-y-0 scale-100 opacity-100'
-      }`}
+      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border px-4 py-3 text-sm shadow-lg transition-all duration-300 ease-out ${variantClasses} ${animationClasses}`}
       role="alert"
       aria-live="polite"
     >

@@ -66,9 +66,17 @@ export const loadAllAssets = createAsyncThunk<
       options?.projectPath,
     );
 
-    // Handle directory read errors gracefully with a toast
+    // Handle directory read errors
     if (result.error) {
-      dispatch(addToast({ children: result.error }));
+      dispatch(addToast({ children: result.error, variant: 'error' }));
+
+      // For custom projects (projectPath provided) with folder not found,
+      // reject so AppProvider redirects to project list
+      if (options?.projectPath && result.errorType === 'not_found') {
+        throw new Error(result.error);
+      }
+
+      // For default project or other errors, return empty array gracefully
       return [];
     }
 

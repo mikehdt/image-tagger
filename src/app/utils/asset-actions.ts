@@ -106,9 +106,12 @@ const detectDuplicateFileIds = (
   return { uniqueFiles, duplicateWarnings };
 };
 
+export type ImageFileListErrorType = 'not_found' | 'read_error';
+
 export interface ImageFileListResult {
   files: string[];
   error?: string;
+  errorType?: ImageFileListErrorType;
 }
 
 // Returns just a list of image files without processing them
@@ -127,12 +130,17 @@ export const getImageFileList = async (
   try {
     rootEntries = fs.readdirSync(dir, { withFileTypes: true });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error && 'code' in error && error.code === 'ENOENT'
-        ? `Project folder not found: ${dir}`
-        : `Unable to read project folder: ${dir}`;
+    const isNotFound =
+      error instanceof Error && 'code' in error && error.code === 'ENOENT';
+    const errorMessage = isNotFound
+      ? `Project folder not found: ${dir}`
+      : `Unable to read project folder: ${dir}`;
     console.error(errorMessage, error);
-    return { files: [], error: errorMessage };
+    return {
+      files: [],
+      error: errorMessage,
+      errorType: isNotFound ? 'not_found' : 'read_error',
+    };
   }
 
   const rootImages = rootEntries
