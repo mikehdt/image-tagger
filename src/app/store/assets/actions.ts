@@ -22,9 +22,11 @@ import {
   getImageAssetDetails,
   getImageFileList,
   getMultipleImageAssetDetails,
+  ImageFileListResult,
   saveAssetTags,
   saveMultipleAssetTags,
 } from '../../utils/asset-actions';
+import { addToast } from '../toasts';
 import {
   createCleanTagStatus,
   createFlattenedTags,
@@ -60,7 +62,17 @@ export const loadAllAssets = createAsyncThunk<
 >('assets/loadAllAssets', async (options, { dispatch }) => {
   try {
     // First, get the list of image files (fast operation)
-    const imageFiles = await getImageFileList(options?.projectPath);
+    const result: ImageFileListResult = await getImageFileList(
+      options?.projectPath,
+    );
+
+    // Handle directory read errors gracefully with a toast
+    if (result.error) {
+      dispatch(addToast({ children: result.error }));
+      return [];
+    }
+
+    const imageFiles = result.files;
 
     // Initialize progress tracking when we know the total and clear any previous errors
     const totalFiles = imageFiles.length;

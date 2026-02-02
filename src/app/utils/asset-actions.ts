@@ -106,11 +106,16 @@ const detectDuplicateFileIds = (
   return { uniqueFiles, duplicateWarnings };
 };
 
+export interface ImageFileListResult {
+  files: string[];
+  error?: string;
+}
+
 // Returns just a list of image files without processing them
 // Includes images from root folder and valid repeat subfolders
 export const getImageFileList = async (
   projectPath?: string,
-): Promise<string[]> => {
+): Promise<ImageFileListResult> => {
   const dataPath = await getCurrentDataPath(projectPath);
   // Use the path directly if it's absolute, otherwise resolve it relative to cwd
   const dir = path.isAbsolute(dataPath) ? dataPath : path.resolve(dataPath);
@@ -118,7 +123,17 @@ export const getImageFileList = async (
   const allImageFiles: string[] = [];
 
   // 1. Get images from root directory
-  const rootEntries = fs.readdirSync(dir, { withFileTypes: true });
+  let rootEntries: fs.Dirent[];
+  try {
+    rootEntries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error && 'code' in error && error.code === 'ENOENT'
+        ? `Project folder not found: ${dir}`
+        : `Unable to read project folder: ${dir}`;
+    console.error(errorMessage, error);
+    return { files: [], error: errorMessage };
+  }
 
   const rootImages = rootEntries
     .filter((entry) => entry.isFile())
@@ -163,7 +178,7 @@ export const getImageFileList = async (
     duplicateWarnings.forEach((warning) => console.warn(warning));
   }
 
-  return uniqueFiles;
+  return { files: uniqueFiles };
 };
 
 /**
