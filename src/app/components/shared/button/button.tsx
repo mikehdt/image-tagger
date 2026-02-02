@@ -230,7 +230,7 @@ export const Button = ({
   };
 
   const baseStyle = {
-    common: `flex justify-center items-center rounded-sm transition-colors border ${disabled ? 'cursor-not-allowed' : inert ? 'cursor-default' : 'cursor-pointer'}`,
+    common: `flex justify-center items-center rounded-sm hover:transition-colors transition-colors border ${disabled ? 'cursor-not-allowed' : inert ? 'cursor-default' : 'cursor-pointer'}`,
     normal: 'inset-shadow-xs inset-shadow-white dark:inset-shadow-white/10',
     disabled: 'opacity-60',
     ghost:
@@ -320,9 +320,12 @@ export const Button = ({
   }
 
   // Combine all classes
-  const allClasses = [baseStyle.common, sizeClasses, styleClasses, className]
-    .filter(Boolean)
-    .join(' ');
+  const allClasses = [
+    baseStyle.common,
+    sizeClasses,
+    styleClasses,
+    className,
+  ].join(' ');
 
   return (
     <button
