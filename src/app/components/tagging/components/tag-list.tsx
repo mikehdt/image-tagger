@@ -13,7 +13,10 @@ import {
   DragStartEvent,
 } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
+import {
+  ClipboardDocumentListIcon,
+  ClipboardIcon,
+} from '@heroicons/react/24/outline';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button } from '../../shared/button';
@@ -463,7 +466,11 @@ const TagListComponent = ({
                 : 'Copy all tags as comma-separated list'
             }
           >
-            <ClipboardDocumentIcon className="w-4 opacity-50" />
+            {copyInfo.isPartialCopy ? (
+              <ClipboardDocumentListIcon className="w-4 opacity-50" />
+            ) : (
+              <ClipboardIcon className="w-4 opacity-50" />
+            )}
           </Button>
         </div>
       )}

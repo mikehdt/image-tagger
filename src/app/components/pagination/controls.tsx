@@ -78,7 +78,7 @@ export const PaginationControls = ({
         htmlFor="pagination-size"
         className="mr-2 text-xs text-slate-500 max-lg:hidden"
       >
-        Per page:
+        Per page
       </label>
       <Dropdown
         items={paginationSizeItems}

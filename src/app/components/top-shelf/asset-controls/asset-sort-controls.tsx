@@ -176,7 +176,7 @@ export const AssetSortControls = () => {
     (sortType === SortType.FOLDER && !hasSubfolderAssets);
 
   return (
-    <>
+    <div className="flex flex-wrap items-center rounded-sm bg-slate-200 inset-shadow-xs inset-shadow-slate-300 dark:bg-slate-800/30 dark:inset-shadow-slate-900">
       <Dropdown
         items={sortTypeItems}
         selectedValue={sortType}
@@ -201,6 +201,6 @@ export const AssetSortControls = () => {
           {getSortDirectionLabel(sortType, sortDirection)}
         </span>
       </Button>
-    </>
+    </div>
   );
 };

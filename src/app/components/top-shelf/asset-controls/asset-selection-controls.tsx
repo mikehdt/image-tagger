@@ -21,10 +21,9 @@ const AssetSelectionControlsComponent = () => {
 
       <ToolbarDivider />
 
-      <span className="mx-0.5 cursor-default text-slate-500 max-xl:hidden">
+      <span className="mx-0.5 cursor-default text-xs text-slate-500 max-xl:hidden">
         by
       </span>
-
       <AssetSortControls />
       <ModifiedFilterToggle />
 
