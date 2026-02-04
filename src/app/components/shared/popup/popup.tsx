@@ -5,8 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { usePopup } from './popup-context';
 import type { PopupProps } from './types';
 import {
-  adjustForViewport,
-  calculateInitialStyles,
+  calculatePopupPosition,
   DEFAULT_OFFSET,
   getTransformOrigin,
 } from './utils';
@@ -25,6 +24,9 @@ export const Popup: React.FC<PopupProps> = ({
     usePopup();
   const [positionStyles, setPositionStyles] = useState<React.CSSProperties>({});
   const [isConstrained, setIsConstrained] = useState(false);
+  // Store the natural width measured during positioning phase
+  // This is needed for resize calculations since scrollWidth changes once constrained
+  const naturalWidthRef = useRef<number | null>(null);
 
   const state = getPopupState(id);
   const config = getPopupConfig(id);
@@ -43,60 +45,62 @@ export const Popup: React.FC<PopupProps> = ({
     configRef.current = config;
   });
 
-  const calculateAndApplyPosition = useCallback(() => {
-    const popup = popupRef.current;
-    const currentConfig = configRef.current;
-    const trigger = currentConfig?.triggerRef?.current ?? triggerRef?.current;
+  const calculateAndApplyPosition = useCallback(
+    (isInitialPositioning: boolean = false) => {
+      const popup = popupRef.current;
+      const currentConfig = configRef.current;
+      const trigger = currentConfig?.triggerRef?.current ?? triggerRef?.current;
 
-    if (!popup || !trigger) return;
+      if (!popup || !trigger) return;
 
-    const desiredPosition = currentConfig?.position || position;
-    const currentOffset = currentConfig?.offset ?? offset;
+      const desiredPosition = currentConfig?.position || position;
+      const currentOffset = currentConfig?.offset ?? offset;
 
-    // First, reset any previous constraints so we can measure natural width
-    popup.style.maxWidth = '';
-    popup.style.minWidth = '';
-    popup.style.left = '';
-    popup.style.right = '';
-    popup.style.transform = '';
+      // For initial positioning, measure and store the natural width
+      // For resize, reuse the stored width (scrollWidth changes once constrained)
+      let popupWidth: number;
+      if (isInitialPositioning || naturalWidthRef.current === null) {
+        popupWidth = popup.scrollWidth;
+        naturalWidthRef.current = popupWidth;
+      } else {
+        popupWidth = naturalWidthRef.current;
+      }
 
-    // Apply initial positioning styles
-    const initialStyles = calculateInitialStyles(
-      desiredPosition,
-      currentOffset,
-    );
-    Object.assign(popup.style, initialStyles);
+      const triggerRect = trigger.getBoundingClientRect();
 
-    // Force a reflow so the popup expands to natural width before measuring
-    void popup.offsetWidth;
+      // Calculate final position using pure math (no DOM manipulation)
+      const {
+        styles,
+        adjustedPosition,
+        isConstrained: constrained,
+      } = calculatePopupPosition(
+        popupWidth,
+        triggerRect,
+        desiredPosition,
+        currentOffset,
+        disableOverflowHandling,
+      );
 
-    // Now check viewport and adjust if needed
-    const {
-      styles,
-      adjustedPosition,
-      isConstrained: constrained,
-    } = adjustForViewport(
-      popup,
-      trigger,
-      desiredPosition,
-      currentOffset,
-      disableOverflowHandling,
-    );
+      // Add transform origin to styles
+      styles.transformOrigin = getTransformOrigin(adjustedPosition);
 
-    // Apply adjusted styles and transform origin
-    setPositionStyles(styles);
-    setIsConstrained(constrained);
-    popup.style.transformOrigin = getTransformOrigin(adjustedPosition);
-  }, [position, offset, triggerRef, disableOverflowHandling]);
+      // Apply everything through React state
+      setPositionStyles(styles);
+      setIsConstrained(constrained);
+    },
+    [position, offset, triggerRef, disableOverflowHandling],
+  );
 
   // Handle the positioning phase when popup opens
   useEffect(() => {
     if (!state.shouldRender || !state.isPositioning) return;
     if (!popupRef.current) return;
 
-    // We're in positioning phase - transitions are disabled via CSS class
-    // Calculate position, then signal we're ready to animate
-    calculateAndApplyPosition();
+    // Clear the stored natural width so we measure fresh
+    naturalWidthRef.current = null;
+
+    // We're in positioning phase - calculate position while hidden
+    calculateAndApplyPosition(true);
 
     // Use double rAF to ensure styles are applied before enabling transitions
     requestAnimationFrame(() => {
@@ -151,12 +155,24 @@ export const Popup: React.FC<PopupProps> = ({
   // Disabled during positioning phase to prevent "fly-in" effect
   const transitionsEnabled = !state.isPositioning;
 
+  // During positioning phase:
+  // 1. Hide popup with visibility: hidden (so no flash of stale position)
+  // 2. Clear all positioning styles so we can measure natural width
+  // After positioning, apply the calculated styles
+  const appliedStyles: React.CSSProperties = state.isPositioning
+    ? {
+        position: 'absolute',
+        zIndex: 60,
+        visibility: 'hidden',
+      }
+    : positionStyles;
+
   return (
     <div
       ref={popupRef}
       data-popup-id={id}
       data-constrained={isConstrained || undefined}
-      style={positionStyles}
+      style={appliedStyles}
       className={`${
         transitionsEnabled ? 'transition-all duration-150 ease-in-out' : ''
       } ${
