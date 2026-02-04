@@ -103,7 +103,7 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg shadow-black/50 focus:outline-none max-sm:fixed! max-sm:top-12! max-sm:right-4! max-sm:left-4! max-sm:mt-0! max-sm:transform-none!"
+          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg shadow-slate-600/50 focus:outline-none max-sm:fixed! max-sm:top-12! max-sm:right-4! max-sm:left-4! max-sm:mt-0! max-sm:transform-none! dark:shadow-slate-950/50"
           disableOverflowHandling
         >
           <div

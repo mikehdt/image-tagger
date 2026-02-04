@@ -99,7 +99,7 @@ const CategoryNavigationComponent = ({
         id={popupId}
         position="bottom-left"
         triggerRef={buttonRef}
-        className="flex max-h-[80vh] w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"
+        className="flex max-h-[80vh] w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <CategoryList
           categoriesWithPageInfo={categoriesWithPageInfo}

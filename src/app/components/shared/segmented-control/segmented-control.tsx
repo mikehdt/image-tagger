@@ -15,7 +15,7 @@ export function SegmentedControl<T extends string>({
   onChange,
 }: SegmentedControlProps<T>) {
   return (
-    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-600/50 dark:inset-shadow-slate-800">
+    <div className="flex w-full items-center rounded-sm shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:shadow-slate-600/50 dark:shadow-slate-950/50 dark:inset-shadow-slate-800">
       {options.map((option, index) => {
         const isSelected = value === option.value;
         const isFirst = index === 0;

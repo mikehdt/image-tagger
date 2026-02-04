@@ -134,7 +134,7 @@ export const MenuButton = ({
         id={popupId}
         position={position}
         triggerRef={buttonRef}
-        className="min-w-44 rounded-md border border-slate-200 bg-white py-1 shadow-md shadow-black/50 dark:border-slate-600 dark:bg-slate-800"
+        className="min-w-44 rounded-md border border-slate-200 bg-white py-1 shadow-md shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <div role="menu">
           {items.map((item, index) => (

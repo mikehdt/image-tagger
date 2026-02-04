@@ -17,10 +17,7 @@ import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  selectProjectName,
-  selectProjectThumbnail,
-} from '@/app/store/project';
+import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
 import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
@@ -272,7 +269,7 @@ const ProjectMenuComponent = () => {
         id={popupId}
         position="bottom-left"
         triggerRef={buttonRef}
-        className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800"
+        className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           <MenuItem
