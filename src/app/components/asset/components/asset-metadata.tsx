@@ -1,7 +1,7 @@
 import {
   ArchiveIcon,
   BookmarkIcon,
-  FolderIcon,
+  FolderOpenIcon,
   ImageIcon,
 } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
@@ -99,7 +99,9 @@ const AssetMetadataComponent = ({
   const bucketComposed = `${bucket.width}×${bucket.height}`;
   const bucketActive = filterBuckets.includes(bucketComposed);
   const extensionActive = filterExtensions.includes(fileExtension);
-  const subfolderActive = subfolder ? filterSubfolders.includes(subfolder) : false;
+  const subfolderActive = subfolder
+    ? filterSubfolders.includes(subfolder)
+    : false;
 
   // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
   const isBatchSaveInProgress =
@@ -125,14 +127,11 @@ const AssetMetadataComponent = ({
     [dispatch, fileExtension],
   );
 
-  const handleToggleSubfolder = useCallback(
-    () => {
-      if (subfolder) {
-        dispatch(toggleSubfolderFilter(subfolder));
-      }
-    },
-    [dispatch, subfolder],
-  );
+  const handleToggleSubfolder = useCallback(() => {
+    if (subfolder) {
+      dispatch(toggleSubfolderFilter(subfolder));
+    }
+  }, [dispatch, subfolder]);
 
   const handleCopyAssetPath = useCallback(async () => {
     // Copy just the filename without subfolder path
@@ -221,7 +220,7 @@ const AssetMetadataComponent = ({
             onClick={handleToggleSubfolder}
             title={`Repeat folder: ${subfolder}`}
           >
-            <FolderIcon className="mr-1 h-4 w-4" />
+            <FolderOpenIcon className="mr-1 h-4 w-4" />
             {subfolderDisplay}
           </Button>
         )}
