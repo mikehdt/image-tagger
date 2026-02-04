@@ -51,7 +51,6 @@ export const {
 // Export the selectors from the slice
 export const {
   selectProjectName,
-  selectProjectFolderName,
   selectProjectThumbnail,
   selectProjectInfo,
   selectShowCropVisualization,

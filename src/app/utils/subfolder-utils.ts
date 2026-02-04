@@ -34,16 +34,3 @@ export const parseSubfolder = (
     label,
   };
 };
-
-/**
- * Compose a subfolder name from repeat count and label
- * @param repeatCount - Number of repeats
- * @param label - Folder label
- * @returns Composed folder name (e.g., "2_sonic")
- */
-export const composeSubfolder = (
-  repeatCount: number,
-  label: string,
-): string => {
-  return `${repeatCount}_${label}`;
-};
