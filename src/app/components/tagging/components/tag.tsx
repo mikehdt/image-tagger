@@ -94,12 +94,12 @@ export const Tag = ({
 
   const getCountColour = () => {
     if (isMarkedForDeletion)
-      return isHighlighted ? 'text-pink-600' : 'text-pink-500';
+      return isHighlighted ? 'text-pink-300' : 'text-pink-500';
     if (hasState(tagState, TagState.TO_ADD))
-      return isHighlighted ? 'text-amber-600' : 'text-amber-500';
+      return isHighlighted ? 'text-amber-300' : 'text-amber-500';
     if (hasState(tagState, TagState.DIRTY))
-      return isHighlighted ? 'text-indigo-600' : 'text-indigo-500';
-    return isHighlighted ? 'text-teal-600' : 'text-teal-500';
+      return isHighlighted ? 'text-indigo-300' : 'text-indigo-500';
+    return isHighlighted ? 'text-teal-300' : 'text-teal-500';
   };
 
   // Matching duplicate: visible but non-interactive (pointer-events-none, no opacity change)
