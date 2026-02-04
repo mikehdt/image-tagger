@@ -1,4 +1,4 @@
-import { BoxIcon, BoxSelectIcon } from 'lucide-react';
+import { DiffIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -27,11 +27,7 @@ export const ModifiedFilterToggle = () => {
       ghostDisabled={!hasModifiedAssets}
       size="medium"
     >
-      {filterModifiedActive ? (
-        <BoxIcon className="h-4 w-4" />
-      ) : (
-        <BoxSelectIcon className="h-4 w-4" />
-      )}
+      <DiffIcon className="h-4 w-4" />
       <span className="ml-2 max-xl:hidden">Modified</span>
     </Button>
   );
