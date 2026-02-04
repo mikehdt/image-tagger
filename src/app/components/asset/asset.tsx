@@ -26,6 +26,7 @@ type AssetProps = {
   bucket: KohyaBucket;
   ioState: IoState;
   lastModified: number;
+  blurDataUrl?: string;
   currentPage: number;
   // Shift-hover preview state
   previewState?: PreviewState;
@@ -42,6 +43,7 @@ const AssetComponent = ({
   bucket,
   ioState,
   lastModified,
+  blurDataUrl,
   currentPage,
   previewState,
   onHover,
@@ -194,10 +196,9 @@ const AssetComponent = ({
             )}
           </Button>
         ) : (
-          <EyeIcon
-            className="h-4 w-4 self-center opacity-50"
-            title="Image shape and crop shape are identical"
-          />
+          <span title="Image shape and crop shape are identical">
+            <EyeIcon className="h-4 w-4 self-center opacity-50" />
+          </span>
         )}
 
         <span className="text-sm font-medium tabular-nums select-none text-shadow-(--surface-elevated) md:[writing-mode:sideways-lr]">
@@ -232,6 +233,8 @@ const AssetComponent = ({
               height={dimensions.height}
               alt=""
               priority={filteredIndex <= 4}
+              placeholder={blurDataUrl ? 'blur' : 'empty'}
+              blurDataURL={blurDataUrl}
             />
             <CropVisualization
               dimensions={dimensions}

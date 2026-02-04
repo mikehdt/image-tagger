@@ -8,7 +8,7 @@ interface AppConfig {
 
 // Default values
 const DEFAULT_CONFIG: Required<AppConfig> = {
-  batchSize: 48,
+  batchSize: 36,
   projectsFolder: 'public/assets',
 };
 

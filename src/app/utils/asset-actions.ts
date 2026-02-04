@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { imageDimensionsFromStream } from 'image-dimensions';
+import sharp from 'sharp';
 
 import { isSupportedImageExtension } from '@/app/constants';
 
@@ -189,15 +190,22 @@ export const getImageFileList = async (
   return { files: uniqueFiles };
 };
 
+/** Cached blur data for reuse when assets haven't changed */
+export type BlurCache = {
+  [fileId: string]: { lastModified: number; blurDataUrl: string };
+};
+
 /**
  * Process multiple image files at once and return their asset data
  * @param files Array of files to process
  * @param projectPath Optional project path, uses default if not provided
+ * @param blurCache Optional cache of blur data from previous load
  * @returns Array of image assets and tracking of failed files
  */
 export const getMultipleImageAssetDetails = async (
   files: string[],
   projectPath?: string,
+  blurCache?: BlurCache,
 ): Promise<{ assets: ImageAsset[]; errors: string[] }> => {
   // Check for duplicate fileIds and get filtered files
   const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(files);
@@ -214,7 +222,7 @@ export const getMultipleImageAssetDetails = async (
   }
 
   const results = await Promise.allSettled(
-    uniqueFiles.map((file) => getImageAssetDetails(file, projectPath)),
+    uniqueFiles.map((file) => getImageAssetDetails(file, projectPath, blurCache)),
   );
 
   const assets: ImageAsset[] = [];
@@ -236,10 +244,36 @@ export const getMultipleImageAssetDetails = async (
   return { assets, errors };
 };
 
+const BLUR_MAX_DIMENSION = 10;
+
+/**
+ * Generate a tiny blur placeholder image as a base64 data URL.
+ * The image is resized to fit within 10x10 pixels while maintaining aspect ratio.
+ */
+const generateBlurDataUrl = async (
+  filePath: string,
+): Promise<string | undefined> => {
+  try {
+    const buffer = await sharp(filePath)
+      .resize(BLUR_MAX_DIMENSION, BLUR_MAX_DIMENSION, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+
+    return `data:image/jpeg;base64,${buffer.toString('base64')}`;
+  } catch (error) {
+    console.warn(`Failed to generate blur placeholder for ${filePath}:`, error);
+    return undefined;
+  }
+};
+
 // Process a single image file and return its asset data
 export const getImageAssetDetails = async (
   file: string,
   projectPath?: string,
+  blurCache?: BlurCache,
 ): Promise<ImageAsset> => {
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
@@ -261,9 +295,18 @@ export const getImageAssetDetails = async (
   // @ts-expect-error ReadableStream.from being weird
   const stream = ReadableStream.from(createReadStream(fullFilePath));
 
-  const dimensions = (await imageDimensionsFromStream(
-    stream,
-  )) as ImageDimensions;
+  // Check if we have cached blur data that's still valid
+  const cachedBlur = blurCache?.[fileId];
+  const canUseCachedBlur =
+    cachedBlur && cachedBlur.lastModified === lastModified;
+
+  // Run dimension reading and blur generation in parallel (skip blur if cached)
+  const [dimensions, blurDataUrl] = await Promise.all([
+    imageDimensionsFromStream(stream) as Promise<ImageDimensions>,
+    canUseCachedBlur
+      ? Promise.resolve(cachedBlur.blurDataUrl)
+      : generateBlurDataUrl(fullFilePath),
+  ]);
 
   // Calculate Kohya bucket for this image (using SDXL 1024 settings)
   const bucket = calculateKohyaBucket(
@@ -318,6 +361,7 @@ export const getImageAssetDetails = async (
     tagList,
     savedTagList: [...tagList], // Make a copy of the initial tag list
     lastModified,
+    blurDataUrl,
   };
 };
 

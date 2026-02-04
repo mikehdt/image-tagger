@@ -53,6 +53,7 @@ export type ImageAsset = {
   tagList: string[];
   savedTagList: string[]; // Original tag order from last save
   lastModified: number; // Unix timestamp for cache busting
+  blurDataUrl?: string; // Base64 data URL for blur placeholder (max 10px)
 };
 
 export type SaveProgress = {

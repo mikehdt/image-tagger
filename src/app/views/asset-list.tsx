@@ -238,6 +238,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
                   bucket={asset.bucket}
                   ioState={asset.ioState}
                   lastModified={asset.lastModified}
+                  blurDataUrl={asset.blurDataUrl}
                   currentPage={currentPage}
                   previewState={previewState}
                   onHover={handleAssetHover}

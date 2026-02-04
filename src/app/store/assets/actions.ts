@@ -19,6 +19,7 @@ export const completeAfterDelay = createAsyncThunk<void, void>(
 // Import removed since DEFAULT_BATCH_SIZE is now used through helpers
 import {
   AssetTagOperation,
+  BlurCache,
   getImageAssetDetails,
   getImageFileList,
   getMultipleImageAssetDetails,
@@ -58,9 +59,22 @@ export const clearLoadErrors = createAction('assets/clearLoadErrors');
 
 export const loadAllAssets = createAsyncThunk<
   ImageAsset[],
-  { maintainIoState?: boolean; projectPath?: string } | undefined
->('assets/loadAllAssets', async (options, { dispatch }) => {
+  { maintainIoState?: boolean; projectPath?: string } | undefined,
+  { state: { assets: ImageAssets } }
+>('assets/loadAllAssets', async (options, { dispatch, getState }) => {
   try {
+    // Build blur cache from existing assets to reuse unchanged blur data
+    const { assets: { images } } = getState();
+    const blurCache: BlurCache = {};
+    for (const asset of images) {
+      if (asset.blurDataUrl) {
+        blurCache[asset.fileId] = {
+          lastModified: asset.lastModified,
+          blurDataUrl: asset.blurDataUrl,
+        };
+      }
+    }
+
     // First, get the list of image files (fast operation)
     const result: ImageFileListResult = await getImageFileList(
       options?.projectPath,
@@ -117,6 +131,7 @@ export const loadAllAssets = createAsyncThunk<
         const { assets, errors } = await getMultipleImageAssetDetails(
           batch,
           options?.projectPath,
+          blurCache,
         );
         // Update error count and track failed files for this batch
         if (errors.length > 0) {
@@ -132,7 +147,7 @@ export const loadAllAssets = createAsyncThunk<
       // Fallback for individual processing
       async (file) => {
         try {
-          return await getImageAssetDetails(file, options?.projectPath);
+          return await getImageAssetDetails(file, options?.projectPath, blurCache);
         } catch (error) {
           console.error(`Failed to process file ${file}:`, error);
           failedCount++;
