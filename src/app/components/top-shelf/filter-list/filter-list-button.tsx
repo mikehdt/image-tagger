@@ -9,6 +9,7 @@ import { FilterPanel } from './filter-panel';
 
 const FilterListButtonComponent = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
 
   const popupId = useId();
@@ -29,6 +30,16 @@ const FilterListButtonComponent = () => {
     closePopup(popupId);
   }, [closePopup, popupId]);
 
+  const handlePositioned = useCallback(() => {
+    // Use double rAF to ensure visibility:hidden is fully removed and painted
+    // before attempting to focus (browsers won't focus hidden elements)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+    });
+  }, []);
+
   return (
     <div className="relative">
       <Button
@@ -46,9 +57,10 @@ const FilterListButtonComponent = () => {
         id={popupId}
         position="bottom-right"
         triggerRef={buttonRef}
+        onPositioned={handlePositioned}
         className="flex w-64 flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
-        <FilterProvider onClose={handleClose}>
+        <FilterProvider onClose={handleClose} inputRef={inputRef}>
           <FilterPanel />
         </FilterProvider>
       </Popup>

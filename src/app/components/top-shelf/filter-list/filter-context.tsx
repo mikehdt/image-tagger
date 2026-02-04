@@ -92,10 +92,15 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 interface FilterProviderProps {
   children: ReactNode;
   onClose: () => void;
+  /** Ref to the search input, for focus management */
+  inputRef: RefObject<HTMLInputElement | null>;
 }
 
-export const FilterProvider = ({ children, onClose }: FilterProviderProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+export const FilterProvider = ({
+  children,
+  onClose,
+  inputRef,
+}: FilterProviderProps) => {
 
   // Persistent state for view and sort settings (initialized from module-level variables)
   const [activeView, setActiveView] = useState<FilterView>(persistedActiveView);
@@ -272,6 +277,7 @@ export const FilterProvider = ({ children, onClose }: FilterProviderProps) => {
       selectedIndex,
       listLength,
       updateListLength,
+      inputRef,
       handleKeyDown,
       getSortOptions,
       setSizeSubView,

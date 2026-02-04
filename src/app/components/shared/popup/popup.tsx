@@ -18,6 +18,7 @@ export const Popup: React.FC<PopupProps> = ({
   className = '',
   children,
   disableOverflowHandling = false,
+  onPositioned,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const { getPopupState, getPopupConfig, setPopupConfig, finishPositioning } =
@@ -107,6 +108,8 @@ export const Popup: React.FC<PopupProps> = ({
       requestAnimationFrame(() => {
         // Positioning complete - tell context to enable transitions and animate
         finishPositioning(id);
+        // Notify consumer that popup is positioned and about to be visible
+        onPositioned?.();
       });
     });
   }, [
@@ -115,6 +118,7 @@ export const Popup: React.FC<PopupProps> = ({
     calculateAndApplyPosition,
     finishPositioning,
     id,
+    onPositioned,
   ]);
 
   // Handle window resize while popup is open
@@ -156,8 +160,9 @@ export const Popup: React.FC<PopupProps> = ({
   const transitionsEnabled = !state.isPositioning;
 
   // During positioning phase:
-  // 1. Hide popup with visibility: hidden (so no flash of stale position)
+  // 1. Hide with visibility:hidden (prevents flash, allows measurement)
   // 2. Clear all positioning styles so we can measure natural width
+  // Note: autoFocus won't work during this phase - use onPositioned callback instead
   // After positioning, apply the calculated styles
   const appliedStyles: React.CSSProperties = state.isPositioning
     ? {

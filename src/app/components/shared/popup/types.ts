@@ -48,4 +48,7 @@ export interface PopupProps {
   children: ReactNode;
   /** Skip maxHeight/overflow handling - useful for popups containing nested popups */
   disableOverflowHandling?: boolean;
+  /** Called when positioning is complete and the popup is about to become visible.
+   * Use this to focus inputs instead of autoFocus, which fires too early. */
+  onPositioned?: () => void;
 }
