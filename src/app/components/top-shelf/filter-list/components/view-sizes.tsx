@@ -1,4 +1,4 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XIcon } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useMemo } from 'react';
 
 import { selectImageSizes } from '@/app/store/assets';
@@ -478,7 +478,7 @@ export const SizesView = () => {
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
           }
         >
-          <XMarkIcon />
+          <XIcon className="h-4 w-4" />
         </button>
       </div>
 

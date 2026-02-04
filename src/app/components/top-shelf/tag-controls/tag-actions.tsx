@@ -1,4 +1,4 @@
-import { SwatchIcon } from '@heroicons/react/24/outline';
+import { TagsIcon } from 'lucide-react';
 import { memo } from 'react';
 
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
@@ -14,7 +14,7 @@ import { TagSortControls } from './tag-sort-controls';
 const TagActionsComponent = () => {
   return (
     <ResponsiveToolbarGroup
-      icon={<SwatchIcon className="w-4" />}
+      icon={<TagsIcon className="h-4 w-4" />}
       title="Tags"
       position="right"
     >

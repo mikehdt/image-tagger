@@ -1,4 +1,4 @@
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XIcon } from 'lucide-react';
 import {
   KeyboardEvent,
   useCallback,
@@ -165,9 +165,7 @@ export const FileView = () => {
         }
         return b.count - a.count;
       } else if (sortType === 'count') {
-        return sortDirection === 'asc'
-          ? a.count - b.count
-          : b.count - a.count;
+        return sortDirection === 'asc' ? a.count - b.count : b.count - a.count;
       } else {
         return sortDirection === 'asc'
           ? a.subfolder.localeCompare(b.subfolder)
@@ -245,7 +243,7 @@ export const FileView = () => {
           }`}
           title="Add pattern"
         >
-          <PlusIcon />
+          <PlusIcon className="h-4 w-4" />
         </button>
       </div>
 
@@ -271,7 +269,7 @@ export const FileView = () => {
                     className="hover:text-blue-80 cursor-pointer rounded-full bg-stone-100 p-0.5 text-stone-600 transition-colors hover:bg-slate-200 hover:text-slate-800 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-slate-600 dark:hover:text-slate-200"
                     title="Remove pattern"
                   >
-                    <XMarkIcon className="h-4 w-4" />
+                    <XIcon className="h-4 w-4" />
                   </button>
                 </span>
               </li>

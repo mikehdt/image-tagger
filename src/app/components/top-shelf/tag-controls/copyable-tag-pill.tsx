@@ -1,4 +1,4 @@
-import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
 type CopyableTagPillProps = {
@@ -70,7 +70,11 @@ const CopyableTagPillComponent = ({
             : 'text-slate-300 dark:text-slate-600'
         }`}
       >
-        {isSelected ? <CheckIcon /> : <XMarkIcon />}
+        {isSelected ? (
+          <CheckIcon className="h-4 w-4" />
+        ) : (
+          <XIcon className="h-4 w-4" />
+        )}
       </span>
     </div>
   );

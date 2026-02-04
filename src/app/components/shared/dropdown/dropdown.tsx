@@ -1,4 +1,4 @@
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from 'lucide-react';
 import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
 import { Popup, usePopup } from '../popup';

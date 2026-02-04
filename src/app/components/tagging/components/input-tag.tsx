@@ -5,7 +5,7 @@
  * - Text input with submit/cancel
  * - Placeholder for edit mode (to be added later)
  */
-import { CheckIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, PlusIcon, XIcon } from 'lucide-react';
 import {
   ChangeEvent,
   ClipboardEvent,
@@ -219,7 +219,11 @@ const InputTagComponent = ({
         tabIndex={canSubmit ? 0 : -1}
         title={mode === 'add' ? 'Add tag' : 'Save tag'}
       >
-        {mode === 'add' ? <PlusIcon /> : <CheckIcon />}
+        {mode === 'add' ? (
+          <PlusIcon className="h-4 w-4" />
+        ) : (
+          <CheckIcon className="h-4 w-4" />
+        )}
       </span>
 
       {/* Cancel button */}
@@ -233,7 +237,7 @@ const InputTagComponent = ({
         tabIndex={value.trim() !== '' && !disabled ? 0 : -1}
         title="Cancel"
       >
-        <XMarkIcon />
+        <XIcon className="h-4 w-4" />
       </span>
     </div>
   );

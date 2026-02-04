@@ -9,7 +9,7 @@
  * - Highlight and fade support
  * - When faded, all interactions are disabled
  */
-import { MinusIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { MinusIcon, PencilIcon, PlusIcon } from 'lucide-react';
 import { SyntheticEvent, useCallback } from 'react';
 
 import { hasState, TagState } from '@/app/store/assets';
@@ -123,7 +123,7 @@ export const Tag = ({
 
       {/* Edit button */}
       <span
-        className={`ml-1 inline-flex w-5 rounded-full p-0.5 transition-colors ${
+        className={`ml-1 inline-flex h-5 w-5 rounded-full p-0.5 transition-colors ${
           isMarkedForDeletion || isNonInteractive
             ? 'cursor-not-allowed opacity-20'
             : 'text-slate-500 hover:bg-blue-500 hover:text-white dark:text-slate-400'
@@ -136,12 +136,12 @@ export const Tag = ({
         }
         tabIndex={isMarkedForDeletion || isNonInteractive ? -1 : 0}
       >
-        <PencilIcon />
+        <PencilIcon size="100%" />
       </span>
 
       {/* Delete button */}
       <span
-        className={`ml-1 inline-flex w-5 rounded-full p-0.5 transition-colors ${
+        className={`ml-1 inline-flex h-5 w-5 rounded-full p-0.5 transition-colors ${
           isNonInteractive
             ? 'opacity-20'
             : `hover:bg-pink-500 hover:text-white ${isMarkedForDeletion ? 'text-pink-500 dark:text-pink-400' : ''}`
@@ -154,7 +154,11 @@ export const Tag = ({
         }
         tabIndex={isNonInteractive ? -1 : 0}
       >
-        {isMarkedForDeletion ? <PlusIcon /> : <MinusIcon />}
+        {isMarkedForDeletion ? (
+          <PlusIcon size="100%" />
+        ) : (
+          <MinusIcon size="100%" />
+        )}
       </span>
     </div>
   );

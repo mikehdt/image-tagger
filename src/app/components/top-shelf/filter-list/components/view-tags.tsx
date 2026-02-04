@@ -1,4 +1,4 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { selectAllTags } from '@/app/store/assets';
@@ -196,7 +196,7 @@ export const TagsView = () => {
             searchTerm.trim() !== '' ? () => setSearchTerm('') : undefined
           }
         >
-          <XMarkIcon />
+          <XIcon className="h-4 w-4" />
         </button>
       </div>
 

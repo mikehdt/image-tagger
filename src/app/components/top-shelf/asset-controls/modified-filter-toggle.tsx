@@ -1,4 +1,4 @@
-import { CubeIcon, CubeTransparentIcon } from '@heroicons/react/24/outline';
+import { BoxIcon, BoxSelectIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -28,9 +28,9 @@ export const ModifiedFilterToggle = () => {
       size="medium"
     >
       {filterModifiedActive ? (
-        <CubeIcon className="w-4" />
+        <BoxIcon className="h-4 w-4" />
       ) : (
-        <CubeTransparentIcon className="w-4" />
+        <BoxSelectIcon className="h-4 w-4" />
       )}
       <span className="ml-2 max-xl:hidden">Modified</span>
     </Button>

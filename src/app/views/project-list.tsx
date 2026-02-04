@@ -1,12 +1,14 @@
 'use client';
 
 import {
-  ComputerDesktopIcon,
+  FolderClosedIcon,
   FolderIcon,
+  FolderXIcon,
+  MonitorIcon,
   MoonIcon,
   StarIcon,
   SunIcon,
-} from '@heroicons/react/24/outline';
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 import {
@@ -21,9 +23,9 @@ import { useProjectList } from './hooks/use-project-list';
 
 const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
   {
-    light: { icon: <SunIcon className="w-4" />, label: 'Light' },
-    dark: { icon: <MoonIcon className="w-4" />, label: 'Dark' },
-    auto: { icon: <ComputerDesktopIcon className="w-4" />, label: 'Auto' },
+    light: { icon: <SunIcon className="h-4 w-4" />, label: 'Light' },
+    dark: { icon: <MoonIcon className="h-4 w-4" />, label: 'Dark' },
+    auto: { icon: <MonitorIcon className="h-4 w-4" />, label: 'Auto' },
   };
 
 export const ProjectList = () => {
@@ -94,18 +96,16 @@ export const ProjectList = () => {
   if (loading) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderIcon className="w-full max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderClosedIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
         <h1 className="mt-4 w-full text-xl text-slate-500 dark:text-slate-400">
           Loading projects&hellip;
         </h1>
       </div>
     );
-  }
-
-  if (error) {
+  } else if (error) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderIcon className="w-full max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderClosedIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500 dark:text-slate-400">
           Error loading projects
         </h1>
@@ -117,12 +117,10 @@ export const ProjectList = () => {
         </p>
       </div>
     );
-  }
-
-  if (projects.length === 0) {
+  } else if (projects.length === 0) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderIcon className="w-full max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderXIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500 dark:text-slate-400">
           No projects found
         </h1>
@@ -140,7 +138,7 @@ export const ProjectList = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-col items-center px-4">
-      <FolderIcon className="mb-6 h-24 w-24 text-slate-500 dark:text-slate-400" />
+      <FolderClosedIcon className="mb-6 h-24 w-24 text-slate-500 dark:text-slate-400" />
 
       <h1 className="mb-8 text-2xl text-slate-700 dark:text-slate-200">
         Select a Project
@@ -150,8 +148,8 @@ export const ProjectList = () => {
         {featuredProjects.length > 0 && (
           <div className="mb-8">
             <h2 className="mb-2 flex items-center border-b border-b-slate-200 pb-1 text-lg font-semibold text-slate-700 dark:border-b-slate-600 dark:text-slate-200">
-              <span className="mr-2 flex items-center justify-center rounded-full border border-amber-300 bg-amber-200 p-1.5 text-amber-700 inset-shadow-sm inset-shadow-amber-50 dark:border-amber-500 dark:bg-amber-700 dark:text-amber-200 dark:inset-shadow-amber-900">
-                <StarIcon className="w-4" />
+              <span className="mr-2 flex items-center justify-center rounded-full border border-amber-300 bg-amber-200 p-2.5 text-amber-700 inset-shadow-sm inset-shadow-amber-50 dark:border-amber-500 dark:bg-amber-700 dark:text-amber-200 dark:inset-shadow-amber-900">
+                <StarIcon className="h-5 w-5" />
               </span>
               Featured Projects
             </h2>
@@ -172,8 +170,8 @@ export const ProjectList = () => {
         {regularProjects.length > 0 && (
           <div className="mb-8">
             <h2 className="mb-2 flex items-center border-b border-b-slate-200 pb-1 text-lg font-semibold text-slate-700 dark:border-b-slate-600 dark:text-slate-200">
-              <span className="mr-2 flex items-center justify-center rounded-full border border-slate-300 bg-slate-200 p-1.5 text-slate-700 inset-shadow-sm inset-shadow-slate-50 dark:border-slate-500 dark:bg-slate-600 dark:text-slate-200 dark:inset-shadow-slate-800">
-                <FolderIcon className="w-4" />
+              <span className="mr-2 flex items-center justify-center rounded-full border border-slate-300 bg-slate-200 p-2.5 text-slate-700 inset-shadow-sm inset-shadow-slate-50 dark:border-slate-500 dark:bg-slate-600 dark:text-slate-200 dark:inset-shadow-slate-800">
+                <FolderIcon className="h-5 w-5" />
               </span>
               {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
             </h2>

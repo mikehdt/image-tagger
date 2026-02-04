@@ -7,6 +7,7 @@ import sharp from 'sharp';
 
 import { isSupportedImageExtension } from '@/app/constants';
 import type { AutoTaggerSettings } from '@/app/services/auto-tagger';
+
 import { isValidRepeatFolder } from './subfolder-utils';
 
 // Server-side config reading function

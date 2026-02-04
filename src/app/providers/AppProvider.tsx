@@ -256,7 +256,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       };
       checkAndRedirect();
     } else {
-      setIsRedirectingOnError(false);
+      // Schedule state update to avoid cascading renders
+      requestAnimationFrame(() => setIsRedirectingOnError(false));
     }
   }, [ioState, router]);
 
@@ -298,10 +299,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   if (ioState === IoState.ERROR) {
     // Don't show Error view if we're redirecting to project list
-    if (isRedirectingOnError) {
-      return <InitialLoad />;
-    }
-    return <Error onReload={loadImageAssets} />;
+    return isRedirectingOnError ? (
+      <InitialLoad />
+    ) : (
+      <Error onReload={loadImageAssets} />
+    );
   }
 
   // Handle empty state at the provider level instead of in page components

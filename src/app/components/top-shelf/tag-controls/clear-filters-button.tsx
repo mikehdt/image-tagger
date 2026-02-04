@@ -1,4 +1,4 @@
-import { NoSymbolIcon } from '@heroicons/react/24/outline';
+import { BanIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -25,7 +25,7 @@ export const ClearFiltersButton = () => {
       size="medium"
       title="Clear all filters"
     >
-      <NoSymbolIcon className="w-4" />
+      <BanIcon className="h-4 w-4" />
     </Button>
   );
 };

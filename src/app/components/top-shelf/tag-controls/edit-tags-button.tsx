@@ -1,4 +1,4 @@
-import { PencilIcon } from '@heroicons/react/24/outline';
+import { PencilIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -29,7 +29,7 @@ export const EditTagsButton = () => {
         disabled={!filterTags.length}
         title="Edit selected tags"
       >
-        <PencilIcon className="w-4" />
+        <PencilIcon className="h-4 w-4" />
         <span className="ml-2 max-xl:hidden">Edit</span>
       </Button>
 

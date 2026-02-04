@@ -1,9 +1,9 @@
 import {
-  ArchiveBoxIcon,
+  ArchiveIcon,
   BookmarkIcon,
   FolderIcon,
-  PhotoIcon,
-} from '@heroicons/react/24/outline';
+  ImageIcon,
+} from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 
 import type { RootState } from '@/app/store';
@@ -186,7 +186,7 @@ const AssetMetadataComponent = ({
           onClick={handleToggleSize}
           title="Image dimensions"
         >
-          <PhotoIcon className="mr-1 w-4" />
+          <ImageIcon className="mr-1 h-4 w-4" />
           {dimensions.width}&times;{dimensions.height}
         </Button>
 
@@ -198,7 +198,7 @@ const AssetMetadataComponent = ({
           onClick={handleToggleBucket}
           title="Bucket dimensions"
         >
-          <ArchiveBoxIcon className="mr-1 w-4" />
+          <ArchiveIcon className="mr-1 h-4 w-4" />
           {bucket.width}&times;{bucket.height}
         </Button>
 
@@ -221,7 +221,7 @@ const AssetMetadataComponent = ({
             onClick={handleToggleSubfolder}
             title={`Repeat folder: ${subfolder}`}
           >
-            <FolderIcon className="mr-1 w-4" />
+            <FolderIcon className="mr-1 h-4 w-4" />
             {subfolderDisplay}
           </Button>
         )}
@@ -255,7 +255,7 @@ const AssetMetadataComponent = ({
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
-            <BookmarkIcon className="mr-1 w-4" />
+            <BookmarkIcon className="mr-1 h-4 w-4" />
             Save
           </Button>
         </span>

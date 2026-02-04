@@ -9,10 +9,10 @@ A responsive toolbar component that adapts its layout based on screen size:
 
 ```tsx
 import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
-import { SwatchIcon } from '@heroicons/react/24/outline';
+import { SomeIcon } from 'react-lucide';
 
 <ResponsiveToolbarGroup
-  icon={<SwatchIcon className="w-4 text-slate-400" />}
+  icon={<SomeIcon className="h-4 w-4 text-slate-400" />}
   title="My Actions"
 >
   <Button>Action 1</Button>

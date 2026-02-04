@@ -1,4 +1,4 @@
-import { QueueListIcon } from '@heroicons/react/24/outline';
+import { ListTodoIcon } from 'lucide-react';
 import { memo, useCallback, useId, useRef } from 'react';
 
 import { Popup, usePopup } from '@/app/components/shared/popup';
@@ -39,7 +39,7 @@ const FilterListButtonComponent = () => {
         onClick={handleToggle}
         title="Show filters"
       >
-        <QueueListIcon className="w-4" />
+        <ListTodoIcon className="h-4 w-4" />
       </Button>
 
       <Popup

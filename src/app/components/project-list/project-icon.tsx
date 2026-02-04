@@ -1,10 +1,4 @@
-import {
-  FolderIcon,
-  PhotoIcon,
-  StarIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { FolderIcon, ImageIcon, StarIcon, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import { memo, useRef, useState } from 'react';
 
@@ -95,7 +89,7 @@ const ProjectIconComponent = ({
           className={`absolute inset-0 flex cursor-pointer items-center justify-center rounded-full border border-sky-400 bg-sky-100 transition-opacity duration-200 dark:border-sky-500 dark:bg-sky-800 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
           title="Select thumbnail image"
         >
-          <PhotoIcon className="h-5 w-5 text-sky-600 dark:text-sky-300" />
+          <ImageIcon className="h-5 w-5 text-sky-600 dark:text-sky-300" />
         </div>
 
         {/* Remove button - positioned outside overflow-hidden container */}
@@ -105,7 +99,7 @@ const ProjectIconComponent = ({
             className="absolute -top-1 -right-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-rose-300 bg-rose-100 transition-colors hover:bg-rose-200 dark:border-rose-500 dark:bg-rose-800 dark:hover:bg-rose-700"
             title="Remove thumbnail"
           >
-            <XMarkIcon className="h-3 w-3 text-rose-600 dark:text-rose-300" />
+            <XIcon className="h-3 w-3 text-rose-600 dark:text-rose-300" />
           </div>
         )}
       </span>
@@ -143,7 +137,7 @@ const ProjectIconComponent = ({
         {project.featured ? (
           <StarIcon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
         ) : (
-          <StarIconSolid className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+          <StarIcon className="h-5 w-5 fill-current text-amber-500 dark:text-amber-400" />
         )}
       </div>
     </span>

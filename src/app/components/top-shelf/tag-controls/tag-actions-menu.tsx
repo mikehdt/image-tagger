@@ -1,8 +1,8 @@
 import {
-  BarsArrowUpIcon,
-  DocumentDuplicateIcon,
+  ArrowUpFromLineIcon,
+  CopyIcon,
   EllipsisVerticalIcon,
-} from '@heroicons/react/24/outline';
+} from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { MenuButton, MenuItem } from '@/app/components/shared/menu-button';
@@ -39,13 +39,13 @@ export const TagActionsMenu = () => {
   const overflowMenuItems: MenuItem[] = [
     {
       label: 'Copy Tags',
-      icon: <DocumentDuplicateIcon className="w-4" />,
+      icon: <CopyIcon className="h-4 w-4" />,
       onClick: openCopyTagsModal,
       disabled: selectedAssetsCount < 2,
     },
     {
       label: 'Gather Tags',
-      icon: <BarsArrowUpIcon className="w-4" />,
+      icon: <ArrowUpFromLineIcon className="h-4 w-4" />,
       onClick: handleGatherTags,
       disabled: filterTags.length < 2,
     },
@@ -54,7 +54,7 @@ export const TagActionsMenu = () => {
   return (
     <>
       <MenuButton
-        icon={<EllipsisVerticalIcon className="w-4" />}
+        icon={<EllipsisVerticalIcon className="h-4 w-4" />}
         items={overflowMenuItems}
         position="bottom-right"
         title="More tag actions"

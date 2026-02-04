@@ -13,10 +13,7 @@ import {
   DragStartEvent,
 } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import {
-  ClipboardDocumentListIcon,
-  ClipboardIcon,
-} from '@heroicons/react/24/outline';
+import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button } from '../../shared/button';
@@ -467,9 +464,9 @@ const TagListComponent = ({
             }
           >
             {copyInfo.isPartialCopy ? (
-              <ClipboardDocumentListIcon className="w-4 opacity-50" />
+              <ClipboardListIcon className="h-4 w-4 opacity-50" />
             ) : (
-              <ClipboardIcon className="w-4 opacity-50" />
+              <ClipboardIcon className="h-4 w-4 opacity-50" />
             )}
           </Button>
         </div>

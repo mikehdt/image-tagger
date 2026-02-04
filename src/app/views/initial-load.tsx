@@ -1,6 +1,6 @@
 'use client';
 
-import { CubeIcon } from '@heroicons/react/24/outline';
+import { BoxIcon } from 'lucide-react';
 import Image from 'next/image';
 
 import { selectLoadProgress } from '../store/assets';
@@ -45,7 +45,10 @@ export const InitialLoad = () => {
           </span>
         ) : null}
 
-        <CubeIcon className="w-full max-w-80 text-slate-500" />
+        <BoxIcon
+          size="100%"
+          className="h-full w-full max-w-80 text-slate-500"
+        />
       </div>
 
       <h1 className="mt-4 w-full text-xl text-slate-500">

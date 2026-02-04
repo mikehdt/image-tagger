@@ -1,4 +1,4 @@
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import { XIcon } from 'lucide-react';
 
 export type TagChipStatus = 'all' | 'some' | 'none';
 
@@ -69,7 +69,7 @@ export const TagChip = ({
         className={`ml-1 cursor-pointer rounded-full p-0.5 transition-colors ${getButtonHoverStyle(status, isHighlighted)}`}
         aria-label={`Remove tag ${tag}`}
       >
-        <XMarkIcon
+        <XIcon
           className={`h-4 w-4 ${getIconStyle(status, isHighlighted)}`}
         />
       </button>

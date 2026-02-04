@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { CopyIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -311,7 +311,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
             color="teal"
             size="mediumWide"
           >
-            <DocumentDuplicateIcon className="mr-1 w-4" />
+            <CopyIcon className="mr-1 h-4 w-4" />
             Copy Tags
           </Button>
         </div>

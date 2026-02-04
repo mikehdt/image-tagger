@@ -1,4 +1,4 @@
-import { IdentificationIcon } from '@heroicons/react/24/outline';
+import { IdCardIcon } from 'lucide-react';
 import { memo } from 'react';
 
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
@@ -12,7 +12,7 @@ import { SelectAllButton } from './select-all-button';
 const AssetSelectionControlsComponent = () => {
   return (
     <ResponsiveToolbarGroup
-      icon={<IdentificationIcon className="w-4" />}
+      icon={<IdCardIcon className="h-4 w-4" />}
       title="Assets"
       position="left"
       breakpoint="large"

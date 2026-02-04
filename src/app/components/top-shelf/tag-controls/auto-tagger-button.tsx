@@ -1,4 +1,4 @@
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AutoTaggerModal } from '@/app/components/auto-tagger';
@@ -63,7 +63,7 @@ export const AutoTaggerButton = () => {
               : `Auto-tag ${selectedAssetsCount} selected asset${selectedAssetsCount === 1 ? '' : 's'}`
         }
       >
-        <SparklesIcon className="w-4" />
+        <SparklesIcon className="h-4 w-4" />
         <span className="ml-2 max-2xl:hidden">Auto</span>
       </Button>
 

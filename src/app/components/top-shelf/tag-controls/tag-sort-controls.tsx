@@ -1,4 +1,4 @@
-import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -90,9 +90,9 @@ export const TagSortControls = () => {
           title={`Sort ${tagSortDirection === TagSortDirection.ASC ? 'ascending' : 'descending'}`}
         >
           {tagSortDirection === TagSortDirection.ASC ? (
-            <ArrowUpIcon className="w-4" />
+            <ArrowUpIcon className="h-4 w-4" />
           ) : (
-            <ArrowDownIcon className="w-4" />
+            <ArrowDownIcon className="h-4 w-4" />
           )}
 
           <span className="ml-1 max-2xl:hidden">

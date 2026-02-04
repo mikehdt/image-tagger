@@ -1,4 +1,4 @@
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import Image from 'next/image';
 import { memo, MouseEvent, useCallback, useMemo, useState } from 'react';
 
@@ -188,7 +188,7 @@ const AssetComponent = ({
             title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualization for this asset`}
           >
             {showCropVisualization ? (
-              <EyeSlashIcon className="h-4 w-4" />
+              <EyeOffIcon className="h-4 w-4" />
             ) : (
               <EyeIcon className="h-4 w-4" />
             )}

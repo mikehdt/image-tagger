@@ -32,7 +32,7 @@ export const LoadingStatus = ({
   return (
     <>
       <div className="border border-white/0 px-1 py-0.5">
-        <Loader className="w-6" />
+        <Loader className="h-6 w-6" />
       </div>
 
       <div className="ml-1 text-xs font-medium text-(--foreground) tabular-nums">

@@ -1,6 +1,6 @@
 'use client';
 
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { TriangleAlertIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '../components/shared/button';
@@ -28,7 +28,7 @@ export const Error = ({ onReload }: ErrorProps) => {
 
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
-      <ExclamationTriangleIcon className="w-full max-w-80 text-slate-500" />
+      <TriangleAlertIcon className="w-full max-w-80 text-slate-500" />
 
       <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
         An I/O error occurred{projectName ? ` loading ${projectName}` : ''}

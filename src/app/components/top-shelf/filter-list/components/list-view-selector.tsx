@@ -1,4 +1,4 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XIcon } from 'lucide-react';
 
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 
@@ -34,7 +34,7 @@ export const ViewSelector = () => {
         className="ml-2 cursor-pointer rounded-full p-1 transition-colors hover:bg-slate-200 dark:hover:bg-slate-600"
         title="Close filter list"
       >
-        <XMarkIcon className="h-4 w-4" />
+        <XIcon className="h-4 w-4" />
       </button>
     </>
   );

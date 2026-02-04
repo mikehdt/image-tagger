@@ -1,4 +1,4 @@
-import { SquaresPlusIcon } from '@heroicons/react/24/outline';
+import { Grid2x2PlusIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -47,9 +47,9 @@ export const SelectAllButton = () => {
             : 'Add all filtered assets to selection'
       }
     >
-      <SquaresPlusIcon className="w-4" />
+      <Grid2x2PlusIcon className="h-4 w-4" />
       <span className="ml-2 max-xl:hidden">
-        {isShowingAllAssets ? 'Select All' : 'Filtered'}
+        {isShowingAllAssets ? 'Select All' : 'Select Filtered'}
       </span>
     </Button>
   );

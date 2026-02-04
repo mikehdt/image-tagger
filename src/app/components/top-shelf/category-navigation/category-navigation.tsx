@@ -1,4 +1,4 @@
-import { NumberedListIcon } from '@heroicons/react/24/outline';
+import { ListOrderedIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useMemo, useRef } from 'react';
 
@@ -92,7 +92,7 @@ const CategoryNavigationComponent = ({
         isPressed={isOpen}
         disabled={categoriesWithPageInfo.length <= 1}
       >
-        <NumberedListIcon className="w-4" />
+        <ListOrderedIcon className="h-4 w-4" />
       </Button>
 
       <Popup

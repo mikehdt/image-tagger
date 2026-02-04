@@ -1,14 +1,14 @@
 import {
   ArrowLeftCircleIcon,
-  ArrowPathIcon,
+  BoxIcon,
   CalculatorIcon,
   ChevronDownIcon,
-  ComputerDesktopIcon,
-  CubeIcon,
+  MonitorIcon,
   MoonIcon,
+  RefreshCwIcon,
   SparklesIcon,
   SunIcon,
-} from '@heroicons/react/24/outline';
+} from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useRef, useState } from 'react';
@@ -57,16 +57,16 @@ const MenuItem = ({ icon, label, onClick, disabled }: MenuItemProps) => (
         : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
-    <span className="w-5">{icon}</span>
+    <span className="h-5 w-5">{icon}</span>
     {label}
   </button>
 );
 
 const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
   {
-    light: { icon: <SunIcon className="w-5" />, label: 'Light' },
-    dark: { icon: <MoonIcon className="w-5" />, label: 'Dark' },
-    auto: { icon: <ComputerDesktopIcon className="w-5" />, label: 'Auto' },
+    light: { icon: <SunIcon className="h-5 w-5" />, label: 'Light' },
+    dark: { icon: <MoonIcon className="h-5 w-5" />, label: 'Dark' },
+    auto: { icon: <MonitorIcon className="h-5 w-5" />, label: 'Auto' },
   };
 
 const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
@@ -258,7 +258,7 @@ const ProjectMenuComponent = () => {
             className="h-6 w-6 rounded-full object-cover"
           />
         ) : (
-          <CubeIcon className="h-6 w-6 rounded-full bg-(--surface) p-1 text-(--unselected-text)" />
+          <BoxIcon className="h-6 w-6 rounded-full bg-(--surface) p-1 text-(--unselected-text)" />
         )}
         <span className="font-medium text-(--foreground)">{projectName}</span>
         <ChevronDownIcon
@@ -276,18 +276,18 @@ const ProjectMenuComponent = () => {
       >
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           <MenuItem
-            icon={<ArrowPathIcon className="w-5" />}
+            icon={<RefreshCwIcon className="h-5 w-5" />}
             label="Refresh Assets"
             onClick={handleRefresh}
             disabled={ioInProgress}
           />
           <MenuItem
-            icon={<CalculatorIcon className="w-5" />}
+            icon={<CalculatorIcon className="h-5 w-5" />}
             label="Bucket Crop Tool"
             onClick={handleOpenBucketModal}
           />
           <MenuItem
-            icon={<SparklesIcon className="w-5" />}
+            icon={<SparklesIcon className="h-5 w-5" />}
             label="Auto-Tagger Models"
             onClick={handleOpenAutoTaggerSetup}
           />
@@ -297,7 +297,7 @@ const ProjectMenuComponent = () => {
             onClick={handleCycleTheme}
           />
           <MenuItem
-            icon={<ArrowLeftCircleIcon className="w-5" />}
+            icon={<ArrowLeftCircleIcon className="h-5 w-5" />}
             label="Back to Projects"
             onClick={handleBackToProjects}
             disabled={ioInProgress}

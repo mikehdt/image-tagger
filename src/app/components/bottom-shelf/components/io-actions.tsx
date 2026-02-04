@@ -1,7 +1,7 @@
 import {
-  BookmarkSlashIcon,
-  BookmarkSquareIcon,
-} from '@heroicons/react/24/outline';
+  BookmarkCheckIcon,
+  BookmarkMinusIcon,
+} from 'lucide-react';
 
 import {
   resetAllTags,
@@ -35,7 +35,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
           hasModifiedAssets ? 'Cancel all tag changes' : 'No changes to cancel'
         }
       >
-        <BookmarkSlashIcon className="w-4" />
+        <BookmarkMinusIcon className="h-4 w-4" />
         <span className="ml-1 max-lg:hidden">Cancel All</span>
       </Button>
 
@@ -51,7 +51,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
           hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
         }
       >
-        <BookmarkSquareIcon className="w-4" />
+        <BookmarkCheckIcon className="h-4 w-4" />
         <span className="ml-1 max-lg:hidden">Save All</span>
       </Button>
     </>

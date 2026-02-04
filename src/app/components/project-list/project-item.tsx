@@ -1,4 +1,4 @@
-import { CheckIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, PencilIcon, XIcon } from 'lucide-react';
 import { memo, useEffect, useRef } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -181,7 +181,7 @@ const ProjectItemComponent = ({
                   ))}
                 </div>
 
-                <Checkbox
+                <CheckIconbox
                   isSelected={actions.editHidden || false}
                   onChange={() => actions.onHiddenChange(!actions.editHidden)}
                   ariaLabel="Hide project from list"
@@ -228,7 +228,7 @@ const ProjectItemComponent = ({
                   }
                 }}
               >
-                <XMarkIcon className="h-4 w-4" />
+                <XIcon className="h-4 w-4" />
               </div>
             </div>
           </div>

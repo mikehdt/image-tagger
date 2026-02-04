@@ -1,4 +1,4 @@
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 import {
@@ -96,9 +96,9 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
           >
             {showCropVisualization ? (
-              <EyeSlashIcon className="w-5" />
+              <EyeOffIcon className="h-5 w-5" />
             ) : (
-              <EyeIcon className="w-5" />
+              <EyeIcon className="h-5 w-5" />
             )}
           </Button>
 

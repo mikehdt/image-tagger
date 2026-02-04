@@ -1,6 +1,6 @@
 'use client';
 
-import { CubeTransparentIcon } from '@heroicons/react/24/outline';
+import { BoxSelectIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { SyntheticEvent } from 'react';
 import { useEffect, useState } from 'react';
@@ -73,7 +73,7 @@ export const NoContent = ({ onReload }: NoContentProps) => {
 
   return (
     <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 py-20 text-center">
-      <CubeTransparentIcon className="w-full max-w-80 text-slate-500" />
+      <BoxSelectIcon className="h-full w-full max-w-80 text-slate-500" />
 
       <h1 className="mt-4 mb-4 w-full text-xl text-slate-500">
         No assets found

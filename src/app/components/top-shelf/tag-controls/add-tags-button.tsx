@@ -1,4 +1,4 @@
-import { TagIcon } from '@heroicons/react/24/outline';
+import { TagIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -93,7 +93,7 @@ export const AddTagsButton = () => {
                 : 'Select assets or apply filters to add new tags'
         }
       >
-        <TagIcon className="w-4" />
+        <TagIcon className="h-4 w-4" />
         <span className="ml-2 max-xl:hidden">Add</span>
       </Button>
 

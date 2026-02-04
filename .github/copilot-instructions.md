@@ -30,7 +30,7 @@ An image tagging application that allows users to:
 - **Package Management**: pnpm
 - **Frontend**: Next.js with App Router, React, TypeScript
 - **State Management**: Redux / Redux Toolkit for global state (image list, filters), React `useState` for local state
-- **Styling**: Tailwind CSS for responsive design; Heroicons for icons
+- **Styling**: Tailwind CSS for responsive design; Lucide for icons
 - **Language**: Australian English for UI and documentation eg. colour, US English for coding such as variable or function naming eg. color
 - **Formatting**: eslint and prettier, imports ordered with an eslint plugin (can ignore import order errors as linting will fix them)
 - **Filenames**: Lower kebab-case filenames eg. `file-name.ts` for all Typescript/TSX files

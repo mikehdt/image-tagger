@@ -1,7 +1,7 @@
 import {
-  DocumentMinusIcon,
-  DocumentPlusIcon,
-} from '@heroicons/react/24/outline';
+  FileMinusIcon,
+  FilePlusIcon,
+} from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -47,11 +47,11 @@ export const DeleteToggleButton = () => {
       }
     >
       {filterTagsDeleteState.state === 'all' ? (
-        <DocumentPlusIcon className="w-4" />
+        <FilePlusIcon className="h-4 w-4" />
       ) : filterTagsDeleteState.state === 'mixed' ? (
-        <DocumentMixedIcon className="w-4" />
+        <DocumentMixedIcon className="h-4 w-4" />
       ) : (
-        <DocumentMinusIcon className="w-4" />
+        <FileMinusIcon className="h-4 w-4" />
       )}
       {filterTags.length > 0 && deleteToggleAffectedCount > 0 && (
         <span className="ml-1 text-xs text-slate-500">

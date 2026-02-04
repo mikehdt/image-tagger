@@ -1,6 +1,6 @@
 'use client';
 
-import { BookmarkIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { RootState } from '@/app/store';
@@ -613,7 +613,7 @@ export const EditTagsModal = ({
               color="indigo"
               size="mediumWide"
             >
-              <BookmarkIcon className="mr-1 w-4" />
+              <BookmarkIcon className="mr-1 h-4 w-4" />
               Save Changes
             </Button>
           </div>

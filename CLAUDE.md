@@ -75,6 +75,7 @@ This is a Next.js 16 application for managing and tagging image collections with
 - Australian English for UI text, US English for code (e.g., `colour` vs `color`)
 - Prefer `requestAnimationFrame` over `setTimeout` for UI timing
 - Performance optimisation with `React.memo`, `useSelector`, `useMemo`, `useCallback`
+- For Lucide icons, use the `[Name]Icon` import, with the Icon suffix
 
 ### Data Structure
 
