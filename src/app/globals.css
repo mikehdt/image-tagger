@@ -11,6 +11,19 @@
   }
 }
 
+input,
+textarea,
+select {
+  outline: none;
+  outline-offset: 0px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 3px var(--color-sky-400);
+}
+
 /* Light mode (default) */
 :root,
 html.light {

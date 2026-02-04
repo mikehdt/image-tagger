@@ -48,7 +48,7 @@ export const Toast = ({ toast, onRemove, duration = 3000 }: ToastProps) => {
 
   return (
     <div
-      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border px-4 py-3 text-sm shadow-lg transition-all duration-300 ease-out ${variantClasses} ${animationClasses}`}
+      className={`pointer-events-auto mb-3 w-full max-w-sm origin-bottom rounded-lg border px-4 py-3 text-sm shadow-lg shadow-black/50 transition-all duration-300 ease-out ${variantClasses} ${animationClasses}`}
       role="alert"
       aria-live="polite"
     >

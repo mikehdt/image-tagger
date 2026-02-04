@@ -96,7 +96,10 @@ export const ProjectList = () => {
   if (loading) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderClosedIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderClosedIcon
+          size={320}
+          className="max-w-80 text-slate-500 dark:text-slate-400"
+        />
         <h1 className="mt-4 w-full text-xl text-slate-500 dark:text-slate-400">
           Loading projects&hellip;
         </h1>
@@ -105,7 +108,10 @@ export const ProjectList = () => {
   } else if (error) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderClosedIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderClosedIcon
+          size={320}
+          className="max-w-80 text-slate-500 dark:text-slate-400"
+        />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500 dark:text-slate-400">
           Error loading projects
         </h1>
@@ -120,7 +126,10 @@ export const ProjectList = () => {
   } else if (projects.length === 0) {
     return (
       <div className="mx-auto flex w-full max-w-120 min-w-80 flex-wrap justify-center px-4 text-center">
-        <FolderXIcon size={320} className="max-w-80 text-slate-500 dark:text-slate-400" />
+        <FolderXIcon
+          size={320}
+          className="max-w-80 text-slate-500 dark:text-slate-400"
+        />
         <h1 className="mt-4 mb-4 w-full text-xl text-slate-500 dark:text-slate-400">
           No projects found
         </h1>
@@ -171,7 +180,7 @@ export const ProjectList = () => {
           <div className="mb-8">
             <h2 className="mb-2 flex items-center border-b border-b-slate-200 pb-1 text-lg font-semibold text-slate-700 dark:border-b-slate-600 dark:text-slate-200">
               <span className="mr-2 flex items-center justify-center rounded-full border border-slate-300 bg-slate-200 p-2.5 text-slate-700 inset-shadow-sm inset-shadow-slate-50 dark:border-slate-500 dark:bg-slate-600 dark:text-slate-200 dark:inset-shadow-slate-800">
-                <FolderIcon className="h-5 w-5" />
+                <FolderClosedIcon className="h-5 w-5" />
               </span>
               {featuredProjects.length > 0 ? 'Other Projects' : 'All Projects'}
             </h2>
