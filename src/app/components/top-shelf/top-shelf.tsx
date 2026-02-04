@@ -9,6 +9,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
+import { ToolbarDivider } from '../shared/toolbar-divider';
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
 import { CategoryNavigation } from './category-navigation';
 import { FilterListButton } from './filter-list/filter-list-button';
@@ -47,14 +48,16 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
     <div className="fixed top-0 left-0 z-20 w-full">
       {/* Top information row - z-10 ensures popups appear above the toolbar row */}
       <div className="relative z-10 border-b border-b-(--border)/50 bg-(--surface-glass-alt) shadow-(--border) backdrop-blur-md">
-        <div className="mx-auto flex max-w-400 items-center gap-2 px-4 py-1 text-sm text-(--unselected-text)">
+        <div className="mx-auto flex max-w-400 flex-wrap items-center gap-2 px-4 py-1 text-sm text-(--unselected-text)">
           <ProjectMenu />
 
-          <AssetCounts />
+          <ToolbarDivider />
 
-          <div className="ml-auto!">
-            <FilterIndicatorsInfo />
+          <div className="mr-auto!">
+            <AssetCounts />
           </div>
+
+          <FilterIndicatorsInfo />
         </div>
       </div>
 
