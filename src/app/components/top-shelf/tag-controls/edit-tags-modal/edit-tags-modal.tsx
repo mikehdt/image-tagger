@@ -20,7 +20,7 @@ export const EditTagsModal = ({
   filterTags,
 }: EditTagsModalProps) => {
   const {
-    hasActiveFilters,
+    isFilteredScopeMeaningful,
     filteredAssets,
     selectedAssetsCount,
     hasSelectedAssets,
@@ -52,7 +52,7 @@ export const EditTagsModal = ({
 
         {/* Scoping checkboxes - at top so tag list can react to scope changes */}
         <ScopingCheckboxes
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={isFilteredScopeMeaningful}
           filteredCount={filteredAssets.length}
           scopeToFiltered={onlyFilteredAssets}
           onScopeToFilteredChange={setOnlyFilteredAssets}

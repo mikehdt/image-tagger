@@ -44,6 +44,29 @@ export const selectHasActiveFilters = createSelector(
     showModified,
 );
 
+export const selectHasNonTagFilters = createSelector(
+  selectFilterSizes,
+  selectFilterBuckets,
+  selectFilterExtensions,
+  selectFilterSubfolders,
+  selectFilenamePatterns,
+  selectShowModified,
+  (
+    filterSizes,
+    filterBuckets,
+    filterExtensions,
+    filterSubfolders,
+    filenamePatterns,
+    showModified,
+  ) =>
+    filterSizes.length > 0 ||
+    filterBuckets.length > 0 ||
+    filterExtensions.length > 0 ||
+    filterSubfolders.length > 0 ||
+    filenamePatterns.length > 0 ||
+    showModified,
+);
+
 export const selectFilterCount = createSelector(
   selectFilterTags,
   selectFilterSizes,

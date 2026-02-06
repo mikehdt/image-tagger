@@ -1,9 +1,10 @@
-publicHoistPattern:
-  - '@next/eslint-plugin-next'
-  - eslint-plugin-react-hooks
-
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
+  - onnxruntime-node
   - oxc-resolver
   - sharp
   - unrs-resolver
+
+publicHoistPattern:
+  - '@next/eslint-plugin-next'
+  - eslint-plugin-react-hooks

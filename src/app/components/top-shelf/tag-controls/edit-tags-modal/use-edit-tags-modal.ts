@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { RootState } from '@/app/store';
 import { selectAllImages, selectFilteredAssets } from '@/app/store/assets';
-import { selectHasActiveFilters } from '@/app/store/filters';
+import {
+  FilterMode,
+  selectFilterMode,
+  selectHasActiveFilters,
+  selectHasNonTagFilters,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectSelectedAssets,
@@ -44,9 +49,20 @@ export const useEditTagsModal = (
   const allImages = useAppSelector(selectAllImages);
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const hasNonTagFilters = useAppSelector(selectHasNonTagFilters);
+  const filterMode = useAppSelector(selectFilterMode);
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasSelectedAssets = selectedAssetsCount > 0;
+
+  // In SHOW_ALL or MATCH_ANY mode with only tag filters active, scoping to
+  // filtered assets is redundant — the filtered set already contains exactly
+  // the assets that have these tags, which is the same set the rename affects.
+  const isFilteredScopeMeaningful =
+    hasActiveFilters &&
+    (hasNonTagFilters ||
+      (filterMode !== FilterMode.SHOW_ALL &&
+        filterMode !== FilterMode.MATCH_ANY));
 
   // Compute the effective scoped asset IDs based on checkbox state
   const scopedAssetIds = useMemo(() => {
@@ -147,10 +163,10 @@ export const useEditTagsModal = (
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
-      setOnlyFilteredAssets(hasActiveFilters);
+      setOnlyFilteredAssets(isFilteredScopeMeaningful);
       setOnlySelectedAssets(hasSelectedAssets);
     }
-  }, [isOpen, hasActiveFilters, hasSelectedAssets]);
+  }, [isOpen, isFilteredScopeMeaningful, hasSelectedAssets]);
 
   // Update editedTags when scopedFilterTags change (due to scope checkbox changes)
   useEffect(() => {
@@ -332,7 +348,7 @@ export const useEditTagsModal = (
 
   return {
     // Scoping state
-    hasActiveFilters,
+    isFilteredScopeMeaningful,
     filteredAssets,
     selectedAssetsCount,
     hasSelectedAssets,
