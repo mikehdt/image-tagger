@@ -8,9 +8,15 @@ import {
   updateProject,
 } from '@/app/utils/project-actions';
 
+type UseEditProjectOptions = {
+  onError?: (message: string) => void;
+};
+
 export const useEditProject = (
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
+  options?: UseEditProjectOptions,
 ) => {
+  const { onError } = options ?? {};
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editColor, setEditColor] = useState<ProjectColor | undefined>('slate');
@@ -123,9 +129,17 @@ export const useEditProject = (
         );
       } catch (error) {
         console.error('Error creating thumbnail:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        // Check for common serialisation errors from large files
+        if (errorMessage.includes('array nesting')) {
+          onError?.('Image file is too large. Please use a smaller image.');
+        } else {
+          onError?.(`Failed to set thumbnail: ${errorMessage}`);
+        }
       }
     },
-    [setProjects],
+    [setProjects, onError],
   );
 
   const handleThumbnailRemove = useCallback(

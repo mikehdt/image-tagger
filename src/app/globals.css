@@ -11,17 +11,22 @@
   }
 }
 
-input,
-textarea,
-select {
-  outline: none;
-  outline-offset: 0px;
-}
+@layer utilities {
+  input,
+  textarea,
+  select {
+    outline: none;
+    outline-offset: 0px;
+  }
 
-input:focus,
-textarea:focus,
-select:focus {
-  box-shadow: 0 0 0 3px var(--color-sky-400);
+  input:focus,
+  textarea:focus,
+  select:focus {
+    --tw-ring-color: var(--color-sky-400);
+    --tw-ring-shadow: 0 0 0 3px var(--tw-ring-color);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    border-color: var(--color-sky-600);
+  }
 }
 
 /* Light mode (default) */

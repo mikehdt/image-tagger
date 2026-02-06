@@ -1,6 +1,3 @@
-'use client';
-
-import { BookmarkIcon } from 'lucide-react';
 import { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { RootState } from '@/app/store';
@@ -13,15 +10,7 @@ import {
   selectSelectedAssetsCount,
 } from '@/app/store/selection';
 
-import { Button } from '../../shared/button';
-import { Checkbox } from '../../shared/checkbox';
-import { Modal } from '../../shared/modal';
-import { MultiTagInput } from '../../shared/multi-tag-input';
-import { RadioGroup } from '../../shared/radio-group';
-import { ScopingCheckboxes } from '../../shared/scoping-checkboxes';
-import { TagStatusLegend } from '../../shared/tag-status-legend';
-
-type AddTagsModalProps = {
+type UseAddTagsModalParams = {
   isOpen: boolean;
   onClose: () => void;
   onAddTag: (
@@ -36,21 +25,21 @@ type AddTagsModalProps = {
     onlySelectedAssets?: boolean,
     onlyFilteredAssets?: boolean,
   ) => void;
-  onClearSelection?: () => void; // Optional callback to clear selection
+  onClearSelection?: () => void;
 };
 
-export const AddTagsModal = ({
+export const useAddTagsModal = ({
   isOpen,
   onClose,
   onAddTag,
   onAddMultipleTags,
   onClearSelection,
-}: AddTagsModalProps) => {
+}: UseAddTagsModalParams) => {
   const [tags, setTags] = useState<string[]>([]);
   const [keepSelection, setKeepSelection] = useState(false);
   const [addToStart, setAddToStart] = useState(false);
 
-  // New state for dual selection mode
+  // State for dual selection mode
   const [applyToSelectedAssets, setApplyToSelectedAssets] = useState(false);
   const [applyToAssetsWithActiveFilters, setApplyToAssetsWithActiveFilters] =
     useState(false);
@@ -61,7 +50,6 @@ export const AddTagsModal = ({
   const assetsWithActiveFilters = useAppSelector(selectAssetsWithActiveFilters);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
 
-  // Check state conditions
   const hasSelectedAssets = selectedAssetsCount > 0;
   const assetsWithActiveFiltersCount = assetsWithActiveFilters.length;
 
@@ -88,7 +76,6 @@ export const AddTagsModal = ({
   }, [checkTag]);
 
   // Create a memoized selector for getting all tag statuses
-  // The selector is recreated when tags change, but returns cached results for unchanged tags
   const tagsStatusSelector = useMemo(
     () => (state: RootState) =>
       tags.map((tag) => {
@@ -102,7 +89,7 @@ export const AddTagsModal = ({
     [tags],
   );
 
-  // Get status for all tags - uses custom equality to prevent unnecessary re-renders
+  // Get status for all tags
   const memoizedTagsStatus = useAppSelector(
     tagsStatusSelector,
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
@@ -122,7 +109,6 @@ export const AddTagsModal = ({
   // Initialize checkboxes based on what selections are available
   useEffect(() => {
     if (isOpen) {
-      // Simply enable each constraint if it's available
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional form initialization on modal open
       setApplyToSelectedAssets(hasSelectedAssets);
       setApplyToAssetsWithActiveFilters(hasActiveFilters);
@@ -133,25 +119,21 @@ export const AddTagsModal = ({
     e.preventDefault();
     if (tags.length === 0) return;
 
-    // Check that at least one constraint is selected when both are available
     if (
       hasSelectedAssets &&
       hasActiveFilters &&
       !applyToSelectedAssets &&
       !applyToAssetsWithActiveFilters
     ) {
-      return; // Don't submit if no constraints are selected
+      return;
     }
 
-    // Get valid tags that aren't marked as "all"
     const validTags = tags.filter((tag) => {
       const tagInfo = memoizedTagsStatus.find((t) => t.tag === tag);
       return !tagInfo || tagInfo.status !== 'all';
     });
 
-    // Use batched approach if we have multiple tags and the callback is available
     if (validTags.length > 1 && onAddMultipleTags) {
-      // For batch operations, maintain original order (no need to reverse)
       onAddMultipleTags(
         validTags,
         addToStart,
@@ -159,8 +141,6 @@ export const AddTagsModal = ({
         applyToAssetsWithActiveFilters,
       );
     } else {
-      // Fall back to individual tag addition for single tags or if batch function not available
-      // If adding to start, process tags in reverse order to maintain the original order
       const tagsToProcess = addToStart ? [...validTags].reverse() : validTags;
 
       tagsToProcess.forEach((tag) => {
@@ -176,28 +156,23 @@ export const AddTagsModal = ({
     if (!keepSelection && onClearSelection) {
       onClearSelection();
     }
-    // Close modal - form state is reset via useEffect when isOpen becomes false
     onClose();
   };
 
   // Duplicate check function for the input field
   const handleDuplicateCheck = (tag: string) => {
-    // Store the tag in a ref to be synced via useEffect (avoids setState during render)
     pendingCheckTagRef.current = tag;
     return tagDuplicateInfo;
   };
 
   // Determine if the form is submittable
-  // A tag is valid if it's not marked as "all" (exists on all assets)
   const validTags = tags.filter((tag) => {
     const status = memoizedTagsStatus.find((t) => t.tag === tag)?.status;
     return status !== 'all';
   });
 
-  // Check if we have valid input
   const hasNoValidTags = tags.length === 0 || validTags.length === 0;
 
-  // Check if at least one constraint is selected when both are available
   const hasInvalidConstraints =
     hasSelectedAssets &&
     hasActiveFilters &&
@@ -214,162 +189,69 @@ export const AddTagsModal = ({
       } else if (applyToAssetsWithActiveFilters) {
         return assetsWithActiveFiltersCount;
       }
-      return 0; // Neither selected
+      return 0;
     } else if (hasSelectedAssets) {
       return selectedAssetsCount;
     } else if (hasActiveFilters) {
       return assetsWithActiveFiltersCount;
     }
-    return 0; // No scoping available
+    return 0;
   })();
 
   const hasNoAffectedAssets = effectiveAssetCount === 0;
-
   const isFormInvalid =
     hasNoValidTags || hasInvalidConstraints || hasNoAffectedAssets;
 
-  // Calculate the summary message for how many assets will be affected
+  // Calculate the summary message
   const getSummaryMessage = () => {
     if (hasSelectedAssets && hasActiveFilters) {
-      // Dual selection mode
       if (applyToSelectedAssets && applyToAssetsWithActiveFilters) {
-        // Both constraints: intersection
         return `Tags will be added to ${intersectionCount} ${intersectionCount === 1 ? 'asset that is' : 'assets that are'} both selected and ${intersectionCount === 1 ? 'matches' : 'match'} active filters.`;
       } else if (applyToSelectedAssets) {
-        // Only selected assets
         return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
       } else if (applyToAssetsWithActiveFilters) {
-        // Only assets with active filters
         return `Tags will be added to ${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'} with active filters.`;
       }
     } else if (hasSelectedAssets) {
-      // Only assets selected
       return `Tags will be added to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
     } else if (hasActiveFilters) {
-      // Only filters active
       return `Tags will be added to ${assetsWithActiveFiltersCount} ${assetsWithActiveFiltersCount === 1 ? 'asset' : 'assets'} with active filters.`;
     }
     return '';
   };
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
-      <div className="flex flex-wrap gap-4">
-        {/* Title */}
-        <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
-          Add Tags
-        </h2>
+  return {
+    // Tag state
+    tags,
+    setTags,
+    keepSelection,
+    setKeepSelection,
+    addToStart,
+    setAddToStart,
 
-        {/* Scoping checkboxes - at top so user sees scope first */}
-        <ScopingCheckboxes
-          hasActiveFilters={hasActiveFilters}
-          filteredCount={assetsWithActiveFiltersCount}
-          scopeToFiltered={applyToAssetsWithActiveFilters}
-          onScopeToFilteredChange={setApplyToAssetsWithActiveFilters}
-          hasSelectedAssets={hasSelectedAssets}
-          selectedCount={selectedAssetsCount}
-          scopeToSelected={applyToSelectedAssets}
-          onScopeToSelectedChange={setApplyToSelectedAssets}
-          requireBothConstraints
-          requireAtLeastOne
-          showBorder
-        />
+    // Scoping state
+    hasActiveFilters,
+    assetsWithActiveFiltersCount,
+    selectedAssetsCount,
+    hasSelectedAssets,
+    applyToSelectedAssets,
+    setApplyToSelectedAssets,
+    applyToAssetsWithActiveFilters,
+    setApplyToAssetsWithActiveFilters,
 
-        {/* Summary of how many assets will be affected */}
-        {!hasInvalidConstraints &&
-          (hasNoAffectedAssets ? (
-            <p className="text-xs text-rose-600">
-              No assets match the current selection and filter combination.
-            </p>
-          ) : (
-            <p className="text-xs text-slate-500">{getSummaryMessage()}</p>
-          ))}
+    // Tag status
+    memoizedTagsStatus,
 
-        {/* Tag input form */}
-        <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
-          <MultiTagInput
-            tags={tags}
-            onTagsChange={setTags}
-            duplicateCheck={handleDuplicateCheck}
-            tagStatus={memoizedTagsStatus}
-            autoFocus
-            className="w-full"
-          />
+    // Validation
+    hasInvalidConstraints,
+    hasNoAffectedAssets,
+    isFormInvalid,
 
-          {tags.length === 0 ? (
-            <p className="text-xs text-slate-500">
-              Tags to add to selected assets. Press Enter, Tab, or use commas to
-              add new tags.
-            </p>
-          ) : memoizedTagsStatus.some(
-              (t) => t.status === 'some' || t.status === 'all',
-            ) ? (
-            <TagStatusLegend
-              all={{
-                show: memoizedTagsStatus.some((t) => t.status === 'all'),
-                message:
-                  'Red tags exist on all selected assets and will be disregarded.',
-              }}
-              some={{
-                show: memoizedTagsStatus.some((t) => t.status === 'some'),
-                message:
-                  'Yellow tags exist on some assets and will only be added to assets without them.',
-              }}
-            />
-          ) : (
-            <p className="text-xs text-slate-500">
-              Tags will be added to all selected assets that don&apos;t already
-              have them.
-            </p>
-          )}
+    // Handlers
+    handleSubmit,
+    handleDuplicateCheck,
 
-          {/* Tag position */}
-          <div className="w-full border-t border-t-slate-300 pt-4 dark:border-t-slate-600">
-            <RadioGroup
-              name="tagPosition"
-              options={[
-                { value: 'prepend', label: 'Prepend to start' },
-                { value: 'append', label: 'Append to end' },
-              ]}
-              value={addToStart ? 'prepend' : 'append'}
-              onChange={(mode) => setAddToStart(mode === 'prepend')}
-            />
-          </div>
-
-          {/* Keep selection checkbox */}
-          <div className="flex w-full items-center">
-            <Checkbox
-              isSelected={keepSelection}
-              onChange={() => setKeepSelection((v) => !v)}
-              label="Keep asset selection after adding new tags"
-              ariaLabel="Keep asset selection after adding new tags"
-            />
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex w-full justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              onClick={onClose}
-              color="slate"
-              size="mediumWide"
-            >
-              Cancel
-            </Button>
-
-            <Button
-              type="submit"
-              disabled={isFormInvalid}
-              neutralDisabled
-              color="amber"
-              size="mediumWide"
-            >
-              <BookmarkIcon className="mr-1 h-4 w-4" />
-              Add New Tags
-            </Button>
-          </div>
-        </form>
-      </div>
-    </Modal>
-  );
+    // Display
+    getSummaryMessage,
+  };
 };

@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { Project } from '@/app/components/project-list/types';
+import { useToast } from '@/app/components/shared/toast/hooks/use-toast';
 import { resetAssetsState } from '@/app/store/assets';
 import { clearFilters } from '@/app/store/filters';
 import { useAppDispatch } from '@/app/store/hooks';
@@ -36,8 +37,9 @@ export const useProjectList = () => {
   const [error, setError] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { showErrorToast } = useToast();
 
-  const editActions = useEditProject(setProjects);
+  const editActions = useEditProject(setProjects, { onError: showErrorToast });
 
   const handleCycleTheme = useCallback(() => {
     const currentIndex = themeOrder.indexOf(theme);
