@@ -1,4 +1,4 @@
-import { BanIcon } from 'lucide-react';
+import { SquareXIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -40,7 +40,7 @@ export const ClearSelectionButton = () => {
       size="medium"
       title="Clear selection"
     >
-      <BanIcon className="h-4 w-4" />
+      <SquareXIcon className="h-4 w-4" />
     </Button>
   );
 };
