@@ -95,11 +95,14 @@ export const useTagsView = () => {
         // If both have same active state, sort by count descending (9-0) as secondary criteria
         return b.count - a.count; // always descending count (9-0) as tie-breaker
       }
-      // If sort type is count, compare by count
+      // If sort type is count, compare by count then alphabetical (A-Z) as tie-breaker
       else if (sortType === 'count') {
-        return sortDirection === 'asc'
-          ? a.count - b.count // ascending
-          : b.count - a.count; // descending
+        const countDiff =
+          sortDirection === 'asc'
+            ? a.count - b.count
+            : b.count - a.count;
+        if (countDiff !== 0) return countDiff;
+        return a.tag.localeCompare(b.tag);
       }
       // Otherwise sort by tag name (alphabetical)
       else {
