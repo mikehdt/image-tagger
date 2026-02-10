@@ -47,7 +47,7 @@ export const getSortCategory = (
 
       const firstChar = filename.charAt(0).toLowerCase();
       if (firstChar >= '0' && firstChar <= '9') {
-        return '0-9';
+        return firstChar;
       } else if (firstChar >= 'a' && firstChar <= 'z') {
         return firstChar.toUpperCase();
       } else {
@@ -123,7 +123,7 @@ export const sortCategories = (
         // Order: Symbols first, then numbers, then letters, then other
         const getOrder = (cat: string) => {
           if (cat === 'Symbols') return 0;
-          if (cat === '0-9') return 1;
+          if (cat.length === 1 && cat >= '0' && cat <= '9') return 1;
           if (cat.length === 1 && cat >= 'A' && cat <= 'Z') return 2;
           return 3; // Other
         };
