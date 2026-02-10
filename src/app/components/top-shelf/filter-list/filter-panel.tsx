@@ -1,5 +1,5 @@
-import { FilterControls } from './filter-controls';
 import { useFilterContext } from './filter-context';
+import { FilterControls } from './filter-controls';
 import { ViewSelector } from './list-view-selector';
 import { SizeSubView, SizeSubViewSelector } from './select-sizes-sub-view';
 import { FileView } from './view-file/view-file';

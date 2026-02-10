@@ -6,7 +6,6 @@ import {
   DimensionVisualizer,
   normalizeDimensionText,
 } from '../view-sizes/view-sizes';
-
 import { useBucketsView } from './use-buckets-view';
 
 export const BucketsView = () => {
