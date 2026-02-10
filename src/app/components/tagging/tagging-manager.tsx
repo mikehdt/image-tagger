@@ -29,7 +29,7 @@ import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectTagSortType, TagSortType } from '@/app/store/project';
 
-import { TagList } from './components';
+import { TagList } from './tag-list';
 
 type TaggingManagerProps = {
   assetId: string;

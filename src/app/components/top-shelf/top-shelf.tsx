@@ -11,7 +11,7 @@ import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 import { ToolbarDivider } from '../shared/toolbar-divider';
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
-import { CategoryNavigation } from './category-navigation';
+import { CategoryNavigation } from './category-navigation/category-navigation';
 import { FilterListButton } from './filter-list/filter-list-button';
 import { AssetCounts } from './info/asset-counts';
 import { FilterIndicatorsInfo } from './info/filter-counts';
