@@ -2,11 +2,9 @@
 
 import { Modal } from '@/app/components/shared/modal';
 
-import {
-  AutoTaggerProgress,
-  AutoTaggerSettings,
-  AutoTaggerSummary,
-} from './components';
+import { AutoTaggerProgress } from './auto-tagger-progress';
+import { AutoTaggerSettings } from './auto-tagger-settings';
+import { AutoTaggerSummary } from './auto-tagger-summary';
 import { useAutoTagger } from './use-auto-tagger';
 
 type AutoTaggerModalProps = {

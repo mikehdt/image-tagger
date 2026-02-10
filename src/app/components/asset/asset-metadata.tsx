@@ -25,8 +25,8 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { parseSubfolder } from '@/app/utils/subfolder-utils';
 import { highlightPatterns } from '@/app/utils/text-highlight';
 
-import { Button } from '../../shared/button';
-import { useToast } from '../../shared/toast';
+import { Button } from '../shared/button';
+import { useToast } from '../shared/toast';
 
 // Individual selectors for metadata - avoids creating new object references
 const selectFilenamePatterns = (state: RootState) =>

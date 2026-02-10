@@ -1,6 +1,6 @@
 import { Button } from '@/app/components/shared/button';
 
-import type { TaggingSummary } from '../types';
+import type { TaggingSummary } from './types';
 
 type AutoTaggerSummaryProps = {
   summary: TaggingSummary;

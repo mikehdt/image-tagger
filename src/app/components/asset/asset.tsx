@@ -12,7 +12,8 @@ import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
 import { TaggingManager } from '../tagging';
-import { AssetMetadata, CropVisualization } from './components';
+import { AssetMetadata } from './asset-metadata';
+import { CropVisualization } from './crop-visualization';
 
 type PreviewState = 'select' | 'deselect' | null;
 

@@ -1,7 +1,4 @@
-import {
-  BookmarkCheckIcon,
-  BookmarkMinusIcon,
-} from 'lucide-react';
+import { BookmarkCheckIcon, BookmarkMinusIcon } from 'lucide-react';
 
 import {
   resetAllTags,
@@ -10,7 +7,7 @@ import {
 } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { Button } from '../../shared/button';
+import { Button } from '../shared/button';
 
 export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
   const dispatch = useAppDispatch();

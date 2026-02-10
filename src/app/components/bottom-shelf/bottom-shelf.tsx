@@ -18,8 +18,8 @@ import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';
-import { LoadingStatus } from './components';
-import { IoActions } from './components/io-actions';
+import { IoActions } from './io-actions';
+import { LoadingStatus } from './loading-status';
 
 type BottomShelfProps = {
   currentPage?: number;

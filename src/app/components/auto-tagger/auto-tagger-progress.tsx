@@ -1,6 +1,6 @@
 import { Button } from '@/app/components/shared/button';
 
-import type { TaggingProgress } from '../types';
+import type { TaggingProgress } from './types';
 
 type AutoTaggerProgressProps = {
   progress: TaggingProgress | null;

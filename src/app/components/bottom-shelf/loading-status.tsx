@@ -1,6 +1,6 @@
 import { IoState, LoadProgress, SaveProgress } from '@/app/store/assets';
 
-import { Loader } from '../../loader';
+import { Loader } from '../loader';
 
 interface LoadingStatusProps {
   ioState: IoState;
