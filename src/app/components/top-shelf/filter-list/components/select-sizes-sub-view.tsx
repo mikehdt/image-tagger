@@ -2,8 +2,8 @@ import { SegmentedControl } from '@/app/components/shared/segmented-control/segm
 
 import { useFilterContext } from '../filter-context';
 import { SizeSubViewType } from '../types';
-import { BucketsView } from './view-buckets';
-import { SizesView } from './view-sizes';
+import { BucketsView } from './view-buckets/view-buckets';
+import { SizesView } from './view-sizes/view-sizes';
 
 const subViewOptions: { value: SizeSubViewType; label: string }[] = [
   { value: 'dimensions', label: 'Images' },

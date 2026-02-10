@@ -1,7 +1,7 @@
 import {
   ArrowUpFromLineIcon,
+  ChevronsDownIcon,
   CopyIcon,
-  EllipsisVerticalIcon,
   SparklesIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -100,7 +100,7 @@ export const TagActionsMenu = () => {
   return (
     <>
       <MenuButton
-        icon={<EllipsisVerticalIcon className="h-4 w-4" />}
+        icon={<ChevronsDownIcon className="h-4 w-4" />}
         items={overflowMenuItems}
         position="bottom-right"
         title="More tag actions"

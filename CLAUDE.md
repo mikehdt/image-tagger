@@ -70,6 +70,22 @@ This is a Next.js 16 application for managing and tagging image collections with
 - Path alias `@/app/...` for clean imports, maximum two `../../` levels
 - Feature-based component organization
 
+### Component Folder Pattern (preferred)
+
+When a component has enough logic to warrant splitting, use a colocated folder:
+
+```
+component-name/
+  component-name.tsx     ← presentational component (JSX)
+  use-component-name.ts  ← hook with data, state, and logic
+```
+
+- **No per-component `index.ts` barrels** — import directly from the source file (e.g. `./component-name/component-name`). Barrels add indirection that slows navigation when tracing imports
+- **Parent-level `index.ts` barrels are fine** for feature boundaries (e.g. a `components/index.ts` that acts as the public API for a feature area)
+- **Component-specific hooks** live alongside their component in its folder
+- **Shared hooks** (used by multiple siblings) live in a `hooks/` directory at the parent level
+- This pattern ensures moving a folder moves all related code with it
+
 ### Code Style
 
 - Australian English for UI text, US English for code (e.g., `colour` vs `color`)
