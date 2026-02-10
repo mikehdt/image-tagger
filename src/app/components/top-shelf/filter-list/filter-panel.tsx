@@ -1,12 +1,9 @@
-import {
-  FileView,
-  FilterControls,
-  SizeSubView,
-  SizeSubViewSelector,
-  TagsView,
-  ViewSelector,
-} from './components';
+import { FilterControls } from './filter-controls';
 import { useFilterContext } from './filter-context';
+import { ViewSelector } from './list-view-selector';
+import { SizeSubView, SizeSubViewSelector } from './select-sizes-sub-view';
+import { FileView } from './view-file/view-file';
+import { TagsView } from './view-tags/view-tags';
 
 /**
  * The filter panel content - renders inside the popup.

@@ -9,8 +9,8 @@ import {
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { useFilterContext } from '../filter-context';
-import { SortDirection } from '../types';
+import { useFilterContext } from './filter-context';
+import { SortDirection } from './types';
 
 export const FilterControls = () => {
   const {

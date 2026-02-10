@@ -9,14 +9,12 @@ import {
   useState,
 } from 'react';
 
-import {
-  getBucketSortOptions,
-  getFiletypeSortOptions,
-  getSizeSortOptions,
-  getTagSortOptions,
-} from './components';
-import { useKeyboardNavigation } from './hooks';
 import { FilterView, SizeSubViewType, SortDirection, SortType } from './types';
+import { useKeyboardNavigation } from './use-keyboard-navigation';
+import { getBucketSortOptions } from './view-buckets/use-buckets-view';
+import { getFiletypeSortOptions } from './view-file/use-file-view';
+import { getSizeSortOptions } from './view-sizes/use-sizes-view';
+import { getTagSortOptions } from './view-tags/use-tags-view';
 
 // Get the default sort direction for a given sort type
 const getDefaultDirection = (type: SortType): SortDirection => {

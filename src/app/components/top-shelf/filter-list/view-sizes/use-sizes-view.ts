@@ -5,8 +5,8 @@ import { selectFilterSizes, toggleSizeFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions, getAspectRatio } from '@/app/utils/helpers';
 
-import { useFilterContext } from '../../filter-context';
-import { SortDirection, SortType } from '../../types';
+import { useFilterContext } from '../filter-context';
+import { SortDirection, SortType } from '../types';
 
 // Format aspect ratio as a simplified string
 const formatAspectRatio = (

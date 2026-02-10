@@ -22,8 +22,8 @@ import {
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { useFilterContext } from '../../filter-context';
-import { SortDirection, SortType } from '../../types';
+import { useFilterContext } from '../filter-context';
+import { SortDirection, SortType } from '../types';
 
 // Get sort options for the filetypes view
 export const getFiletypeSortOptions = (

@@ -4,8 +4,8 @@ import { selectAllTags } from '@/app/store/assets';
 import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
-import { useFilterContext } from '../../filter-context';
-import { SortDirection, SortType } from '../../types';
+import { useFilterContext } from '../filter-context';
+import { SortDirection, SortType } from '../types';
 
 // Get sort options for the tags view
 export const getTagSortOptions = (

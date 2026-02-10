@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import { decomposeDimensions } from '@/app/utils/helpers';
 import { highlightText } from '@/app/utils/text-highlight';
 
-import { SortType } from '../../types';
+import { SortType } from '../types';
 
 import { useSizesView } from './use-sizes-view';
 

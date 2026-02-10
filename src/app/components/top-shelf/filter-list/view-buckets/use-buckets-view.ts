@@ -5,8 +5,8 @@ import { selectFilterBuckets, toggleBucketFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions } from '@/app/utils/helpers';
 
-import { useFilterContext } from '../../filter-context';
-import { SortDirection, SortType } from '../../types';
+import { useFilterContext } from '../filter-context';
+import { SortDirection, SortType } from '../types';
 
 // Get sort options for the buckets view (simplified compared to image sizes)
 export const getBucketSortOptions = (

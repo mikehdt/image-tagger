@@ -1,7 +1,7 @@
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 
-import { useFilterContext } from '../filter-context';
-import { SizeSubViewType } from '../types';
+import { useFilterContext } from './filter-context';
+import { SizeSubViewType } from './types';
 import { BucketsView } from './view-buckets/view-buckets';
 import { SizesView } from './view-sizes/view-sizes';
 

@@ -2,8 +2,8 @@ import { XIcon } from 'lucide-react';
 
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 
-import { useFilterContext } from '../filter-context';
-import { FilterView } from '../types';
+import { useFilterContext } from './filter-context';
+import { FilterView } from './types';
 
 const viewOptions: { value: FilterView; label: string }[] = [
   { value: 'tag', label: 'Tag' },
