@@ -85,7 +85,6 @@ export const PaginationControls = ({
         selectedValue={paginationSize}
         onChange={handlePaginationSizeChange}
         openUpward={true}
-        buttonClassName="rounded border border-slate-300 bg-white/50 px-3 py-1 text-sm inset-shadow-sm inset-shadow-white"
       />
     </span>
   );

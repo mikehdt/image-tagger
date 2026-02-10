@@ -175,12 +175,12 @@ function DropdownInternal<T>({
         onClick={handleClick}
         onKeyDown={handleButtonKeyDown}
         onBlur={handleButtonBlur}
-        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 bg-white/50 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors dark:border-slate-600 dark:bg-slate-700/50 dark:inset-shadow-white/10 ${
+        className={`flex cursor-pointer items-center justify-between rounded-sm border border-slate-300 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors dark:border-slate-700 dark:inset-shadow-white/10 ${
           fullWidth ? 'w-full' : ''
         } ${sizeStyles[size]} ${
           isOpen
             ? 'bg-white shadow-sm dark:bg-slate-700'
-            : 'bg-white shadow-sm hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600'
+            : 'bg-slate-100 shadow-sm hover:bg-slate-200 dark:bg-slate-600 dark:hover:bg-slate-600'
         } ${buttonClassName}`}
         aria-haspopup="true"
         aria-expanded={isOpen}
