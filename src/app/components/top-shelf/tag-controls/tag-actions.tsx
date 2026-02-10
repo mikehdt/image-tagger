@@ -4,7 +4,6 @@ import { memo } from 'react';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AddTagsButton } from './add-tags-button';
-import { AutoTaggerButton } from './auto-tagger-button';
 import { ClearFiltersButton } from './clear-filters-button';
 import { DeleteToggleButton } from './delete-toggle-button';
 import { EditTagsButton } from './edit-tags-button';
@@ -19,10 +18,6 @@ const TagActionsComponent = () => {
       position="right"
     >
       <TagSortControls />
-
-      <ToolbarDivider />
-
-      <AutoTaggerButton />
 
       <ToolbarDivider />
 
