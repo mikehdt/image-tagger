@@ -24,7 +24,9 @@
   select:focus {
     --tw-ring-color: var(--color-sky-400);
     --tw-ring-shadow: 0 0 0 3px var(--tw-ring-color);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    box-shadow:
+      var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     border-color: var(--color-sky-600);
   }
 }

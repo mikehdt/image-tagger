@@ -4,5 +4,8 @@
   },
   "search.exclude": {
     "pnpm-lock.yaml": true
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
   }
 }
