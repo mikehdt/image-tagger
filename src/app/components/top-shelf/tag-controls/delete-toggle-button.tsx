@@ -1,7 +1,4 @@
-import {
-  FileMinusIcon,
-  FilePlusIcon,
-} from 'lucide-react';
+import { FileMinusIcon, FilePlusIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -28,7 +25,10 @@ export const DeleteToggleButton = () => {
 
   const toggleFilterTagsDelete = useCallback(() => {
     dispatch(
-      markFilterTagsToDelete({ tags: filterTags, assetIds: effectiveScopeAssetIds }),
+      markFilterTagsToDelete({
+        tags: filterTags,
+        assetIds: effectiveScopeAssetIds,
+      }),
     );
   }, [dispatch, filterTags, effectiveScopeAssetIds]);
 
@@ -54,7 +54,7 @@ export const DeleteToggleButton = () => {
         <FileMinusIcon className="h-4 w-4" />
       )}
       {filterTags.length > 0 && deleteToggleAffectedCount > 0 && (
-        <span className="ml-1 text-xs text-slate-500">
+        <span className="ml-1 text-xs text-slate-500 dark:text-slate-300">
           {deleteToggleAffectedCount}
         </span>
       )}
