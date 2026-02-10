@@ -5,7 +5,7 @@ import { Button } from '@/app/components/shared/button';
 import { selectFilterTags } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 
-import { EditTagsModal } from './edit-tags-modal';
+import { EditTagsModal } from './edit-tags-modal/edit-tags-modal';
 
 export const EditTagsButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

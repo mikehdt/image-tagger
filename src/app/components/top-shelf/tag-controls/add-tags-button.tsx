@@ -12,7 +12,7 @@ import {
 } from '@/app/store/selection';
 import { selectAssetsWithActiveFiltersCount } from '@/app/store/selection/combinedSelectors';
 
-import { AddTagsModal } from './add-tags-modal';
+import { AddTagsModal } from './add-tags-modal/add-tags-modal';
 
 export const AddTagsButton = () => {
   const dispatch = useAppDispatch();
