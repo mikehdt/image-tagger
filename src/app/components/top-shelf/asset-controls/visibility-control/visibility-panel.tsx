@@ -17,9 +17,11 @@ const CLASS_MODES: Array<{ value: ClassFilterMode; label: string }> = [
 const ClassModeSection = ({
   section,
   onSetMode,
+  disabled = false,
 }: {
   section: SectionConfig;
   onSetMode: (classKey: SectionConfig['key'], mode: ClassFilterMode) => void;
+  disabled?: boolean;
 }) => {
   if (!section.available) {
     return (
@@ -56,7 +58,8 @@ const ClassModeSection = ({
           options={CLASS_MODES}
           value={section.mode}
           onChange={(mode) => onSetMode(section.key, mode)}
-        ></SegmentedControl>
+          disabled={disabled}
+        />
       </div>
     </>
   );
@@ -117,6 +120,7 @@ export const VisibilityPanel = () => {
           key={section.key}
           section={section}
           onSetMode={handleSetClassMode}
+          disabled={section.key === 'tags' && visibility.scopeTagless}
         />
       ))}
     </>

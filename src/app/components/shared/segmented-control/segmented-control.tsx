@@ -7,15 +7,17 @@ type SegmentedControlProps<T extends string> = {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  disabled?: boolean;
 };
 
 export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  disabled = false,
 }: SegmentedControlProps<T>) {
   return (
-    <div className="flex w-full items-center rounded-sm bg-slate-100 shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:border dark:border-slate-600 dark:bg-slate-700 dark:shadow-slate-600/50 dark:inset-shadow-slate-800">
+    <div className={`flex w-full items-center rounded-sm bg-slate-100 shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:border dark:border-slate-600 dark:bg-slate-700 dark:shadow-slate-600/50 dark:inset-shadow-slate-800 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
       {options.map((option, index) => {
         const isSelected = value === option.value;
         const isFirst = index === 0;
@@ -31,6 +33,7 @@ export function SegmentedControl<T extends string>({
           <button
             key={option.value}
             type="button"
+            disabled={disabled}
             onClick={() => onChange(option.value)}
             className={`flex-auto cursor-pointer items-center px-2 py-1 transition-colors ${roundedClasses} ${
               isSelected

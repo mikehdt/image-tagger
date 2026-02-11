@@ -2,7 +2,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 
 import type { RootState } from '../';
-import { FilterCount } from './types';
+import { ClassFilterMode, FilterCount } from './types';
 
 // Base selectors that extract filter state from RootState
 // Note: These are local versions to avoid circular dependency with index.ts
@@ -42,6 +42,36 @@ export const selectHasActiveFilters = createSelector(
     filterSubfolders.length > 0 ||
     filenamePatterns.length > 0 ||
     showModified,
+);
+
+const selectVisibility = (state: RootState) => state.filters.visibility;
+
+export const selectHasActiveVisibility = createSelector(
+  selectVisibility,
+  selectFilterTags,
+  selectFilenamePatterns,
+  selectFilterSizes,
+  selectFilterBuckets,
+  selectFilterExtensions,
+  selectFilterSubfolders,
+  (
+    visibility,
+    filterTags,
+    filenamePatterns,
+    filterSizes,
+    filterBuckets,
+    filterExtensions,
+    filterSubfolders,
+  ) =>
+    visibility.scopeTagless ||
+    visibility.scopeSelected ||
+    visibility.showModified ||
+    (visibility.tags !== ClassFilterMode.OFF && filterTags.length > 0) ||
+    (visibility.nameSearch !== ClassFilterMode.OFF && filenamePatterns.length > 0) ||
+    (visibility.sizes !== ClassFilterMode.OFF && filterSizes.length > 0) ||
+    (visibility.buckets !== ClassFilterMode.OFF && filterBuckets.length > 0) ||
+    (visibility.extensions !== ClassFilterMode.OFF && filterExtensions.length > 0) ||
+    (visibility.subfolders !== ClassFilterMode.OFF && filterSubfolders.length > 0),
 );
 
 export const selectHasNonTagFilters = createSelector(

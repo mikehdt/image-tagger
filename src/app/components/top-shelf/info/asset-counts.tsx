@@ -7,6 +7,7 @@ import {
 import {
   selectFilterMode,
   selectHasActiveFilters,
+  selectHasActiveVisibility,
   selectShowModified,
 } from '@/app/store/filters';
 import { FilterMode } from '@/app/store/filters/types';
@@ -16,10 +17,15 @@ import { selectSelectedAssetsCount } from '@/app/store/selection';
 const AssetCountsComponent = () => {
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
   const filtersActive = useAppSelector(selectHasActiveFilters);
+  const visibilityActive = useAppSelector(selectHasActiveVisibility);
   const filterMode = useAppSelector(selectFilterMode);
   const showModified = useAppSelector(selectShowModified);
   const allAssetsCount = useAppSelector(selectImageCount);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
+
+  const showFilteredCount =
+    visibilityActive ||
+    (filtersActive && (filterMode !== FilterMode.SHOW_ALL || showModified));
 
   return (
     <div className="flex items-center gap-2 text-xs font-medium tabular-nums">
@@ -28,7 +34,7 @@ const AssetCountsComponent = () => {
         <span className="text-(--unselected-text)">images total</span>
       </div>
 
-      {filtersActive && (filterMode !== FilterMode.SHOW_ALL || showModified) ? (
+      {showFilteredCount ? (
         <div className="flex items-center gap-1 border-l border-l-(--border) pl-2">
           <span className="text-teal-500">{filteredCount}</span>
           <span className="text-(--unselected-text)">filtered</span>

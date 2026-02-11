@@ -1,10 +1,11 @@
 // Complex selectors for assets slice
 import { createSelector } from '@reduxjs/toolkit';
 
-import { applyFilters } from '../../utils/filter-actions';
+import { applyFilters, applyVisibilityFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
 import { wrapSelector } from '../../utils/selector-perf';
 import type { RootState } from '../';
+import { ClassFilterMode } from '../filters';
 import { TagSortDirection, TagSortType } from '../project';
 import { ImageAsset, KeyedCountList, TagState } from './types';
 import { buildTagCountsCache, hasState } from './utils';
@@ -233,6 +234,7 @@ export const selectFilteredAssets = wrapSelector(
       (state: RootState) => state.filters.filenamePatterns,
       (state: RootState) => state.filters.filterMode,
       (state: RootState) => state.filters.showModified,
+      (state: RootState) => state.filters.visibility,
       (state: RootState) => state.selection.selectedAssets,
       (state: RootState) => state.assets.sortType,
       (state: RootState) => state.assets.sortDirection,
@@ -247,10 +249,40 @@ export const selectFilteredAssets = wrapSelector(
       filenamePatterns,
       filterMode,
       showModified,
+      visibility,
       selectedAssets,
       sortType,
       sortDirection,
     ) => {
+      // Use visibility-based filtering when any visibility setting is actively filtering
+      // A class mode only counts if it has selections to filter with
+      const hasVisibilityActive =
+        visibility.scopeTagless ||
+        visibility.scopeSelected ||
+        visibility.showModified ||
+        (visibility.tags !== ClassFilterMode.OFF && filterTags.length > 0) ||
+        (visibility.nameSearch !== ClassFilterMode.OFF && filenamePatterns.length > 0) ||
+        (visibility.sizes !== ClassFilterMode.OFF && filterSizes.length > 0) ||
+        (visibility.buckets !== ClassFilterMode.OFF && filterBuckets.length > 0) ||
+        (visibility.extensions !== ClassFilterMode.OFF && filterExtensions.length > 0) ||
+        (visibility.subfolders !== ClassFilterMode.OFF && filterSubfolders.length > 0);
+
+      if (hasVisibilityActive) {
+        return applyVisibilityFilters({
+          assets,
+          filterTags,
+          filterSizes,
+          filterBuckets,
+          filterExtensions,
+          filterSubfolders: filterSubfolders || [],
+          filenamePatterns: filenamePatterns || [],
+          visibility,
+          selectedAssets: selectedAssets || [],
+          sortType,
+          sortDirection,
+        });
+      }
+
       return applyFilters({
         assets,
         filterTags,

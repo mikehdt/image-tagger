@@ -1,14 +1,17 @@
 import { useCallback, useMemo } from 'react';
 
-import { selectHasModifiedAssets, selectHasTaglessAssets } from '@/app/store/assets';
+import {
+  selectHasModifiedAssets,
+  selectHasTaglessAssets,
+} from '@/app/store/assets';
 import {
   ClassFilterMode,
+  selectFilenamePatterns,
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSizes,
   selectFilterSubfolders,
   selectFilterTags,
-  selectFilenamePatterns,
   selectVisibility,
   setVisibilityClassMode,
   toggleVisibilityModified,
@@ -134,16 +137,22 @@ export const useVisibilityControl = () => {
   );
 
   // Count how many classes/scopes are actively filtering
+  // A class only counts if it has both a non-OFF mode AND selections to filter with
   const activeCount = useMemo(() => {
     let count = 0;
     for (const section of sections) {
-      if (section.mode !== ClassFilterMode.OFF) count++;
+      if (section.mode !== ClassFilterMode.OFF && section.count > 0) count++;
     }
     if (visibility.scopeTagless) count++;
     if (visibility.scopeSelected) count++;
     if (visibility.showModified) count++;
     return count;
-  }, [sections, visibility.scopeTagless, visibility.scopeSelected, visibility.showModified]);
+  }, [
+    sections,
+    visibility.scopeTagless,
+    visibility.scopeSelected,
+    visibility.showModified,
+  ]);
 
   return {
     sections,

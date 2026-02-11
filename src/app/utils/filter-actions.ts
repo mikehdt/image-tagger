@@ -5,7 +5,7 @@ import {
   TagState,
 } from '../store/assets';
 import { hasState } from '../store/assets/utils';
-import { FilterMode } from '../store/filters';
+import { ClassFilterMode, FilterMode, type VisibilitySettings } from '../store/filters';
 import { composeDimensions, naturalCompare } from './helpers';
 
 // Define an interface that extends ImageAsset with originalIndex
@@ -295,6 +295,174 @@ export const applyFilters = ({
   );
 
   // Return filtered results (already sorted with correct indices)
+  return filteredAssets;
+};
+
+/**
+ * Apply visibility-based filtering using per-class modes.
+ * Each class independently uses ANY/ALL/INVERSE logic; between classes is AND.
+ * Scope flags (tagless, selected, modified) are ANDed with everything.
+ */
+export const applyVisibilityFilters = ({
+  assets,
+  filterTags,
+  filterSizes,
+  filterBuckets,
+  filterExtensions,
+  filterSubfolders,
+  filenamePatterns,
+  visibility,
+  selectedAssets,
+  sortType,
+  sortDirection,
+}: {
+  assets: ImageAsset[];
+  filterTags: string[];
+  filterSizes: string[];
+  filterBuckets: string[];
+  filterExtensions: string[];
+  filterSubfolders: string[];
+  filenamePatterns: string[];
+  visibility: VisibilitySettings;
+  selectedAssets: string[];
+  sortType?: SortType;
+  sortDirection?: SortDirection;
+}): ImageAssetWithIndex[] => {
+  // Sort first (reuse existing sorting infrastructure)
+  const assetsWithTempIndex = assets.map((asset, index) => ({
+    ...asset,
+    originalIndex: index + 1,
+  })) as ImageAssetWithIndex[];
+
+  const sortedAssets = applySorting(
+    assetsWithTempIndex,
+    sortType,
+    sortDirection,
+    selectedAssets,
+    { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders },
+  );
+
+  const sortedAssetsWithCorrectIndex = sortedAssets.map((asset, index) => ({
+    ...asset,
+    originalIndex: index + 1,
+  }));
+
+  // Pre-compute sets for fast lookups
+  const filterSizesSet = new Set(filterSizes);
+  const filterBucketsSet = new Set(filterBuckets);
+  const filterExtensionsSet = new Set(filterExtensions);
+  const filterSubfoldersSet = new Set(filterSubfolders);
+  const selectedSet = new Set(selectedAssets);
+
+  // Helper: check a single class against an asset, returns true if asset passes
+  const checkClass = (
+    mode: ClassFilterMode,
+    matchAny: () => boolean,
+    matchAll: () => boolean,
+  ): boolean => {
+    if (mode === ClassFilterMode.OFF) return true;
+    if (mode === ClassFilterMode.ANY) return matchAny();
+    if (mode === ClassFilterMode.ALL) return matchAll();
+    // INVERSE: pass if NONE match (i.e. ANY would be false)
+    return !matchAny();
+  };
+
+  const filteredAssets = sortedAssetsWithCorrectIndex.filter(
+    (img: ImageAssetWithIndex) => {
+      // --- Scope filters (ANDed with everything) ---
+
+      // Scope: tagless — only assets with no persisted tags
+      if (visibility.scopeTagless) {
+        const persistedTags = img.tagList.filter(
+          (tag) =>
+            !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
+            !hasState(img.tagStatus[tag], TagState.TO_ADD),
+        );
+        if (persistedTags.length > 0) return false;
+      }
+
+      // Scope: selected only
+      if (visibility.scopeSelected) {
+        if (!selectedSet.has(img.fileId)) return false;
+      }
+
+      // Scope: modified only
+      if (visibility.showModified) {
+        const hasModifiedTags = img.tagList.some(
+          (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
+        );
+        if (!hasModifiedTags) return false;
+      }
+
+      // --- Per-class filters (AND between classes) ---
+
+      // Tags class — skip when scopeTagless is on (tagless assets have no tags to filter)
+      if (!visibility.scopeTagless && filterTags.length > 0) {
+        const passes = checkClass(
+          visibility.tags,
+          () => filterTags.some((tag) => img.tagList.includes(tag)),
+          () => filterTags.every((tag) => img.tagList.includes(tag)),
+        );
+        if (!passes) return false;
+      }
+
+      // Name search class
+      if (filenamePatterns.length > 0) {
+        const lowerFilename = img.fileId.toLowerCase();
+        const passes = checkClass(
+          visibility.nameSearch,
+          () => filenamePatterns.some((p) => lowerFilename.includes(p)),
+          () => filenamePatterns.every((p) => lowerFilename.includes(p)),
+        );
+        if (!passes) return false;
+      }
+
+      // Sizes class
+      if (filterSizes.length > 0) {
+        const dimensionsComposed = composeDimensions(img.dimensions);
+        const passes = checkClass(
+          visibility.sizes,
+          () => filterSizesSet.has(dimensionsComposed),
+          () => filterSizesSet.has(dimensionsComposed), // single value, ANY === ALL
+        );
+        if (!passes) return false;
+      }
+
+      // Buckets class
+      if (filterBuckets.length > 0) {
+        const bucketComposed = `${img.bucket.width}×${img.bucket.height}`;
+        const passes = checkClass(
+          visibility.buckets,
+          () => filterBucketsSet.has(bucketComposed),
+          () => filterBucketsSet.has(bucketComposed),
+        );
+        if (!passes) return false;
+      }
+
+      // Extensions class
+      if (filterExtensions.length > 0) {
+        const passes = checkClass(
+          visibility.extensions,
+          () => filterExtensionsSet.has(img.fileExtension),
+          () => filterExtensionsSet.has(img.fileExtension),
+        );
+        if (!passes) return false;
+      }
+
+      // Subfolders class
+      if (filterSubfolders.length > 0) {
+        const passes = checkClass(
+          visibility.subfolders,
+          () => !!img.subfolder && filterSubfoldersSet.has(img.subfolder),
+          () => !!img.subfolder && filterSubfoldersSet.has(img.subfolder),
+        );
+        if (!passes) return false;
+      }
+
+      return true;
+    },
+  );
+
   return filteredAssets;
 };
 

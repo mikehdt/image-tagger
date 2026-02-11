@@ -1,12 +1,12 @@
 import { memo } from 'react';
 
 import {
+  selectFilenamePatterns,
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSizes,
   selectFilterSubfolders,
   selectFilterTags,
-  selectFilenamePatterns,
   selectShowModified,
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
