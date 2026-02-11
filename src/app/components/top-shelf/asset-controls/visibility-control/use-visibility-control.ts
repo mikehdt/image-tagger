@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { selectHasTaglessAssets } from '@/app/store/assets';
+import { selectHasModifiedAssets, selectHasTaglessAssets } from '@/app/store/assets';
 import {
   ClassFilterMode,
   selectFilterBuckets,
@@ -47,6 +47,7 @@ export const useVisibilityControl = () => {
   const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
+  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
 
   const sections: SectionConfig[] = useMemo(
     () => [
@@ -150,6 +151,7 @@ export const useVisibilityControl = () => {
     activeCount,
     selectedAssetsCount,
     hasTaglessAssets,
+    hasModifiedAssets,
     handleSetClassMode,
     handleToggleScopeTagless,
     handleToggleScopeSelected,

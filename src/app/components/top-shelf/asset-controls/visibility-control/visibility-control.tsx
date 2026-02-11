@@ -1,6 +1,7 @@
-import { EyeIcon } from 'lucide-react';
+import { ChevronDownIcon } from 'lucide-react';
 import { memo, useCallback, useId, useRef } from 'react';
 
+import { Button } from '@/app/components/shared/button';
 import { Popup, usePopup } from '@/app/components/shared/popup';
 
 import { useVisibilityControl } from './use-visibility-control';
@@ -29,27 +30,30 @@ const VisibilityControlComponent = () => {
 
   return (
     <div className="relative">
-      <button
+      <Button
         ref={buttonRef}
-        type="button"
+        isPressed={isOpen}
         onClick={handleClick}
-        className={`flex cursor-pointer items-center gap-1.5 rounded-sm border px-2 py-1 text-sm whitespace-nowrap inset-shadow-xs transition-colors ${
-          isActive
-            ? 'border-teal-400 bg-teal-50 text-teal-700 inset-shadow-teal-100 dark:border-teal-600 dark:bg-teal-900/50 dark:text-teal-300 dark:inset-shadow-teal-900/50'
-            : 'border-slate-300 bg-slate-100 text-slate-600 shadow-sm inset-shadow-white hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-600 dark:text-slate-300 dark:inset-shadow-white/10 dark:hover:bg-slate-600'
-        }`}
         aria-haspopup="true"
         aria-expanded={isOpen}
         title="Visibility settings"
+        color={isActive ? 'teal' : 'slate'}
+        className="flex gap-1"
       >
-        <EyeIcon className="h-3.5 w-3.5" />
-        <span>Visibility</span>
+        <span className="text-nowrap">Filter Assets</span>
+
         {isActive && (
           <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-teal-500 px-1 text-[10px] font-bold text-white tabular-nums">
             {activeCount}
           </span>
         )}
-      </button>
+
+        <ChevronDownIcon
+          className={`ml-2 h-3 w-3 transition-transform ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </Button>
 
       <Popup
         id={popupId}
