@@ -5,7 +5,6 @@ import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AssetSortControls } from './asset-sort-controls';
 import { ClearSelectionButton } from './clear-selection-button';
-import { FilterModeDropdown } from './filter-mode-dropdown';
 import { ModifiedFilterToggle } from './modified-filter-toggle';
 import { SelectAllButton } from './select-all-button';
 import { VisibilityControl } from './visibility-control/visibility-control';
@@ -18,7 +17,6 @@ const AssetSelectionControlsComponent = () => {
       position="left"
       breakpoint="large"
     >
-      <FilterModeDropdown />
       <VisibilityControl />
 
       <ToolbarDivider />

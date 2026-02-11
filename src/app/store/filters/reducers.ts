@@ -80,6 +80,16 @@ export const coreReducers = {
     state.filterSubfolders = [];
     state.filenamePatterns = [];
     state.showModified = false;
+    // Also clear visibility settings
+    state.visibility.tags = ClassFilterMode.OFF;
+    state.visibility.nameSearch = ClassFilterMode.OFF;
+    state.visibility.sizes = ClassFilterMode.OFF;
+    state.visibility.buckets = ClassFilterMode.OFF;
+    state.visibility.extensions = ClassFilterMode.OFF;
+    state.visibility.subfolders = ClassFilterMode.OFF;
+    state.visibility.scopeTagless = false;
+    state.visibility.scopeSelected = false;
+    state.visibility.showModified = false;
   },
 
   addFilenamePattern: (state: Filters, { payload }: PayloadAction<string>) => {

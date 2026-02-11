@@ -2,13 +2,15 @@ import { FunnelXIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import { clearFilters, selectHasActiveFilters } from '@/app/store/filters';
+import { clearFilters, selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 export const ClearFiltersButton = () => {
   const dispatch = useAppDispatch();
 
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const hasActiveVisibility = useAppSelector(selectHasActiveVisibility);
+  const canClear = hasActiveFilters || hasActiveVisibility;
 
   const handleClearFilters = useCallback(
     () => dispatch(clearFilters()),
@@ -20,8 +22,8 @@ export const ClearFiltersButton = () => {
       variant="ghost"
       type="button"
       onClick={handleClearFilters}
-      disabled={!hasActiveFilters}
-      ghostDisabled={!hasActiveFilters}
+      disabled={!canClear}
+      ghostDisabled={!canClear}
       size="medium"
       title="Clear all filters"
     >
