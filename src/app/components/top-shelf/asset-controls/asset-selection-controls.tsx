@@ -5,7 +5,6 @@ import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AssetSortControls } from './asset-sort-controls';
 import { ClearSelectionButton } from './clear-selection-button';
-import { ModifiedFilterToggle } from './modified-filter-toggle';
 import { SelectAllButton } from './select-all-button';
 import { VisibilityControl } from './visibility-control/visibility-control';
 
@@ -25,7 +24,6 @@ const AssetSelectionControlsComponent = () => {
         by
       </span>
       <AssetSortControls />
-      <ModifiedFilterToggle />
 
       <ToolbarDivider />
 

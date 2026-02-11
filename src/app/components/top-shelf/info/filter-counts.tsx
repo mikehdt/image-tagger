@@ -7,7 +7,7 @@ import {
   selectFilterSizes,
   selectFilterSubfolders,
   selectFilterTags,
-  selectShowModified,
+  selectVisibility,
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 
@@ -18,7 +18,7 @@ const FilterIndicatorsInfoComponent = () => {
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
-  const showModified = useAppSelector(selectShowModified);
+  const visibility = useAppSelector(selectVisibility);
 
   const activeFilters = [
     {
@@ -58,7 +58,7 @@ const FilterIndicatorsInfoComponent = () => {
         'bg-violet-50 border-violet-300 text-violet-600 dark:bg-violet-900 dark:text-violet-500',
     },
     {
-      count: showModified ? 1 : 0,
+      count: visibility.showModified ? 1 : 0,
       label: 'Modified',
       color:
         'bg-amber-50 border-amber-300 text-amber-600 dark:bg-amber-900 dark:text-amber-500',
