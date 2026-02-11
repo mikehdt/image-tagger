@@ -63,7 +63,7 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
 
       {/* Main toolbar row */}
       <div className="border-t border-t-(--border-subtle) bg-(--surface-glass) shadow-md backdrop-blur-md">
-        <div className="mx-auto flex h-12 max-w-400 items-center gap-2 px-4 text-sm">
+        <div className="mx-auto flex min-h-12 max-w-400 items-center gap-2 px-4 text-sm">
           <CategoryNavigation currentPage={currentPage} />
 
           <div className="mr-auto!">

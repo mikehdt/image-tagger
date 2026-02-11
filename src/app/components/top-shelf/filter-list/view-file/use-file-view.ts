@@ -75,7 +75,7 @@ export const useFileView = () => {
 
   const [patternInput, setPatternInput] = useState('');
 
-  const { sortType, sortDirection, updateListLength, selectedIndex } =
+  const { sortType, sortDirection, updateListLength, selectedIndex, inputRef } =
     useFilterContext();
 
   // Sort the filename patterns based on current sort settings
@@ -177,8 +177,13 @@ export const useFileView = () => {
   const handleToggle = useCallback(
     (ext: string) => {
       dispatch(toggleExtensionFilter(ext));
+
+      // Focus back on input after selection
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     },
-    [dispatch],
+    [dispatch, inputRef],
   );
 
   // Create a memoized toggle handler for subfolders
@@ -220,6 +225,7 @@ export const useFileView = () => {
   }, [dispatch, patternInput]);
 
   return {
+    inputRef,
     patternInput,
     setPatternInput,
     sortedPatterns,

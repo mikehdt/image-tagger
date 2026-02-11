@@ -1,9 +1,16 @@
-import { PlusIcon, XIcon } from 'lucide-react';
+import {
+  FileImageIcon,
+  FileSearchIcon,
+  FolderOpenIcon,
+  PlusIcon,
+  XIcon,
+} from 'lucide-react';
 
 import { useFileView } from './use-file-view';
 
 export const FileView = () => {
   const {
+    inputRef,
     patternInput,
     setPatternInput,
     sortedPatterns,
@@ -24,10 +31,12 @@ export const FileView = () => {
       <div className="relative shrink-0 border-b border-slate-200 bg-slate-50 px-2 py-2 dark:border-slate-700 dark:bg-slate-800">
         <input
           type="text"
+          ref={inputRef}
           value={patternInput}
           onChange={(e) => setPatternInput(e.target.value)}
           onKeyDown={handlePatternKeyDown}
-          placeholder="Search filenames..."
+          autoFocus
+          placeholder="Search file and folder names..."
           className="w-full rounded border border-slate-300 bg-white py-1.5 ps-2 pe-8 text-sm placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:placeholder-slate-400 dark:focus:border-blue-400"
         />
         <button
@@ -48,40 +57,55 @@ export const FileView = () => {
       {/* Scrollable content area */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Filename patterns list */}
-        {sortedPatterns.length > 0 && (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
-            {sortedPatterns.map((pattern) => (
+        {/* Divider with label */}
+        <div className="flex cursor-default items-center gap-2 py-1.5">
+          <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-slate-800" />
+          <span className="flex items-center gap-1 text-xs text-slate-400 text-shadow-white text-shadow-xs dark:text-shadow-slate-900">
+            <FileSearchIcon className="h-4 w-4" />
+            Name Search
+          </span>
+          <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-stone-800" />
+        </div>
+
+        <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+          {sortedPatterns.length > 0 ? (
+            sortedPatterns.map((pattern) => (
               <li
                 key={pattern}
-                className="flex cursor-default items-center justify-between bg-stone-100 px-3 py-2 transition-colors dark:bg-stone-800"
+                className="flex cursor-default items-center justify-between bg-slate-100 px-3 py-2 transition-colors dark:bg-slate-800"
               >
-                <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
+                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                   {pattern}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-xs text-stone-600 tabular-nums dark:text-stone-400">
+                  <span className="text-xs text-slate-600 tabular-nums dark:text-slate-400">
                     {patternCounts[pattern] || 0}
                   </span>
                   <button
                     onClick={(e) => handleRemovePattern(pattern, e)}
-                    className="hover:text-blue-80 cursor-pointer rounded-full bg-stone-100 p-0.5 text-stone-600 transition-colors hover:bg-slate-200 hover:text-slate-800 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-slate-600 dark:hover:text-slate-200"
-                    title="Remove pattern"
+                    className="hover:text-blue-80 cursor-pointer rounded-full bg-slate-100 p-0.5 text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-800 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600 dark:hover:text-slate-200"
+                    title="Remove search"
                   >
                     <XIcon className="h-4 w-4" />
                   </button>
                 </span>
               </li>
-            ))}
-          </ul>
-        )}
+            ))
+          ) : (
+            <li className="cursor-default px-3 py-2 text-slate-400">
+              No active name searches
+            </li>
+          )}
+        </ul>
 
         {/* Subfolder list */}
         {subfolderList.length > 0 && (
           <>
             {/* Divider with label */}
-            <div className="flex cursor-default items-center gap-2 bg-indigo-50 py-1.5 dark:bg-indigo-950">
+            <div className="flex cursor-default items-center gap-2 py-1.5">
               <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
-              <span className="text-xs text-indigo-400 text-shadow-white text-shadow-xs dark:text-shadow-indigo-950">
+              <span className="flex items-center gap-1 text-xs text-indigo-400 text-shadow-white text-shadow-xs dark:text-shadow-indigo-950">
+                <FolderOpenIcon className="h-4 w-4" />
                 Repeat Folders
               </span>
               <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
@@ -133,9 +157,10 @@ export const FileView = () => {
         )}
 
         {/* Divider with label */}
-        <div className="flex cursor-default items-center gap-2 bg-stone-50 py-1.5 dark:bg-stone-900">
+        <div className="flex cursor-default items-center gap-2 py-1.5">
           <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />
-          <span className="text-xs text-stone-400 text-shadow-white text-shadow-xs dark:text-shadow-stone-900">
+          <span className="flex items-center gap-1 text-xs text-stone-400 text-shadow-white text-shadow-xs dark:text-shadow-stone-900">
+            <FileImageIcon className="h-4 w-4" />
             File Types
           </span>
           <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />

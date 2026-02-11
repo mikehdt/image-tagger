@@ -6,6 +6,7 @@ import {
   selectFilterSizes,
   selectFilterSubfolders,
   selectFilterTags,
+  selectFilenamePatterns,
   selectShowModified,
 } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
@@ -16,6 +17,7 @@ const FilterIndicatorsInfoComponent = () => {
   const filterTags = useAppSelector(selectFilterTags);
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterSubfolders = useAppSelector(selectFilterSubfolders);
+  const filenamePatterns = useAppSelector(selectFilenamePatterns);
   const showModified = useAppSelector(selectShowModified);
 
   const activeFilters = [
@@ -48,6 +50,12 @@ const FilterIndicatorsInfoComponent = () => {
       label: filterSubfolders.length === 1 ? 'folder' : 'folders',
       color:
         'bg-indigo-50 border-indigo-300 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-500',
+    },
+    {
+      count: filenamePatterns.length,
+      label: filenamePatterns.length === 1 ? 'name filter' : 'name filters',
+      color:
+        'bg-violet-50 border-violet-300 text-violet-600 dark:bg-violet-900 dark:text-violet-500',
     },
     {
       count: showModified ? 1 : 0,

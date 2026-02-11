@@ -8,6 +8,7 @@ import { ClearSelectionButton } from './clear-selection-button';
 import { FilterModeDropdown } from './filter-mode-dropdown';
 import { ModifiedFilterToggle } from './modified-filter-toggle';
 import { SelectAllButton } from './select-all-button';
+import { VisibilityControl } from './visibility-control/visibility-control';
 
 const AssetSelectionControlsComponent = () => {
   return (
@@ -18,6 +19,7 @@ const AssetSelectionControlsComponent = () => {
       breakpoint="large"
     >
       <FilterModeDropdown />
+      <VisibilityControl />
 
       <ToolbarDivider />
 

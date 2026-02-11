@@ -9,6 +9,39 @@ export enum FilterMode {
   TAGLESS = 'Tagless',
 }
 
+/**
+ * Within-class combination logic for the new visibility control.
+ * Each filter class independently chooses how its selections combine.
+ * - OFF: this class does not filter (selections exist but are ignored)
+ * - ANY: match any of the selections (OR)
+ * - ALL: match all of the selections (AND)
+ * - INVERSE: exclude anything matching the selections (NOT)
+ */
+export enum ClassFilterMode {
+  OFF = 'Off',
+  ANY = 'Any',
+  ALL = 'All',
+  INVERSE = 'Inverse',
+}
+
+/**
+ * Per-class visibility settings. Between classes, logic is always AND.
+ * Each class can be OFF (no filtering), or set to ANY/ALL/INVERSE.
+ */
+export type VisibilitySettings = {
+  tags: ClassFilterMode;
+  nameSearch: ClassFilterMode;
+  sizes: ClassFilterMode;
+  buckets: ClassFilterMode;
+  extensions: ClassFilterMode;
+  subfolders: ClassFilterMode;
+  // Scope flags — boolean on/off, ANDed with everything
+  scopeTagless: boolean;
+  scopeSelected: boolean;
+  // Modified — boolean on/off
+  showModified: boolean;
+};
+
 export enum PaginationSize {
   TWENTY_FIVE = 25,
   FIFTY = 50,
@@ -27,6 +60,7 @@ export type Filters = {
   filenamePatterns: string[];
   paginationSize: PaginationSize;
   showModified: boolean;
+  visibility: VisibilitySettings;
 };
 
 export type FilterCount = {

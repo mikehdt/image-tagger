@@ -2,7 +2,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { coreReducers } from './reducers';
-import { FilterMode, Filters, PaginationSize } from './types';
+import {
+  ClassFilterMode,
+  FilterMode,
+  Filters,
+  PaginationSize,
+  VisibilitySettings,
+} from './types';
+
+const initialVisibility: VisibilitySettings = {
+  tags: ClassFilterMode.OFF,
+  nameSearch: ClassFilterMode.OFF,
+  sizes: ClassFilterMode.OFF,
+  buckets: ClassFilterMode.OFF,
+  extensions: ClassFilterMode.OFF,
+  subfolders: ClassFilterMode.OFF,
+  scopeTagless: false,
+  scopeSelected: false,
+  showModified: false,
+};
 
 const initialState: Filters = {
   filterMode: FilterMode.SHOW_ALL,
@@ -14,6 +32,7 @@ const initialState: Filters = {
   filenamePatterns: [],
   paginationSize: PaginationSize.ONE_HUNDRED,
   showModified: false,
+  visibility: initialVisibility,
 };
 
 const filtersSlice = createSlice({
@@ -31,6 +50,7 @@ const filtersSlice = createSlice({
     selectFilenamePatterns: (state) => state.filenamePatterns,
     selectPaginationSize: (state) => state.paginationSize,
     selectShowModified: (state) => state.showModified,
+    selectVisibility: (state) => state.visibility,
   },
 });
 
@@ -55,6 +75,11 @@ export const {
   resetFilterModeIfNeeded,
   addFilenamePattern,
   removeFilenamePattern,
+  setVisibilityClassMode,
+  toggleVisibilityScopeTagless,
+  toggleVisibilityScopeSelected,
+  toggleVisibilityModified,
+  clearVisibility,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice
@@ -68,6 +93,7 @@ export const {
   selectFilenamePatterns,
   selectPaginationSize,
   selectShowModified,
+  selectVisibility,
 } = filtersSlice.selectors;
 
 // Main exports for filters module

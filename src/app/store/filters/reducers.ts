@@ -1,8 +1,11 @@
 // Core reducers for the filters slice
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { FilterMode, Filters, PaginationSize } from './types';
+import { ClassFilterMode, FilterMode, Filters, PaginationSize } from './types';
 import { toggleFilter } from './utils';
+
+/** Key type for the class-based filter modes in visibility settings */
+type VisibilityClassKey = 'tags' | 'nameSearch' | 'sizes' | 'buckets' | 'extensions' | 'subfolders';
 
 export const coreReducers = {
   setTagFilterMode: (
@@ -142,5 +145,42 @@ export const coreReducers = {
 
     // Deduplicate the filter tags to remove any duplicates that might have been created
     state.filterTags = [...new Set(state.filterTags)];
+  },
+
+  // Visibility control reducers
+
+  /** Toggle a class filter mode. If already set to the given mode, switch to OFF. */
+  setVisibilityClassMode: (
+    state: Filters,
+    { payload }: PayloadAction<{ classKey: VisibilityClassKey; mode: ClassFilterMode }>,
+  ) => {
+    const { classKey, mode } = payload;
+    // Toggle behaviour: clicking the active mode turns it off
+    state.visibility[classKey] =
+      state.visibility[classKey] === mode ? ClassFilterMode.OFF : mode;
+  },
+
+  toggleVisibilityScopeTagless: (state: Filters) => {
+    state.visibility.scopeTagless = !state.visibility.scopeTagless;
+  },
+
+  toggleVisibilityScopeSelected: (state: Filters) => {
+    state.visibility.scopeSelected = !state.visibility.scopeSelected;
+  },
+
+  toggleVisibilityModified: (state: Filters) => {
+    state.visibility.showModified = !state.visibility.showModified;
+  },
+
+  clearVisibility: (state: Filters) => {
+    state.visibility.tags = ClassFilterMode.OFF;
+    state.visibility.nameSearch = ClassFilterMode.OFF;
+    state.visibility.sizes = ClassFilterMode.OFF;
+    state.visibility.buckets = ClassFilterMode.OFF;
+    state.visibility.extensions = ClassFilterMode.OFF;
+    state.visibility.subfolders = ClassFilterMode.OFF;
+    state.visibility.scopeTagless = false;
+    state.visibility.scopeSelected = false;
+    state.visibility.showModified = false;
   },
 };

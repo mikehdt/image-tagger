@@ -84,8 +84,9 @@ export const Checkbox = ({
   // Build checkbox styling based on state
   const getCheckboxStyles = () => {
     if (disabled) {
-      return 'border-slate-300 bg-slate-50 shadow-slate-200';
+      return 'border-slate-300 bg-slate-50 shadow-slate-200 dark:bg-slate-700 dark:shadow-slate-900 dark:border-slate-600';
     }
+
     if (showAsSelected) {
       if (isPreview) {
         // Preview-select: lighter sky blue
@@ -104,7 +105,7 @@ export const Checkbox = ({
 
   return (
     <label
-      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700 dark:text-slate-400'}`}
+      className={`inline-flex items-start ${currentSize.gap} ${currentSize.label} select-none ${disabled ? 'cursor-not-allowed text-slate-300 dark:text-slate-600' : 'cursor-pointer text-slate-700 dark:text-slate-400'}`}
       onClick={onClick}
       tabIndex={-1} // prevent double tab stop
     >
