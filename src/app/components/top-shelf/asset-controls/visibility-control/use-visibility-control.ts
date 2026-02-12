@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import {
   selectHasModifiedAssets,
+  selectHasSubfolderAssets,
   selectHasTaglessAssets,
 } from '@/app/store/assets';
 import {
@@ -51,11 +52,12 @@ export const useVisibilityControl = () => {
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const hasSubfolderAssets = useAppSelector(selectHasSubfolderAssets);
 
-  const sections: SectionConfig[] = useMemo(
-    () => [
+  const sections: SectionConfig[] = useMemo(() => {
+    const all: SectionConfig[] = [
       {
-        key: 'tags' as const,
+        key: 'tags',
         label: 'Tags',
         count: filterTags.length,
         mode: visibility.tags,
@@ -63,15 +65,15 @@ export const useVisibilityControl = () => {
         emptyMessage: 'No tags selected',
       },
       {
-        key: 'nameSearch' as const,
+        key: 'nameSearch',
         label: 'Name search',
         count: filenamePatterns.length,
         mode: visibility.nameSearch,
         available: filenamePatterns.length > 0,
-        emptyMessage: 'No patterns added',
+        emptyMessage: 'No name searches',
       },
       {
-        key: 'sizes' as const,
+        key: 'sizes',
         label: 'Sizes',
         count: filterSizes.length,
         mode: visibility.sizes,
@@ -79,7 +81,7 @@ export const useVisibilityControl = () => {
         emptyMessage: 'No sizes selected',
       },
       {
-        key: 'buckets' as const,
+        key: 'buckets',
         label: 'Buckets',
         count: filterBuckets.length,
         mode: visibility.buckets,
@@ -87,32 +89,37 @@ export const useVisibilityControl = () => {
         emptyMessage: 'No buckets selected',
       },
       {
-        key: 'extensions' as const,
+        key: 'extensions',
         label: 'Extensions',
         count: filterExtensions.length,
         mode: visibility.extensions,
         available: filterExtensions.length > 0,
         emptyMessage: 'No types selected',
       },
-      {
-        key: 'subfolders' as const,
-        label: 'Subfolders',
-        count: filterSubfolders.length,
-        mode: visibility.subfolders,
-        available: filterSubfolders.length > 0,
-        emptyMessage: 'No folders selected',
-      },
-    ],
-    [
-      filterTags.length,
-      filenamePatterns.length,
-      filterSizes.length,
-      filterBuckets.length,
-      filterExtensions.length,
-      filterSubfolders.length,
-      visibility,
-    ],
-  );
+      ...(hasSubfolderAssets
+        ? [
+            {
+              key: 'subfolders' as VisibilityClassKey,
+              label: 'Subfolders',
+              count: filterSubfolders.length,
+              mode: visibility.subfolders,
+              available: filterSubfolders.length > 0,
+              emptyMessage: 'No folders selected',
+            },
+          ]
+        : []),
+    ];
+    return all;
+  }, [
+    filterTags.length,
+    filenamePatterns.length,
+    filterSizes.length,
+    filterBuckets.length,
+    filterExtensions.length,
+    filterSubfolders.length,
+    hasSubfolderAssets,
+    visibility,
+  ]);
 
   const handleSetClassMode = useCallback(
     (classKey: VisibilityClassKey, mode: ClassFilterMode) => {

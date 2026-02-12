@@ -29,12 +29,9 @@ const ClassModeSection = ({
         <div className="flex cursor-default items-center gap-2 py-1.5">
           <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-slate-800" />
           <span className="flex items-center gap-1 text-xs text-slate-400 text-shadow-white text-shadow-xs dark:text-shadow-slate-900">
-            {section.label}
+            {section.emptyMessage}
           </span>
           <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-stone-800" />
-        </div>
-        <div className="px-3 py-2 text-(--unselected-text)">
-          {section.emptyMessage}
         </div>
       </>
     );
@@ -91,7 +88,6 @@ export const VisibilityPanel = () => {
             disabled={!hasTaglessAssets}
             onChange={handleToggleScopeTagless}
             label="Tagless only"
-            size="small"
           />
         </div>
         <div className="px-3 py-1">
@@ -100,7 +96,6 @@ export const VisibilityPanel = () => {
             disabled={selectedAssetsCount === 0}
             onChange={handleToggleScopeSelected}
             label="Selected only"
-            size="small"
           />
         </div>
         <div className="px-3 pt-1">
@@ -109,7 +104,6 @@ export const VisibilityPanel = () => {
             disabled={!hasModifiedAssets}
             onChange={handleToggleModified}
             label="Modified only"
-            size="small"
           />
         </div>
       </div>

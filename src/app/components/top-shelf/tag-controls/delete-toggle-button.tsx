@@ -54,9 +54,7 @@ export const DeleteToggleButton = () => {
         <FileMinusIcon className="h-4 w-4" />
       )}
       {filterTags.length > 0 && deleteToggleAffectedCount > 0 && (
-        <span className="ml-1 text-xs text-slate-500 dark:text-slate-300">
-          {deleteToggleAffectedCount}
-        </span>
+        <span className="ml-1 text-xs">{deleteToggleAffectedCount}</span>
       )}
     </Button>
   );

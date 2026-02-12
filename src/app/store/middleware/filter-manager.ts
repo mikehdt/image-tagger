@@ -2,10 +2,11 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { addTag, deleteTag, editTag, selectHasTaglessAssets } from '../assets';
+import { addTag, deleteTag, editTag, selectHasModifiedAssets, selectHasTaglessAssets } from '../assets';
 import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
+  ClassFilterMode,
   clearBucketFilters,
   clearExtensionFilters,
   clearSizeFilters,
@@ -13,11 +14,16 @@ import {
   FilterMode,
   selectHasActiveFilters,
   setTagFilterMode,
+  setVisibilityClassMode,
   toggleBucketFilter,
   toggleExtensionFilter,
   toggleSizeFilter,
   toggleTagFilter,
+  toggleVisibilityModified,
+  toggleVisibilityScopeSelected,
+  toggleVisibilityScopeTagless,
 } from '../filters';
+import { clearSelection } from '../selection';
 
 /**
  * Generic helper to find invalid filters
@@ -133,6 +139,51 @@ const cleanupInvalidFilters = (
 };
 
 /**
+ * Clean up visibility scope flags that no longer apply.
+ * Also resets class modes whose selections have been emptied.
+ */
+const cleanupVisibility = (
+  state: RootState,
+  dispatch: (action: any) => void,
+): void => {
+  const { visibility } = state.filters;
+
+  // Scope: tagless — clear if no tagless assets remain
+  if (visibility.scopeTagless && !selectHasTaglessAssets(state)) {
+    dispatch(toggleVisibilityScopeTagless());
+  }
+
+  // Scope: selected — clear if no assets are selected
+  if (visibility.scopeSelected && state.selection.selectedAssets.length === 0) {
+    dispatch(toggleVisibilityScopeSelected());
+  }
+
+  // Scope: modified — clear if no modified assets remain
+  if (visibility.showModified && !selectHasModifiedAssets(state)) {
+    dispatch(toggleVisibilityModified());
+  }
+
+  // Class modes — reset to OFF if their selections are now empty
+  const classSelections: Array<{
+    key: 'tags' | 'nameSearch' | 'sizes' | 'buckets' | 'extensions' | 'subfolders';
+    selections: string[];
+  }> = [
+    { key: 'tags', selections: state.filters.filterTags },
+    { key: 'nameSearch', selections: state.filters.filenamePatterns },
+    { key: 'sizes', selections: state.filters.filterSizes },
+    { key: 'buckets', selections: state.filters.filterBuckets },
+    { key: 'extensions', selections: state.filters.filterExtensions },
+    { key: 'subfolders', selections: state.filters.filterSubfolders },
+  ];
+
+  for (const { key, selections } of classSelections) {
+    if (visibility[key] !== ClassFilterMode.OFF && selections.length === 0) {
+      dispatch(setVisibilityClassMode({ classKey: key, mode: ClassFilterMode.OFF }));
+    }
+  }
+};
+
+/**
  * Check if filter mode should be reset to SHOW_ALL
  */
 const shouldResetFilterMode = (state: RootState): boolean => {
@@ -174,6 +225,12 @@ filterManagerMiddleware.startListening({
     // Clean up invalid filters
     const hasChanges = cleanupInvalidFilters(state, listenerApi.dispatch);
 
+    // Clean up visibility scope flags and class modes
+    cleanupVisibility(
+      listenerApi.getState() as RootState,
+      listenerApi.dispatch,
+    );
+
     // Check if filter mode needs reset (after cleanup)
     if (hasChanges) {
       const updatedState = listenerApi.getState() as RootState;
@@ -197,6 +254,9 @@ filterManagerMiddleware.startListening({
         return;
       }
     }
+
+    // Clean up visibility scope flags after tag operations
+    cleanupVisibility(state, listenerApi.dispatch);
 
     // Handle tag deletion from filters
     if (deleteTag.match(action)) {
@@ -236,7 +296,7 @@ filterManagerMiddleware.startListening({
   },
 });
 
-// Listen to filter toggles and reset mode if needed
+// Listen to filter toggles and reset mode/visibility if needed
 filterManagerMiddleware.startListening({
   matcher: isAnyOf(
     toggleTagFilter,
@@ -251,12 +311,26 @@ filterManagerMiddleware.startListening({
   effect: async (_action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 
+    // Reset class modes whose selections are now empty
+    cleanupVisibility(state, listenerApi.dispatch);
+
     // Don't auto-reset for TAGLESS mode (has its own logic)
     if (
       state.filters.filterMode !== FilterMode.TAGLESS &&
       shouldResetFilterMode(state)
     ) {
       listenerApi.dispatch(setTagFilterMode(FilterMode.SHOW_ALL));
+    }
+  },
+});
+
+// Listen to selection clearing and reset scopeSelected if needed
+filterManagerMiddleware.startListening({
+  actionCreator: clearSelection,
+  effect: async (_action, listenerApi) => {
+    const state = listenerApi.getState() as RootState;
+    if (state.filters.visibility.scopeSelected) {
+      listenerApi.dispatch(toggleVisibilityScopeSelected());
     }
   },
 });
