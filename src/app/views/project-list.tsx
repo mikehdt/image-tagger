@@ -2,7 +2,6 @@
 
 import {
   FolderClosedIcon,
-  FolderIcon,
   FolderXIcon,
   MonitorIcon,
   MoonIcon,

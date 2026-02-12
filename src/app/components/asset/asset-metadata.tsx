@@ -31,7 +31,6 @@ import { useToast } from '../shared/toast';
 // Individual selectors for metadata - avoids creating new object references
 const selectFilenamePatterns = (state: RootState) =>
   state.filters.filenamePatterns;
-const selectProjectPath = (state: RootState) => state.project.info.projectPath;
 const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
 const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
 const selectFilterExtensions = (state: RootState) =>
@@ -80,7 +79,6 @@ const AssetMetadataComponent = ({
 
   // Individual selector calls - each only triggers re-render when its specific value changes
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
-  const projectPath = useAppSelector(selectProjectPath);
   const filterSizes = useAppSelector(selectFilterSizes);
   const filterBuckets = useAppSelector(selectFilterBuckets);
   const filterExtensions = useAppSelector(selectFilterExtensions);

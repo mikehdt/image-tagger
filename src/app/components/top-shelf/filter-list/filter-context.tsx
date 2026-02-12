@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
@@ -99,7 +98,6 @@ export const FilterProvider = ({
   onClose,
   inputRef,
 }: FilterProviderProps) => {
-
   // Persistent state for view and sort settings (initialized from module-level variables)
   const [activeView, setActiveView] = useState<FilterView>(persistedActiveView);
   const [sizeSubView, setSizeSubViewState] =

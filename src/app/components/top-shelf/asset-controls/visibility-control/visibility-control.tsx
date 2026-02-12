@@ -37,13 +37,13 @@ const VisibilityControlComponent = () => {
         aria-haspopup="true"
         aria-expanded={isOpen}
         title="Visibility settings"
-        color={isActive ? 'teal' : 'slate'}
+        color={isActive ? 'sky' : 'slate'}
         className="flex gap-1"
       >
         <span className="text-nowrap">Filter Assets</span>
 
         {isActive && (
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-teal-500 px-1 text-[10px] font-bold text-white tabular-nums">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-xs font-bold text-white tabular-nums">
             {activeCount}
           </span>
         )}

@@ -7,12 +7,6 @@ import type { TaggerModel } from '../../types';
 
 const PROVIDER_ID = 'wd14';
 
-// Common files needed for all WD14 models
-const WD14_FILES = [
-  { name: 'model.onnx', size: 0 }, // Size varies by model, set below
-  { name: 'selected_tags.csv', size: 500_000 }, // ~500KB tags file
-];
-
 /**
  * WD14 v2 models - support both TensorFlow and ONNX
  */

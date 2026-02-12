@@ -36,10 +36,7 @@ type TaggingManagerProps = {
   onTagEditingChange?: (isEditing: boolean) => void; // Placeholder for future use
 };
 
-const TaggingManagerComponent = ({
-  assetId,
-  onTagEditingChange: _onTagEditingChange, // Unused for now
-}: TaggingManagerProps) => {
+const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
   const dispatch = useAppDispatch();
 
   // Get tag data from Redux

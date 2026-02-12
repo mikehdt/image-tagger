@@ -6,12 +6,7 @@
  * - Memo blocks re-renders of entire DnD subtree when tags unchanged
  * - Edit state managed here to keep it close to where it's used
  */
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-} from '@dnd-kit/core';
+import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -98,7 +93,7 @@ const TagsDisplayComponent = ({
     }
   }, []);
 
-  const handleDragStart = useCallback((_event: DragStartEvent) => {
+  const handleDragStart = useCallback(() => {
     isDraggingRef.current = true;
   }, []);
 

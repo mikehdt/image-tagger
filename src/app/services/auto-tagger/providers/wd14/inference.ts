@@ -5,7 +5,6 @@
 
 import fs from 'fs';
 import * as ort from 'onnxruntime-node';
-import path from 'path';
 
 import { getModelFilePath } from '../../model-manager';
 import type {

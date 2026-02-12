@@ -45,9 +45,7 @@ export default function Page() {
   const [canShowAssets, setCanShowAssets] = useState(
     () => getInitialProjectContext().hasContext,
   );
-  const [isLoading, setIsLoading] = useState(
-    () => !getInitialProjectContext().hasContext,
-  );
+
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Check if a project is selected or if we're using the default project
@@ -153,8 +151,6 @@ export default function Page() {
           }),
         );
         setCanShowAssets(true);
-      } finally {
-        setIsLoading(false);
       }
     };
 

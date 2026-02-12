@@ -1,8 +1,19 @@
-import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
+import {
+  createListenerMiddleware,
+  Dispatch,
+  isAnyOf,
+  UnknownAction,
+} from '@reduxjs/toolkit';
 
 import { composeDimensions } from '../../utils/helpers';
 import { RootState } from '..';
-import { addTag, deleteTag, editTag, selectHasModifiedAssets, selectHasTaglessAssets } from '../assets';
+import {
+  addTag,
+  deleteTag,
+  editTag,
+  selectHasModifiedAssets,
+  selectHasTaglessAssets,
+} from '../assets';
 import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
@@ -61,9 +72,9 @@ const extractExistingValues = (state: RootState) => {
 const cleanupFilterType = (
   activeFilters: string[],
   existingValues: Set<string>,
-  clearAction: () => any,
-  toggleAction: (value: string) => any,
-  dispatch: (action: any) => void,
+  clearAction: () => UnknownAction,
+  toggleAction: (value: string) => UnknownAction,
+  dispatch: Dispatch<UnknownAction>,
 ): boolean => {
   const invalidFilters = findInvalidFilters(activeFilters, existingValues);
 
@@ -83,7 +94,7 @@ const cleanupFilterType = (
  */
 const cleanupInvalidFilters = (
   state: RootState,
-  dispatch: (action: any) => void,
+  dispatch: Dispatch<UnknownAction>,
 ): boolean => {
   const { assets, filters } = state;
 
@@ -144,7 +155,7 @@ const cleanupInvalidFilters = (
  */
 const cleanupVisibility = (
   state: RootState,
-  dispatch: (action: any) => void,
+  dispatch: Dispatch<UnknownAction>,
 ): void => {
   const { visibility } = state.filters;
 
@@ -165,7 +176,13 @@ const cleanupVisibility = (
 
   // Class modes — reset to OFF if their selections are now empty
   const classSelections: Array<{
-    key: 'tags' | 'nameSearch' | 'sizes' | 'buckets' | 'extensions' | 'subfolders';
+    key:
+      | 'tags'
+      | 'nameSearch'
+      | 'sizes'
+      | 'buckets'
+      | 'extensions'
+      | 'subfolders';
     selections: string[];
   }> = [
     { key: 'tags', selections: state.filters.filterTags },
@@ -178,7 +195,9 @@ const cleanupVisibility = (
 
   for (const { key, selections } of classSelections) {
     if (visibility[key] !== ClassFilterMode.OFF && selections.length === 0) {
-      dispatch(setVisibilityClassMode({ classKey: key, mode: ClassFilterMode.OFF }));
+      dispatch(
+        setVisibilityClassMode({ classKey: key, mode: ClassFilterMode.OFF }),
+      );
     }
   }
 };
