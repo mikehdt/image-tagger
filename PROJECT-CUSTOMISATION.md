@@ -1,8 +1,8 @@
-# Project Customization Guide
+# Project Customisation Guide
 
 The image tagger now supports customisable project information including titles, button colours, and thumbnails.
 
-## Setting up Project Customization
+## Setting up Project Customisation
 
 ### 1. Create the Project Folder
 

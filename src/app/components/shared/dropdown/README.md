@@ -4,7 +4,7 @@ A flexible, accessible dropdown component with keyboard navigation support.
 
 ## Features
 
-- Customizable styling for all parts of the dropdown
+- Customisable styling for all parts of the dropdown
 - Support for disabled options
 - Keyboard navigation (arrow keys, Escape, Enter)
 - Smart positioning to stay within viewport
@@ -31,7 +31,7 @@ const MyComponent = () => {
       items={items}
       selectedValue={selectedValue}
       onChange={setSelectedValue}
-      // Optional customizations:
+      // Optional customisations:
       minMenuWidth="150px"
       icon={<MyIcon />}
       buttonClassName="custom-button"

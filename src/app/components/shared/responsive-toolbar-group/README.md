@@ -32,7 +32,7 @@ import { SomeIcon } from 'react-lucide';
 ## Features
 
 - **Responsive Design**: Automatically switches between inline and popover layouts
-- **Smart Positioning**: Popover is centered by default but adjusts to stay within viewport bounds
+- **Smart Positioning**: Popover is centred by default but adjusts to stay within viewport bounds
 - **Keyboard Support**: Space/Enter to open popover, Escape to close
 - **Accessibility**: Proper ARIA attributes and focus management
 - **Click Outside**: Popover closes when clicking outside
@@ -41,7 +41,7 @@ import { SomeIcon } from 'react-lucide';
 ## Implementation Notes
 
 - Uses Tailwind's `md:` and `max-md:` breakpoints for responsive behavior
-- Popover positioning is automatically calculated to stay centered and within viewport bounds
+- Popover positioning is automatically calculated to stay centred and within viewport bounds
 - Uses the shared Button component for consistent styling of the responsive trigger button
 - Children components should include their own responsive classes for optimal display in both modes
 - The inactive icon in large mode includes a dotted border separator for visual grouping

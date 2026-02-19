@@ -1,6 +1,6 @@
-# Centralized Project Configuration
+# Centralised Project Configuration
 
-This folder contains centralized project configurations for the image tagger application.
+This folder contains centralised project configurations for the image tagger application.
 
 ## Structure
 
@@ -53,7 +53,7 @@ This will hide the project from listings. The centralized config takes precedenc
 
 ## Priority
 
-1. Centralized config (`/public/projects/[name].json`) - Full feature set
+1. Centralised config (`/public/projects/[name].json`) - Full feature set
 2. Local config (`[project-folder]/_project.json`) - Privacy only
 3. Default behavior if no config exists
 
@@ -81,7 +81,7 @@ Files: `best-work-2024.json` + `best-work-2024.jpg`
 }
 ```
 
-### Hidden Project (via centralized config)
+### Hidden Project (via centralised config)
 
 ```json
 {

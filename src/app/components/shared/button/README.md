@@ -6,7 +6,7 @@ A comprehensive, reusable button component that provides consistent styling and 
 
 - **Multiple Color Variants**: slate, amber, rose, teal, sky
 - **Multiple Sizes**: medium, large
-- **Multiple Behaviors**:
+- **Multiple Behaviours**:
   - Standard clickable button
   - Toggle button (pressed/unpressed state)
   - Deep toggle button (with enhanced pressed styling)

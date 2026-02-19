@@ -22,10 +22,10 @@ type ModalProps = {
 };
 
 /**
- * A customizable modal component that dims the background and focuses on content
+ * A customisable modal component that dims the background and focuses on content
  * - Dims the UI behind it (clickable to dismiss)
  * - Resets when dismissed (doesn't maintain state)
- * - Customizable layout and design
+ * - Customisable layout and design
  * - Remains centered and responsive
  * - Smooth fade in/out animations
  * - Includes dismiss button (X)

@@ -1,12 +1,12 @@
 # Modal Component
 
-A customizable, accessible modal dialog component with smooth animations and keyboard support.
+A customisable, accessible modal dialog component with smooth animations and keyboard support.
 
 ## Features
 
 - Dims the UI behind it (clickable to dismiss)
 - Resets when dismissed (doesn't maintain state)
-- Customizable layout and design
+- Customisable layout and design
 - Remains centered and responsive
 - Smooth fade in/out animations
 - Keyboard accessible (ESC to close)
