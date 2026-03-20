@@ -244,7 +244,7 @@ export const Popup: React.FC<PopupProps> = ({
       data-popup-id={id}
       data-constrained={isConstrained || undefined}
       style={appliedStyles}
-      className={`${
+      className={`text-sm ${
         transitionsEnabled ? 'transition-all duration-150 ease-in-out' : ''
       } ${
         state.isOpen

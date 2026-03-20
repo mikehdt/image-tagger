@@ -63,7 +63,6 @@ export const MenuButton = ({
   const {
     highlightedIndex,
     getOptionId,
-    activeDescendant,
     resetHighlight,
     handlePositioned,
     handleKeyDown,
