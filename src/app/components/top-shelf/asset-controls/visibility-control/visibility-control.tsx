@@ -1,7 +1,6 @@
 import { ChevronDownIcon } from 'lucide-react';
 import { memo, useCallback, useId, useRef } from 'react';
 
-import { Button } from '@/app/components/shared/button';
 import { Popup, usePopup } from '@/app/components/shared/popup';
 
 import { useVisibilityControl } from './use-visibility-control';
@@ -30,15 +29,18 @@ const VisibilityControlComponent = () => {
 
   return (
     <div className="relative">
-      <Button
+      <button
         ref={buttonRef}
-        isPressed={isOpen}
+        type="button"
         onClick={handleClick}
         aria-haspopup="true"
         aria-expanded={isOpen}
         title="Visibility settings"
-        color={isActive ? 'sky' : 'slate'}
-        className="flex gap-1"
+        className={`flex cursor-pointer items-center gap-1 rounded-sm border border-slate-300 px-2 py-1 text-sm whitespace-nowrap inset-shadow-xs inset-shadow-white transition-colors dark:border-slate-700 dark:inset-shadow-white/10 ${
+          isOpen
+            ? 'bg-white shadow-sm dark:bg-slate-700'
+            : 'bg-slate-100 shadow-sm hover:bg-slate-200 dark:bg-slate-600 dark:hover:bg-slate-500'
+        }`}
       >
         <span className="text-nowrap">Filter Assets</span>
 
@@ -53,7 +55,7 @@ const VisibilityControlComponent = () => {
             isOpen ? 'rotate-180' : ''
           }`}
         />
-      </Button>
+      </button>
 
       <Popup
         id={popupId}

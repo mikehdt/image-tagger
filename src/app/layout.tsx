@@ -1,7 +1,7 @@
 import './globals.css';
 
 import type { Metadata } from 'next';
-import { Geist /* Geist_Mono */ } from 'next/font/google';
+import { Geist } from 'next/font/google';
 
 import { AutoTaggerSetupModal } from './components/auto-tagger';
 import { ModalProvider } from './components/shared/modal';
@@ -16,11 +16,6 @@ const geistSans = Geist({
   subsets: ['latin'],
   fallback: ['system-ui', 'arial'],
 });
-
-// const geistMono = Geist_Mono({
-//   variable: '--font-geist-mono',
-//   subsets: ['latin'],
-// });
 
 export const metadata: Metadata = {
   title: 'Image Tagger',
@@ -56,8 +51,12 @@ export default function Root({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <body className={geistSans.className}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={geistSans.className}
+    >
+      <body>
         <StoreProvider>
           <AppProvider>
             <ModalProvider>

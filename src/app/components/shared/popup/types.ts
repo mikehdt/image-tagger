@@ -45,6 +45,8 @@ export interface PopupProps {
   triggerRef?: RefObject<HTMLElement | null>;
   offset?: number;
   className?: string;
+  /** Additional inline styles merged onto the popup container */
+  style?: React.CSSProperties;
   children: ReactNode;
   /** Skip maxHeight/overflow handling - useful for popups containing nested popups */
   disableOverflowHandling?: boolean;

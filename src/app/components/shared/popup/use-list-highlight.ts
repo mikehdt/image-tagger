@@ -1,0 +1,191 @@
+'use client';
+
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+
+/**
+ * Shared keyboard-navigation and highlight state for popup lists
+ * (dropdowns, menus, etc.).
+ *
+ * Keeps focus on the trigger element and tracks the highlighted index via
+ * `aria-activedescendant`, following the ARIA combobox/listbox pattern.
+ *
+ * Features:
+ * - Two-layer highlight: keyboard anchor + mouse hover override
+ * - Arrow/Home/End/Tab navigation (skipping non-navigable indices)
+ * - Enter/Space to confirm, Escape to close
+ * - Scroll-into-view for the highlighted item
+ * - Option ID generation for aria-activedescendant
+ * - onPositioned callback to highlight an initial item after the popup opens
+ */
+
+interface UseListHighlightOptions {
+  /** Total number of entries (including non-navigable ones like group headers). */
+  count: number;
+  /**
+   * Returns true if the entry at `index` can be highlighted.
+   * Return false for group headers, disabled items, etc.
+   */
+  isNavigable: (index: number) => boolean;
+  /** Whether the popup is currently open (for scroll-into-view). */
+  isOpen: boolean;
+  /** Called when the user confirms the highlighted item (Enter/Space). */
+  onSelect: (index: number) => void;
+  /** Called to close the popup (Escape/Tab). */
+  onClose: () => void;
+  /**
+   * Preferred initial index when the popup opens (e.g. the selected item).
+   * Falls back to the first navigable item if this index is not navigable.
+   * Defaults to -1 (first navigable item).
+   */
+  initialIndex?: number;
+}
+
+/** Find the next navigable index in the given direction, or -1. */
+function findNext(
+  count: number,
+  isNavigable: (i: number) => boolean,
+  from: number,
+  direction: 1 | -1,
+): number {
+  let i = from;
+  while (i >= 0 && i < count) {
+    if (isNavigable(i)) return i;
+    i += direction;
+  }
+  return -1;
+}
+
+export function useListHighlight({
+  count,
+  isNavigable,
+  isOpen,
+  onSelect,
+  onClose,
+  initialIndex = -1,
+}: UseListHighlightOptions) {
+  const idPrefix = useId();
+
+  // Two-layer highlight: keyboard is the anchor, mouse overrides while hovering.
+  const [keyboardIndex, setKeyboardIndex] = useState(-1);
+  const [hoverIndex, setHoverIndex] = useState(-1);
+  const highlightedIndex = hoverIndex >= 0 ? hoverIndex : keyboardIndex;
+
+  /** Get the DOM id for an option at `index` (for aria-activedescendant). */
+  const getOptionId = useCallback(
+    (index: number) => `${idPrefix}-option-${index}`,
+    [idPrefix],
+  );
+
+  /** The aria-activedescendant value for the trigger element. */
+  const activeDescendant = useMemo(
+    () => (highlightedIndex >= 0 ? getOptionId(highlightedIndex) : undefined),
+    [highlightedIndex, getOptionId],
+  );
+
+  /** Reset highlight state (call when closing the popup). */
+  const resetHighlight = useCallback(() => {
+    setKeyboardIndex(-1);
+    setHoverIndex(-1);
+  }, []);
+
+  /**
+   * Popup onPositioned callback — highlights the initial item after the popup
+   * finishes its positioning phase. Called by Popup after its own double-rAF,
+   * so no additional frame delay is needed here.
+   */
+  const handlePositioned = useCallback(() => {
+    const start =
+      initialIndex >= 0 && isNavigable(initialIndex)
+        ? initialIndex
+        : findNext(count, isNavigable, 0, 1);
+    if (start >= 0) {
+      setKeyboardIndex(start);
+    }
+  }, [initialIndex, count, isNavigable]);
+
+  /**
+   * Keyboard handler for the open list. Call this from the trigger's onKeyDown
+   * when the popup is open.
+   */
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      switch (e.key) {
+        case 'Enter':
+        case ' ':
+          if (highlightedIndex >= 0) onSelect(highlightedIndex);
+          e.preventDefault();
+          break;
+        case 'Escape':
+          onClose();
+          e.preventDefault();
+          break;
+        case 'ArrowDown': {
+          const next = findNext(count, isNavigable, highlightedIndex + 1, 1);
+          if (next >= 0) {
+            setKeyboardIndex(next);
+            setHoverIndex(-1);
+          }
+          e.preventDefault();
+          break;
+        }
+        case 'ArrowUp': {
+          const prev = findNext(count, isNavigable, highlightedIndex - 1, -1);
+          if (prev >= 0) {
+            setKeyboardIndex(prev);
+            setHoverIndex(-1);
+          }
+          e.preventDefault();
+          break;
+        }
+        case 'Home': {
+          const first = findNext(count, isNavigable, 0, 1);
+          if (first >= 0) {
+            setKeyboardIndex(first);
+            setHoverIndex(-1);
+          }
+          e.preventDefault();
+          break;
+        }
+        case 'End': {
+          const last = findNext(count, isNavigable, count - 1, -1);
+          if (last >= 0) {
+            setKeyboardIndex(last);
+            setHoverIndex(-1);
+          }
+          e.preventDefault();
+          break;
+        }
+        case 'Tab':
+          onClose();
+          break;
+      }
+    },
+    [count, isNavigable, highlightedIndex, onSelect, onClose],
+  );
+
+  /** Props to spread on each item element for hover tracking. */
+  const getItemHoverProps = useCallback(
+    (index: number) => ({
+      onMouseMove: () => setHoverIndex(index),
+      onMouseLeave: () => setHoverIndex(-1),
+    }),
+    [],
+  );
+
+  // Scroll highlighted item into view when navigating by keyboard
+  useEffect(() => {
+    if (!isOpen || highlightedIndex < 0) return;
+    const el = document.getElementById(getOptionId(highlightedIndex));
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [isOpen, highlightedIndex, getOptionId]);
+
+  return {
+    highlightedIndex,
+    getOptionId,
+    activeDescendant,
+    resetHighlight,
+    handlePositioned,
+    handleKeyDown,
+    getItemHoverProps,
+  };
+}

@@ -6,6 +6,7 @@ export const DEFAULT_OFFSET = 4; // px spacing between trigger and popup - match
 
 const VIEWPORT_MARGIN = 16; // px minimum margin from viewport edges
 const MAX_HEIGHT_VH = 0.8; // Maximum height as fraction of viewport height (80vh)
+const MIN_DROPDOWN_HEIGHT = 120; // px minimum before trying the opposite direction
 
 interface PopupPositionResult {
   styles: React.CSSProperties;
@@ -16,10 +17,12 @@ interface PopupPositionResult {
 
 /**
  * Calculate popup position using pure math - no DOM manipulation.
- * Takes the popup's natural width and trigger rect, returns final styles.
+ * Uses position:fixed with viewport-relative coordinates so popups
+ * are never clipped by overflow:hidden/auto on ancestor elements.
  */
 export function calculatePopupPosition(
   popupWidth: number,
+  popupHeight: number,
   triggerRect: DOMRect,
   desiredPosition: PopupPosition,
   offset: number = DEFAULT_OFFSET,
@@ -29,20 +32,50 @@ export function calculatePopupPosition(
   const viewportHeight = window.innerHeight;
 
   const styles: React.CSSProperties = {
-    position: 'absolute',
+    position: 'fixed',
     zIndex: 60,
   };
 
-  const adjustedPosition = desiredPosition;
-  const verticalPart = desiredPosition.startsWith('top') ? 'top' : 'bottom';
+  const horizontalPart = desiredPosition.includes('left')
+    ? '-left'
+    : desiredPosition.includes('right')
+      ? '-right'
+      : '';
+  const desiredVertical = desiredPosition.startsWith('top') ? 'top' : 'bottom';
 
-  // --- Vertical positioning ---
-  if (verticalPart === 'top') {
-    styles.bottom = '100%';
-    styles.marginBottom = `${offset}px`;
+  // --- Vertical positioning with flip logic ---
+  const spaceBelow =
+    viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
+  const spaceAbove = triggerRect.top - offset - VIEWPORT_MARGIN;
+
+  let verticalPart: 'top' | 'bottom';
+
+  if (disableOverflowHandling) {
+    // No flip when overflow handling is disabled
+    verticalPart = desiredVertical;
   } else {
-    styles.top = '100%';
-    styles.marginTop = `${offset}px`;
+    const desiredSpace = desiredVertical === 'bottom' ? spaceBelow : spaceAbove;
+    const oppositeSpace =
+      desiredVertical === 'bottom' ? spaceAbove : spaceBelow;
+
+    if (desiredSpace >= popupHeight || desiredSpace >= MIN_DROPDOWN_HEIGHT) {
+      // Desired direction has enough room (fits fully, or at least the minimum)
+      verticalPart = desiredVertical;
+    } else if (oppositeSpace > desiredSpace) {
+      // Opposite direction has more room — flip
+      verticalPart = desiredVertical === 'bottom' ? 'top' : 'bottom';
+    } else {
+      // Neither side is great — stick with the desired direction
+      verticalPart = desiredVertical;
+    }
+  }
+
+  const adjustedPosition = `${verticalPart}${horizontalPart}` as PopupPosition;
+
+  if (verticalPart === 'top') {
+    styles.bottom = viewportHeight - triggerRect.top + offset;
+  } else {
+    styles.top = triggerRect.bottom + offset;
   }
 
   // --- Horizontal positioning ---
@@ -51,15 +84,12 @@ export function calculatePopupPosition(
   let naturalRight: number;
 
   if (desiredPosition.includes('left')) {
-    // Left-aligned: popup's left edge aligns with trigger's left edge
     naturalLeft = triggerRect.left;
     naturalRight = naturalLeft + popupWidth;
   } else if (desiredPosition.includes('right')) {
-    // Right-aligned: popup's right edge aligns with trigger's right edge
     naturalRight = triggerRect.right;
     naturalLeft = naturalRight - popupWidth;
   } else {
-    // Centered: popup is centered on trigger
     const triggerCenter = triggerRect.left + triggerRect.width / 2;
     naturalLeft = triggerCenter - popupWidth / 2;
     naturalRight = triggerCenter + popupWidth / 2;
@@ -74,52 +104,40 @@ export function calculatePopupPosition(
   const overflowRight = Math.max(0, naturalRight - rightEdgeLimit);
   const overflowLeft = Math.max(0, leftEdgeLimit - naturalLeft);
 
-  // Check if popup is wider than available space (with buffer for rounding)
   const fitsInViewport = popupWidth <= maxAvailableWidth + ROUNDING_BUFFER;
-  const isConstrained = !fitsInViewport || overflowRight > 0 || overflowLeft > 0;
+  const isConstrained =
+    !fitsInViewport || overflowRight > 0 || overflowLeft > 0;
 
   if (!fitsInViewport) {
-    // Popup is wider than viewport - constrain width and pin to left margin
     styles.maxWidth = `${maxAvailableWidth}px`;
     styles.minWidth = `${Math.min(300, maxAvailableWidth)}px`;
-    styles.left = leftEdgeLimit - triggerRect.left;
-  } else if (overflowRight > ROUNDING_BUFFER && overflowLeft > ROUNDING_BUFFER) {
-    // Somehow overflowing both sides but fits - this shouldn't happen, but handle it
-    styles.left = leftEdgeLimit - triggerRect.left;
+    styles.left = leftEdgeLimit;
   } else if (overflowRight > ROUNDING_BUFFER) {
-    // Overflowing right only - shift left to fit
-    styles.left = rightEdgeLimit - popupWidth - triggerRect.left;
+    styles.left = rightEdgeLimit - popupWidth;
   } else if (overflowLeft > ROUNDING_BUFFER) {
-    // Overflowing left only - shift right to fit
-    styles.left = leftEdgeLimit - triggerRect.left;
+    styles.left = leftEdgeLimit;
   } else {
-    // No overflow - use natural positioning
-    if (desiredPosition.includes('left')) {
-      styles.left = 0;
-    } else if (desiredPosition.includes('right')) {
-      styles.right = 0;
-    } else {
-      // Center
-      styles.left = '50%';
-      styles.transform = 'translateX(-50%)';
-    }
+    styles.left = naturalLeft;
   }
 
   // --- Vertical height constraint ---
   if (!disableOverflowHandling) {
     const maxPreferredHeight = viewportHeight * MAX_HEIGHT_VH;
+    const availableHeight = verticalPart === 'bottom' ? spaceBelow : spaceAbove;
 
-    if (verticalPart === 'bottom') {
-      const availableHeight =
-        viewportHeight - triggerRect.bottom - offset - VIEWPORT_MARGIN;
-      const maxHeight = Math.min(maxPreferredHeight, availableHeight);
-
-      if (maxHeight > 0) {
-        styles.maxHeight = `${maxHeight}px`;
-        styles.overflowY = 'auto';
-      }
+    if (
+      availableHeight < MIN_DROPDOWN_HEIGHT &&
+      popupHeight > availableHeight
+    ) {
+      // Neither direction has enough room — fill the viewport
+      // Remove directional positioning; pin to both edges with margin
+      delete styles.top;
+      delete styles.bottom;
+      styles.top = VIEWPORT_MARGIN;
+      styles.bottom = VIEWPORT_MARGIN;
+      styles.maxHeight = `${viewportHeight - VIEWPORT_MARGIN * 2}px`;
+      styles.overflowY = 'auto';
     } else {
-      const availableHeight = triggerRect.top - offset - VIEWPORT_MARGIN;
       const maxHeight = Math.min(maxPreferredHeight, availableHeight);
 
       if (maxHeight > 0) {

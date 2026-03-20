@@ -1,7 +1,16 @@
 import { ChevronDownIcon } from 'lucide-react';
-import React, { ReactNode, useCallback, useId, useRef } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { Popup, usePopup } from '../popup';
+import { useListHighlight } from '../popup/use-list-highlight';
 
 /**
  * Dropdown Item interface - defines the structure of each dropdown option
@@ -16,6 +25,46 @@ export interface DropdownItem<T> {
 }
 
 /**
+ * A named group of dropdown items, rendered with a non-selectable header
+ */
+export interface DropdownGroup<T> {
+  /** Label shown as the group header */
+  groupLabel: ReactNode;
+  /** Items within this group */
+  items: DropdownItem<T>[];
+}
+
+/** A single entry in the flattened list: either a selectable item or a group header */
+type FlatEntry<T> =
+  | { kind: 'item'; item: DropdownItem<T> }
+  | { kind: 'group-header'; label: ReactNode };
+
+/** Type guard to distinguish groups from items */
+function isDropdownGroup<T>(
+  entry: DropdownItem<T> | DropdownGroup<T>,
+): entry is DropdownGroup<T> {
+  return 'groupLabel' in entry;
+}
+
+/** Flatten mixed items/groups into a single list for rendering and navigation */
+function flattenEntries<T>(
+  items: (DropdownItem<T> | DropdownGroup<T>)[],
+): FlatEntry<T>[] {
+  const result: FlatEntry<T>[] = [];
+  for (const entry of items) {
+    if (isDropdownGroup(entry)) {
+      result.push({ kind: 'group-header', label: entry.groupLabel });
+      for (const item of entry.items) {
+        result.push({ kind: 'item', item });
+      }
+    } else {
+      result.push({ kind: 'item', item: entry });
+    }
+  }
+  return result;
+}
+
+/**
  * Size options for the dropdown
  */
 type DropdownSize = 'small' | 'medium' | 'large';
@@ -24,10 +73,14 @@ type DropdownSize = 'small' | 'medium' | 'large';
  * Props for the Dropdown component
  */
 interface DropdownProps<T> {
-  items: DropdownItem<T>[];
+  items: (DropdownItem<T> | DropdownGroup<T>)[];
   selectedValue: T;
   onChange: (value: T) => void;
   selectedValueRenderer?: (item: DropdownItem<T>) => ReactNode;
+  /** Text shown when no item is selected (selectedValue doesn't match any item) */
+  placeholder?: string;
+  /** Accessible label for the dropdown (used as aria-label on the trigger button) */
+  'aria-label'?: string;
   className?: string;
   buttonClassName?: string;
   menuClassName?: string;
@@ -46,8 +99,11 @@ interface DropdownProps<T> {
 const sizeStyles: Record<DropdownSize, string> = {
   small: 'px-2 py-1',
   medium: 'px-2 py-1',
-  large: 'px-3 py-2',
+  large: 'px-4 py-2.5',
 };
+
+/** Minimum width for the popup menu (matches Tailwind min-w-40 = 10rem) */
+const MIN_MENU_WIDTH = 160;
 
 /**
  * Internal dropdown component that uses the popup context
@@ -57,6 +113,8 @@ function DropdownInternal<T>({
   selectedValue,
   onChange,
   selectedValueRenderer,
+  placeholder,
+  'aria-label': ariaLabel,
   className = '',
   buttonClassName = '',
   menuClassName = '',
@@ -69,13 +127,120 @@ function DropdownInternal<T>({
   fullWidth = false,
 }: DropdownProps<T>) {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const listboxRef = useRef<HTMLDivElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
 
-  const popupId = useId();
-  const isOpen = getPopupState(popupId).isOpen;
+  const popupId = `dropdown-${React.useId()}`;
+  const listboxId = `${popupId}-listbox`;
+  const { isOpen, shouldRender } = getPopupState(popupId);
 
-  // Find the selected item
-  const selectedItem = items.find((item) => item.value === selectedValue);
+  // Track trigger width for fullWidth mode
+  const [triggerWidth, setTriggerWidth] = useState(0);
+
+  // Flatten groups into a single list for rendering and navigation
+  const flatEntries = useMemo(() => flattenEntries(items), [items]);
+
+  // Detect single-option mode: only one selectable (non-disabled) item
+  const singleItem = useMemo(() => {
+    const selectable = flatEntries.filter(
+      (e) => e.kind === 'item' && !e.item.disabled,
+    );
+    if (selectable.length === 1) {
+      return (selectable[0] as { kind: 'item'; item: DropdownItem<T> }).item;
+    }
+    return null;
+  }, [flatEntries]);
+
+  // Find the selected item in the flattened list
+  const selectedItem = flatEntries.find(
+    (e) => e.kind === 'item' && e.item.value === selectedValue,
+  );
+  const selectedIndex = flatEntries.findIndex(
+    (e) => e.kind === 'item' && e.item.value === selectedValue,
+  );
+  const selectedDropdownItem =
+    selectedItem?.kind === 'item' ? selectedItem.item : undefined;
+
+  // Navigability predicate for the shared highlight hook
+  const isNavigable = useCallback(
+    (index: number) => {
+      const entry = flatEntries[index];
+      return entry?.kind === 'item' && !entry.item.disabled;
+    },
+    [flatEntries],
+  );
+
+  // Handle item selection by index
+  const handleSelectIndex = useCallback(
+    (index: number) => {
+      const entry = flatEntries[index];
+      if (entry?.kind === 'item' && !entry.item.disabled) {
+        onChange(entry.item.value);
+        closePopup(popupId);
+        buttonRef.current?.focus();
+      }
+    },
+    [flatEntries, onChange, closePopup, popupId],
+  );
+
+  const handleClose = useCallback(() => {
+    closePopup(popupId);
+    buttonRef.current?.focus();
+  }, [closePopup, popupId]);
+
+  const {
+    highlightedIndex,
+    getOptionId,
+    activeDescendant,
+    resetHighlight,
+    handlePositioned,
+    handleKeyDown,
+    getItemHoverProps,
+  } = useListHighlight({
+    count: flatEntries.length,
+    isNavigable,
+    isOpen,
+    onSelect: handleSelectIndex,
+    onClose: handleClose,
+    initialIndex: selectedIndex,
+  });
+
+  // When fullWidth, the menu should be at least as wide as the trigger button
+  // (floored at the standard min-w-40 baseline).
+  // Keyed on shouldRender so the minWidth is present during positioning,
+  // while open, and through the closing animation — preventing width "pops".
+  const popupStyle = useMemo<React.CSSProperties | undefined>(() => {
+    if (!fullWidth || !shouldRender) return undefined;
+    return { minWidth: Math.max(triggerWidth, MIN_MENU_WIDTH) };
+  }, [fullWidth, shouldRender, triggerWidth]);
+
+  // Measure trigger width synchronously before paint (useLayoutEffect) so the
+  // popup's positioning phase already has the correct minWidth — avoids an
+  // animated width "pop" caused by the async ResizeObserver firing after the
+  // popup becomes visible. The ResizeObserver then tracks subsequent resizes.
+  useLayoutEffect(() => {
+    if (!fullWidth || !shouldRender) return;
+    const button = buttonRef.current;
+    if (!button) return;
+
+    setTriggerWidth(button.offsetWidth);
+  }, [fullWidth, shouldRender]);
+
+  useEffect(() => {
+    if (!fullWidth || !shouldRender) return;
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const observer = new ResizeObserver(() => {
+      setTriggerWidth(button.offsetWidth);
+    });
+
+    observer.observe(button);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [fullWidth, shouldRender]);
 
   // Determine popup position based on alignment and direction
   const position = openUpward
@@ -86,86 +251,80 @@ function DropdownInternal<T>({
       ? 'bottom-right'
       : 'bottom-left';
 
-  // Handle keyboard navigation in the dropdown button
+  const doOpen = useCallback(() => {
+    openPopup(popupId, { position, triggerRef: buttonRef });
+  }, [openPopup, popupId, position]);
+
+  const doClose = useCallback(() => {
+    closePopup(popupId);
+    resetHighlight();
+    buttonRef.current?.focus();
+  }, [closePopup, popupId, resetHighlight]);
+
+  // Handle keyboard navigation on the trigger button
   const handleButtonKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-      openPopup(popupId, {
-        position,
-        triggerRef: buttonRef,
-      });
-      e.preventDefault();
-    } else if (e.key === 'Escape' && isOpen) {
-      closePopup(popupId);
-      e.preventDefault();
+    if (isOpen) {
+      handleKeyDown(e);
+      return;
+    }
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+      case 'ArrowDown':
+      case 'ArrowUp':
+        doOpen();
+        e.preventDefault();
+        break;
     }
   };
 
-  // Handle keyboard navigation in dropdown items
-  const handleItemKeyDown = (
-    e: React.KeyboardEvent,
-    _item: DropdownItem<T>,
-    index: number,
-  ) => {
-    if (e.key === 'Escape') {
-      closePopup(popupId);
-      e.preventDefault();
-    } else if (e.key === 'ArrowDown') {
-      // Find the next non-disabled item
-      let nextIndex = index + 1;
-      while (nextIndex < items.length && items[nextIndex].disabled) {
-        nextIndex++;
-      }
-
-      if (nextIndex < items.length) {
-        (
-          e.currentTarget.parentElement?.children[nextIndex] as HTMLElement
-        )?.focus();
-      }
-      e.preventDefault();
-    } else if (e.key === 'ArrowUp') {
-      // Find the previous non-disabled item
-      let prevIndex = index - 1;
-      while (prevIndex >= 0 && items[prevIndex].disabled) {
-        prevIndex--;
-      }
-
-      if (prevIndex >= 0) {
-        (
-          e.currentTarget.parentElement?.children[prevIndex] as HTMLElement
-        )?.focus();
-      }
-      e.preventDefault();
-    }
-  };
-
-  // Handle item selection
+  // Handle item click
   const handleItemClick = (item: DropdownItem<T>) => {
     if (!item.disabled) {
       onChange(item.value);
-      closePopup(popupId);
+      doClose();
     }
   };
 
+  // Prevent clicks on items from stealing focus from the button
+  const handleItemMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+
   // Handle blur event on the button
   const handleButtonBlur = (e: React.FocusEvent) => {
-    // Check if the next focus is not within a popup
+    // Check if the next focus is within the popup (i.e. the listbox)
     const popupElement = document.querySelector(`[data-popup-id="${popupId}"]`);
     if (!popupElement?.contains(e.relatedTarget as Node)) {
-      // Give a small delay to allow new focus to be established before closing
       setTimeout(() => closePopup(popupId), 100);
     }
   };
 
   const handleClick = useCallback(() => {
     if (isOpen) {
-      closePopup(popupId);
+      doClose();
     } else {
-      openPopup(popupId, {
-        position,
-        triggerRef: buttonRef,
-      });
+      doOpen();
     }
-  }, [isOpen, closePopup, openPopup, position, popupId]);
+  }, [isOpen, doClose, doOpen]);
+
+  // Single selectable item → render as static text (no interaction needed)
+  if (singleItem) {
+    return (
+      <div className={`relative ${fullWidth ? 'w-full' : ''} ${className}`}>
+        <div
+          className={`flex items-center rounded-sm border border-slate-300 text-sm whitespace-nowrap dark:border-slate-700 ${
+            fullWidth ? 'w-full' : ''
+          } ${sizeStyles[size]} text-slate-500 dark:text-slate-400 ${buttonClassName}`}
+          aria-label={ariaLabel}
+        >
+          {selectedValueRenderer
+            ? selectedValueRenderer(singleItem)
+            : singleItem.label}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${fullWidth ? 'w-full' : ''} ${className}`}>
@@ -180,15 +339,25 @@ function DropdownInternal<T>({
         } ${sizeStyles[size]} ${
           isOpen
             ? 'bg-white shadow-sm dark:bg-slate-700'
-            : 'bg-slate-100 shadow-sm hover:bg-slate-200 dark:bg-slate-600 dark:hover:bg-slate-600'
+            : 'bg-slate-100 shadow-sm hover:bg-slate-200 dark:bg-slate-600 dark:hover:bg-slate-500'
         } ${buttonClassName}`}
-        aria-haspopup="true"
+        aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? listboxId : undefined}
+        aria-label={ariaLabel}
       >
-        <span>
-          {selectedItem && selectedValueRenderer
-            ? selectedValueRenderer(selectedItem)
-            : selectedItem?.label}
+        <span
+          className={
+            !selectedDropdownItem && placeholder
+              ? 'text-slate-400 dark:text-slate-300'
+              : ''
+          }
+        >
+          {selectedDropdownItem
+            ? selectedValueRenderer
+              ? selectedValueRenderer(selectedDropdownItem)
+              : selectedDropdownItem.label
+            : (placeholder ?? '')}
         </span>
         <ChevronDownIcon
           className={`ml-2 h-3 w-3 transition-transform ${
@@ -201,35 +370,57 @@ function DropdownInternal<T>({
         id={popupId}
         position={position}
         triggerRef={buttonRef}
+        onPositioned={handlePositioned}
+        style={popupStyle}
         className={`${
-          fullWidth ? 'min-w-full' : 'min-w-40'
+          fullWidth ? '' : 'min-w-40'
         } rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-md shadow-slate-600/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50 ${menuClassName}`}
       >
         <div
+          ref={listboxRef}
+          id={listboxId}
           className="divide-y divide-slate-100 dark:divide-slate-700"
-          role="menu"
+          role="listbox"
+          aria-label={ariaLabel}
+          aria-activedescendant={activeDescendant}
         >
-          {items.map((item, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleItemClick(item)}
-              onKeyDown={(e) => handleItemKeyDown(e, item, index)}
-              className={`block w-full px-3 py-2 text-left text-sm ${
-                item.value === selectedValue
-                  ? `bg-slate-100 font-medium dark:bg-slate-700 ${selectedItemClassName}`
-                  : `hover:bg-blue-50 dark:hover:bg-slate-700 ${itemClassName}`
-              } ${
-                item.disabled
-                  ? `cursor-not-allowed text-slate-300 dark:text-slate-500 ${disabledItemClassName}`
-                  : ''
-              }`}
-              disabled={item.disabled}
-              role="menuitem"
-            >
-              {item.label}
-            </button>
-          ))}
+          {flatEntries.map((entry, index) =>
+            entry.kind === 'group-header' ? (
+              <div
+                key={index}
+                className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase select-none dark:text-slate-500"
+                role="presentation"
+              >
+                {entry.label}
+              </div>
+            ) : (
+              <div
+                key={index}
+                id={getOptionId(index)}
+                onMouseDown={handleItemMouseDown}
+                onClick={() => handleItemClick(entry.item)}
+                {...getItemHoverProps(index)}
+                className={`block w-full px-3 py-2 text-left text-sm outline-none ${
+                  index === highlightedIndex
+                    ? entry.item.value === selectedValue
+                      ? `bg-blue-100 font-medium dark:bg-slate-600 ${selectedItemClassName}`
+                      : `bg-blue-50 dark:bg-slate-700 ${itemClassName}`
+                    : entry.item.value === selectedValue
+                      ? `bg-slate-200 font-medium dark:bg-slate-700 ${selectedItemClassName}`
+                      : itemClassName
+                } ${
+                  entry.item.disabled
+                    ? `cursor-not-allowed text-slate-300 dark:text-slate-500 ${disabledItemClassName}`
+                    : 'cursor-pointer'
+                }`}
+                role="option"
+                aria-selected={entry.item.value === selectedValue}
+                aria-disabled={entry.item.disabled || undefined}
+              >
+                {entry.item.label}
+              </div>
+            ),
+          )}
         </div>
       </Popup>
     </div>
@@ -237,9 +428,11 @@ function DropdownInternal<T>({
 }
 
 /**
- * A reusable dropdown component with keyboard navigation and accessibility features.
- * This version uses the global popup stack for consistent behavior across the application.
+ * A reusable dropdown component with listbox semantics and keyboard navigation.
  * Requires a PopupProvider ancestor in the component tree.
+ *
+ * When only one selectable (non-disabled) item exists, renders as static text
+ * instead of an interactive dropdown.
  */
 export function Dropdown<T>(props: DropdownProps<T>) {
   return <DropdownInternal {...props} />;

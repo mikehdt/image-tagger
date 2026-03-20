@@ -12,8 +12,9 @@ interface ResponsiveToolbarGroupProps {
   children: ReactNode;
   /** Preferred position for the popover - defaults to center */
   position?: 'left' | 'center' | 'right';
-  /** Breakpoint at which to switch from mobile to desktop layout - defaults to medium */
-  breakpoint?: 'medium' | 'large';
+  /** Breakpoint at which to switch from mobile to desktop layout - defaults to md.
+   * Use 'full' to always show button-toggle mode regardless of screen size. */
+  breakpoint?: 'md' | 'lg' | 'full';
 }
 
 /**
@@ -24,20 +25,43 @@ function ResponsiveToolbarGroupInternal({
   title,
   children,
   position = 'center',
-  breakpoint = 'medium',
+  breakpoint = 'md',
 }: ResponsiveToolbarGroupProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const popupContentRef = useRef<HTMLDivElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
+
+  const focusFirstInteractable = useCallback(() => {
+    const el = popupContentRef.current;
+    if (!el) return;
+    const focusable = el.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    focusable?.focus();
+  }, []);
 
   const popupId = useId();
   const isPopoverOpen = getPopupState(popupId).isOpen;
 
   // Define breakpoint-specific classes
-  const showDesktop = breakpoint === 'large' ? 'lg:flex' : 'md:flex';
-  const hideDesktop = breakpoint === 'large' ? 'lg:hidden' : 'md:hidden';
-  const hideIconOnMobile =
-    breakpoint === 'large' ? 'max-lg:hidden' : 'max-md:hidden';
+  // 'full' breakpoint means always show button mode (no inline desktop view)
+  const alwaysButton = breakpoint === 'full';
+  const showDesktop = alwaysButton
+    ? 'hidden'
+    : breakpoint === 'lg'
+      ? 'lg:flex'
+      : 'md:flex';
+  const hideDesktop = alwaysButton
+    ? 'flex'
+    : breakpoint === 'lg'
+      ? 'lg:hidden'
+      : 'md:hidden';
+  const hideIconOnMobile = alwaysButton
+    ? 'hidden'
+    : breakpoint === 'lg'
+      ? 'max-lg:hidden'
+      : 'max-md:hidden';
 
   // Determine popup position based on the position prop
   const popupPosition =
@@ -72,6 +96,8 @@ function ResponsiveToolbarGroupInternal({
     <div ref={containerRef} className="relative">
       {/* Desktop: Show icon with inline children */}
       <div
+        role="toolbar"
+        aria-label={title}
         className={`hidden min-h-9.5 items-center gap-1 rounded-md bg-(--surface-elevated) px-1 py-1 ${showDesktop}`}
       >
         <div
@@ -103,10 +129,14 @@ function ResponsiveToolbarGroupInternal({
           id={popupId}
           position={popupPosition}
           triggerRef={buttonRef}
-          className="rounded-md border border-(--border) bg-(--surface-elevated) shadow-lg shadow-slate-600/50 focus:outline-none max-sm:fixed! max-sm:top-12! max-sm:right-4! max-sm:left-4! max-sm:mt-0! max-sm:transform-none! dark:shadow-slate-950/50"
+          className="bg-background rounded-md border border-(--border) shadow-lg shadow-slate-600/50 focus:outline-none max-sm:right-4! max-sm:left-4! max-sm:w-auto! dark:shadow-slate-950/50"
           disableOverflowHandling
+          onPositioned={focusFirstInteractable}
         >
           <div
+            ref={popupContentRef}
+            role="toolbar"
+            aria-label={title}
             className={`flex items-center gap-1 p-2 max-sm:flex-wrap ${
               position === 'left'
                 ? 'max-sm:justify-start'
@@ -126,7 +156,7 @@ function ResponsiveToolbarGroupInternal({
 /**
  * A responsive toolbar group that shows an inactive icon with inline actions at larger screens,
  * and becomes an active icon button with popover at smaller screens.
- * The breakpoint can be customized to 'medium' (md) or 'large' (lg) - defaults to 'medium'.
+ * The breakpoint can be customized to 'md', 'lg', or 'full' (always button mode) - defaults to 'md'.
  * This version uses the global popup stack for consistent behavior across the application.
  * Requires a PopupProvider ancestor in the component tree.
  */

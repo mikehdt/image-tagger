@@ -2,6 +2,7 @@ import React, { ReactNode, useCallback, useId, useRef } from 'react';
 
 import { Button } from '../button';
 import { Popup, usePopup } from '../popup';
+import { useListHighlight } from '../popup/use-list-highlight';
 
 export type MenuItem = {
   label: string;
@@ -21,6 +22,9 @@ type MenuButtonProps = {
 /**
  * A button that opens a popup menu with action items.
  * Simpler than Dropdown - no "selected value" concept, just a list of actions.
+ *
+ * Uses aria-activedescendant pattern: focus stays on the trigger button while
+ * the highlighted item is tracked via state, matching the Dropdown behaviour.
  */
 export const MenuButton = ({
   icon,
@@ -33,77 +37,97 @@ export const MenuButton = ({
   const { openPopup, closePopup, getPopupState } = usePopup();
 
   const popupId = useId();
-  const isOpen = getPopupState(popupId).isOpen;
+  const { isOpen } = getPopupState(popupId);
+
+  const isNavigable = useCallback(
+    (index: number) => !items[index]?.disabled,
+    [items],
+  );
+
+  const handleClose = useCallback(() => {
+    closePopup(popupId);
+    buttonRef.current?.focus();
+  }, [closePopup, popupId]);
+
+  const handleSelectIndex = useCallback(
+    (index: number) => {
+      const item = items[index];
+      if (item && !item.disabled) {
+        closePopup(popupId);
+        item.onClick();
+      }
+    },
+    [items, closePopup, popupId],
+  );
+
+  const {
+    highlightedIndex,
+    getOptionId,
+    activeDescendant,
+    resetHighlight,
+    handlePositioned,
+    handleKeyDown,
+    getItemHoverProps,
+  } = useListHighlight({
+    count: items.length,
+    isNavigable,
+    isOpen,
+    onSelect: handleSelectIndex,
+    onClose: handleClose,
+  });
+
+  const doOpen = useCallback(() => {
+    openPopup(popupId, { position, triggerRef: buttonRef });
+  }, [openPopup, popupId, position]);
+
+  const doClose = useCallback(() => {
+    closePopup(popupId);
+    resetHighlight();
+    buttonRef.current?.focus();
+  }, [closePopup, popupId, resetHighlight]);
 
   const handleClick = useCallback(() => {
     if (disabled) return;
-
     if (isOpen) {
-      closePopup(popupId);
+      doClose();
     } else {
-      openPopup(popupId, {
-        position,
-        triggerRef: buttonRef,
-      });
+      doOpen();
     }
-  }, [disabled, isOpen, closePopup, openPopup, position, popupId]);
+  }, [disabled, isOpen, doClose, doOpen]);
 
   const handleButtonKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
 
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      openPopup(popupId, {
-        position,
-        triggerRef: buttonRef,
-      });
-    } else if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      closePopup(popupId);
+    if (isOpen) {
+      handleKeyDown(e);
+      return;
     }
-  };
 
-  const handleItemKeyDown = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      closePopup(popupId);
-      buttonRef.current?.focus();
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      // Find next non-disabled item
-      let nextIndex = index + 1;
-      while (nextIndex < items.length && items[nextIndex].disabled) {
-        nextIndex++;
-      }
-      if (nextIndex < items.length) {
-        (
-          e.currentTarget.parentElement?.children[nextIndex] as HTMLElement
-        )?.focus();
-      }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      // Find previous non-disabled item
-      let prevIndex = index - 1;
-      while (prevIndex >= 0 && items[prevIndex].disabled) {
-        prevIndex--;
-      }
-      if (prevIndex >= 0) {
-        (
-          e.currentTarget.parentElement?.children[prevIndex] as HTMLElement
-        )?.focus();
-      }
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+      case 'ArrowDown':
+      case 'ArrowUp':
+        e.preventDefault();
+        doOpen();
+        break;
     }
   };
 
   const handleItemClick = useCallback(
     (item: MenuItem) => {
       if (!item.disabled) {
-        closePopup(popupId);
+        doClose();
         item.onClick();
       }
     },
-    [closePopup, popupId],
+    [doClose],
   );
+
+  // Prevent clicks on items from stealing focus from the button
+  const handleItemMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
 
   const handleButtonBlur = (e: React.FocusEvent) => {
     const popupElement = document.querySelector(`[data-popup-id="${popupId}"]`);
@@ -124,8 +148,6 @@ export const MenuButton = ({
         disabled={disabled}
         isPressed={isOpen}
         title={title}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
       >
         {icon}
       </Button>
@@ -134,26 +156,30 @@ export const MenuButton = ({
         id={popupId}
         position={position}
         triggerRef={buttonRef}
+        onPositioned={handlePositioned}
         className="min-w-44 rounded-md border border-slate-200 bg-white py-1 shadow-md shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <div role="menu">
           {items.map((item, index) => (
-            <button
+            <div
               key={index}
-              type="button"
+              id={getOptionId(index)}
+              onMouseDown={handleItemMouseDown}
               onClick={() => handleItemClick(item)}
-              onKeyDown={(e) => handleItemKeyDown(e, index)}
-              disabled={item.disabled}
-              role="menuitem"
+              {...getItemHoverProps(index)}
               className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm ${
+                index === highlightedIndex ? 'bg-blue-50 dark:bg-slate-700' : ''
+              } ${
                 item.disabled
                   ? 'cursor-not-allowed text-slate-300 dark:text-slate-500'
-                  : 'text-slate-700 hover:bg-blue-50 dark:text-slate-300 dark:hover:bg-slate-700'
+                  : 'cursor-pointer text-slate-700 dark:text-slate-300'
               }`}
+              role="menuitem"
+              aria-disabled={item.disabled || undefined}
             >
               {item.icon && <span className="w-4 shrink-0">{item.icon}</span>}
               <span>{item.label}</span>
-            </button>
+            </div>
           ))}
         </div>
       </Popup>

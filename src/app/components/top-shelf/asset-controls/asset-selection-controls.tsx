@@ -14,7 +14,7 @@ const AssetSelectionControlsComponent = () => {
       icon={<IdCardIcon className="h-4 w-4" />}
       title="Assets"
       position="left"
-      breakpoint="large"
+      breakpoint="lg"
     >
       <VisibilityControl />
 
