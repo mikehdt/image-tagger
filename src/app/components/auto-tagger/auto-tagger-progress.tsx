@@ -28,7 +28,7 @@ export function AutoTaggerProgress({
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <p className="flex text-xs text-ellipsis text-slate-500">
+        <p className="flex text-xs truncate text-slate-500">
           {progress?.currentFileId || 'Processing...'}
         </p>
       </div>

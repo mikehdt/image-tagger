@@ -1,7 +1,7 @@
 import { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { RootState } from '@/app/store';
-import { selectHasActiveFilters } from '@/app/store/filters';
+import { selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import {
   selectAssetsWithActiveFilters,
@@ -45,7 +45,9 @@ export const useAddTagsModal = ({
     useState(false);
 
   // Get data for dual selection logic
-  const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const hasExplicitFilters = useAppSelector(selectHasActiveFilters);
+  const hasActiveVisibility = useAppSelector(selectHasActiveVisibility);
+  const hasActiveFilters = hasExplicitFilters || hasActiveVisibility;
   const selectedAssets = useAppSelector(selectSelectedAssets);
   const assetsWithActiveFilters = useAppSelector(selectAssetsWithActiveFilters);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
@@ -102,7 +104,6 @@ export const useAddTagsModal = ({
       setTags([]);
       setCheckTag('');
       pendingCheckTagRef.current = '';
-      setAddToStart(false);
     }
   }, [isOpen]);
 

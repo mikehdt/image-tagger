@@ -1,3 +1,5 @@
+import { TriangleAlertIcon } from 'lucide-react';
+
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import { ClassFilterMode } from '@/app/store/filters';
@@ -75,6 +77,9 @@ export const VisibilityPanel = () => {
     handleToggleModified,
   } = useVisibilityControl();
 
+  const tagSection = sections.find((s) => s.key === 'tags');
+  const hasTagSelections = tagSection && tagSection.count > 0;
+
   return (
     <>
       <div className="py-2">
@@ -82,13 +87,20 @@ export const VisibilityPanel = () => {
         <div className="px-3 pb-2 text-xs font-medium tracking-wider text-(--unselected-text) uppercase">
           Scope
         </div>
-        <div className="px-3 pb-1">
+        <div className="flex items-center justify-between gap-1.5 px-3 pb-1">
           <Checkbox
             isSelected={visibility.scopeTagless}
             disabled={!hasTaglessAssets}
             onChange={handleToggleScopeTagless}
             label="Tagless only"
           />
+          {hasTagSelections && (
+            <span title="Tag filters are ignored while Tagless is active — tagless assets have no tags to match against">
+              <TriangleAlertIcon
+                className={`h-5 w-5 shrink-0 ${visibility.scopeTagless ? 'text-amber-500' : 'text-slate-400'}`}
+              />
+            </span>
+          )}
         </div>
         <div className="px-3 py-1">
           <Checkbox

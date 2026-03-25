@@ -1,12 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit';
 
-import { applyFilters } from '../../utils/filter-actions';
+import { composeDimensions } from '../../utils/helpers';
 import { selectAllImages, selectFilteredAssets } from '../assets';
 import {
-  FilterMode,
   selectFilterTags,
   selectHasActiveFilters,
+  selectHasActiveVisibility,
 } from '../filters';
+import type { RootState } from '../index';
 import { selectSelectedAssets } from '../selection';
 
 // Cache for memoized selectors - prevents creating new selector instances
@@ -124,52 +125,57 @@ export const selectTagCoExistence = (
 };
 
 /**
- * Selector to get assets that have at least one of the selected tags
- * @returns Array of assets that contain at least one selected tag
- */
-export const selectAssetsWithSelectedTags = createSelector(
-  [selectAllImages, selectFilterTags],
-  (allImages, filterTags) => {
-    if (filterTags.length === 0) {
-      return [];
-    }
-
-    return allImages.filter((asset) =>
-      asset.tagList.some((tag) => filterTags.includes(tag)),
-    );
-  },
-);
-
-/**
- * Enhanced selector to get assets that match any active filters (unified filtering approach)
- * This considers tags, sizes, buckets, extensions, and modified state
- * Uses the existing applyFilters logic but in MATCH_ANY mode for union behavior
- * @returns Array of assets that match at least one active filter criterion
+ * Selector to get assets that match any active filtering (filters or visibility scopes).
+ * When visibility narrows the view, returns exactly what the user sees.
+ * When only explicit filter selections are active (without visibility modes),
+ * returns assets matching any of the selections (union/OR logic).
  */
 export const selectAssetsWithActiveFilters = createSelector(
-  [(state) => state, selectAllImages, (state) => state.filters],
-  (state, allImages, filters) => {
-    // If no filters are active, return empty array
-    const hasActiveFilters = selectHasActiveFilters(state);
-
-    if (!hasActiveFilters) {
+  [
+    (state: RootState) => selectHasActiveFilters(state),
+    (state: RootState) => selectHasActiveVisibility(state),
+    selectFilteredAssets,
+    selectAllImages,
+    (state: RootState) => state.filters,
+  ],
+  (hasActiveFilters, hasActiveVisibility, filteredAssets, allImages, filters) => {
+    if (!hasActiveFilters && !hasActiveVisibility) {
       return [];
     }
 
-    // Use the existing applyFilters function with MATCH_ANY mode
-    // This ensures consistency with the main filtering logic
-    return applyFilters({
-      assets: allImages,
-      filterTags: filters.filterTags,
-      filterSizes: filters.filterSizes,
-      filterBuckets: filters.filterBuckets,
-      filterExtensions: filters.filterExtensions,
-      filterSubfolders: filters.filterSubfolders,
-      filenamePatterns: filters.filenamePatterns,
-      filterMode: FilterMode.MATCH_ANY, // Use MATCH_ANY for union behavior
-      showModified: filters.showModified,
-      selectedAssets: [], // No asset selection constraint
-    });
+    // If the view is narrowed by visibility, use exactly what the user sees
+    if (filteredAssets.length < allImages.length) {
+      return filteredAssets;
+    }
+
+    // Visibility didn't narrow the view, but explicit filter selections exist —
+    // compute a union match so scoped actions know which assets are targeted
+    if (hasActiveFilters) {
+      const tagSet = new Set(filters.filterTags);
+      const extSet = new Set(filters.filterExtensions);
+      const subSet = new Set(filters.filterSubfolders);
+      const sizeSet = new Set(filters.filterSizes);
+      const bucketSet = new Set(filters.filterBuckets);
+      const patterns = filters.filenamePatterns;
+
+      return allImages.filter((img) => {
+        if (tagSet.size > 0 && img.tagList.some((t) => tagSet.has(t))) return true;
+        if (extSet.size > 0 && extSet.has(img.fileExtension)) return true;
+        if (subSet.size > 0 && img.subfolder && subSet.has(img.subfolder)) return true;
+        if (sizeSet.size > 0 && sizeSet.has(composeDimensions(img.dimensions))) return true;
+        if (bucketSet.size > 0 && bucketSet.has(`${img.bucket.width}×${img.bucket.height}`)) return true;
+        if (patterns.length > 0) {
+          const lower = img.fileId.toLowerCase();
+          if (patterns.some((p) => lower.includes(p))) return true;
+        }
+        if (filters.showModified) {
+          return img.tagList.some((tag) => img.tagStatus[tag] !== 0);
+        }
+        return false;
+      });
+    }
+
+    return [];
   },
 );
 

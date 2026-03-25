@@ -2,7 +2,7 @@ import { TagIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import { selectHasActiveFilters } from '@/app/store/filters';
+import { selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   addMultipleTagsToAssetsWithDualSelection,
@@ -20,11 +20,13 @@ export const AddTagsButton = () => {
 
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
+  const hasActiveVisibility = useAppSelector(selectHasActiveVisibility);
   const assetsWithActiveFiltersCount = useAppSelector(
     selectAssetsWithActiveFiltersCount,
   );
 
-  const canAddTags = selectedAssetsCount > 0 || hasActiveFilters;
+  const hasActiveScope = hasActiveFilters || hasActiveVisibility;
+  const canAddTags = selectedAssetsCount > 0 || hasActiveScope;
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -84,12 +86,12 @@ export const AddTagsButton = () => {
         color="slate"
         size="medium"
         title={
-          selectedAssetsCount > 0 && hasActiveFilters
+          selectedAssetsCount > 0 && hasActiveScope
             ? `Add tags to selected assets or assets with active filters`
             : selectedAssetsCount > 0
               ? `Add tags to ${selectedAssetsCount} selected assets`
-              : hasActiveFilters
-                ? `Add tags to ${assetsWithActiveFiltersCount} assets with active filters`
+              : hasActiveScope
+                ? `Add tags to ${assetsWithActiveFiltersCount} filtered assets`
                 : 'Select assets or apply filters to add new tags'
         }
       >

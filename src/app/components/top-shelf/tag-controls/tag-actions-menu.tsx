@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { MenuButton, MenuItem } from '@/app/components/shared/menu-button';
 import { gatherTags } from '@/app/store/assets';
+import { selectFilteredAssets } from '@/app/store/assets';
 import {
   selectHasReadyModel,
   selectIsInitialised,
@@ -18,6 +19,7 @@ import { selectFilterTags } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 import {
+  selectAssetsWithActiveFiltersCount,
   selectEffectiveScopeAssetIds,
   selectSelectedAssetsData,
 } from '@/app/store/selection/combinedSelectors';
@@ -40,6 +42,8 @@ export const TagActionsMenu = () => {
   );
 
   const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
+  const filteredAssets = useAppSelector(selectFilteredAssets);
+  const filteredAssetsCount = useAppSelector(selectAssetsWithActiveFiltersCount);
   const hasReadyModel = useAppSelector(selectHasReadyModel);
   const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
 
@@ -55,15 +59,14 @@ export const TagActionsMenu = () => {
     }
   }, [isAutoTaggerInitialised, dispatch]);
 
-  // Prepare selected assets for auto-tagger (only need fileId and extension)
-  const selectedAssetsForTagger = useMemo(
-    () =>
-      selectedAssetsData.map((asset) => ({
-        fileId: asset.fileId,
-        fileExtension: asset.fileExtension,
-      })),
-    [selectedAssetsData],
-  );
+  // Prepare assets for auto-tagger: use explicit selection, or fall back to filtered view
+  const assetsForTagger = useMemo(() => {
+    const source = selectedAssetsData.length > 0 ? selectedAssetsData : filteredAssetsCount > 0 ? filteredAssets : [];
+    return source.map((asset) => ({
+      fileId: asset.fileId,
+      fileExtension: asset.fileExtension,
+    }));
+  }, [selectedAssetsData, filteredAssets, filteredAssetsCount]);
 
   const openTaggerModal = useCallback(() => setIsTaggerModalOpen(true), []);
   const closeTaggerModal = useCallback(() => setIsTaggerModalOpen(false), []);
@@ -93,7 +96,7 @@ export const TagActionsMenu = () => {
       label: 'Auto Tagger',
       icon: <SparklesIcon className="h-4 w-4" />,
       onClick: openTaggerModal,
-      disabled: !hasReadyModel || selectedAssetsCount === 0,
+      disabled: !hasReadyModel || assetsForTagger.length === 0,
     },
   ];
 
@@ -114,7 +117,7 @@ export const TagActionsMenu = () => {
       <AutoTaggerModal
         isOpen={isTaggerModalOpen}
         onClose={closeTaggerModal}
-        selectedAssets={selectedAssetsForTagger}
+        selectedAssets={assetsForTagger}
       />
     </>
   );
