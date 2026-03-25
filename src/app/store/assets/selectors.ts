@@ -295,6 +295,10 @@ export const selectFilterTagsDeleteState = createSelector(
 
       for (const tag of asset.tagList) {
         if (filterTagsSet.has(tag)) {
+          // TO_ADD tags are removed outright by the action, not toggled,
+          // so exclude them from the none/all/mixed state calculation
+          if (hasState(asset.tagStatus[tag], TagState.TO_ADD)) continue;
+
           filterTagCount++;
           if (hasState(asset.tagStatus[tag], TagState.TO_DELETE)) {
             toDeleteCount++;

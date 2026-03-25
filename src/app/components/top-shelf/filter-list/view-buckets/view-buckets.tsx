@@ -72,8 +72,8 @@ export const BucketsView = () => {
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-sky-200 dark:bg-sky-800'
-                      : 'bg-sky-100 dark:bg-sky-900/50'
+                      ? 'bg-sky-300 dark:bg-sky-700'
+                      : 'bg-blue-100 dark:bg-blue-900/50'
                     : item.isActive
                       ? 'bg-sky-100 dark:bg-sky-900/50'
                       : ''

@@ -66,8 +66,8 @@ export const TagsView = () => {
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
-                      ? 'bg-teal-200 dark:bg-teal-800'
-                      : 'bg-blue-100 dark:bg-blue-900'
+                      ? 'bg-teal-300 dark:bg-teal-700'
+                      : 'bg-blue-100 dark:bg-blue-900/50'
                     : item.isActive
                       ? 'bg-teal-100 dark:bg-teal-900/50'
                       : ''

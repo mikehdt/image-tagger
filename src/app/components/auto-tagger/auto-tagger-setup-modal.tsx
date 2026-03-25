@@ -174,7 +174,7 @@ export function AutoTaggerSetupModal() {
         {isDownloading ? (
           // Download progress view
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               Downloading {selectedModel?.name}...
             </p>
 
@@ -303,14 +303,16 @@ function ModelOption({
       onClick={onSelect}
       className={`w-full cursor-pointer rounded-md border p-3 text-left transition-colors ${
         isSelected
-          ? 'border-indigo-300 bg-indigo-50'
-          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+          ? 'border-indigo-300 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-900'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-indigo-600 dark:hover:bg-indigo-950'
       }`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-slate-800">{model.name}</span>
+            <span className="font-medium text-slate-800 dark:text-slate-200">
+              {model.name}
+            </span>
             {model.isDefault && (
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
                 Recommended

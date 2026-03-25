@@ -52,7 +52,7 @@ export function AutoTaggerSettings({
 
       {/* Model selection */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
           Model
         </label>
         <Dropdown
@@ -129,7 +129,7 @@ export function AutoTaggerSettings({
 
       {/* Tag insert mode */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
           New tags
         </label>
         <RadioGroup
@@ -142,7 +142,7 @@ export function AutoTaggerSettings({
 
       {/* Include tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
           Always Include Tags
         </label>
         <MultiTagInput
@@ -155,7 +155,7 @@ export function AutoTaggerSettings({
 
       {/* Exclude tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-400">
+        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
           Exclude Tags
         </label>
         <MultiTagInput

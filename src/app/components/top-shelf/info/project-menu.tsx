@@ -3,11 +3,8 @@ import {
   BoxIcon,
   CalculatorIcon,
   ChevronDownIcon,
-  MonitorIcon,
-  MoonIcon,
   RefreshCwIcon,
   SparklesIcon,
-  SunIcon,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -18,9 +15,10 @@ import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
-import { ThemeMode, useTheme } from '@/app/utils/use-theme';
+import { useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
+import { MenuThemeSwitcher } from './menu-theme-switcher';
 
 // Inline configuration check function to avoid import issues
 const checkIfUsingDefaultProject = async (): Promise<boolean> => {
@@ -51,22 +49,13 @@ const MenuItem = ({ icon, label, onClick, disabled }: MenuItemProps) => (
     className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
       disabled
         ? 'cursor-not-allowed text-slate-300 dark:text-slate-500'
-        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+        : 'cursor-pointer text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     <span className="h-5 w-5">{icon}</span>
     {label}
   </button>
 );
-
-const themeConfig: Record<ThemeMode, { icon: React.ReactNode; label: string }> =
-  {
-    light: { icon: <SunIcon className="h-5 w-5" />, label: 'Light' },
-    dark: { icon: <MoonIcon className="h-5 w-5" />, label: 'Dark' },
-    auto: { icon: <MonitorIcon className="h-5 w-5" />, label: 'Auto' },
-  };
-
-const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
 
 const ProjectMenuComponent = () => {
   const dispatch = useAppDispatch();
@@ -225,12 +214,6 @@ const ProjectMenuComponent = () => {
     dispatch(openSetupModal());
   }, [closePopup, popupId, dispatch]);
 
-  const handleCycleTheme = useCallback(() => {
-    const currentIndex = themeOrder.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themeOrder.length;
-    setTheme(themeOrder[nextIndex]);
-  }, [theme, setTheme]);
-
   if (!projectName) {
     return null;
   }
@@ -288,11 +271,7 @@ const ProjectMenuComponent = () => {
             label="Auto-Tagger Models"
             onClick={handleOpenAutoTaggerSetup}
           />
-          <MenuItem
-            icon={themeConfig[theme].icon}
-            label={`${themeConfig[theme].label} Theme`}
-            onClick={handleCycleTheme}
-          />
+          <MenuThemeSwitcher theme={theme} setTheme={setTheme} />
           <MenuItem
             icon={<ArrowLeftCircleIcon className="h-5 w-5" />}
             label="Back to Projects"

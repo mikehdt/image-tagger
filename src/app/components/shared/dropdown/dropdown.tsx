@@ -379,7 +379,7 @@ function DropdownInternal<T>({
         <div
           ref={listboxRef}
           id={listboxId}
-          className="divide-y divide-slate-100 dark:divide-slate-700"
+          className="divide-y divide-slate-100 dark:divide-slate-800"
           role="listbox"
           aria-label={ariaLabel}
           aria-activedescendant={activeDescendant}
@@ -403,10 +403,10 @@ function DropdownInternal<T>({
                 className={`block w-full px-3 py-2 text-left text-sm outline-none ${
                   index === highlightedIndex
                     ? entry.item.value === selectedValue
-                      ? `bg-blue-100 font-medium dark:bg-slate-600 ${selectedItemClassName}`
+                      ? `bg-blue-200 font-medium dark:bg-blue-800 ${selectedItemClassName}`
                       : `bg-blue-50 dark:bg-slate-700 ${itemClassName}`
                     : entry.item.value === selectedValue
-                      ? `bg-slate-200 font-medium dark:bg-slate-700 ${selectedItemClassName}`
+                      ? `bg-blue-100 font-medium dark:bg-blue-900 ${selectedItemClassName}`
                       : itemClassName
                 } ${
                   entry.item.disabled

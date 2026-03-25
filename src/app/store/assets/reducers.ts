@@ -36,21 +36,68 @@ export const coreReducers = {
     const targetAssetIds = assetIds ? new Set(assetIds) : null;
 
     // Iterate over images and mark matching tags for deletion
+    const filterTagsSet = new Set(tags);
+
     state.images.forEach((image) => {
       // Skip if we have a scope and this image isn't in it
       if (targetAssetIds && !targetAssetIds.has(image.fileId)) return;
 
+      // Collect TO_ADD tags to remove (modifies tagList, so can't remove inline)
+      const toAddTagsToRemove: string[] = [];
+
       tags.forEach((filterTag) => {
-        if (image.tagList.includes(filterTag)) {
-          // Only toggle TO_DELETE for tags that are not marked as TO_ADD
-          if (!hasState(image.tagStatus[filterTag], TagState.TO_ADD)) {
-            image.tagStatus[filterTag] = toggleState(
-              image.tagStatus[filterTag],
-              TagState.TO_DELETE,
-            );
-          }
+        if (!image.tagList.includes(filterTag)) return;
+
+        if (hasState(image.tagStatus[filterTag], TagState.TO_ADD)) {
+          // TO_ADD tags: remove entirely (they were never saved)
+          toAddTagsToRemove.push(filterTag);
+        } else {
+          // Saved tags: toggle TO_DELETE flag
+          image.tagStatus[filterTag] = toggleState(
+            image.tagStatus[filterTag],
+            TagState.TO_DELETE,
+          );
         }
       });
+
+      // Remove TO_ADD tags and re-evaluate DIRTY state for shifted tags
+      if (toAddTagsToRemove.length > 0) {
+        const savedTagList = image.savedTagList || [];
+        // Find the earliest removal index so we only re-evaluate from there
+        let earliestRemoved = image.tagList.length;
+
+        for (const tagName of toAddTagsToRemove) {
+          const idx = image.tagList.indexOf(tagName);
+          if (idx >= 0 && idx < earliestRemoved) {
+            earliestRemoved = idx;
+          }
+          delete image.tagStatus[tagName];
+        }
+
+        // Filter out removed tags
+        image.tagList = image.tagList.filter(
+          (tag) => !filterTagsSet.has(tag) || tag in image.tagStatus,
+        );
+
+        // Re-evaluate DIRTY flags from the earliest removal point
+        for (let i = earliestRemoved; i < image.tagList.length; i++) {
+          const tag = image.tagList[i];
+          if (tag && !hasState(image.tagStatus[tag], TagState.TO_ADD)) {
+            const originalIndex = savedTagList.indexOf(tag);
+            if (originalIndex === i) {
+              image.tagStatus[tag] = removeState(
+                image.tagStatus[tag],
+                TagState.DIRTY,
+              );
+            } else {
+              image.tagStatus[tag] = addState(
+                image.tagStatus[tag],
+                TagState.DIRTY,
+              );
+            }
+          }
+        }
+      }
     });
 
     // Invalidate tag counts cache since TO_DELETE state affects counts

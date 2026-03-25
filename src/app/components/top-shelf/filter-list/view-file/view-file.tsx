@@ -127,7 +127,7 @@ export const FileView = () => {
                   className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                     index === selectedIndex
                       ? item.isActive
-                        ? 'bg-indigo-200 dark:bg-indigo-800'
+                        ? 'bg-indigo-300 dark:bg-indigo-700'
                         : 'bg-blue-100 dark:bg-blue-900/50'
                       : item.isActive
                         ? 'bg-indigo-100 dark:bg-indigo-900'
@@ -189,7 +189,7 @@ export const FileView = () => {
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index + subfolderListLength === selectedIndex
                     ? item.isActive
-                      ? 'bg-stone-200 dark:bg-stone-700'
+                      ? 'bg-stone-300 dark:bg-stone-600'
                       : 'bg-blue-100 dark:bg-blue-900/50'
                     : item.isActive
                       ? 'bg-stone-100 dark:bg-stone-800'
