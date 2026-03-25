@@ -187,6 +187,9 @@ export const SizesView = () => {
     filteredSizes,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useSizesView();
 
   return (
@@ -226,12 +229,16 @@ export const SizesView = () => {
               : 'No sizes available'}
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+          <ul
+            className="divide-y divide-slate-100 dark:divide-slate-700"
+            onMouseLeave={handleListMouseLeave}
+          >
             {filteredSizes.map((item, index) => (
               <li
                 id={`size-${item.dimensions}`}
                 key={item.dimensions}
-                onClick={() => handleToggle(item.dimensions)}
+                onClick={() => { handleItemClick(index); handleToggle(item.dimensions); }}
+                onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
@@ -239,7 +246,7 @@ export const SizesView = () => {
                       : 'bg-blue-100 dark:bg-blue-900'
                     : item.isActive
                       ? 'bg-sky-100 dark:bg-sky-900/50'
-                      : 'hover:bg-blue-50 dark:hover:bg-slate-700'
+                      : ''
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">

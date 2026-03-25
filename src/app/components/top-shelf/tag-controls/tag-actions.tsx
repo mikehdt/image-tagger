@@ -4,7 +4,6 @@ import { memo } from 'react';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AddTagsButton } from './add-tags-button';
-import { ClearFiltersButton } from './clear-filters-button';
 import { DeleteToggleButton } from './delete-toggle-button';
 import { EditTagsButton } from './edit-tags-button';
 import { TagActionsMenu } from './tag-actions-menu';
@@ -25,10 +24,6 @@ const TagActionsComponent = () => {
       <EditTagsButton />
       <DeleteToggleButton />
       <TagActionsMenu />
-
-      <ToolbarDivider />
-
-      <ClearFiltersButton />
     </ResponsiveToolbarGroup>
   );
 };

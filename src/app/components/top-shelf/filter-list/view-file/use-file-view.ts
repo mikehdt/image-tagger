@@ -1,10 +1,4 @@
-import {
-  KeyboardEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   selectAllExtensions,
@@ -75,8 +69,17 @@ export const useFileView = () => {
 
   const [patternInput, setPatternInput] = useState('');
 
-  const { sortType, sortDirection, updateListLength, selectedIndex, inputRef } =
-    useFilterContext();
+  const {
+    sortType,
+    sortDirection,
+    updateListLength,
+    selectedIndex,
+    inputRef,
+    handleKeyDown,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
+  } = useFilterContext();
 
   // Sort the filename patterns based on current sort settings
   const sortedPatterns = useMemo(() => {
@@ -136,11 +139,6 @@ export const useFileView = () => {
     });
   }, [allExtensions, activeExtensions, sortType, sortDirection]);
 
-  // Update list length for keyboard navigation
-  useEffect(() => {
-    updateListLength(extensionList.length);
-  }, [extensionList.length, updateListLength]);
-
   // Get subfolder data from store
   const subfolderList = useMemo(() => {
     // Convert map to array
@@ -173,6 +171,12 @@ export const useFileView = () => {
     });
   }, [allSubfolders, activeSubfolders, sortType, sortDirection]);
 
+  // Update list length for keyboard navigation (subfolders + extensions as one continuous list)
+  const combinedListLength = subfolderList.length + extensionList.length;
+  useEffect(() => {
+    updateListLength(combinedListLength);
+  }, [combinedListLength, updateListLength]);
+
   // Create a memoized toggle handler for extensions
   const handleToggle = useCallback(
     (ext: string) => {
@@ -190,23 +194,13 @@ export const useFileView = () => {
   const handleToggleSubfolder = useCallback(
     (subfolder: string) => {
       dispatch(toggleSubfolderFilter(subfolder));
-    },
-    [dispatch],
-  );
 
-  // Pattern input handlers
-  const handlePatternKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && patternInput.trim()) {
-        dispatch(addFilenamePattern(patternInput.trim()));
-        setPatternInput('');
-        e.preventDefault();
-      } else if (e.key === 'Escape') {
-        setPatternInput('');
-        e.preventDefault();
+      // Focus back on input after selection
+      if (inputRef.current) {
+        inputRef.current.focus();
       }
     },
-    [dispatch, patternInput],
+    [dispatch, inputRef],
   );
 
   const handleRemovePattern = useCallback(
@@ -224,6 +218,97 @@ export const useFileView = () => {
     }
   }, [dispatch, patternInput]);
 
+  // Combined keyboard handler: pattern input behaviour + list navigation
+  const handleCombinedKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Enter with text in the input adds a pattern (pattern-specific behaviour)
+      if (e.key === 'Enter' && patternInput.trim() && selectedIndex < 0) {
+        dispatch(addFilenamePattern(patternInput.trim()));
+        setPatternInput('');
+        e.preventDefault();
+        return;
+      }
+      // Escape with text clears the input (pattern-specific behaviour)
+      if (e.key === 'Escape' && patternInput.trim() && selectedIndex < 0) {
+        setPatternInput('');
+        e.preventDefault();
+        return;
+      }
+      // Delegate to the shared keyboard navigation handler
+      handleKeyDown(e);
+    },
+    [patternInput, selectedIndex, dispatch, handleKeyDown],
+  );
+
+  // Resolve selectedIndex to the correct list item
+  const getSelectedItem = useCallback(
+    (index: number) => {
+      if (index < 0) return null;
+      if (index < subfolderList.length) {
+        return { type: 'subfolder' as const, item: subfolderList[index] };
+      }
+      const extIndex = index - subfolderList.length;
+      if (extIndex < extensionList.length) {
+        return { type: 'extension' as const, item: extensionList[extIndex] };
+      }
+      return null;
+    },
+    [subfolderList, extensionList],
+  );
+
+  // Scroll selected item into view
+  useEffect(() => {
+    const selected = getSelectedItem(selectedIndex);
+    if (!selected) return;
+
+    const elId =
+      selected.type === 'subfolder'
+        ? `subfolder-${selected.item.subfolder}`
+        : `ext-${selected.item.ext}`;
+    const el = document.getElementById(elId);
+    if (el) {
+      el.scrollIntoView({ block: 'nearest' });
+    }
+  }, [selectedIndex, getSelectedItem]);
+
+  // Listen for keyboard selection events (Enter on a selected item)
+  useEffect(() => {
+    const handleKeyboardSelect = (e: CustomEvent) => {
+      if (e.detail?.index !== selectedIndex || selectedIndex < 0) return;
+
+      const selected = getSelectedItem(selectedIndex);
+      if (!selected) return;
+
+      if (selected.type === 'subfolder') {
+        handleToggleSubfolder(selected.item.subfolder);
+      } else {
+        handleToggle(selected.item.ext);
+      }
+    };
+
+    document.addEventListener(
+      'filterlist:keyboardselect',
+      handleKeyboardSelect as EventListener,
+    );
+    return () => {
+      document.removeEventListener(
+        'filterlist:keyboardselect',
+        handleKeyboardSelect as EventListener,
+      );
+    };
+  }, [selectedIndex, getSelectedItem, handleToggle, handleToggleSubfolder]);
+
+  // Mouse move/click for extensions needs to offset by subfolder count
+  const handleExtensionMouseMove = useCallback(
+    (index: number) => handleItemMouseMove(index + subfolderList.length),
+    [handleItemMouseMove, subfolderList.length],
+  );
+
+  const handleExtensionClick = useCallback(
+    (index: number) => handleItemClick(index + subfolderList.length),
+    [handleItemClick, subfolderList.length],
+  );
+
   return {
     inputRef,
     patternInput,
@@ -232,11 +317,17 @@ export const useFileView = () => {
     patternCounts,
     extensionList,
     subfolderList,
+    subfolderListLength: subfolderList.length,
     selectedIndex,
     handleToggle,
     handleToggleSubfolder,
-    handlePatternKeyDown,
+    handleCombinedKeyDown,
     handleRemovePattern,
     handleAddPattern,
+    handleItemMouseMove,
+    handleItemClick,
+    handleExtensionMouseMove,
+    handleExtensionClick,
+    handleListMouseLeave,
   };
 };

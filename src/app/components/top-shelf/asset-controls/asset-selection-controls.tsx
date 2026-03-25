@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
 import { AssetSortControls } from './asset-sort-controls';
+import { ClearFiltersButton } from './clear-filters-button';
 import { ClearSelectionButton } from './clear-selection-button';
 import { SelectAllButton } from './select-all-button';
 import { VisibilityControl } from './visibility-control/visibility-control';
@@ -24,6 +25,10 @@ const AssetSelectionControlsComponent = () => {
         by
       </span>
       <AssetSortControls />
+
+      <ToolbarDivider />
+
+      <ClearFiltersButton />
 
       <ToolbarDivider />
 

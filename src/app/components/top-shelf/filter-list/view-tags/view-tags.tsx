@@ -13,6 +13,9 @@ export const TagsView = () => {
     filteredTags,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useTagsView();
 
   return (
@@ -50,12 +53,16 @@ export const TagsView = () => {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+          <ul
+            className="divide-y divide-slate-100 dark:divide-slate-700"
+            onMouseLeave={handleListMouseLeave}
+          >
             {filteredTags.map((item, index) => (
               <li
                 id={`tag-${item.tag}`}
                 key={item.tag}
-                onClick={() => handleToggle(item.tag)}
+                onClick={() => { handleItemClick(index); handleToggle(item.tag); }}
+                onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
@@ -63,7 +70,7 @@ export const TagsView = () => {
                       : 'bg-blue-100 dark:bg-blue-900'
                     : item.isActive
                       ? 'bg-teal-100 dark:bg-teal-900/50'
-                      : 'hover:bg-blue-50 dark:hover:bg-slate-700'
+                      : ''
                 }`}
                 title={
                   item.isActive

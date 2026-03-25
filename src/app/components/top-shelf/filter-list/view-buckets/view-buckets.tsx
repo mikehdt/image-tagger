@@ -17,6 +17,9 @@ export const BucketsView = () => {
     bucketList,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useBucketsView();
 
   return (
@@ -56,12 +59,16 @@ export const BucketsView = () => {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
+          <ul
+            className="divide-y divide-slate-100 dark:divide-slate-700"
+            onMouseLeave={handleListMouseLeave}
+          >
             {bucketList.map((item, index) => (
               <li
                 id={`bucket-${item.name}`}
                 key={item.name}
-                onClick={() => handleToggle(item.name)}
+                onClick={() => { handleItemClick(index); handleToggle(item.name); }}
+                onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex
                     ? item.isActive
@@ -69,7 +76,7 @@ export const BucketsView = () => {
                       : 'bg-sky-100 dark:bg-sky-900/50'
                     : item.isActive
                       ? 'bg-sky-100 dark:bg-sky-900/50'
-                      : 'hover:bg-sky-50 dark:hover:bg-slate-700'
+                      : ''
                 }`}
               >
                 <div className="mr-2 flex w-10 justify-center">

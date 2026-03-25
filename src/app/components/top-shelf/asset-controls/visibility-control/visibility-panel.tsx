@@ -94,13 +94,13 @@ export const VisibilityPanel = () => {
             onChange={handleToggleScopeTagless}
             label="Tagless only"
           />
-          {hasTagSelections && (
+          {hasTagSelections && hasTaglessAssets ? (
             <span title="Tag filters are ignored while Tagless is active — tagless assets have no tags to match against">
               <TriangleAlertIcon
                 className={`h-5 w-5 shrink-0 ${visibility.scopeTagless ? 'text-amber-500' : 'text-slate-400'}`}
               />
             </span>
-          )}
+          ) : null}
         </div>
         <div className="px-3 py-1">
           <Checkbox

@@ -68,6 +68,9 @@ export const useBucketsView = () => {
     selectedIndex,
     inputRef,
     handleKeyDown,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useFilterContext();
 
   // Calculate bucket counts from images
@@ -206,5 +209,8 @@ export const useBucketsView = () => {
     bucketList,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   };
 };

@@ -125,6 +125,9 @@ export const useSizesView = () => {
     selectedIndex,
     inputRef,
     handleKeyDown,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useFilterContext();
 
   // Filter and sort sizes based on search term and sort settings
@@ -291,5 +294,8 @@ export const useSizesView = () => {
     filteredSizes,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   };
 };

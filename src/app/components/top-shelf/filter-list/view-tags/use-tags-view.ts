@@ -60,6 +60,9 @@ export const useTagsView = () => {
     selectedIndex,
     inputRef,
     handleKeyDown,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   } = useFilterContext();
 
   // Filter and sort tags based on search term and sort settings
@@ -181,5 +184,8 @@ export const useTagsView = () => {
     filteredTags,
     selectedIndex,
     handleToggle,
+    handleItemMouseMove,
+    handleItemClick,
+    handleListMouseLeave,
   };
 };

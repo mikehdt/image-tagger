@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -75,6 +76,9 @@ interface FilterContextType {
   updateListLength: (length: number) => void;
   inputRef: RefObject<HTMLInputElement | null>;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleItemMouseMove: (index: number) => void;
+  handleItemClick: (index: number) => void;
+  handleListMouseLeave: () => void;
 
   // Sort options getter
   getSortOptions: () => {
@@ -214,6 +218,9 @@ export const FilterProvider = ({
     }
   }, [activeView, sizeSubView, currentSort.type, currentSort.direction]);
 
+  // Tracks the last keyboard-driven index (-1 = no KB position)
+  const keyboardIndexRef = useRef(-1);
+
   // Keyboard navigation
   const { handleKeyDown } = useKeyboardNavigation(
     listLength,
@@ -221,12 +228,34 @@ export const FilterProvider = ({
     setSelectedIndex,
     onClose,
     inputRef,
+    keyboardIndexRef,
   );
+
+  // Mouse hover sets selectedIndex (only when moving to a different item)
+  const handleItemMouseMove = useCallback(
+    (index: number) => {
+      if (index !== selectedIndex) {
+        setSelectedIndex(index);
+      }
+    },
+    [selectedIndex, setSelectedIndex],
+  );
+
+  // Clicking an item anchors the KB position to it
+  const handleItemClick = useCallback((index: number) => {
+    keyboardIndexRef.current = index;
+  }, []);
+
+  // Mouse leave restores to KB position (or clears if no KB position)
+  const handleListMouseLeave = useCallback(() => {
+    setSelectedIndex(keyboardIndexRef.current);
+  }, [setSelectedIndex]);
 
   // Reset selected index when search term changes
   const handleSearchTermChange = useCallback((term: string) => {
     setSearchTerm(term);
     setSelectedIndex(-1);
+    keyboardIndexRef.current = -1;
   }, []);
 
   // Reset search when view changes, and persist the view
@@ -235,6 +264,7 @@ export const FilterProvider = ({
     setActiveView(view);
     setSearchTerm('');
     setSelectedIndex(-1);
+    keyboardIndexRef.current = -1;
   }, []);
 
   // Memoize context value to prevent unnecessary re-renders
@@ -257,6 +287,9 @@ export const FilterProvider = ({
       updateListLength,
       inputRef,
       handleKeyDown,
+      handleItemMouseMove,
+      handleItemClick,
+      handleListMouseLeave,
       getSortOptions,
     }),
     [
@@ -275,6 +308,9 @@ export const FilterProvider = ({
       updateListLength,
       inputRef,
       handleKeyDown,
+      handleItemMouseMove,
+      handleItemClick,
+      handleListMouseLeave,
       getSortOptions,
       setSizeSubView,
     ],

@@ -17,12 +17,18 @@ export const FileView = () => {
     patternCounts,
     extensionList,
     subfolderList,
+    subfolderListLength,
     selectedIndex,
     handleToggle,
     handleToggleSubfolder,
-    handlePatternKeyDown,
+    handleCombinedKeyDown,
     handleRemovePattern,
     handleAddPattern,
+    handleItemMouseMove,
+    handleItemClick,
+    handleExtensionMouseMove,
+    handleExtensionClick,
+    handleListMouseLeave,
   } = useFileView();
 
   return (
@@ -34,7 +40,7 @@ export const FileView = () => {
           ref={inputRef}
           value={patternInput}
           onChange={(e) => setPatternInput(e.target.value)}
-          onKeyDown={handlePatternKeyDown}
+          onKeyDown={handleCombinedKeyDown}
           autoFocus
           placeholder="Search file and folder names..."
           className="w-full rounded border border-slate-300 bg-white py-1.5 ps-2 pe-8 text-sm placeholder-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:placeholder-slate-400 dark:focus:border-blue-400"
@@ -55,7 +61,7 @@ export const FileView = () => {
       </div>
 
       {/* Scrollable content area */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto" onMouseLeave={handleListMouseLeave}>
         {/* Filename patterns list */}
         {/* Divider with label */}
         <div className="flex cursor-default items-center gap-2 py-1.5">
@@ -116,7 +122,8 @@ export const FileView = () => {
                 <li
                   id={`subfolder-${item.subfolder}`}
                   key={item.subfolder}
-                  onClick={() => handleToggleSubfolder(item.subfolder)}
+                  onClick={() => { handleItemClick(index); handleToggleSubfolder(item.subfolder); }}
+                  onMouseMove={() => handleItemMouseMove(index)}
                   className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                     index === selectedIndex
                       ? item.isActive
@@ -124,7 +131,7 @@ export const FileView = () => {
                         : 'bg-blue-100 dark:bg-blue-900/50'
                       : item.isActive
                         ? 'bg-indigo-100 dark:bg-indigo-900'
-                        : 'hover:bg-blue-50 dark:hover:bg-slate-700'
+                        : ''
                   }`}
                   title={
                     item.isActive
@@ -175,17 +182,18 @@ export const FileView = () => {
           <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {extensionList.map((item, index) => (
               <li
-                id={`tag-${item.ext}`}
+                id={`ext-${item.ext}`}
                 key={item.ext}
-                onClick={() => handleToggle(item.ext)}
+                onClick={() => { handleExtensionClick(index); handleToggle(item.ext); }}
+                onMouseMove={() => handleExtensionMouseMove(index)}
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
-                  index === selectedIndex
+                  index + subfolderListLength === selectedIndex
                     ? item.isActive
                       ? 'bg-stone-200 dark:bg-stone-700'
                       : 'bg-blue-100 dark:bg-blue-900/50'
                     : item.isActive
                       ? 'bg-stone-100 dark:bg-stone-800'
-                      : 'hover:bg-blue-50 dark:hover:bg-slate-700'
+                      : ''
                 }`}
                 title={
                   item.isActive
