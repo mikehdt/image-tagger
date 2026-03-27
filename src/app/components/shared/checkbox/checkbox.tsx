@@ -17,6 +17,19 @@ interface CheckboxProps {
   previewState?: PreviewState; // For shift-hover preview
 }
 
+const sizeClasses = {
+  small: {
+    checkbox: 'h-4 w-4',
+    label: 'text-xs',
+    gap: 'gap-1.5',
+  },
+  medium: {
+    checkbox: 'h-5 w-5',
+    label: 'text-sm',
+    gap: 'gap-2',
+  },
+};
+
 /**
  * A reusable checkbox component with custom styling and keyboard accessibility
  */
@@ -55,20 +68,6 @@ export const Checkbox = ({
     },
     [disabled, onChange],
   );
-
-  // Size-specific styling
-  const sizeClasses = {
-    small: {
-      checkbox: 'h-4 w-4',
-      label: 'text-xs',
-      gap: 'gap-1.5',
-    },
-    medium: {
-      checkbox: 'h-5 w-5',
-      label: 'text-sm',
-      gap: 'gap-2',
-    },
-  };
 
   const currentSize = sizeClasses[size];
 

@@ -56,9 +56,6 @@ export const editTagsAcrossAssets = createAsyncThunk(
       );
     }
 
-    // These are the final assets we'll operate on
-    const allAssets = candidateAssets;
-
     // Validate the input
     if (!tagUpdates.length) {
       return {
@@ -73,7 +70,7 @@ export const editTagsAcrossAssets = createAsyncThunk(
 
     // Create a snapshot of the original asset state to avoid interference between operations
     const originalAssetState = new Map(
-      allAssets.map((asset) => [asset.fileId, [...asset.tagList]]),
+      candidateAssets.map((asset) => [asset.fileId, [...asset.tagList]]),
     );
 
     // Track which assets have already had a tag renamed to each target name
@@ -93,7 +90,7 @@ export const editTagsAcrossAssets = createAsyncThunk(
         // but is being deleted due to duplicate detection)
         if (newTagName.trim() !== oldTagName) {
           // This is a duplicate prevention delete - handle it like a rename that creates duplicates
-          allAssets.forEach((asset) => {
+          candidateAssets.forEach((asset) => {
             if (asset.tagList.includes(oldTagName)) {
               dispatch(
                 deleteTag({
@@ -119,7 +116,7 @@ export const editTagsAcrossAssets = createAsyncThunk(
         const trimmedNewName = newTagName.trim();
 
         // Find all assets with this tag
-        allAssets.forEach((asset) => {
+        candidateAssets.forEach((asset) => {
           if (asset.tagList.includes(oldTagName)) {
             // Initialize tracking for this asset if needed
             if (!assetRenamedTargets.has(asset.fileId)) {
@@ -166,12 +163,12 @@ export const editTagsAcrossAssets = createAsyncThunk(
     // Mark tags for deletion in bulk
     if (tagsToDelete.length > 0) {
       // Pass the scoped asset IDs so deletion only affects the assets we're operating on
-      const assetIds = allAssets.map((asset) => asset.fileId);
+      const assetIds = candidateAssets.map((asset) => asset.fileId);
       dispatch(markFilterTagsToDelete({ tags: tagsToDelete, assetIds }));
 
       // Count deletions - count assets that have each tag
       tagsToDelete.forEach((tagName) => {
-        const assetsWithTag = allAssets.filter((asset) =>
+        const assetsWithTag = candidateAssets.filter((asset) =>
           asset.tagList.includes(tagName),
         ).length;
         modifiedAssetCount[tagName] = assetsWithTag;

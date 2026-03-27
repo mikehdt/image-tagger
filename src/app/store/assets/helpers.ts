@@ -30,13 +30,11 @@ export function createFlattenedTags(tags: string[]): string {
 export function createCleanTagStatus(tags: string[]): {
   [key: string]: number;
 } {
-  return tags.reduce(
-    (acc, tag) => {
-      acc[tag] = TagState.SAVED;
-      return acc;
-    },
-    {} as { [key: string]: number },
-  );
+  const status: { [key: string]: number } = {};
+  for (const tag of tags) {
+    status[tag] = TagState.SAVED;
+  }
+  return status;
 }
 
 /**

@@ -14,6 +14,7 @@ import {
   hasState,
   markExistingTagsDirty,
   reevaluateDirtyFlags,
+  removeState,
   toggleState,
 } from './utils';
 
@@ -205,14 +206,14 @@ export const coreReducers = {
     const assetIndex = state.imageIndexById[assetId];
     if (assetIndex === undefined) return;
 
+    const asset = state.images[assetIndex];
+
     // Update the name in the tagList
-    const tagListIndex = state.images[assetIndex].tagList.findIndex(
+    const tagListIndex = asset.tagList.findIndex(
       (item) => item === oldTagName,
     );
+    asset.tagList[tagListIndex] = newTagName;
 
-    state.images[assetIndex].tagList[tagListIndex] = newTagName;
-
-    const asset = state.images[assetIndex];
     const savedIndex = asset.savedTagList?.indexOf(newTagName);
 
     // Check if this is a revert to the original name AND position
@@ -221,25 +222,16 @@ export const coreReducers = {
       savedIndex !== -1 &&
       savedIndex === tagListIndex;
 
-    // If tag is back to original name and position, don't mark as DIRTY
-    if (isBackToOriginal) {
-      // Copy any other flags except DIRTY
-      state.images[assetIndex].tagStatus[newTagName] =
-        state.images[assetIndex].tagStatus[oldTagName] & ~TagState.DIRTY;
-    } else {
-      // Otherwise, mark as DIRTY
-      state.images[assetIndex].tagStatus[newTagName] = addState(
-        state.images[assetIndex].tagStatus[oldTagName],
-        TagState.DIRTY,
-      );
-    }
+    // Transfer status flags from old tag to new tag, adjusting DIRTY as needed
+    const oldStatus = asset.tagStatus[oldTagName];
+    asset.tagStatus[newTagName] = isBackToOriginal
+      ? removeState(oldStatus, TagState.DIRTY)
+      : addState(oldStatus, TagState.DIRTY);
 
-    delete state.images[assetIndex].tagStatus[oldTagName];
+    delete asset.tagStatus[oldTagName];
 
     // Invalidate tag counts cache since tag name changed
     state.tagCountsCache = null;
-
-    // On cancel, need to also remove superfluous and reset any tag keys missing as a result!
   },
 
   deleteTag: (

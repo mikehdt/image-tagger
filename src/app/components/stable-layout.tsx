@@ -23,16 +23,8 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Calculate total pages based on filtered results
   const totalPages = useMemo(() => {
-    try {
-      if (paginationSize === -1) {
-        // -1 is PaginationSize.ALL
-        return 1; // When showing all, there's only one page
-      }
-      return Math.max(1, Math.ceil(filteredAssets.length / paginationSize));
-    } catch (error) {
-      console.error('Error calculating total pages:', error);
-      return 1; // Default to 1 page on error
-    }
+    if (paginationSize === -1) return 1; // -1 is PaginationSize.ALL
+    return Math.max(1, Math.ceil(filteredAssets.length / paginationSize));
   }, [filteredAssets, paginationSize]);
 
   // Effect to redirect if current page is out of bounds after filter change

@@ -44,23 +44,23 @@ export const applyVisibilityFilters = ({
   sortDirection?: SortDirection;
 }): ImageAssetWithIndex[] => {
   // Sort first (reuse existing sorting infrastructure)
-  const assetsWithTempIndex = assets.map((asset, index) => ({
+  const assetsWithIndex = assets.map((asset, index) => ({
     ...asset,
     originalIndex: index + 1,
   })) as ImageAssetWithIndex[];
 
   const sortedAssets = applySorting(
-    assetsWithTempIndex,
+    assetsWithIndex,
     sortType,
     sortDirection,
     selectedAssets,
     { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders },
   );
 
-  const sortedAssetsWithCorrectIndex = sortedAssets.map((asset, index) => ({
-    ...asset,
-    originalIndex: index + 1,
-  }));
+  // Reassign originalIndex based on sorted position (safe to mutate — we own these objects)
+  for (let i = 0; i < sortedAssets.length; i++) {
+    sortedAssets[i].originalIndex = i + 1;
+  }
 
   // Pre-compute sets for fast lookups
   const filterSizesSet = new Set(filterSizes);
@@ -69,7 +69,7 @@ export const applyVisibilityFilters = ({
   const filterSubfoldersSet = new Set(filterSubfolders);
   const selectedSet = new Set(selectedAssets);
 
-  // Helper: check a single class against an asset, returns true if asset passes
+  // Helper: check a multi-value class (tags, name search) against an asset
   const checkClass = (
     mode: ClassFilterMode,
     matchAny: () => boolean,
@@ -82,18 +82,26 @@ export const applyVisibilityFilters = ({
     return !matchAny();
   };
 
-  const filteredAssets = sortedAssetsWithCorrectIndex.filter(
+  // Helper: check a single-value class (sizes, buckets, extensions, subfolders)
+  // For single-value properties, ANY === ALL, so only one test is needed
+  const checkSingleValue = (mode: ClassFilterMode, matches: boolean): boolean => {
+    if (mode === ClassFilterMode.OFF) return true;
+    if (mode === ClassFilterMode.INVERSE) return !matches;
+    return matches;
+  };
+
+  const filteredAssets = sortedAssets.filter(
     (img: ImageAssetWithIndex) => {
       // --- Scope filters (ANDed with everything) ---
 
       // Scope: tagless — only assets with no persisted tags
       if (visibility.scopeTagless) {
-        const persistedTags = img.tagList.filter(
+        const hasPersisted = img.tagList.some(
           (tag) =>
             !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
             !hasState(img.tagStatus[tag], TagState.TO_ADD),
         );
-        if (persistedTags.length > 0) return false;
+        if (hasPersisted) return false;
       }
 
       // Scope: selected only
@@ -134,44 +142,25 @@ export const applyVisibilityFilters = ({
 
       // Sizes class
       if (filterSizes.length > 0) {
-        const dimensionsComposed = composeDimensions(img.dimensions);
-        const passes = checkClass(
-          visibility.sizes,
-          () => filterSizesSet.has(dimensionsComposed),
-          () => filterSizesSet.has(dimensionsComposed), // single value, ANY === ALL
-        );
-        if (!passes) return false;
+        const matches = filterSizesSet.has(composeDimensions(img.dimensions));
+        if (!checkSingleValue(visibility.sizes, matches)) return false;
       }
 
       // Buckets class
       if (filterBuckets.length > 0) {
-        const bucketComposed = `${img.bucket.width}×${img.bucket.height}`;
-        const passes = checkClass(
-          visibility.buckets,
-          () => filterBucketsSet.has(bucketComposed),
-          () => filterBucketsSet.has(bucketComposed),
-        );
-        if (!passes) return false;
+        const matches = filterBucketsSet.has(`${img.bucket.width}×${img.bucket.height}`);
+        if (!checkSingleValue(visibility.buckets, matches)) return false;
       }
 
       // Extensions class
       if (filterExtensions.length > 0) {
-        const passes = checkClass(
-          visibility.extensions,
-          () => filterExtensionsSet.has(img.fileExtension),
-          () => filterExtensionsSet.has(img.fileExtension),
-        );
-        if (!passes) return false;
+        if (!checkSingleValue(visibility.extensions, filterExtensionsSet.has(img.fileExtension))) return false;
       }
 
       // Subfolders class
       if (filterSubfolders.length > 0) {
-        const passes = checkClass(
-          visibility.subfolders,
-          () => !!img.subfolder && filterSubfoldersSet.has(img.subfolder),
-          () => !!img.subfolder && filterSubfoldersSet.has(img.subfolder),
-        );
-        if (!passes) return false;
+        const matches = !!img.subfolder && filterSubfoldersSet.has(img.subfolder);
+        if (!checkSingleValue(visibility.subfolders, matches)) return false;
       }
 
       return true;
