@@ -348,6 +348,49 @@ export const coreReducers = {
     state.tagCountsCache = null;
   },
 
+  // Reset all modified assets' tags back to their saved state in a single pass
+  resetAllModifiedTags: (state: ImageAssets) => {
+    let resetCount = 0;
+
+    for (const asset of state.images) {
+      const hasModified = asset.tagList.some(
+        (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+      );
+      if (!hasModified) continue;
+
+      const savedList = asset.savedTagList || [];
+      const savedTagsSet = new Set(savedList);
+
+      // Remove TO_ADD tags and tags not in savedList from tagStatus
+      for (const tag of Object.keys(asset.tagStatus)) {
+        if (
+          hasState(asset.tagStatus[tag], TagState.TO_ADD) ||
+          !savedTagsSet.has(tag)
+        ) {
+          delete asset.tagStatus[tag];
+        } else {
+          asset.tagStatus[tag] = TagState.SAVED;
+        }
+      }
+
+      // Ensure all tags in savedList have a status entry
+      for (const tag of savedList) {
+        if (!(tag in asset.tagStatus)) {
+          asset.tagStatus[tag] = TagState.SAVED;
+        }
+      }
+
+      // Restore tagList to saved order
+      asset.tagList.length = 0;
+      asset.tagList.push(...savedList);
+      resetCount++;
+    }
+
+    if (resetCount > 0) {
+      state.tagCountsCache = null;
+    }
+  },
+
   // Sorting reducers
   setSortType: (state: ImageAssets, { payload }: PayloadAction<SortType>) => {
     state.sortType = payload;

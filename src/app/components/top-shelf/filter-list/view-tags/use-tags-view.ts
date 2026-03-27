@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { selectAllTags } from '@/app/store/assets';
+import { selectTagCounts } from '@/app/store/assets';
 import { selectFilterTags, toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
@@ -48,7 +48,7 @@ export const getTagSortOptions = (
 
 export const useTagsView = () => {
   const dispatch = useAppDispatch();
-  const allTags = useAppSelector(selectAllTags);
+  const allTags = useAppSelector(selectTagCounts);
   const activeTags = useAppSelector(selectFilterTags);
 
   const {

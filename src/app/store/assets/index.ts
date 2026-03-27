@@ -45,6 +45,7 @@ export const {
   deleteTag,
   reorderTags,
   resetTags,
+  resetAllModifiedTags,
   markFilterTagsToDelete,
   gatherTags,
   copyTagsToAssets,

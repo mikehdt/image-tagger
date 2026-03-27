@@ -6,7 +6,6 @@ import {
   clearSaveErrors,
   completeAfterDelay,
   loadAllAssets,
-  resetAllTags,
   saveAllAssets,
   saveAsset,
   updateLoadProgress,
@@ -161,29 +160,6 @@ export const setupExtraReducers = (
     state.ioState = IoState.ERROR;
     state.ioMessage = `Failed to save all assets: ${action.error.message}`;
     state.saveProgress = undefined;
-  });
-
-  // Reset All Tags
-  builder.addCase(resetAllTags.pending, (state) => {
-    state.ioState = IoState.LOADING;
-    state.ioMessage = 'Canceling all tag changes...';
-  });
-
-  builder.addCase(resetAllTags.fulfilled, (state, action) => {
-    state.ioState = IoState.COMPLETE;
-    // Individual resetTags actions have already updated the state
-    if (action.payload.resetCount > 0) {
-      state.ioMessage = `Changes canceled for ${action.payload.resetCount} assets`;
-      // Invalidate cache since tags were reset
-      state.tagCountsCache = null;
-    } else {
-      state.ioMessage = 'No changes to cancel';
-    }
-  });
-
-  builder.addCase(resetAllTags.rejected, (state, action) => {
-    state.ioState = IoState.ERROR;
-    state.ioMessage = `Failed to cancel all changes: ${action.error.message}`;
   });
 
   // Add the updateSaveProgress handler

@@ -94,6 +94,15 @@ const createTagCoExistenceSelector = (
   });
 
 /**
+ * Clears all parameterised selector caches.
+ * Call on project switch to prevent stale selectors from accumulating.
+ */
+export const clearSelectorCaches = () => {
+  duplicateTagInfoCache.clear();
+  tagCoExistenceCache.clear();
+};
+
+/**
  * Returns a cached selector for duplicate tag info.
  * The same selector instance is returned for the same tagName,
  * enabling proper memoization.

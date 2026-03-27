@@ -1,7 +1,7 @@
 import { BookmarkCheckIcon, BookmarkMinusIcon } from 'lucide-react';
 
 import {
-  resetAllTags,
+  resetAllModifiedTags,
   saveAllAssets,
   selectHasModifiedAssets,
 } from '@/app/store/assets';
@@ -18,7 +18,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
     const selectedProject = sessionStorage.getItem('selectedProject');
     dispatch(saveAllAssets({ projectPath: selectedProject || undefined }));
   };
-  const cancelAllChanges = () => dispatch(resetAllTags());
+  const cancelAllChanges = () => dispatch(resetAllModifiedTags());
 
   return (
     <>

@@ -112,26 +112,6 @@ export const selectImageSizes = createSelector([selectAllImages], (images) => {
   return counts;
 });
 
-export const selectAllTags = wrapSelector(
-  'selectAllTags',
-  createSelector([selectAllImages], (imageAssets) => {
-    if (!imageAssets?.length) return {};
-
-    const tagCounts: KeyedCountList = {};
-
-    // Process all images and count tags
-    for (const asset of imageAssets) {
-      for (const tag of asset.tagList) {
-        // Only count tags that aren't marked for deletion
-        if (!hasState(asset.tagStatus[tag], TagState.TO_DELETE)) {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        }
-      }
-    }
-
-    return tagCounts;
-  }),
-);
 
 // Custom selector to check if any assets have modified tags
 export const selectHasModifiedAssets = wrapSelector(

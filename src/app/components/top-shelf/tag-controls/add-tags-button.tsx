@@ -6,7 +6,6 @@ import { selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/f
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   addMultipleTagsToAssetsWithDualSelection,
-  addTagToAssetsWithDualSelection,
   clearSelection,
   selectSelectedAssetsCount,
 } from '@/app/store/selection';
@@ -44,8 +43,8 @@ export const AddTagsButton = () => {
       applyToAssetsWithActiveFilters = false,
     ) => {
       dispatch(
-        addTagToAssetsWithDualSelection({
-          tagName: tag,
+        addMultipleTagsToAssetsWithDualSelection({
+          tagNames: [tag],
           addToStart,
           applyToSelectedAssets,
           applyToAssetsWithActiveFilters,

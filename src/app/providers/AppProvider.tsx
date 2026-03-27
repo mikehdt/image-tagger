@@ -14,7 +14,7 @@ import {
 import { clearFilters } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
-import { clearSelection } from '../store/selection';
+import { clearSelection, clearSelectorCaches } from '../store/selection';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
 import { NoContent } from '../views/no-content';
@@ -69,6 +69,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             dispatch(resetProjectState());
             dispatch(clearFilters());
             dispatch(clearSelection());
+            clearSelectorCaches();
 
             // Redirect to home to determine the correct navigation flow
             router.push('/');

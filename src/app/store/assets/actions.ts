@@ -319,26 +319,3 @@ export const saveAllAssets = createAsyncThunk<
   }
 });
 
-// Cancel all tag changes
-export const resetAllTags = createAsyncThunk(
-  'assets/resetAllTags',
-  async (_, { getState, dispatch }) => {
-    const {
-      assets: { images },
-    } = getState() as { assets: ImageAssets };
-
-    // Find all images with modified tags using helper function
-    const modifiedAssets = findModifiedAssets(images);
-
-    if (modifiedAssets.length === 0) {
-      return { resetCount: 0 };
-    }
-
-    // Reset tags for each modified asset
-    for (const asset of modifiedAssets) {
-      dispatch({ type: 'assets/resetTags', payload: asset.fileId });
-    }
-
-    return { resetCount: modifiedAssets.length };
-  },
-);

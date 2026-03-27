@@ -7,7 +7,7 @@ import { resetAssetsState } from './store/assets';
 import { clearFilters } from './store/filters';
 import { useAppDispatch } from './store/hooks';
 import { resetProjectState } from './store/project';
-import { clearSelection } from './store/selection';
+import { clearSelection, clearSelectorCaches } from './store/selection';
 import { ProjectList } from './views/project-list';
 
 // Inline configuration check function to avoid import issues
@@ -54,6 +54,7 @@ export default function Home() {
           dispatch(resetProjectState());
           dispatch(clearFilters());
           dispatch(clearSelection());
+          clearSelectorCaches();
         }
 
         if (isDefault) {

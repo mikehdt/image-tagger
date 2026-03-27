@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 
 import {
   addMultipleTags,
-  addTag,
   deleteTag,
   editTag,
   markFilterTagsToDelete,
@@ -200,66 +199,8 @@ export const editTagsAcrossAssets = createAsyncThunk(
 );
 
 /**
- * Thunk action to add a tag to assets based on dual selection logic.
+ * Thunk action to add tags to assets based on dual selection logic.
  * Supports adding to selected assets, assets with active filters/visibility, or both.
- */
-export const addTagToAssetsWithDualSelection = createAsyncThunk(
-  'selection/addTagToAssetsWithDualSelection',
-  async (
-    {
-      tagName,
-      addToStart = false,
-      applyToSelectedAssets = false,
-      applyToAssetsWithActiveFilters = false,
-    }: {
-      tagName: string;
-      addToStart?: boolean;
-      applyToSelectedAssets?: boolean;
-      applyToAssetsWithActiveFilters?: boolean;
-    },
-    { getState, dispatch },
-  ) => {
-    const state = getState() as RootState;
-
-    let finalAssets: string[] = [];
-
-    if (applyToSelectedAssets && applyToAssetsWithActiveFilters) {
-      // Both constraints: intersection of selected assets AND filtered assets
-      const selectedAssetIds = new Set(state.selection.selectedAssets);
-      const filteredAssets = selectAssetsWithActiveFilters(state);
-      finalAssets = filteredAssets
-        .filter((asset) => selectedAssetIds.has(asset.fileId))
-        .map((asset) => asset.fileId);
-    } else if (applyToSelectedAssets) {
-      finalAssets = [...state.selection.selectedAssets];
-    } else if (applyToAssetsWithActiveFilters) {
-      finalAssets = selectAssetsWithActiveFilters(state).map((asset) => asset.fileId);
-    }
-
-    if (!finalAssets.length || !tagName.trim()) {
-      return { success: false, message: 'No assets available or invalid tag' };
-    }
-
-    finalAssets.forEach((assetId) => {
-      dispatch(
-        addTag({
-          assetId,
-          tagName: tagName.trim(),
-          position: addToStart ? 'start' : 'end',
-        }),
-      );
-    });
-
-    return {
-      success: true,
-      count: finalAssets.length,
-      message: `Added tag "${tagName}" to ${finalAssets.length} assets`,
-    };
-  },
-);
-
-/**
- * Thunk action to add multiple tags to assets based on dual selection logic.
  * Optimized to avoid redundant DIRTY marking when adding multiple tags.
  */
 export const addMultipleTagsToAssetsWithDualSelection = createAsyncThunk(

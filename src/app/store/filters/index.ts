@@ -64,7 +64,7 @@ export const {
   toggleBucketFilter,
   toggleExtensionFilter,
   toggleSubfolderFilter,
-  toggleModifiedFilter,
+  
   clearTagFilters,
   updateTagFilters,
   clearSizeFilters,

@@ -7,7 +7,7 @@ import { resetAssetsState } from '@/app/store/assets';
 import { clearFilters } from '@/app/store/filters';
 import { useAppDispatch } from '@/app/store/hooks';
 import { resetProjectState, setProjectInfo } from '@/app/store/project';
-import { clearSelection } from '@/app/store/selection';
+import { clearSelection, clearSelectorCaches } from '@/app/store/selection';
 import { getProjectList } from '@/app/utils/project-actions';
 import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
@@ -97,6 +97,7 @@ export const useProjectList = () => {
     dispatch(resetProjectState());
     dispatch(clearFilters());
     dispatch(clearSelection());
+    clearSelectorCaches();
     sessionStorage.removeItem('selectedProject');
     sessionStorage.removeItem('selectedProjectTitle');
     sessionStorage.removeItem('selectedProjectThumbnail');
