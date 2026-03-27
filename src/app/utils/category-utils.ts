@@ -154,15 +154,15 @@ export const sortCategories = (
         break;
 
       case SortType.FOLDER:
-        // ASC mode: Root first, then alphabetically by label (a-z), with repeat count as secondary
-        // DESC mode: Root first, then numerically by repeat count (0-9), with label as secondary
+        // Subfolders always come first, Root always last (regardless of direction)
+        // Primary: repeat count (0-9 ASC, 9-0 DESC), tiebreak: label (always a-z)
         const aIsRoot = a === 'Root';
         const bIsRoot = b === 'Root';
 
         if (aIsRoot && !bIsRoot) {
-          comparison = -1; // Root always first in both modes
+          comparison = 1; // Root always last in both modes
         } else if (!aIsRoot && bIsRoot) {
-          comparison = 1;
+          comparison = -1;
         } else if (!aIsRoot && !bIsRoot) {
           // Both are subfolder categories - parse and compare
           // Format is "2× sonic", extract repeat count and label
@@ -175,13 +175,13 @@ export const sortCategories = (
             const aLabel = aMatch[2];
             const bLabel = bMatch[2];
 
-            if (sortDirection === SortDirection.ASC) {
-              // ASC: Sort by label (a-z), then by repeat count (0-9)
-              const labelComparison = aLabel.localeCompare(bLabel);
-              comparison = labelComparison !== 0 ? labelComparison : aRepeat - bRepeat;
+            // Primary: repeat count (direction-aware), tiebreak: label (always a-z)
+            if (aRepeat !== bRepeat) {
+              comparison = sortDirection === SortDirection.ASC
+                ? aRepeat - bRepeat
+                : bRepeat - aRepeat;
             } else {
-              // DESC: Sort by repeat count (0-9), then by label (a-z)
-              comparison = aRepeat !== bRepeat ? aRepeat - bRepeat : aLabel.localeCompare(bLabel);
+              comparison = aLabel.localeCompare(bLabel);
             }
           } else {
             // Fallback to alphabetical if parsing fails

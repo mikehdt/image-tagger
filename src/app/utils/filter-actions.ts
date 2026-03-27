@@ -332,6 +332,25 @@ const applySorting = (
         }
         break;
 
+      case SortType.FOLDER: {
+        // Subfolder assets always come first, root assets last (regardless of direction)
+        const aInFolder = !!a.subfolder;
+        const bInFolder = !!b.subfolder;
+
+        if (aInFolder && !bInFolder) return -1;
+        if (!aInFolder && bInFolder) return 1;
+
+        // Both in subfolders: sort by subfolder name, then by filename within same folder
+        if (aInFolder && bInFolder) {
+          const folderCmp = naturalCompare(a.subfolder!, b.subfolder!);
+          if (folderCmp !== 0) return folderCmp * direction;
+          return naturalCompare(a.fileId, b.fileId) * direction;
+        }
+
+        // Both in root: sort by filename
+        return naturalCompare(a.fileId, b.fileId) * direction;
+      }
+
       default:
         comparison = 0;
         break;
