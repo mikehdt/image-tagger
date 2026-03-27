@@ -17,46 +17,6 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 import { useFilterContext } from '../filter-context';
-import { SortDirection, SortType } from '../types';
-
-// Get sort options for the filetypes view
-export const getFiletypeSortOptions = (
-  sortType: SortType,
-  sortDirection: SortDirection,
-) => {
-  let typeLabel: string, directionLabel: string;
-
-  switch (sortType) {
-    case 'count':
-      typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    case 'active':
-      typeLabel = 'Active';
-      directionLabel = sortDirection === 'desc' ? '↑ Active' : '↓ Active';
-      break;
-    case 'alphabetical':
-    default:
-      typeLabel = 'Name';
-      directionLabel = sortDirection === 'asc' ? '↑ A-Z' : '↓ Z-A';
-  }
-
-  // Calculate next sort type based on current sort type
-  let nextType: SortType = 'count';
-  if (sortType === 'count') {
-    nextType = 'active';
-  } else if (sortType === 'active') {
-    nextType = 'alphabetical';
-  } else if (sortType === 'alphabetical') {
-    nextType = 'count';
-  }
-
-  return {
-    typeLabel,
-    directionLabel,
-    nextType,
-  };
-};
 
 export const useFileView = () => {
   const dispatch = useAppDispatch();

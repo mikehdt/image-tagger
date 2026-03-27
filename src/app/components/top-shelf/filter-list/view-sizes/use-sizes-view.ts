@@ -6,7 +6,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions, getAspectRatio } from '@/app/utils/helpers';
 
 import { useFilterContext } from '../filter-context';
-import { SortDirection, SortType } from '../types';
 
 // Format aspect ratio as a simplified string
 const formatAspectRatio = (
@@ -53,61 +52,6 @@ const formatAspectRatio = (
   return {
     ratio: `${ratioWidth}:${ratioHeight}`,
     type: width > height ? 'Landscape' : 'Portrait',
-  };
-};
-
-// Get sort options for the sizes view
-export const getSizeSortOptions = (
-  sortType: SortType,
-  sortDirection: SortDirection,
-) => {
-  let typeLabel: string, directionLabel: string;
-
-  switch (sortType) {
-    case 'count':
-      typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    case 'dimensions':
-      typeLabel = 'Size';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    case 'active':
-      typeLabel = 'Active';
-      directionLabel = sortDirection === 'desc' ? '↑ Active' : '↓ Active';
-      break;
-    case 'aspectRatio':
-      typeLabel = 'Ratio';
-      directionLabel = sortDirection === 'asc' ? '↑ Tall-Wide' : '↓ Wide-Tall';
-      break;
-    case 'megapixels':
-      typeLabel = 'Megapixel';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    default:
-      typeLabel = 'Size';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-  }
-
-  // Calculate next sort type based on current sort type
-  // Define a safe mapping for sort type transitions
-  let nextType: SortType = 'count';
-  if (sortType === 'count') {
-    nextType = 'active';
-  } else if (sortType === 'active') {
-    nextType = 'dimensions';
-  } else if (sortType === 'dimensions') {
-    nextType = 'aspectRatio';
-  } else if (sortType === 'aspectRatio') {
-    nextType = 'megapixels';
-  } else if (sortType === 'megapixels') {
-    nextType = 'count';
-  }
-
-  return {
-    typeLabel,
-    directionLabel,
-    nextType,
   };
 };
 

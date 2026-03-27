@@ -6,53 +6,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { decomposeDimensions } from '@/app/utils/helpers';
 
 import { useFilterContext } from '../filter-context';
-import { SortDirection, SortType } from '../types';
-
-// Get sort options for the buckets view (simplified compared to image sizes)
-export const getBucketSortOptions = (
-  sortType: SortType,
-  sortDirection: SortDirection,
-) => {
-  let typeLabel: string, directionLabel: string;
-
-  switch (sortType) {
-    case 'count':
-      typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    case 'active':
-      typeLabel = 'Active';
-      directionLabel = sortDirection === 'desc' ? '↑ Active' : '↓ Active';
-      break;
-    case 'dimensions':
-      typeLabel = 'Size';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-      break;
-    default:
-      // Fallback to count for any unsupported sort types (like megapixels, aspectRatio)
-      typeLabel = 'Count';
-      directionLabel = sortDirection === 'asc' ? '↑ 0-9' : '↓ 9-0';
-  }
-
-  // Simple cycle: count → active → dimensions → count
-  let nextType: SortType = 'count';
-  if (sortType === 'count') {
-    nextType = 'active';
-  } else if (sortType === 'active') {
-    nextType = 'dimensions';
-  } else {
-    nextType = 'count';
-  }
-
-  const nextDirection: SortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-
-  return {
-    typeLabel,
-    directionLabel,
-    nextType,
-    nextDirection,
-  };
-};
 
 export const useBucketsView = () => {
   const dispatch = useAppDispatch();
@@ -105,32 +58,32 @@ export const useBucketsView = () => {
 
     // Apply sorting
     buckets.sort((a, b) => {
+      if (sortType === 'active') {
+        if (a.isActive !== b.isActive) {
+          return sortDirection === 'desc'
+            ? a.isActive
+              ? -1
+              : 1
+            : a.isActive
+              ? 1
+              : -1;
+        }
+        return b.count - a.count;
+      }
+
       let result = 0;
 
       switch (sortType) {
-        case 'count':
-          result = a.count - b.count;
-          break;
         case 'dimensions': {
-          // Parse dimensions and sort by size (borrowed from view-sizes logic)
           const { width: aWidth, height: aHeight } = decomposeDimensions(
             a.name.replace('×', 'x'),
           );
           const { width: bWidth, height: bHeight } = decomposeDimensions(
             b.name.replace('×', 'x'),
           );
-
-          // Sort by width first, then by height
-          if (aWidth !== bWidth) {
-            result = aWidth - bWidth;
-          } else {
-            result = aHeight - bHeight;
-          }
+          result = aWidth !== bWidth ? aWidth - bWidth : aHeight - bHeight;
           break;
         }
-        case 'active':
-          result = Number(a.isActive) - Number(b.isActive);
-          break;
         default:
           result = a.count - b.count;
       }

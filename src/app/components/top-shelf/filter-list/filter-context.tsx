@@ -9,12 +9,15 @@ import {
   useState,
 } from 'react';
 
-import { FilterView, SizeSubViewType, SortDirection, SortType } from './types';
+import {
+  FilterView,
+  getSortOptions,
+  SizeSubViewType,
+  SORT_CYCLES,
+  SortDirection,
+  SortType,
+} from './types';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
-import { getBucketSortOptions } from './view-buckets/use-buckets-view';
-import { getFiletypeSortOptions } from './view-file/use-file-view';
-import { getSizeSortOptions } from './view-sizes/use-sizes-view';
-import { getTagSortOptions } from './view-tags/use-tags-view';
 
 // Get the default sort direction for a given sort type
 const getDefaultDirection = (type: SortType): SortDirection => {
@@ -193,29 +196,12 @@ export const FilterProvider = ({
   }, []);
 
   // Get sort options for current view
-  const getSortOptions = useCallback(() => {
-    const sortType = currentSort.type;
-    const sortDirection = currentSort.direction;
-
-    switch (activeView) {
-      case 'tag':
-        return getTagSortOptions(sortType, sortDirection);
-      case 'size':
-        // Use different sort options based on sub-view
-        if (sizeSubView === 'buckets') {
-          return getBucketSortOptions(sortType, sortDirection);
-        } else {
-          return getSizeSortOptions(sortType, sortDirection);
-        }
-      case 'filetype':
-        return getFiletypeSortOptions(sortType, sortDirection);
-      default:
-        return {
-          typeLabel: 'Count',
-          directionLabel: 'High to Low',
-          nextType: 'count' as SortType,
-        };
-    }
+  const getSortOptionsForView = useCallback(() => {
+    const cycle =
+      activeView === 'size'
+        ? SORT_CYCLES[sizeSubView]
+        : SORT_CYCLES[activeView];
+    return getSortOptions(currentSort.type, currentSort.direction, cycle);
   }, [activeView, sizeSubView, currentSort.type, currentSort.direction]);
 
   // Tracks the last keyboard-driven index (-1 = no KB position)
@@ -290,7 +276,7 @@ export const FilterProvider = ({
       handleItemMouseMove,
       handleItemClick,
       handleListMouseLeave,
-      getSortOptions,
+      getSortOptions: getSortOptionsForView,
     }),
     [
       onClose,
@@ -311,7 +297,7 @@ export const FilterProvider = ({
       handleItemMouseMove,
       handleItemClick,
       handleListMouseLeave,
-      getSortOptions,
+      getSortOptionsForView,
       setSizeSubView,
     ],
   );
