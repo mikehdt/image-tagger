@@ -66,9 +66,6 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
     [orderedTagsWithStatus, tagCounts, highlightedTags],
   );
 
-  // Tag names for SortableContext items
-  const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
-
   // DnD sensors - stable across renders
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -87,6 +84,7 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
       const { active, over } = event;
 
       if (over && active.id !== over.id) {
+        const tagNames = tags.map((t) => t.name);
         const oldIndex = tagNames.indexOf(active.id as string);
         const newIndex = tagNames.indexOf(over.id as string);
 
@@ -95,7 +93,7 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
         }
       }
     },
-    [dispatch, assetId, tagNames],
+    [dispatch, assetId, tags],
   );
 
   // Handle adding a new tag

@@ -4,7 +4,7 @@ import {
   FolderOpenIcon,
   ImageIcon,
 } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 
 import type { RootState } from '@/app/store';
 import {
@@ -62,20 +62,15 @@ const AssetMetadataComponent = ({
   const dispatch = useAppDispatch();
 
   // Parse subfolder to display repeat count and label
-  const subfolderDisplay = useMemo(() => {
-    if (!subfolder) return null;
-    const parsed = parseSubfolder(subfolder);
-    if (!parsed) return null;
-    return `${parsed.repeatCount}× ${parsed.label}`;
-  }, [subfolder]);
+  const parsed = subfolder ? parseSubfolder(subfolder) : null;
+  const subfolderDisplay = parsed
+    ? `${parsed.repeatCount}× ${parsed.label}`
+    : null;
 
   // Extract filename without subfolder path for display
-  const displayFilename = useMemo(() => {
-    if (!subfolder) return assetId;
-    // Remove "subfolder/" prefix from assetId
-    const slashIndex = assetId.indexOf('/');
-    return slashIndex !== -1 ? assetId.substring(slashIndex + 1) : assetId;
-  }, [assetId, subfolder]);
+  const slashIndex = subfolder ? assetId.indexOf('/') : -1;
+  const displayFilename =
+    slashIndex !== -1 ? assetId.substring(slashIndex + 1) : assetId;
 
   // Individual selector calls - each only triggers re-render when its specific value changes
   const filenamePatterns = useAppSelector(selectFilenamePatterns);

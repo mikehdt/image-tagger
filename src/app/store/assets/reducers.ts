@@ -9,7 +9,13 @@ import {
   SortType,
   TagState,
 } from './types';
-import { addState, hasState, removeState, toggleState } from './utils';
+import {
+  addState,
+  hasState,
+  markExistingTagsDirty,
+  reevaluateDirtyFlags,
+  toggleState,
+} from './utils';
 
 export const coreReducers = {
   // Reset assets to initial state (useful when switching projects)
@@ -80,23 +86,13 @@ export const coreReducers = {
         );
 
         // Re-evaluate DIRTY flags from the earliest removal point
-        for (let i = earliestRemoved; i < image.tagList.length; i++) {
-          const tag = image.tagList[i];
-          if (tag && !hasState(image.tagStatus[tag], TagState.TO_ADD)) {
-            const originalIndex = savedTagList.indexOf(tag);
-            if (originalIndex === i) {
-              image.tagStatus[tag] = removeState(
-                image.tagStatus[tag],
-                TagState.DIRTY,
-              );
-            } else {
-              image.tagStatus[tag] = addState(
-                image.tagStatus[tag],
-                TagState.DIRTY,
-              );
-            }
-          }
-        }
+        reevaluateDirtyFlags(
+          image.tagList,
+          image.tagStatus,
+          savedTagList,
+          earliestRemoved,
+          image.tagList.length - 1,
+        );
       }
     });
 
@@ -130,16 +126,7 @@ export const coreReducers = {
 
         // When adding to start, mark all other existing valid tags as DIRTY
         // since their positions have shifted (similar to drag/drop behavior)
-        const currentTagStatus = state.images[imageIndex].tagStatus;
-        Object.keys(currentTagStatus).forEach((existingTag) => {
-          // Only mark tags as DIRTY if they are not already TO_ADD
-          if (!hasState(currentTagStatus[existingTag], TagState.TO_ADD)) {
-            currentTagStatus[existingTag] = addState(
-              currentTagStatus[existingTag],
-              TagState.DIRTY,
-            );
-          }
-        });
+        markExistingTagsDirty(state.images[imageIndex].tagStatus);
       } else {
         // Add to the end of the list (default behavior)
         state.images[imageIndex].tagList.push(tagName);
@@ -186,17 +173,8 @@ export const coreReducers = {
       // Add all new tags to the beginning of the list in the order provided
       state.images[imageIndex].tagList.unshift(...tagsToAdd);
 
-      // Mark all other existing valid tags as DIRTY only once
-      // since their positions have shifted (similar to drag/drop behavior)
-      Object.keys(currentTagStatus).forEach((existingTag) => {
-        // Only mark tags as DIRTY if they are not already TO_ADD
-        if (!hasState(currentTagStatus[existingTag], TagState.TO_ADD)) {
-          currentTagStatus[existingTag] = addState(
-            currentTagStatus[existingTag],
-            TagState.DIRTY,
-          );
-        }
-      });
+      // Mark all other existing valid tags as DIRTY since their positions shifted
+      markExistingTagsDirty(currentTagStatus);
     } else {
       // Add all new tags to the end of the list (default behavior)
       state.images[imageIndex].tagList.push(...tagsToAdd);
@@ -289,30 +267,13 @@ export const coreReducers = {
 
       // Re-evaluate DIRTY state for all tags after the deleted position
       // since their positions may have shifted back to original
-      const savedTagList = asset.savedTagList || [];
-
-      for (let i = deletedIndex; i < asset.tagList.length; i++) {
-        const tag = asset.tagList[i];
-
-        // Skip TO_ADD tags (they don't have original positions)
-        if (tag && !hasState(asset.tagStatus[tag], TagState.TO_ADD)) {
-          const originalIndex = savedTagList.indexOf(tag);
-
-          // If tag is now in its original position, remove DIRTY flag
-          // Otherwise, ensure DIRTY flag is set
-          if (originalIndex === i) {
-            asset.tagStatus[tag] = removeState(
-              asset.tagStatus[tag],
-              TagState.DIRTY,
-            );
-          } else {
-            asset.tagStatus[tag] = addState(
-              asset.tagStatus[tag],
-              TagState.DIRTY,
-            );
-          }
-        }
-      }
+      reevaluateDirtyFlags(
+        asset.tagList,
+        asset.tagStatus,
+        asset.savedTagList || [],
+        deletedIndex,
+        asset.tagList.length - 1,
+      );
     } else {
       // Toggle TO_DELETE flag for all other tags
       state.images[assetIndex].tagStatus[tagName] = toggleState(
@@ -350,30 +311,14 @@ export const coreReducers = {
     tagList.splice(oldIndex, 1);
     tagList.splice(newIndex, 0, tagToMove);
 
-    // Use savedTagList to compare current vs original positions
-    const savedTagList = asset.savedTagList || [];
-
-    // Only examine tags in the range that was reordered
-    const minIndex = Math.min(oldIndex, newIndex);
-    const maxIndex = Math.max(oldIndex, newIndex);
-
-    // Check each tag in the affected range
-    for (let i = minIndex; i <= maxIndex; i++) {
-      const tag = tagList[i];
-
-      // Skip TO_ADD tags (they're always dirty)
-      if (tag && !hasState(tagStatus[tag], TagState.TO_ADD)) {
-        const originalIndex = savedTagList.indexOf(tag);
-
-        // If tag is in its original position, remove DIRTY flag
-        // Otherwise, add DIRTY flag
-        if (originalIndex === i) {
-          tagStatus[tag] = removeState(tagStatus[tag], TagState.DIRTY);
-        } else {
-          tagStatus[tag] = addState(tagStatus[tag], TagState.DIRTY);
-        }
-      }
-    }
+    // Re-evaluate DIRTY flags in the affected range
+    reevaluateDirtyFlags(
+      tagList,
+      tagStatus,
+      asset.savedTagList || [],
+      Math.min(oldIndex, newIndex),
+      Math.max(oldIndex, newIndex),
+    );
   },
 
   resetTags: (state: ImageAssets, { payload }: PayloadAction<string>) => {
@@ -475,28 +420,14 @@ export const coreReducers = {
       // Insert them consecutively at the first tag's original position
       asset.tagList.splice(firstTagIndex, 0, ...orderedTagsToGather);
 
-      // Update DIRTY flags by comparing with savedTagList
-      const savedTagList = asset.savedTagList || [];
-
-      // Check all tags that might have been affected
-      asset.tagList.forEach((tag, currentIndex) => {
-        // Skip TO_ADD tags (they don't have original positions)
-        if (!hasState(asset.tagStatus[tag], TagState.TO_ADD)) {
-          const originalIndex = savedTagList.indexOf(tag);
-
-          if (originalIndex === currentIndex) {
-            asset.tagStatus[tag] = removeState(
-              asset.tagStatus[tag],
-              TagState.DIRTY,
-            );
-          } else {
-            asset.tagStatus[tag] = addState(
-              asset.tagStatus[tag],
-              TagState.DIRTY,
-            );
-          }
-        }
-      });
+      // Re-evaluate DIRTY flags for all tags
+      reevaluateDirtyFlags(
+        asset.tagList,
+        asset.tagStatus,
+        asset.savedTagList || [],
+        0,
+        asset.tagList.length - 1,
+      );
     });
   },
 
@@ -537,14 +468,7 @@ export const coreReducers = {
         asset.tagList.unshift(...tagsToAdd);
 
         // Mark all existing tags as DIRTY since their positions have shifted
-        Object.keys(asset.tagStatus).forEach((existingTag) => {
-          if (!hasState(asset.tagStatus[existingTag], TagState.TO_ADD)) {
-            asset.tagStatus[existingTag] = addState(
-              asset.tagStatus[existingTag],
-              TagState.DIRTY,
-            );
-          }
-        });
+        markExistingTagsDirty(asset.tagStatus);
       } else {
         // Append new tags to the end
         asset.tagList.push(...tagsToAdd);

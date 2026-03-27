@@ -1,6 +1,6 @@
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import Image from 'next/image';
-import { memo, MouseEvent, useCallback, useMemo, useState } from 'react';
+import { memo, MouseEvent, useCallback, useState } from 'react';
 
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -80,26 +80,16 @@ const AssetComponent = ({
     localCropOverride ?? globalShowCropVisualization;
 
   // Determine if cropping would occur (when aspect ratios don't match)
-  const imageAspectRatio = dimensions.width / dimensions.height;
-  const bucketAspectRatio = bucket.width / bucket.height;
-  const wouldCrop = Math.abs(imageAspectRatio - bucketAspectRatio) > 0;
+  const wouldCrop =
+    dimensions.width / dimensions.height !== bucket.width / bucket.height;
 
-  // Memoize the composed dimensions so it's not recreated on every render
-  const dimensionsComposed = useMemo(
-    () => composeDimensions(dimensions),
-    [dimensions],
-  );
+  const dimensionsComposed = composeDimensions(dimensions);
 
   // Get the image URL for the current project with cache busting
-  const imageUrl = useMemo(() => {
-    const projectName = getCurrentProjectName();
-    const fileName = `${assetId}.${fileExtension}`;
-    const baseUrl = getImageUrl(fileName, projectName || undefined);
-
-    // Properly append cache-busting parameter
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}t=${lastModified}`;
-  }, [assetId, fileExtension, lastModified]);
+  const projectName = getCurrentProjectName();
+  const fileName = `${assetId}.${fileExtension}`;
+  const baseUrl = getImageUrl(fileName, projectName || undefined);
+  const imageUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${lastModified}`;
 
   const toggleImageZoom = useCallback(() => {
     setImageZoom((prev) => !prev);

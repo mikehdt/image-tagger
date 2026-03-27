@@ -31,6 +31,44 @@ export const debug_getTagStateString = (state: number): string => {
 };
 
 /**
+ * Re-evaluate DIRTY flags for tags in a given range by comparing
+ * current positions against savedTagList. Skips TO_ADD tags.
+ */
+export const reevaluateDirtyFlags = (
+  tagList: string[],
+  tagStatus: { [key: string]: number },
+  savedTagList: string[],
+  startIndex: number,
+  endIndex: number,
+): void => {
+  for (let i = startIndex; i <= endIndex; i++) {
+    const tag = tagList[i];
+    if (tag && !hasState(tagStatus[tag], TagState.TO_ADD)) {
+      const originalIndex = savedTagList.indexOf(tag);
+      if (originalIndex === i) {
+        tagStatus[tag] = removeState(tagStatus[tag], TagState.DIRTY);
+      } else {
+        tagStatus[tag] = addState(tagStatus[tag], TagState.DIRTY);
+      }
+    }
+  }
+};
+
+/**
+ * Mark all existing (non-TO_ADD) tags as DIRTY. Used when tags are
+ * prepended, shifting every existing tag's position.
+ */
+export const markExistingTagsDirty = (tagStatus: {
+  [key: string]: number;
+}): void => {
+  for (const tag of Object.keys(tagStatus)) {
+    if (!hasState(tagStatus[tag], TagState.TO_ADD)) {
+      tagStatus[tag] = addState(tagStatus[tag], TagState.DIRTY);
+    }
+  }
+};
+
+/**
  * Build a lookup map from fileId to array index for O(1) asset access
  */
 export const buildImageIndexMap = (

@@ -304,9 +304,7 @@ const TagListComponent = ({
   })();
 
   // Add input handlers
-  const handleInputChange = useCallback((value: string) => {
-    setInputValue(value);
-  }, []);
+  const handleInputChange = setInputValue;
 
   const handleSubmit = useCallback(
     (prepend?: boolean) => {

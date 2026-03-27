@@ -6,13 +6,14 @@ import { composeDimensions } from '../../utils/helpers';
 import { wrapSelector } from '../../utils/selector-perf';
 import type { RootState } from '../';
 import { TagSortDirection, TagSortType } from '../project';
-import { ImageAsset, KeyedCountList, TagState } from './types';
+import { KeyedCountList, TagState } from './types';
 import { buildTagCountsCache, hasState } from './utils';
 
 // Base selector that extracts all images from RootState
 // Note: This is a local version to avoid circular dependency with index.ts
 // External consumers should use the slice selector from the main exports
 const selectAllImages = (state: RootState) => state.assets.images;
+const selectImageIndexById = (state: RootState) => state.assets.imageIndexById;
 const selectTagCountsCache = (state: RootState) => state.assets.tagCountsCache;
 
 // Selector that returns cached tag counts, rebuilding if cache is null
@@ -36,14 +37,13 @@ export const selectTagCounts = wrapSelector(
 // Optimised selector to check if a specific asset has modified tags
 // Returns boolean - only re-renders when modified state actually changes
 export const selectAssetHasModifiedTags = createSelector(
-  [selectAllImages, (_, assetId: string) => assetId],
-  (images, assetId) => {
-    const asset = images.find((img) => img.fileId === assetId);
+  [selectAllImages, selectImageIndexById, (_, assetId: string) => assetId],
+  (images, indexById, assetId) => {
+    const asset = images[indexById[assetId]];
     if (!asset || asset.tagList.length === 0) return false;
 
-    // Check if any tag is not in SAVED state
     return asset.tagList.some(
-      (tagName: string) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
+      (tagName) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
     );
   },
 );
@@ -58,21 +58,19 @@ export const selectOrderedTagsWithStatus = createSelector(
   // Input selectors
   [
     selectAllImages,
+    selectImageIndexById,
     selectTagCounts,
     selectTagSortType,
     selectTagSortDirection,
     (_, fileId: string) => fileId,
   ],
   // Result function
-  (images, tagCounts, sortType, sortDirection, fileId) => {
-    const selectedImage = images.find(
-      (item: { fileId: string }) => item.fileId === fileId,
-    );
-
+  (images, indexById, tagCounts, sortType, sortDirection, fileId) => {
+    const selectedImage = images[indexById[fileId]];
     if (!selectedImage) return [];
 
     // Create an array of objects with tag name and status
-    const tagsWithStatus = selectedImage.tagList.map((tagName: string) => ({
+    const tagsWithStatus = selectedImage.tagList.map((tagName) => ({
       name: tagName,
       status: selectedImage.tagStatus[tagName] || TagState.SAVED,
     }));
@@ -106,21 +104,12 @@ export const selectOrderedTagsWithStatus = createSelector(
 export const selectImageSizes = createSelector([selectAllImages], (images) => {
   if (!images.length) return {};
 
-  // Group by dimension
-  const dimensionGroups: Record<string, ImageAsset[]> = {};
+  const counts: Record<string, number> = {};
   for (const item of images) {
-    const dimension = composeDimensions(item.dimensions);
-    dimensionGroups[dimension] = dimensionGroups[dimension] || [];
-    dimensionGroups[dimension].push(item);
+    const dim = composeDimensions(item.dimensions);
+    counts[dim] = (counts[dim] || 0) + 1;
   }
-
-  // Create count map
-  return Object.fromEntries(
-    Object.entries(dimensionGroups).map(([dim, assets]) => [
-      dim,
-      assets.length,
-    ]),
-  );
+  return counts;
 });
 
 export const selectAllTags = wrapSelector(
@@ -149,9 +138,9 @@ export const selectHasModifiedAssets = wrapSelector(
   'selectHasModifiedAssets',
   createSelector([selectAllImages], (images) => {
     // Check if any asset has tags that aren't in the SAVED state
-    return images.some((asset: ImageAsset) =>
+    return images.some((asset) =>
       asset.tagList.some(
-        (tag: string) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+        (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
       ),
     );
   }),
@@ -160,26 +149,21 @@ export const selectHasModifiedAssets = wrapSelector(
 // Custom selector to check if any assets have no persisted tags
 export const selectHasTaglessAssets = createSelector(
   [selectAllImages],
-  (images) => {
-    // Check if any asset has no persisted tags (only TO_ADD or TO_DELETE tags are allowed)
-    const taglessAssets = images.filter((asset: ImageAsset) => {
-      const persistedTags = asset.tagList.filter(
-        (tag: string) =>
-          !hasState(asset.tagStatus[tag], TagState.TO_DELETE) &&
-          !hasState(asset.tagStatus[tag], TagState.TO_ADD),
-      );
-      return persistedTags.length === 0;
-    });
-
-    return taglessAssets.length > 0;
-  },
+  (images) =>
+    images.some((asset) =>
+      asset.tagList.every(
+        (tag) =>
+          hasState(asset.tagStatus[tag], TagState.TO_DELETE) ||
+          hasState(asset.tagStatus[tag], TagState.TO_ADD),
+      ),
+    ),
 );
 
 export const selectHasSubfolderAssets = createSelector(
   [selectAllImages],
   (images) => {
     // Check if any asset is in a subfolder
-    return images.some((asset: ImageAsset) => asset.subfolder !== undefined);
+    return images.some((asset) => asset.subfolder !== undefined);
   },
 );
 
@@ -389,9 +373,14 @@ const selectFilterTagsSet = createSelector(
 export const selectAssetHighlightedTags = wrapSelector(
   'selectAssetHighlightedTags',
   createSelector(
-    [selectAllImages, selectFilterTagsSet, (_, assetId: string) => assetId],
-    (imageAssets, filterTagsSet, assetId) => {
-      const asset = imageAssets.find((img) => img.fileId === assetId);
+    [
+      selectAllImages,
+      selectImageIndexById,
+      selectFilterTagsSet,
+      (_, assetId: string) => assetId,
+    ],
+    (imageAssets, indexById, filterTagsSet, assetId) => {
+      const asset = imageAssets[indexById[assetId]];
       if (!asset || filterTagsSet.size === 0) return new Set<string>();
 
       // Only return tags that exist on this asset AND are in the filter

@@ -106,21 +106,10 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
 
   // Apply pagination to the filtered assets
   const paginatedAssets = useMemo(() => {
-    try {
-      // If paginationSize is ALL, return all filtered assets
-      if (paginationSize === -1) {
-        // -1 is PaginationSize.ALL
-        return filteredAssets;
-      }
+    if (paginationSize === -1) return filteredAssets; // -1 is PaginationSize.ALL
 
-      const start = (currentPage - 1) * paginationSize;
-      const end = start + paginationSize;
-      return filteredAssets.slice(start, end);
-    } catch (error) {
-      console.error('Error in pagination calculation:', error);
-      // Fallback to showing first page of results
-      return filteredAssets.slice(0, 100);
-    }
+    const start = (currentPage - 1) * paginationSize;
+    return filteredAssets.slice(start, start + paginationSize);
   }, [filteredAssets, currentPage, paginationSize]);
 
   // Get paginated asset IDs for shift-hover preview calculation

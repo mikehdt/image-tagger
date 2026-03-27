@@ -38,25 +38,21 @@ export const setupExtraReducers = (
   });
 
   builder.addCase(loadAllAssets.fulfilled, (state, action) => {
-    // If we have progress data and it shows completion, transition to COMPLETING state first
-    if (
+    state.ioMessage = undefined;
+    state.images = action.payload;
+    state.imageIndexById = buildImageIndexMap(action.payload);
+    state.tagCountsCache = buildTagCountsCache(action.payload);
+
+    // If progress data shows completion, briefly show 100% before transitioning
+    const hasProgressCompletion =
       state.loadProgress &&
       state.loadProgress.total > 0 &&
-      state.loadProgress.completed >= state.loadProgress.total
-    ) {
+      state.loadProgress.completed >= state.loadProgress.total;
+
+    if (hasProgressCompletion) {
       state.ioState = IoState.COMPLETING;
-      state.ioMessage = undefined;
-      state.images = action.payload;
-      state.imageIndexById = buildImageIndexMap(action.payload);
-      state.tagCountsCache = buildTagCountsCache(action.payload);
-      // Keep progress data briefly to show 100% completion
     } else {
-      // If no progress tracking (e.g., small datasets), go directly to complete
       state.ioState = IoState.COMPLETE;
-      state.ioMessage = undefined;
-      state.images = action.payload;
-      state.imageIndexById = buildImageIndexMap(action.payload);
-      state.tagCountsCache = buildTagCountsCache(action.payload);
       state.loadProgress = undefined;
     }
   });
