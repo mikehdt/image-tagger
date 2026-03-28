@@ -9,7 +9,14 @@
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';
@@ -105,7 +112,7 @@ const TagsDisplayComponent = ({
     [onDragEnd],
   );
 
-  const tagNames = tags.map((t) => t.name);
+  const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
   // Keep DnD enabled (which renders SortableTag with InputTag) when editing
   const dndEnabled = sortable && (isHovered || editingTagName !== null);
 
@@ -118,6 +125,11 @@ const TagsDisplayComponent = ({
     const isMatchingTag = matchingTagName === tag.name;
     const fade = isInputActive && !isBeingEdited && !isMatchingTag;
 
+    // Only pass edit-specific values to the tag being edited — all other tags
+    // receive stable constants so their memo comparisons pass during keystrokes
+    const tagEditValue = isBeingEdited ? editValue : '';
+    const tagIsDuplicateEdit = isBeingEdited ? isDuplicateEdit : false;
+
     return dndEnabled ? (
       <SortableTag
         key={tag.name}
@@ -129,14 +141,14 @@ const TagsDisplayComponent = ({
         fade={fade}
         isMatchingDuplicate={isMatchingTag}
         isEditing={isBeingEdited}
-        editValue={editValue}
+        editValue={tagEditValue}
         onToggle={onToggleTag}
         onEdit={onEditTag}
         onDelete={onDeleteTag}
         onEditChange={onEditChange}
         onEditSubmit={onEditSubmit}
         onEditCancel={onEditCancel}
-        isDuplicateEdit={isDuplicateEdit}
+        isDuplicateEdit={tagIsDuplicateEdit}
       />
     ) : (
       <div key={tag.name} className="mr-2 mb-2">
@@ -148,14 +160,14 @@ const TagsDisplayComponent = ({
           fade={fade}
           isMatchingDuplicate={isMatchingTag}
           isEditing={isBeingEdited}
-          editValue={editValue}
+          editValue={tagEditValue}
           onToggle={onToggleTag}
           onEdit={onEditTag}
           onDelete={onDeleteTag}
           onEditChange={onEditChange}
           onEditSubmit={onEditSubmit}
           onEditCancel={onEditCancel}
-          isDuplicateEdit={isDuplicateEdit}
+          isDuplicateEdit={tagIsDuplicateEdit}
         />
       </div>
     );
@@ -284,10 +296,19 @@ const TagListComponent = ({
       (tag) => tag.name.toLowerCase() === editValue.trim().toLowerCase(),
     );
 
+  // Refs for handleEditSubmit — reading these at submit time instead of as
+  // useCallback deps keeps the callback stable during editing keystrokes
+  const editValueRef = useRef(editValue);
+  const isDuplicateEditRef = useRef(isDuplicateEdit);
+  useEffect(() => {
+    editValueRef.current = editValue;
+    isDuplicateEditRef.current = isDuplicateEdit;
+  });
+
   // Find the matching tag name for fading other tags
   // When adding: show which tag already exists with that name
   // When editing: show which tag conflicts with the new name
-  const matchingTagName = (() => {
+  const matchingTagName = useMemo(() => {
     const addInputTrimmed = inputValue.trim().toLowerCase();
     const editInputTrimmed = editValue.trim().toLowerCase();
 
@@ -308,7 +329,7 @@ const TagListComponent = ({
     }
 
     return null;
-  })();
+  }, [tags, inputValue, editValue, editingTagName]);
 
   // Add input handlers
   const handleInputChange = setInputValue;
@@ -363,14 +384,15 @@ const TagListComponent = ({
   }, []);
 
   const handleEditSubmit = useCallback(() => {
-    if (editingTagName && editValue.trim() && !isDuplicateEdit) {
-      if (editValue.trim() !== editingTagName) {
-        onEditTag(editingTagName, editValue.trim());
+    const currentEditValue = editValueRef.current.trim();
+    if (editingTagName && currentEditValue && !isDuplicateEditRef.current) {
+      if (currentEditValue !== editingTagName) {
+        onEditTag(editingTagName, currentEditValue);
       }
       setEditingTagName(null);
       setEditValue('');
     }
-  }, [editingTagName, editValue, isDuplicateEdit, onEditTag]);
+  }, [editingTagName, onEditTag]);
 
   const handleEditCancel = useCallback(() => {
     setEditingTagName(null);

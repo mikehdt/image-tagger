@@ -163,7 +163,7 @@ const AssetMetadataComponent = ({
 
   return (
     <div
-      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-(--surface-elevated) transition-colors ${
+      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-sm inset-shadow-white transition-colors dark:inset-shadow-slate-700 ${
         hasModifiedTags
           ? 'border-t-amber-300 bg-amber-100 dark:border-t-amber-600 dark:bg-amber-900'
           : 'border-t-(--border) bg-(--surface)'
