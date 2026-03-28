@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  FolderInputIcon,
   FolderOpenIcon,
-  FolderOutputIcon,
   FolderPlusIcon,
   HomeIcon,
 } from 'lucide-react';
@@ -47,7 +47,6 @@ export const MoveToFolderModal = ({
 
     isMoving,
     collisionError,
-    effectiveMoveCount,
 
     isFormValid,
     handleSubmit,
@@ -327,10 +326,8 @@ export const MoveToFolderModal = ({
             color="sky"
             size="mediumWide"
           >
-            <FolderOutputIcon className="mr-1 h-4 w-4" />
-            {isMoving
-              ? 'Moving...'
-              : `Move${effectiveMoveCount > 0 ? ` ${effectiveMoveCount}` : ''}`}
+            <FolderInputIcon className="mr-1 h-4 w-4" />
+            {isMoving ? 'Moving...' : 'Move'}
           </Button>
         </div>
       </div>

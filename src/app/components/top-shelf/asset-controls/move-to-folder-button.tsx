@@ -1,4 +1,4 @@
-import { FolderInputIcon } from 'lucide-react';
+import { FolderOutputIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -53,10 +53,10 @@ export const MoveToFolderButton = () => {
                 ? `Move ${selectedAssetsCount} selected assets to a folder`
                 : hasActiveScope
                   ? `Move ${assetsWithActiveFiltersCount} filtered assets to a folder`
-                  : 'Select assets or apply filters to move'
+                  : 'Select assets or apply filters first'
         }
       >
-        <FolderInputIcon className="h-4 w-4" />
+        <FolderOutputIcon className="h-4 w-4" />
         <span className="ml-2 max-xl:hidden">Move</span>
       </Button>
 

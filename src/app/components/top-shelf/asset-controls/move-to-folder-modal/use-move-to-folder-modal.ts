@@ -330,7 +330,7 @@ export const useMoveToFolderModal = ({
       return `${effectiveMoveCount} of ${count} ${assetWord} will be moved (${count - effectiveMoveCount} already in destination).`;
     }
     if (effectiveMoveCount === 0) {
-      return `All ${count} ${assetWord} are already in the selected destination.`;
+      return `All assets are already in the selected destination.`;
     }
     return `${count} ${assetWord} from ${sourceFolderCount} ${folderWord} will be moved.`;
   }, [resolvedAssetIds.length, sourceFolderCount, effectiveMoveCount]);
