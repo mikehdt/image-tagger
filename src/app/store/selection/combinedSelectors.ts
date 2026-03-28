@@ -145,9 +145,27 @@ export const selectAssetsWithActiveFilters = createSelector(
     (state: RootState) => selectHasActiveVisibility(state),
     selectFilteredAssets,
     selectAllImages,
-    (state: RootState) => state.filters,
+    // Extract specific fields — avoids recomputation when unrelated filter
+    // state changes (paginationSize, filterMode, visibility toggles)
+    (state: RootState) => state.filters.filterTags,
+    (state: RootState) => state.filters.filterExtensions,
+    (state: RootState) => state.filters.filterSubfolders,
+    (state: RootState) => state.filters.filterSizes,
+    (state: RootState) => state.filters.filterBuckets,
+    (state: RootState) => state.filters.filenamePatterns,
   ],
-  (hasActiveFilters, hasActiveVisibility, filteredAssets, allImages, filters) => {
+  (
+    hasActiveFilters,
+    hasActiveVisibility,
+    filteredAssets,
+    allImages,
+    filterTags,
+    filterExtensions,
+    filterSubfolders,
+    filterSizes,
+    filterBuckets,
+    filenamePatterns,
+  ) => {
     if (!hasActiveFilters && !hasActiveVisibility) {
       return [];
     }
@@ -160,12 +178,11 @@ export const selectAssetsWithActiveFilters = createSelector(
     // Visibility didn't narrow the view, but explicit filter selections exist —
     // compute a union match so scoped actions know which assets are targeted
     if (hasActiveFilters) {
-      const tagSet = new Set(filters.filterTags);
-      const extSet = new Set(filters.filterExtensions);
-      const subSet = new Set(filters.filterSubfolders);
-      const sizeSet = new Set(filters.filterSizes);
-      const bucketSet = new Set(filters.filterBuckets);
-      const patterns = filters.filenamePatterns;
+      const tagSet = new Set(filterTags);
+      const extSet = new Set(filterExtensions);
+      const subSet = new Set(filterSubfolders);
+      const sizeSet = new Set(filterSizes);
+      const bucketSet = new Set(filterBuckets);
 
       return allImages.filter((img) => {
         if (tagSet.size > 0 && img.tagList.some((t) => tagSet.has(t))) return true;
@@ -173,9 +190,9 @@ export const selectAssetsWithActiveFilters = createSelector(
         if (subSet.size > 0 && img.subfolder && subSet.has(img.subfolder)) return true;
         if (sizeSet.size > 0 && sizeSet.has(composeDimensions(img.dimensions))) return true;
         if (bucketSet.size > 0 && bucketSet.has(`${img.bucket.width}×${img.bucket.height}`)) return true;
-        if (patterns.length > 0) {
+        if (filenamePatterns.length > 0) {
           const lower = img.fileId.toLowerCase();
-          if (patterns.some((p) => lower.includes(p))) return true;
+          if (filenamePatterns.some((p) => lower.includes(p))) return true;
         }
         return false;
       });

@@ -43,24 +43,14 @@ export const applyVisibilityFilters = ({
   sortType?: SortType;
   sortDirection?: SortDirection;
 }): ImageAssetWithIndex[] => {
-  // Sort first (reuse existing sorting infrastructure)
-  const assetsWithIndex = assets.map((asset, index) => ({
-    ...asset,
-    originalIndex: index + 1,
-  })) as ImageAssetWithIndex[];
-
+  // Sort first, operating on raw asset references (no spreading yet)
   const sortedAssets = applySorting(
-    assetsWithIndex,
+    assets,
     sortType,
     sortDirection,
     selectedAssets,
     { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders },
   );
-
-  // Reassign originalIndex based on sorted position (safe to mutate — we own these objects)
-  for (let i = 0; i < sortedAssets.length; i++) {
-    sortedAssets[i].originalIndex = i + 1;
-  }
 
   // Pre-compute sets for fast lookups
   const filterSizesSet = new Set(filterSizes);
@@ -91,7 +81,7 @@ export const applyVisibilityFilters = ({
   };
 
   const filteredAssets = sortedAssets.filter(
-    (img: ImageAssetWithIndex) => {
+    (img: ImageAsset) => {
       // --- Scope filters (ANDed with everything) ---
 
       // Scope: tagless — only assets with no persisted tags
@@ -167,14 +157,19 @@ export const applyVisibilityFilters = ({
     },
   );
 
-  return filteredAssets;
+  // Add originalIndex only to the filtered results — avoids spreading all N
+  // assets when only K pass the filter
+  return filteredAssets.map((asset, i) => ({
+    ...asset,
+    originalIndex: i + 1,
+  }));
 };
 
 /**
  * Apply sorting to an array of assets
  */
 const applySorting = (
-  assets: ImageAssetWithIndex[],
+  assets: ImageAsset[],
   sortType?: SortType,
   sortDirection?: SortDirection,
   selectedAssets?: string[],
@@ -185,7 +180,7 @@ const applySorting = (
     filterExtensions: string[];
     filterSubfolders?: string[];
   },
-): ImageAssetWithIndex[] => {
+): ImageAsset[] => {
   if (!sortType || !sortDirection) {
     return assets; // Return unsorted if no sort parameters
   }
@@ -269,7 +264,7 @@ const applySorting = (
         // Within each category, sort alphabetically by asset name
 
         // Calculate scaling categories for both assets
-        const getCategoryAndSecondary = (asset: ImageAssetWithIndex) => {
+        const getCategoryAndSecondary = (asset: ImageAsset) => {
           const imageDims = asset.dimensions;
           const bucketDims = asset.bucket;
 

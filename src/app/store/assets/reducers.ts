@@ -53,8 +53,11 @@ export const coreReducers = {
       // Collect TO_ADD tags to remove (modifies tagList, so can't remove inline)
       const toAddTagsToRemove: string[] = [];
 
+      // Set for O(1) lookups instead of O(n) array.includes() per tag
+      const tagListSet = new Set(image.tagList);
+
       tags.forEach((filterTag) => {
-        if (!image.tagList.includes(filterTag)) return;
+        if (!tagListSet.has(filterTag)) return;
 
         if (hasState(image.tagStatus[filterTag], TagState.TO_ADD)) {
           // TO_ADD tags: remove entirely (they were never saved)
@@ -491,9 +494,12 @@ export const coreReducers = {
 
       const asset = state.images[assetIndex];
 
+      // Set for O(1) lookups instead of O(n) array.includes() per tag
+      const existingTags = new Set(asset.tagList);
+
       // Filter to tags that don't already exist in this asset
       const tagsToAdd = tags.filter(
-        (tag) => tag.trim() !== '' && !asset.tagList.includes(tag),
+        (tag) => tag.trim() !== '' && !existingTags.has(tag),
       );
 
       if (tagsToAdd.length === 0) return;
