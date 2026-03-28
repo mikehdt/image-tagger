@@ -9,7 +9,7 @@
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';
@@ -258,6 +258,13 @@ const TagListComponent = ({
 }: TagListProps) => {
   const { showToast } = useToast();
 
+  // Ref for current tags — lets handleMultipleTagsSubmit read the latest tags
+  // without depending on the tags array reference (which would destabilise the callback)
+  const tagsRef = useRef(tags);
+  useEffect(() => {
+    tagsRef.current = tags;
+  });
+
   // Add new tag input state
   const [inputValue, setInputValue] = useState('');
 
@@ -323,8 +330,10 @@ const TagListComponent = ({
   // Handle multiple tags from paste or comma-separated input
   const handleMultipleTagsSubmit = useCallback(
     (newTags: string[], prepend?: boolean) => {
-      // Get existing tag names for duplicate checking
-      const existingTagNames = new Set(tags.map((t) => t.name.toLowerCase()));
+      // Get existing tag names for duplicate checking (via ref for callback stability)
+      const existingTagNames = new Set(
+        tagsRef.current.map((t) => t.name.toLowerCase()),
+      );
 
       // Filter out duplicates and add each unique tag
       const uniqueTags = newTags.filter(
@@ -340,7 +349,7 @@ const TagListComponent = ({
 
       setInputValue('');
     },
-    [tags, onAddTag],
+    [onAddTag],
   );
 
   // Edit handlers

@@ -14,7 +14,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   addTag,
@@ -66,6 +66,13 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
     [orderedTagsWithStatus, tagCounts, highlightedTags],
   );
 
+  // Ref for current tags — lets handleDragEnd read the latest tag order
+  // without depending on the tags array reference (which would destabilise the callback)
+  const tagsRef = useRef(tags);
+  useEffect(() => {
+    tagsRef.current = tags;
+  });
+
   // DnD sensors - stable across renders
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -84,7 +91,7 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
       const { active, over } = event;
 
       if (over && active.id !== over.id) {
-        const tagNames = tags.map((t) => t.name);
+        const tagNames = tagsRef.current.map((t) => t.name);
         const oldIndex = tagNames.indexOf(active.id as string);
         const newIndex = tagNames.indexOf(over.id as string);
 
@@ -93,7 +100,7 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
         }
       }
     },
-    [dispatch, assetId, tags],
+    [dispatch, assetId],
   );
 
   // Handle adding a new tag

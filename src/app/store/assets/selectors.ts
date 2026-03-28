@@ -1,5 +1,5 @@
 // Complex selectors for assets slice
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector, weakMapMemoize } from '@reduxjs/toolkit';
 
 import { applyVisibilityFilters } from '../../utils/filter-actions';
 import { composeDimensions } from '../../utils/helpers';
@@ -102,6 +102,9 @@ export const selectOrderedTagsWithStatus = createSelector(
 
     return sorted;
   },
+  // weakMapMemoize caches per-argument-combination instead of a single slot,
+  // preventing cache thrashing when multiple components call with different fileIds
+  { memoize: weakMapMemoize, argsMemoize: weakMapMemoize },
 );
 
 export const selectImageSizes = createSelector([selectAllImages], (images) => {
@@ -378,8 +381,13 @@ export const selectAssetHighlightedTags = wrapSelector(
       return highlighted;
     },
     {
+      // weakMapMemoize caches per-argument-combination instead of a single slot,
+      // preventing cache thrashing when multiple components call with different assetIds
+      memoize: weakMapMemoize,
+      argsMemoize: weakMapMemoize,
       memoizeOptions: {
-        // Custom equality check for Set comparison
+        // Custom equality check for Set comparison — when filter tags change but
+        // the intersection with this asset's tags is unchanged, reuse the old reference
         resultEqualityCheck: (a: Set<string>, b: Set<string>) => {
           if (a.size !== b.size) return false;
           for (const item of a) {
