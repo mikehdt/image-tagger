@@ -222,7 +222,9 @@ export const getMultipleImageAssetDetails = async (
   }
 
   const results = await Promise.allSettled(
-    uniqueFiles.map((file) => getImageAssetDetails(file, projectPath, blurCache)),
+    uniqueFiles.map((file) =>
+      getImageAssetDetails(file, projectPath, blurCache),
+    ),
   );
 
   const assets: ImageAsset[] = [];
@@ -428,5 +430,191 @@ export const saveMultipleAssetTags = async (
     success,
     results,
     errors,
+  };
+};
+
+// --- Move assets between folders ---
+
+export type MoveAssetOperation = {
+  fileId: string;
+  fileExtension: string;
+};
+
+export type MoveAssetsResult = {
+  success: boolean;
+  moved: Array<{
+    oldFileId: string;
+    newFileId: string;
+    newSubfolder: string | undefined;
+  }>;
+  collisions: string[];
+  errors: string[];
+  deletedFolders: string[];
+};
+
+/**
+ * Extract the basename (filename without subfolder prefix) from a fileId.
+ * "2_sonic/image" → "image", "image" → "image"
+ */
+const getBasename = (fileId: string): string => {
+  const slashIndex = fileId.lastIndexOf('/');
+  return slashIndex !== -1 ? fileId.substring(slashIndex + 1) : fileId;
+};
+
+/**
+ * Move assets to a destination folder (or root).
+ * @param assets Array of assets to move (fileId + fileExtension)
+ * @param destination Target folder name (e.g. "2_sonic"), or null for root
+ * @param projectPath Optional project path
+ */
+export const moveAssetsToFolder = async (
+  assets: MoveAssetOperation[],
+  destination: string | null,
+  projectPath?: string,
+): Promise<MoveAssetsResult> => {
+  const dataPath = await getCurrentDataPath(projectPath);
+  const dir = path.isAbsolute(dataPath) ? dataPath : path.resolve(dataPath);
+
+  // Validate destination folder name
+  if (destination !== null && !isValidRepeatFolder(destination)) {
+    return {
+      success: false,
+      moved: [],
+      collisions: [],
+      errors: [`Invalid folder name: ${destination}`],
+      deletedFolders: [],
+    };
+  }
+
+  // Build move plan, skipping assets already in the destination
+  const movePlan: Array<{
+    asset: MoveAssetOperation;
+    basename: string;
+    oldFileId: string;
+    newFileId: string;
+    newSubfolder: string | undefined;
+  }> = [];
+
+  for (const asset of assets) {
+    const basename = getBasename(asset.fileId);
+    const newFileId = destination ? `${destination}/${basename}` : basename;
+
+    // Skip assets already in the destination
+    if (asset.fileId === newFileId) continue;
+
+    movePlan.push({
+      asset,
+      basename,
+      oldFileId: asset.fileId,
+      newFileId,
+      newSubfolder: destination ?? undefined,
+    });
+  }
+
+  if (movePlan.length === 0) {
+    return {
+      success: true,
+      moved: [],
+      collisions: [],
+      errors: [],
+      deletedFolders: [],
+    };
+  }
+
+  // Pre-flight collision check
+  const collisions: string[] = [];
+  for (const plan of movePlan) {
+    const destImagePath = path.join(
+      dir,
+      `${plan.newFileId}.${plan.asset.fileExtension}`,
+    );
+    if (fs.existsSync(destImagePath)) {
+      collisions.push(plan.basename);
+    }
+  }
+
+  if (collisions.length > 0) {
+    return {
+      success: false,
+      moved: [],
+      collisions,
+      errors: [],
+      deletedFolders: [],
+    };
+  }
+
+  // Create destination folder if needed
+  if (destination) {
+    const destDir = path.join(dir, destination);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+  }
+
+  // Execute moves
+  const moved: MoveAssetsResult['moved'] = [];
+  const errors: string[] = [];
+  const sourceFolders = new Set<string>();
+
+  for (const plan of movePlan) {
+    try {
+      // Track source folder for cleanup
+      const slashIndex = plan.oldFileId.lastIndexOf('/');
+      if (slashIndex !== -1) {
+        sourceFolders.add(plan.oldFileId.substring(0, slashIndex));
+      }
+
+      // Move image file
+      const oldImagePath = path.join(
+        dir,
+        `${plan.oldFileId}.${plan.asset.fileExtension}`,
+      );
+      const newImagePath = path.join(
+        dir,
+        `${plan.newFileId}.${plan.asset.fileExtension}`,
+      );
+      fs.renameSync(oldImagePath, newImagePath);
+
+      // Move tag file if it exists
+      const oldTagPath = path.join(dir, `${plan.oldFileId}.txt`);
+      const newTagPath = path.join(dir, `${plan.newFileId}.txt`);
+      if (fs.existsSync(oldTagPath)) {
+        fs.renameSync(oldTagPath, newTagPath);
+      }
+
+      moved.push({
+        oldFileId: plan.oldFileId,
+        newFileId: plan.newFileId,
+        newSubfolder: plan.newSubfolder,
+      });
+    } catch (err) {
+      console.error(`Failed to move ${plan.oldFileId}:`, err);
+      errors.push(plan.oldFileId);
+    }
+  }
+
+  // Clean up empty source folders
+  const deletedFolders: string[] = [];
+  for (const folder of sourceFolders) {
+    try {
+      const folderPath = path.join(dir, folder);
+      if (fs.existsSync(folderPath)) {
+        const entries = fs.readdirSync(folderPath);
+        if (entries.length === 0) {
+          fs.rmdirSync(folderPath);
+          deletedFolders.push(folder);
+        }
+      }
+    } catch (err) {
+      console.warn(`Failed to clean up folder ${folder}:`, err);
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    moved,
+    collisions: [],
+    errors,
+    deletedFolders,
   };
 };

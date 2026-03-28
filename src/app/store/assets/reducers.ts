@@ -11,6 +11,7 @@ import {
 } from './types';
 import {
   addState,
+  buildImageIndexMap,
   hasState,
   markExistingTagsDirty,
   reevaluateDirtyFlags,
@@ -209,9 +210,7 @@ export const coreReducers = {
     const asset = state.images[assetIndex];
 
     // Update the name in the tagList
-    const tagListIndex = asset.tagList.findIndex(
-      (item) => item === oldTagName,
-    );
+    const tagListIndex = asset.tagList.findIndex((item) => item === oldTagName);
     asset.tagList[tagListIndex] = newTagName;
 
     const savedIndex = asset.savedTagList?.indexOf(newTagName);
@@ -516,6 +515,29 @@ export const coreReducers = {
     });
 
     // Invalidate tag counts cache
+    state.tagCountsCache = null;
+  },
+
+  // Move assets to a different folder — updates fileId, subfolder, and rebuilds index
+  moveAssetsToFolder: (
+    state: ImageAssets,
+    {
+      payload,
+    }: PayloadAction<{
+      moves: Array<{
+        oldFileId: string;
+        newFileId: string;
+        newSubfolder: string | undefined;
+      }>;
+    }>,
+  ) => {
+    for (const { oldFileId, newFileId, newSubfolder } of payload.moves) {
+      const index = state.imageIndexById[oldFileId];
+      if (index === undefined) continue;
+      state.images[index].fileId = newFileId;
+      state.images[index].subfolder = newSubfolder;
+    }
+    state.imageIndexById = buildImageIndexMap(state.images);
     state.tagCountsCache = null;
   },
 };

@@ -5,7 +5,13 @@ import { ClassFilterMode, FilterMode, Filters, PaginationSize } from './types';
 import { toggleFilter } from './utils';
 
 /** Key type for the class-based filter modes in visibility settings */
-type VisibilityClassKey = 'tags' | 'nameSearch' | 'sizes' | 'buckets' | 'extensions' | 'subfolders';
+type VisibilityClassKey =
+  | 'tags'
+  | 'nameSearch'
+  | 'sizes'
+  | 'buckets'
+  | 'extensions'
+  | 'subfolders';
 
 export const coreReducers = {
   setTagFilterMode: (
@@ -162,7 +168,9 @@ export const coreReducers = {
   /** Toggle a class filter mode. If already set to the given mode, switch to OFF. */
   setVisibilityClassMode: (
     state: Filters,
-    { payload }: PayloadAction<{ classKey: VisibilityClassKey; mode: ClassFilterMode }>,
+    {
+      payload,
+    }: PayloadAction<{ classKey: VisibilityClassKey; mode: ClassFilterMode }>,
   ) => {
     const { classKey, mode } = payload;
     // Toggle behaviour: clicking the active mode turns it off
@@ -180,6 +188,17 @@ export const coreReducers = {
 
   toggleVisibilityModified: (state: Filters) => {
     state.visibility.showModified = !state.visibility.showModified;
+  },
+
+  // Remove stale subfolder filters after folders are deleted
+  removeSubfolderFilters: (
+    state: Filters,
+    { payload }: PayloadAction<string[]>,
+  ) => {
+    const toRemove = new Set(payload);
+    state.filterSubfolders = state.filterSubfolders.filter(
+      (f) => !toRemove.has(f),
+    );
   },
 
   clearVisibility: (state: Filters) => {

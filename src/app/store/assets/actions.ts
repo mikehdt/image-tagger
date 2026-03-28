@@ -24,9 +24,13 @@ import {
   getImageFileList,
   getMultipleImageAssetDetails,
   ImageFileListResult,
+  type MoveAssetOperation,
+  type MoveAssetsResult,
+  moveAssetsToFolder,
   saveAssetTags,
   saveMultipleAssetTags,
-} from '../../utils/asset-actions';
+} from '@/app/utils/asset-actions';
+
 import { addToast } from '../toasts';
 import {
   createCleanTagStatus,
@@ -64,7 +68,9 @@ export const loadAllAssets = createAsyncThunk<
 >('assets/loadAllAssets', async (options, { dispatch, getState }) => {
   try {
     // Build blur cache from existing assets to reuse unchanged blur data
-    const { assets: { images } } = getState();
+    const {
+      assets: { images },
+    } = getState();
     const blurCache: BlurCache = {};
     for (const asset of images) {
       if (asset.blurDataUrl) {
@@ -147,7 +153,11 @@ export const loadAllAssets = createAsyncThunk<
       // Fallback for individual processing
       async (file) => {
         try {
-          return await getImageAssetDetails(file, options?.projectPath, blurCache);
+          return await getImageAssetDetails(
+            file,
+            options?.projectPath,
+            blurCache,
+          );
         } catch (error) {
           console.error(`Failed to process file ${file}:`, error);
           failedCount++;
@@ -319,3 +329,72 @@ export const saveAllAssets = createAsyncThunk<
   }
 });
 
+// Move assets to a different folder (or root)
+export const moveAssetsToFolderThunk = createAsyncThunk<
+  MoveAssetsResult,
+  { assetIds: string[]; destination: string | null; projectPath?: string }
+>(
+  'assets/moveAssetsToFolder',
+  async ({ assetIds, destination, projectPath }, { getState, dispatch }) => {
+    const state = getState() as {
+      assets: ImageAssets;
+    };
+    const { images, imageIndexById } = state.assets;
+
+    // Build operation list from current state
+    const operations: MoveAssetOperation[] = [];
+    for (const id of assetIds) {
+      const idx = imageIndexById[id];
+      if (idx === undefined) continue;
+      const asset = images[idx];
+      operations.push({
+        fileId: asset.fileId,
+        fileExtension: asset.fileExtension,
+      });
+    }
+
+    const result = await moveAssetsToFolder(
+      operations,
+      destination,
+      projectPath,
+    );
+
+    // If collisions, return early — the modal will display the error
+    if (!result.success) return result;
+
+    if (result.moved.length > 0) {
+      // Surgical Redux state updates
+      dispatch({
+        type: 'assets/moveAssetsToFolder',
+        payload: { moves: result.moved },
+      });
+
+      const remaps: Record<string, string> = {};
+      for (const m of result.moved) {
+        remaps[m.oldFileId] = m.newFileId;
+      }
+      // Dispatch to selection slice (avoid circular import via barrel)
+      dispatch({
+        type: 'selection/remapSelectedAssets',
+        payload: { remaps },
+      });
+
+      if (result.deletedFolders.length > 0) {
+        // Dispatch to filters slice (avoid circular import via barrel)
+        dispatch({
+          type: 'filters/removeSubfolderFilters',
+          payload: result.deletedFolders,
+        });
+      }
+
+      const destLabel = destination ?? 'root';
+      dispatch(
+        addToast({
+          children: `Moved ${result.moved.length} asset${result.moved.length !== 1 ? 's' : ''} to ${destLabel}`,
+        }),
+      );
+    }
+
+    return result;
+  },
+);

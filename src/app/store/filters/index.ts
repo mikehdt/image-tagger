@@ -64,7 +64,7 @@ export const {
   toggleBucketFilter,
   toggleExtensionFilter,
   toggleSubfolderFilter,
-  
+
   clearTagFilters,
   updateTagFilters,
   clearSizeFilters,
@@ -73,6 +73,7 @@ export const {
   clearFilters,
   clearModifiedFilter,
   resetFilterModeIfNeeded,
+  removeSubfolderFilters,
   addFilenamePattern,
   removeFilenamePattern,
   setVisibilityClassMode,

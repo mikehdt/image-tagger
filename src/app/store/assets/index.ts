@@ -49,6 +49,7 @@ export const {
   markFilterTagsToDelete,
   gatherTags,
   copyTagsToAssets,
+  moveAssetsToFolder,
   setSortType,
   setSortDirection,
   toggleSortDirection,
