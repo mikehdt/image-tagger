@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '../../../shared/button';
+import { Checkbox } from '../../../shared/checkbox';
 import { Modal } from '../../../shared/modal';
 import { ScopingCheckboxes } from '../../../shared/scoping-checkboxes';
 import { useMoveToFolderModal } from './use-move-to-folder-modal';
@@ -44,6 +45,9 @@ export const MoveToFolderModal = ({
     newFolderAlreadyExists,
     isNewLabelValid,
     isNewRepeatCountValid,
+
+    keepSelection,
+    setKeepSelection,
 
     isMoving,
     collisionError,
@@ -277,6 +281,18 @@ export const MoveToFolderModal = ({
                 Name may only contain letters, numbers, and hyphens.
               </p>
             )}
+          </div>
+        )}
+
+        {/* Keep selection checkbox */}
+        {hasSelectedAssets && (
+          <div className="flex w-full items-center">
+            <Checkbox
+              isSelected={keepSelection}
+              onChange={() => setKeepSelection((v) => !v)}
+              label="Keep asset selection after moving"
+              ariaLabel="Keep asset selection after moving"
+            />
           </div>
         )}
 

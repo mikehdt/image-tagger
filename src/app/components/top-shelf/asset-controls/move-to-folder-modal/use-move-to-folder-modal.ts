@@ -14,6 +14,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectInfo } from '@/app/store/project';
 import {
+  clearSelection,
   selectAssetsWithActiveFilters,
   selectAssetsWithActiveFiltersCount,
   selectSelectedAssets,
@@ -42,6 +43,9 @@ export const useMoveToFolderModal = ({
   const [applyToSelectedAssets, setApplyToSelectedAssets] = useState(false);
   const [applyToAssetsWithActiveFilters, setApplyToAssetsWithActiveFilters] =
     useState(false);
+
+  // Keep selection after move
+  const [keepSelection, setKeepSelection] = useState(false);
 
   // Destination state
   const [selectedDestination, setSelectedDestination] = useState('');
@@ -299,6 +303,9 @@ export const useMoveToFolderModal = ({
       if (!result.success && result.collisions.length > 0) {
         setCollisionError(result.collisions);
       } else if (result.success || result.moved.length > 0) {
+        if (!keepSelection && hasSelectedAssets) {
+          dispatch(clearSelection());
+        }
         onClose();
       }
     } catch {
@@ -315,6 +322,8 @@ export const useMoveToFolderModal = ({
     newLabel,
     resolvedAssetIds,
     projectInfo.projectPath,
+    keepSelection,
+    hasSelectedAssets,
     onClose,
   ]);
 
@@ -360,6 +369,10 @@ export const useMoveToFolderModal = ({
     newFolderAlreadyExists,
     isNewLabelValid,
     isNewRepeatCountValid,
+
+    // Selection
+    keepSelection,
+    setKeepSelection,
 
     // State
     isMoving,
