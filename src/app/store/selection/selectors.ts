@@ -15,12 +15,16 @@ export const selectLastClickAction = (state: RootState) =>
 const selectShiftHoverAssetId = (state: RootState) =>
   state.selection.shiftHoverAssetId;
 
-// Optimized selector for checking if a specific asset is selected
-// This avoids creating new selector instances per asset
-export const selectAssetIsSelected = createSelector(
-  [selectSelectedAssets, (_, assetId: string) => assetId],
-  (selectedAssets, assetId) => selectedAssets.includes(assetId),
+// Memoized Set for O(1) selection lookups — rebuilt only when selectedAssets changes
+export const selectSelectedAssetsSet = createSelector(
+  [selectSelectedAssets],
+  (selectedAssets) => new Set(selectedAssets),
 );
+
+// Plain function — returns boolean primitive so useSelector handles equality.
+// Uses the memoized Set for O(1) lookup instead of O(n) array.includes().
+export const selectAssetIsSelected = (state: RootState, assetId: string) =>
+  selectSelectedAssetsSet(state).has(assetId);
 
 export const selectSelectedAssetsCount = createSelector(
   [selectSelectedAssets],

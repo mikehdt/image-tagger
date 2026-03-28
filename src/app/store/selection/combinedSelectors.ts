@@ -8,7 +8,7 @@ import {
   selectHasActiveVisibility,
 } from '../filters';
 import type { RootState } from '../index';
-import { selectSelectedAssets } from '../selection';
+import { selectSelectedAssets, selectSelectedAssetsSet } from '../selection';
 
 // Cache for memoized selectors - prevents creating new selector instances
 const duplicateTagInfoCache = new Map<
@@ -29,20 +29,20 @@ const makeCoExistenceKey = (originalTag: string, newTagValue: string) =>
  */
 const createDuplicateTagInfoSelector = (tagName: string) =>
   createSelector(
-    [selectSelectedAssets, selectAllImages],
-    (selectedAssets, allImages) => {
-      if (!tagName || selectedAssets.length === 0) {
+    [selectSelectedAssetsSet, selectAllImages],
+    (selectedSet, allImages) => {
+      if (!tagName || selectedSet.size === 0) {
         return {
           isDuplicate: false,
           duplicateCount: 0,
-          totalSelected: selectedAssets.length,
+          totalSelected: selectedSet.size,
           isAllDuplicates: false,
         };
       }
 
-      // Find all selected assets in the assets slice
+      // Find all selected assets in the assets slice (O(1) Set lookup per asset)
       const selectedImagesData = allImages.filter((img) =>
-        selectedAssets.includes(img.fileId),
+        selectedSet.has(img.fileId),
       );
 
       // Count how many assets already have this tag
@@ -177,9 +177,6 @@ export const selectAssetsWithActiveFilters = createSelector(
           const lower = img.fileId.toLowerCase();
           if (patterns.some((p) => lower.includes(p))) return true;
         }
-        if (filters.showModified) {
-          return img.tagList.some((tag) => img.tagStatus[tag] !== 0);
-        }
         return false;
       });
     }
@@ -202,13 +199,12 @@ export const selectAssetsWithActiveFiltersCount = createSelector(
  * @returns Array of ImageAsset objects for selected assets
  */
 export const selectSelectedAssetsData = createSelector(
-  [selectSelectedAssets, selectAllImages],
-  (selectedAssets, allImages) => {
-    if (selectedAssets.length === 0) {
+  [selectSelectedAssetsSet, selectAllImages],
+  (selectedSet, allImages) => {
+    if (selectedSet.size === 0) {
       return [];
     }
 
-    const selectedSet = new Set(selectedAssets);
     return allImages.filter((img) => selectedSet.has(img.fileId));
   },
 );

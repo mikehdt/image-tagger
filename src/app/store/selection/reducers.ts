@@ -50,9 +50,10 @@ const selectionSlice = createSlice({
         ];
         state.selectedAssets = uniqueAssets;
       } else {
-        // Remove all specified assets from selection
+        // Remove all specified assets from selection (Set for O(1) lookups)
+        const toRemove = new Set(assetIds);
         state.selectedAssets = state.selectedAssets.filter(
-          (id) => !assetIds.includes(id),
+          (id) => !toRemove.has(id),
         );
       }
     },

@@ -34,19 +34,22 @@ export const selectTagCounts = wrapSelector(
 
 // Derived selectors
 
-// Optimised selector to check if a specific asset has modified tags
-// Returns boolean - only re-renders when modified state actually changes
-export const selectAssetHasModifiedTags = createSelector(
-  [selectAllImages, selectImageIndexById, (_, assetId: string) => assetId],
-  (images, indexById, assetId) => {
-    const asset = images[indexById[assetId]];
-    if (!asset || asset.tagList.length === 0) return false;
+// Plain function — returns boolean primitive so useSelector handles equality.
+// No createSelector wrapper needed since parameterized selectors with cache
+// size 1 always recompute when called from different components anyway.
+export const selectAssetHasModifiedTags = (
+  state: RootState,
+  assetId: string,
+): boolean => {
+  const images = selectAllImages(state);
+  const indexById = selectImageIndexById(state);
+  const asset = images[indexById[assetId]];
+  if (!asset || asset.tagList.length === 0) return false;
 
-    return asset.tagList.some(
-      (tagName) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
-    );
-  },
-);
+  return asset.tagList.some(
+    (tagName) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
+  );
+};
 
 // Selectors for tag sorting from project store
 const selectTagSortType = (state: RootState) =>

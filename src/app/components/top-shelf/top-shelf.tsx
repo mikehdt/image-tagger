@@ -1,11 +1,6 @@
 import { useEffect } from 'react';
 
-import { selectHasModifiedAssets } from '@/app/store/assets';
-import {
-  clearModifiedFilter,
-  resetFilterModeIfNeeded,
-  selectShowModified,
-} from '@/app/store/filters';
+import { resetFilterModeIfNeeded } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
@@ -25,17 +20,7 @@ type TopShelfProps = {
 export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
   const dispatch = useAppDispatch();
 
-  // Selectors needed for useEffects
-  const filterModifiedActive = useAppSelector(selectShowModified);
-  const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
-
-  // Effect to automatically clear the modified filter when there are no more modified assets
-  useEffect(() => {
-    if (filterModifiedActive && !hasModifiedAssets) {
-      dispatch(clearModifiedFilter());
-    }
-  }, [filterModifiedActive, hasModifiedAssets, dispatch]);
 
   // Effect to reset filter mode when selected assets are cleared
   useEffect(() => {

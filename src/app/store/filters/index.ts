@@ -31,7 +31,6 @@ const initialState: Filters = {
   filterSubfolders: [],
   filenamePatterns: [],
   paginationSize: PaginationSize.ONE_HUNDRED,
-  showModified: false,
   visibility: initialVisibility,
 };
 
@@ -49,7 +48,6 @@ const filtersSlice = createSlice({
     selectFilterSubfolders: (state) => state.filterSubfolders,
     selectFilenamePatterns: (state) => state.filenamePatterns,
     selectPaginationSize: (state) => state.paginationSize,
-    selectShowModified: (state) => state.showModified,
     selectVisibility: (state) => state.visibility,
   },
 });
@@ -71,7 +69,6 @@ export const {
   clearBucketFilters,
   clearExtensionFilters,
   clearFilters,
-  clearModifiedFilter,
   resetFilterModeIfNeeded,
   removeSubfolderFilters,
   addFilenamePattern,
@@ -92,7 +89,6 @@ export const {
   selectFilterSubfolders,
   selectFilenamePatterns,
   selectPaginationSize,
-  selectShowModified,
   selectVisibility,
 } = filtersSlice.selectors;
 

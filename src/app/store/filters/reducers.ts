@@ -54,10 +54,6 @@ export const coreReducers = {
     state.filterSubfolders = toggleFilter(state.filterSubfolders, payload);
   },
 
-  toggleModifiedFilter: (state: Filters) => {
-    state.showModified = !state.showModified;
-  },
-
   clearTagFilters: (state: Filters) => {
     state.filterTags = [];
   },
@@ -74,10 +70,6 @@ export const coreReducers = {
     state.filterExtensions = [];
   },
 
-  clearSubfolderFilters: (state: Filters) => {
-    state.filterSubfolders = [];
-  },
-
   clearFilters: (state: Filters) => {
     state.filterTags = [];
     state.filterSizes = [];
@@ -85,7 +77,6 @@ export const coreReducers = {
     state.filterExtensions = [];
     state.filterSubfolders = [];
     state.filenamePatterns = [];
-    state.showModified = false;
     // Also clear visibility settings
     state.visibility.tags = ClassFilterMode.OFF;
     state.visibility.nameSearch = ClassFilterMode.OFF;
@@ -113,10 +104,6 @@ export const coreReducers = {
     state.filenamePatterns = state.filenamePatterns.filter(
       (p) => p !== payload,
     );
-  },
-
-  clearModifiedFilter: (state: Filters) => {
-    state.showModified = false;
   },
 
   // Reset filter mode if it's SELECTED_ASSETS and there are no selected assets
@@ -199,17 +186,5 @@ export const coreReducers = {
     state.filterSubfolders = state.filterSubfolders.filter(
       (f) => !toRemove.has(f),
     );
-  },
-
-  clearVisibility: (state: Filters) => {
-    state.visibility.tags = ClassFilterMode.OFF;
-    state.visibility.nameSearch = ClassFilterMode.OFF;
-    state.visibility.sizes = ClassFilterMode.OFF;
-    state.visibility.buckets = ClassFilterMode.OFF;
-    state.visibility.extensions = ClassFilterMode.OFF;
-    state.visibility.subfolders = ClassFilterMode.OFF;
-    state.visibility.scopeTagless = false;
-    state.visibility.scopeSelected = false;
-    state.visibility.showModified = false;
   },
 };

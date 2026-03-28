@@ -25,7 +25,6 @@ const projectSlice = createSlice({
   selectors: {
     // Project info selectors
     selectProjectName: (state) => state.info.projectName,
-    selectProjectFolderName: (state) => state.info.projectFolderName,
     selectProjectThumbnail: (state) => state.info.projectThumbnail,
     selectProjectInfo: (state) => state.info,
 
@@ -33,7 +32,6 @@ const projectSlice = createSlice({
     selectShowCropVisualization: (state) => state.config.showCropVisualization,
     selectTagSortType: (state) => state.config.tagSortType,
     selectTagSortDirection: (state) => state.config.tagSortDirection,
-    selectProjectConfig: (state) => state.config,
   },
 });
 

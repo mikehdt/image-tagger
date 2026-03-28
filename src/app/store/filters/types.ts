@@ -59,7 +59,6 @@ export type Filters = {
   filterSubfolders: string[];
   filenamePatterns: string[];
   paginationSize: PaginationSize;
-  showModified: boolean;
   visibility: VisibilitySettings;
 };
 

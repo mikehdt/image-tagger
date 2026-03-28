@@ -349,7 +349,7 @@ export const coreReducers = {
 
   // Reset all modified assets' tags back to their saved state in a single pass
   resetAllModifiedTags: (state: ImageAssets) => {
-    let resetCount = 0;
+    let hasReset = false;
 
     for (const asset of state.images) {
       const hasModified = asset.tagList.some(
@@ -382,10 +382,10 @@ export const coreReducers = {
       // Restore tagList to saved order
       asset.tagList.length = 0;
       asset.tagList.push(...savedList);
-      resetCount++;
+      hasReset = true;
     }
 
-    if (resetCount > 0) {
+    if (hasReset) {
       state.tagCountsCache = null;
     }
   },
@@ -430,13 +430,14 @@ export const coreReducers = {
     state.images.forEach((asset) => {
       // Skip if we have a scope and this asset isn't in it
       if (targetAssetIds && !targetAssetIds.has(asset.fileId)) return;
-      // Find which of the selected tags exist in this asset
-      const presentTags = tagsToGather.filter((tag) =>
-        asset.tagList.includes(tag),
-      );
+      // Find which of the selected tags exist in this asset (Set for O(1) lookup)
+      const tagListSet = new Set(asset.tagList);
+      const presentTags = tagsToGather.filter((tag) => tagListSet.has(tag));
 
       // Need at least 2 tags present in this asset to gather
       if (presentTags.length < 2) return;
+
+      const presentTagsSet = new Set(presentTags);
 
       // Find the index of the first tag to gather (in current tag order)
       const firstTagIndex = Math.min(
@@ -445,11 +446,11 @@ export const coreReducers = {
 
       // Get tags in their current order within the asset
       const orderedTagsToGather = asset.tagList.filter((tag) =>
-        presentTags.includes(tag),
+        presentTagsSet.has(tag),
       );
 
       // Remove all tags to gather from their current positions
-      asset.tagList = asset.tagList.filter((tag) => !presentTags.includes(tag));
+      asset.tagList = asset.tagList.filter((tag) => !presentTagsSet.has(tag));
 
       // Insert them consecutively at the first tag's original position
       asset.tagList.splice(firstTagIndex, 0, ...orderedTagsToGather);

@@ -16,7 +16,6 @@ const selectFilterSubfolders = (state: RootState) =>
   state.filters.filterSubfolders;
 const selectFilenamePatterns = (state: RootState) =>
   state.filters.filenamePatterns;
-const selectShowModified = (state: RootState) => state.filters.showModified;
 
 export const selectHasActiveFilters = createSelector(
   selectFilterTags,
@@ -25,7 +24,6 @@ export const selectHasActiveFilters = createSelector(
   selectFilterExtensions,
   selectFilterSubfolders,
   selectFilenamePatterns,
-  selectShowModified,
   (
     filterTags,
     filterSizes,
@@ -33,15 +31,13 @@ export const selectHasActiveFilters = createSelector(
     filterExtensions,
     filterSubfolders,
     filenamePatterns,
-    showModified,
   ) =>
     filterTags.length > 0 ||
     filterSizes.length > 0 ||
     filterBuckets.length > 0 ||
     filterExtensions.length > 0 ||
     filterSubfolders.length > 0 ||
-    filenamePatterns.length > 0 ||
-    showModified,
+    filenamePatterns.length > 0,
 );
 
 const selectVisibility = (state: RootState) => state.filters.visibility;
@@ -80,21 +76,18 @@ export const selectHasNonTagFilters = createSelector(
   selectFilterExtensions,
   selectFilterSubfolders,
   selectFilenamePatterns,
-  selectShowModified,
   (
     filterSizes,
     filterBuckets,
     filterExtensions,
     filterSubfolders,
     filenamePatterns,
-    showModified,
   ) =>
     filterSizes.length > 0 ||
     filterBuckets.length > 0 ||
     filterExtensions.length > 0 ||
     filterSubfolders.length > 0 ||
-    filenamePatterns.length > 0 ||
-    showModified,
+    filenamePatterns.length > 0,
 );
 
 export const selectFilterCount = createSelector(
