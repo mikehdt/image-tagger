@@ -8,14 +8,16 @@ import {
   selectFilteredAssets,
   selectSortDirection,
   selectSortType,
+  SortType,
 } from '@/app/store/assets';
 import { selectPaginationSize } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
-import { selectSelectedAssets } from '@/app/store/selection';
 import { getCategoriesWithPageInfo } from '@/app/utils/category-utils';
 import { scrollToAnchor } from '@/app/utils/scroll-to-anchor';
 
 import { CategoryList } from './category-list';
+
+const EMPTY_SELECTED: string[] = [];
 
 interface CategoryNavigationProps {
   currentPage: number;
@@ -35,8 +37,15 @@ const CategoryNavigationComponent = ({
   const filteredAssets = useAppSelector(selectFilteredAssets);
   const sortType = useAppSelector(selectSortType);
   const sortDirection = useAppSelector(selectSortDirection);
-  const selectedAssets = useAppSelector(selectSelectedAssets);
   const paginationSize = useAppSelector(selectPaginationSize);
+
+  // Only returns selectedAssets when sorting by SELECTED —
+  // otherwise returns stable empty array, so selection changes don't trigger re-renders
+  const selectedAssets = useAppSelector((state) =>
+    state.assets.sortType === SortType.SELECTED
+      ? state.selection.selectedAssets
+      : EMPTY_SELECTED,
+  );
 
   // Get categories with page information
   const categoriesWithPageInfo = useMemo(

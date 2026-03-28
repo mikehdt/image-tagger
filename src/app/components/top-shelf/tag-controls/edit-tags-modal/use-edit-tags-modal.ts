@@ -298,21 +298,11 @@ export const useEditTagsModal = (
   );
 
   // Calculate the effective asset count that would be affected
-  const effectiveAssetCount = (() => {
-    const useFiltered = onlyFilteredAssets && hasActiveFilters;
-    const useSelected = onlySelectedAssets && hasSelectedAssets;
-
-    if (useFiltered && useSelected) {
-      return selectedAssets.filter((assetId) =>
-        filteredAssets.some((asset) => asset.fileId === assetId),
-      ).length;
-    } else if (useFiltered) {
-      return filteredAssets.length;
-    } else if (useSelected) {
-      return selectedAssetsCount;
-    }
-    return -1;
-  })();
+  // Reuses scopedAssetIds which already computes the same filtered/selected intersection
+  const useFiltered = onlyFilteredAssets && hasActiveFilters;
+  const useSelected = onlySelectedAssets && hasSelectedAssets;
+  const effectiveAssetCount =
+    useFiltered || useSelected ? scopedAssetIds.length : -1;
 
   const hasNoAffectedAssets = effectiveAssetCount === 0;
 
@@ -330,16 +320,12 @@ export const useEditTagsModal = (
 
   // Calculate the summary message for how many assets will be affected
   const getSummaryMessage = () => {
-    const useFiltered = onlyFilteredAssets && hasActiveFilters;
-    const useSelected = onlySelectedAssets && hasSelectedAssets;
-
     if (useFiltered && useSelected) {
-      const intersection = selectedAssets.filter((assetId) =>
-        filteredAssets.some((asset) => asset.fileId === assetId),
-      ).length;
-      return `Tag changes will apply to ${intersection} ${intersection === 1 ? 'asset that is' : 'assets that are'} both filtered and selected.`;
+      const count = scopedAssetIds.length;
+      return `Tag changes will apply to ${count} ${count === 1 ? 'asset that is' : 'assets that are'} both filtered and selected.`;
     } else if (useFiltered) {
-      return `Tag changes will apply to the ${filteredAssets.length} currently filtered ${filteredAssets.length === 1 ? 'asset' : 'assets'}.`;
+      const count = scopedAssetIds.length;
+      return `Tag changes will apply to the ${count} currently filtered ${count === 1 ? 'asset' : 'assets'}.`;
     } else if (useSelected) {
       return `Tag changes will apply to the ${selectedAssetsCount} selected ${selectedAssetsCount === 1 ? 'asset' : 'assets'}.`;
     }

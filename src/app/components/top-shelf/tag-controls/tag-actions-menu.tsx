@@ -59,14 +59,19 @@ export const TagActionsMenu = () => {
     }
   }, [isAutoTaggerInitialised, dispatch]);
 
-  // Prepare assets for auto-tagger: use explicit selection, or fall back to filtered view
+  // Whether there are any assets available for auto-tagging (cheap count check)
+  const hasAssetsForTagger =
+    selectedAssetsData.length > 0 || filteredAssetsCount > 0;
+
+  // Prepare assets for auto-tagger: only compute the full mapped array when modal is open
   const assetsForTagger = useMemo(() => {
-    const source = selectedAssetsData.length > 0 ? selectedAssetsData : filteredAssetsCount > 0 ? filteredAssets : [];
+    if (!isTaggerModalOpen) return [];
+    const source = selectedAssetsData.length > 0 ? selectedAssetsData : filteredAssets;
     return source.map((asset) => ({
       fileId: asset.fileId,
       fileExtension: asset.fileExtension,
     }));
-  }, [selectedAssetsData, filteredAssets, filteredAssetsCount]);
+  }, [isTaggerModalOpen, selectedAssetsData, filteredAssets]);
 
   const openTaggerModal = useCallback(() => setIsTaggerModalOpen(true), []);
   const closeTaggerModal = useCallback(() => setIsTaggerModalOpen(false), []);
@@ -96,7 +101,7 @@ export const TagActionsMenu = () => {
       label: 'Auto Tagger',
       icon: <SparklesIcon className="h-4 w-4" />,
       onClick: openTaggerModal,
-      disabled: !hasReadyModel || assetsForTagger.length === 0,
+      disabled: !hasReadyModel || !hasAssetsForTagger,
     },
   ];
 

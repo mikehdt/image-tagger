@@ -68,30 +68,18 @@ export const AssetSortControls = () => {
     filterMode === FilterMode.MATCH_ALL ||
     filterMode === FilterMode.MATCH_NONE;
 
-  // Auto-switch from "Selected" sort to "Name" when no assets are selected
+  // Auto-switch to "Name" sort when current sort type becomes invalid
   useEffect(() => {
-    if (sortType === SortType.SELECTED && selectedAssetsCount === 0) {
-      dispatch(setSortType(SortType.NAME));
-      dispatch(setSortDirection(SortDirection.ASC));
-    }
-  }, [sortType, selectedAssetsCount, dispatch]);
+    const isInvalid =
+      (sortType === SortType.SELECTED && selectedAssetsCount === 0) ||
+      (sortType === SortType.FILTERED && filteredSortDisabled) ||
+      (sortType === SortType.FOLDER && !hasSubfolderAssets);
 
-  // Auto-switch from "Filtered" sort to "Name" when filters are cleared or
-  // filter mode changes to one that already hides non-matching assets
-  useEffect(() => {
-    if (sortType === SortType.FILTERED && filteredSortDisabled) {
+    if (isInvalid) {
       dispatch(setSortType(SortType.NAME));
       dispatch(setSortDirection(SortDirection.ASC));
     }
-  }, [sortType, filteredSortDisabled, dispatch]);
-
-  // Auto-switch from "Folder" sort to "Name" when no subfolders exist
-  useEffect(() => {
-    if (sortType === SortType.FOLDER && !hasSubfolderAssets) {
-      dispatch(setSortType(SortType.NAME));
-      dispatch(setSortDirection(SortDirection.ASC));
-    }
-  }, [sortType, hasSubfolderAssets, dispatch]);
+  }, [sortType, selectedAssetsCount, filteredSortDisabled, hasSubfolderAssets, dispatch]);
 
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {

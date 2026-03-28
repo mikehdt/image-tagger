@@ -2,11 +2,7 @@ import { Grid2x2PlusIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import {
-  selectFilteredAssets,
-  selectFilteredAssetsCount,
-  selectImageCount,
-} from '@/app/store/assets';
+import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectMultipleAssets,
@@ -18,7 +14,6 @@ export const SelectAllButton = () => {
 
   const selectedAssetsSet = useAppSelector(selectSelectedAssetsSet);
   const filteredAssets = useAppSelector(selectFilteredAssets);
-  const filteredAssetsCount = useAppSelector(selectFilteredAssetsCount);
   const allAssetsCount = useAppSelector(selectImageCount);
 
   // Ref for filteredAssets — keeps handleAddAllToSelection callback stable
@@ -29,16 +24,16 @@ export const SelectAllButton = () => {
 
   // Check if all currently filtered assets are selected (O(1) Set lookups)
   const allFilteredAssetsSelected = useMemo(() => {
-    if (filteredAssetsCount === 0) return true;
+    if (filteredAssets.length === 0) return true;
     return filteredAssets.every((asset) => selectedAssetsSet.has(asset.fileId));
-  }, [filteredAssets, filteredAssetsCount, selectedAssetsSet]);
+  }, [filteredAssets, selectedAssetsSet]);
 
   const handleAddAllToSelection = useCallback(() => {
     const assetIds = filteredAssetsRef.current.map((asset) => asset.fileId);
     dispatch(selectMultipleAssets(assetIds));
   }, [dispatch]);
 
-  const isShowingAllAssets = filteredAssetsCount === allAssetsCount;
+  const isShowingAllAssets = filteredAssets.length === allAssetsCount;
 
   return (
     <Button
