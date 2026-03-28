@@ -1,4 +1,5 @@
 import { XIcon } from 'lucide-react';
+import { memo } from 'react';
 
 export type TagChipStatus = 'all' | 'some' | 'none';
 
@@ -51,7 +52,7 @@ const getIconStyle = (status: TagChipStatus, isHighlighted: boolean) => {
   return styles[status];
 };
 
-export const TagChip = ({
+const TagChipComponent = ({
   tag,
   status,
   isHighlighted,
@@ -76,3 +77,5 @@ export const TagChip = ({
     </div>
   );
 };
+
+export const TagChip = memo(TagChipComponent);

@@ -21,7 +21,6 @@ type AssetProps = {
   assetId: string;
   fileExtension: string;
   subfolder?: string;
-  assetNumber: number;
   filteredIndex: number;
   dimensions: ImageDimensions;
   bucket: KohyaBucket;
@@ -38,7 +37,6 @@ const AssetComponent = ({
   assetId,
   fileExtension,
   subfolder,
-  assetNumber,
   filteredIndex,
   dimensions,
   bucket,
@@ -194,12 +192,6 @@ const AssetComponent = ({
 
         <span className="text-sm font-medium tabular-nums select-none text-shadow-(--surface-elevated) md:[writing-mode:sideways-lr]">
           {filteredIndex}
-
-          {assetNumber !== filteredIndex ? (
-            <span className="mb-4 text-(--unselected-text-preview)">
-              {assetNumber}
-            </span>
-          ) : null}
         </span>
       </div>
 
@@ -269,7 +261,6 @@ const assetPropsAreEqual = (
     prevProps.assetId !== nextProps.assetId ||
     prevProps.fileExtension !== nextProps.fileExtension ||
     prevProps.subfolder !== nextProps.subfolder ||
-    prevProps.assetNumber !== nextProps.assetNumber ||
     prevProps.filteredIndex !== nextProps.filteredIndex ||
     prevProps.ioState !== nextProps.ioState ||
     prevProps.lastModified !== nextProps.lastModified ||

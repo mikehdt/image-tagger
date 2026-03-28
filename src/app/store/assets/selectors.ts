@@ -6,7 +6,7 @@ import { composeDimensions } from '../../utils/helpers';
 import { wrapSelector } from '../../utils/selector-perf';
 import type { RootState } from '../';
 import { TagSortDirection, TagSortType } from '../project';
-import { KeyedCountList, TagState } from './types';
+import { KeyedCountList, SortType, TagState } from './types';
 import { buildTagCountsCache, hasState } from './utils';
 
 // Base selector that extracts all images from RootState
@@ -189,6 +189,24 @@ export const selectAllSubfolders = createSelector(
   },
 );
 
+// Returns selectedAssets only when filtering or sorting actually needs them.
+// When scopeSelected is off and sort type isn't SELECTED, returns a stable
+// empty array so selection changes don't trigger expensive recomputation.
+const EMPTY_STRING_ARRAY: string[] = [];
+const selectRelevantSelectedAssets = createSelector(
+  [
+    (state: RootState) => state.filters.visibility.scopeSelected,
+    (state: RootState) => state.assets.sortType,
+    (state: RootState) => state.selection.selectedAssets,
+  ],
+  (scopeSelected, sortType, selectedAssets) => {
+    if (scopeSelected || sortType === SortType.SELECTED) {
+      return selectedAssets;
+    }
+    return EMPTY_STRING_ARRAY;
+  },
+);
+
 // Combined selector to get filtered assets based on current filter state
 export const selectFilteredAssets = wrapSelector(
   'selectFilteredAssets',
@@ -202,7 +220,7 @@ export const selectFilteredAssets = wrapSelector(
       (state: RootState) => state.filters.filterSubfolders,
       (state: RootState) => state.filters.filenamePatterns,
       (state: RootState) => state.filters.visibility,
-      (state: RootState) => state.selection.selectedAssets,
+      selectRelevantSelectedAssets,
       (state: RootState) => state.assets.sortType,
       (state: RootState) => state.assets.sortDirection,
     ],
@@ -228,7 +246,7 @@ export const selectFilteredAssets = wrapSelector(
         filterSubfolders: filterSubfolders || [],
         filenamePatterns: filenamePatterns || [],
         visibility,
-        selectedAssets: selectedAssets || [],
+        selectedAssets,
         sortType,
         sortDirection,
       });

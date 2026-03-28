@@ -3,7 +3,7 @@
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
-import { selectFilteredAssets } from '../store/assets';
+import { selectFilteredAssetsCount } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
 import { BottomShelf } from './bottom-shelf/bottom-shelf';
@@ -19,13 +19,13 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const showShelves = pathname !== '/';
 
   const paginationSize = useAppSelector(selectPaginationSize);
-  const filteredAssets = useAppSelector(selectFilteredAssets);
+  const filteredCount = useAppSelector(selectFilteredAssetsCount);
 
   // Calculate total pages based on filtered results
   const totalPages = useMemo(() => {
     if (paginationSize === -1) return 1; // -1 is PaginationSize.ALL
-    return Math.max(1, Math.ceil(filteredAssets.length / paginationSize));
-  }, [filteredAssets, paginationSize]);
+    return Math.max(1, Math.ceil(filteredCount / paginationSize));
+  }, [filteredCount, paginationSize]);
 
   // Effect to redirect if current page is out of bounds after filter change
   useEffect(() => {

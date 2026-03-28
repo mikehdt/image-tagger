@@ -8,11 +8,6 @@ import { hasState } from '../store/assets/utils';
 import { ClassFilterMode, type VisibilitySettings } from '../store/filters';
 import { composeDimensions, naturalCompare } from './helpers';
 
-// Define an interface that extends ImageAsset with originalIndex
-interface ImageAssetWithIndex extends ImageAsset {
-  originalIndex: number;
-}
-
 /**
  * Apply visibility-based filtering using per-class modes.
  * Each class independently uses ANY/ALL/INVERSE logic; between classes is AND.
@@ -42,7 +37,7 @@ export const applyVisibilityFilters = ({
   selectedAssets: string[];
   sortType?: SortType;
   sortDirection?: SortDirection;
-}): ImageAssetWithIndex[] => {
+}): ImageAsset[] => {
   // Sort first, operating on raw asset references (no spreading yet)
   const sortedAssets = applySorting(
     assets,
@@ -157,12 +152,7 @@ export const applyVisibilityFilters = ({
     },
   );
 
-  // Add originalIndex only to the filtered results — avoids spreading all N
-  // assets when only K pass the filter
-  return filteredAssets.map((asset, i) => ({
-    ...asset,
-    originalIndex: i + 1,
-  }));
+  return filteredAssets;
 };
 
 /**

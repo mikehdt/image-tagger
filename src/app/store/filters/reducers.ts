@@ -177,6 +177,39 @@ export const coreReducers = {
     state.visibility.showModified = !state.visibility.showModified;
   },
 
+  /**
+   * Batch cleanup for visibility settings — applies multiple scope clears and
+   * class mode resets in a single state transition instead of N separate dispatches.
+   * Used by filter-manager middleware to avoid cascading re-renders.
+   */
+  batchCleanupVisibility: (
+    state: Filters,
+    {
+      payload,
+    }: PayloadAction<{
+      clearScopeTagless?: boolean;
+      clearScopeSelected?: boolean;
+      clearShowModified?: boolean;
+      resetClassModes?: (
+        | 'tags'
+        | 'nameSearch'
+        | 'sizes'
+        | 'buckets'
+        | 'extensions'
+        | 'subfolders'
+      )[];
+    }>,
+  ) => {
+    if (payload.clearScopeTagless) state.visibility.scopeTagless = false;
+    if (payload.clearScopeSelected) state.visibility.scopeSelected = false;
+    if (payload.clearShowModified) state.visibility.showModified = false;
+    if (payload.resetClassModes) {
+      for (const key of payload.resetClassModes) {
+        state.visibility[key] = ClassFilterMode.OFF;
+      }
+    }
+  },
+
   // Remove stale subfolder filters after folders are deleted
   removeSubfolderFilters: (
     state: Filters,

@@ -77,6 +77,7 @@ export const {
   toggleVisibilityScopeTagless,
   toggleVisibilityScopeSelected,
   toggleVisibilityModified,
+  batchCleanupVisibility,
 } = filtersSlice.actions;
 
 // Export the selectors from the slice

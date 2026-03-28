@@ -29,9 +29,8 @@ import { useAnchorScrolling } from '../utils/use-anchor-scrolling';
 
 // Define interface for asset with pagination index
 interface AssetWithPaginationIndex extends ImageAsset {
-  originalIndex: number;
   paginatedIndex: number;
-  filteredIndex: number; // Pre-calculated filtered index for display
+  filteredIndex: number; // 1-based position in full filtered list
 }
 
 type AssetListProps = {
@@ -146,9 +145,7 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
       const assetWithIndex: AssetWithPaginationIndex = {
         ...asset,
         paginatedIndex: index,
-        // Pre-calculate filtered index to avoid doing it in render
-        originalIndex: asset.originalIndex,
-        filteredIndex: startIndex + index + 1, // 1-based index for display
+        filteredIndex: startIndex + index + 1, // 1-based position in full filtered list
       };
       const category = getSortCategory(
         assetWithIndex,
@@ -219,7 +216,6 @@ export const AssetList = ({ currentPage = 1 }: AssetListProps) => {
                 <Asset
                   key={asset.fileId}
                   assetId={asset.fileId}
-                  assetNumber={asset.originalIndex}
                   filteredIndex={asset.filteredIndex}
                   fileExtension={asset.fileExtension}
                   subfolder={asset.subfolder}
