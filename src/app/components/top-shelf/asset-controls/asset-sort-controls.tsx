@@ -15,12 +15,8 @@ import {
 } from '@/app/store/assets';
 import {
   FilterMode,
-  selectFilenamePatterns,
-  selectFilterBuckets,
-  selectFilterExtensions,
   selectFilterMode,
-  selectFilterSizes,
-  selectFilterTags,
+  selectHasActiveFilters,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
@@ -61,30 +57,8 @@ export const AssetSortControls = () => {
   const filterMode = useAppSelector(selectFilterMode);
   const hasSubfolderAssets = useAppSelector(selectHasSubfolderAssets);
 
-  // Filter state for determining if "Filtered" sort is available
-  const filterTags = useAppSelector(selectFilterTags);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterBuckets = useAppSelector(selectFilterBuckets);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
-  const filenamePatterns = useAppSelector(selectFilenamePatterns);
-
-  const filterSelectionActive = useMemo(
-    () =>
-      !!(
-        filterTags.length ||
-        filterSizes.length ||
-        filterBuckets.length ||
-        filterExtensions.length ||
-        filenamePatterns.length
-      ),
-    [
-      filterTags.length,
-      filterSizes.length,
-      filterBuckets.length,
-      filterExtensions.length,
-      filenamePatterns.length,
-    ],
-  );
+  // Boolean selector — avoids subscribing to 5 full arrays when only "any active?" is needed
+  const filterSelectionActive = useAppSelector(selectHasActiveFilters);
 
   // FILTERED sort is disabled when no filters are set, or when filter mode
   // already hides non-matching assets (Match Any/All/Inverse)

@@ -68,5 +68,6 @@ export type FilterCount = {
   buckets: number;
   extensions: number;
   subfolders: number;
+  filenamePatterns: number;
   total: number;
 };

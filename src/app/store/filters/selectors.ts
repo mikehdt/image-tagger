@@ -96,23 +96,27 @@ export const selectFilterCount = createSelector(
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSubfolders,
+  selectFilenamePatterns,
   (
     filterTags,
     filterSizes,
     filterBuckets,
     filterExtensions,
     filterSubfolders,
+    filenamePatterns,
   ): FilterCount => ({
     tags: filterTags.length,
     sizes: filterSizes.length,
     buckets: filterBuckets.length,
     extensions: filterExtensions.length,
     subfolders: filterSubfolders.length,
+    filenamePatterns: filenamePatterns.length,
     total:
       filterTags.length +
       filterSizes.length +
       filterBuckets.length +
       filterExtensions.length +
-      filterSubfolders.length,
+      filterSubfolders.length +
+      filenamePatterns.length,
   }),
 );

@@ -7,12 +7,7 @@ import {
 } from '@/app/store/assets';
 import {
   ClassFilterMode,
-  selectFilenamePatterns,
-  selectFilterBuckets,
-  selectFilterExtensions,
-  selectFilterSizes,
-  selectFilterSubfolders,
-  selectFilterTags,
+  selectFilterCount,
   selectVisibility,
   setVisibilityClassMode,
   toggleVisibilityModified,
@@ -43,12 +38,8 @@ export const useVisibilityControl = () => {
   const dispatch = useAppDispatch();
 
   const visibility = useAppSelector(selectVisibility);
-  const filterTags = useAppSelector(selectFilterTags);
-  const filenamePatterns = useAppSelector(selectFilenamePatterns);
-  const filterSizes = useAppSelector(selectFilterSizes);
-  const filterBuckets = useAppSelector(selectFilterBuckets);
-  const filterExtensions = useAppSelector(selectFilterExtensions);
-  const filterSubfolders = useAppSelector(selectFilterSubfolders);
+  // Single memoised selector for all filter counts — avoids 6 array subscriptions
+  const filterCount = useAppSelector(selectFilterCount);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
@@ -59,41 +50,41 @@ export const useVisibilityControl = () => {
       {
         key: 'tags',
         label: 'Tags',
-        count: filterTags.length,
+        count: filterCount.tags,
         mode: visibility.tags,
-        available: filterTags.length > 0,
+        available: filterCount.tags > 0,
         emptyMessage: 'No tags selected',
       },
       {
         key: 'nameSearch',
         label: 'Name search',
-        count: filenamePatterns.length,
+        count: filterCount.filenamePatterns,
         mode: visibility.nameSearch,
-        available: filenamePatterns.length > 0,
+        available: filterCount.filenamePatterns > 0,
         emptyMessage: 'No name searches',
       },
       {
         key: 'sizes',
         label: 'Sizes',
-        count: filterSizes.length,
+        count: filterCount.sizes,
         mode: visibility.sizes,
-        available: filterSizes.length > 0,
+        available: filterCount.sizes > 0,
         emptyMessage: 'No sizes selected',
       },
       {
         key: 'buckets',
         label: 'Buckets',
-        count: filterBuckets.length,
+        count: filterCount.buckets,
         mode: visibility.buckets,
-        available: filterBuckets.length > 0,
+        available: filterCount.buckets > 0,
         emptyMessage: 'No buckets selected',
       },
       {
         key: 'extensions',
         label: 'Extensions',
-        count: filterExtensions.length,
+        count: filterCount.extensions,
         mode: visibility.extensions,
-        available: filterExtensions.length > 0,
+        available: filterCount.extensions > 0,
         emptyMessage: 'No types selected',
       },
       ...(hasSubfolderAssets
@@ -101,25 +92,16 @@ export const useVisibilityControl = () => {
             {
               key: 'subfolders' as VisibilityClassKey,
               label: 'Subfolders',
-              count: filterSubfolders.length,
+              count: filterCount.subfolders,
               mode: visibility.subfolders,
-              available: filterSubfolders.length > 0,
+              available: filterCount.subfolders > 0,
               emptyMessage: 'No folders selected',
             },
           ]
         : []),
     ];
     return all;
-  }, [
-    filterTags.length,
-    filenamePatterns.length,
-    filterSizes.length,
-    filterBuckets.length,
-    filterExtensions.length,
-    filterSubfolders.length,
-    hasSubfolderAssets,
-    visibility,
-  ]);
+  }, [filterCount, hasSubfolderAssets, visibility]);
 
   const handleSetClassMode = useCallback(
     (classKey: VisibilityClassKey, mode: ClassFilterMode) => {

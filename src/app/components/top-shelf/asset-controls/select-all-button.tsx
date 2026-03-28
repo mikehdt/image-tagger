@@ -1,35 +1,44 @@
 import { Grid2x2PlusIcon } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import { selectFilteredAssets, selectImageCount } from '@/app/store/assets';
+import {
+  selectFilteredAssets,
+  selectFilteredAssetsCount,
+  selectImageCount,
+} from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectMultipleAssets,
-  selectSelectedAssets,
+  selectSelectedAssetsSet,
 } from '@/app/store/selection';
 
 export const SelectAllButton = () => {
   const dispatch = useAppDispatch();
 
-  const selectedAssets = useAppSelector(selectSelectedAssets);
+  const selectedAssetsSet = useAppSelector(selectSelectedAssetsSet);
   const filteredAssets = useAppSelector(selectFilteredAssets);
+  const filteredAssetsCount = useAppSelector(selectFilteredAssetsCount);
   const allAssetsCount = useAppSelector(selectImageCount);
 
-  // Check if all currently filtered assets are selected
+  // Ref for filteredAssets — keeps handleAddAllToSelection callback stable
+  const filteredAssetsRef = useRef(filteredAssets);
+  useEffect(() => {
+    filteredAssetsRef.current = filteredAssets;
+  });
+
+  // Check if all currently filtered assets are selected (O(1) Set lookups)
   const allFilteredAssetsSelected = useMemo(() => {
-    if (filteredAssets.length === 0) return true;
-    return filteredAssets.every((asset) =>
-      selectedAssets.includes(asset.fileId),
-    );
-  }, [filteredAssets, selectedAssets]);
+    if (filteredAssetsCount === 0) return true;
+    return filteredAssets.every((asset) => selectedAssetsSet.has(asset.fileId));
+  }, [filteredAssets, filteredAssetsCount, selectedAssetsSet]);
 
   const handleAddAllToSelection = useCallback(() => {
-    const assetIds = filteredAssets.map((asset) => asset.fileId);
+    const assetIds = filteredAssetsRef.current.map((asset) => asset.fileId);
     dispatch(selectMultipleAssets(assetIds));
-  }, [dispatch, filteredAssets]);
+  }, [dispatch]);
 
-  const isShowingAllAssets = filteredAssets.length === allAssetsCount;
+  const isShowingAllAssets = filteredAssetsCount === allAssetsCount;
 
   return (
     <Button
