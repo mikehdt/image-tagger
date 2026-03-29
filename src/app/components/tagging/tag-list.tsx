@@ -9,14 +9,9 @@
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { TagEditMode } from '@/app/store/project';
 
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';
@@ -34,6 +29,7 @@ type TagData = {
 type TagListProps = {
   tags: TagData[];
   sortable?: boolean;
+  tagEditMode: TagEditMode;
   assetId: string;
   // DnD props - passed through to TagsDisplay
   sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
@@ -52,6 +48,7 @@ type TagListProps = {
 type TagsDisplayProps = {
   tags: TagData[];
   sortable: boolean;
+  tagEditMode: TagEditMode;
   assetId: string;
   // DnD props
   sensors: ReturnType<typeof import('@dnd-kit/core').useSensors>;
@@ -74,6 +71,7 @@ type TagsDisplayProps = {
 const TagsDisplayComponent = ({
   tags,
   sortable,
+  tagEditMode,
   assetId,
   sensors,
   onDragEnd,
@@ -140,6 +138,7 @@ const TagsDisplayComponent = ({
         isHighlighted={tag.isHighlighted}
         fade={fade}
         isMatchingDuplicate={isMatchingTag}
+        tagEditMode={tagEditMode}
         isEditing={isBeingEdited}
         editValue={tagEditValue}
         onToggle={onToggleTag}
@@ -159,6 +158,7 @@ const TagsDisplayComponent = ({
           isHighlighted={tag.isHighlighted}
           fade={fade}
           isMatchingDuplicate={isMatchingTag}
+          tagEditMode={tagEditMode}
           isEditing={isBeingEdited}
           editValue={tagEditValue}
           onToggle={onToggleTag}
@@ -219,8 +219,11 @@ const tagsDisplayPropsAreEqual = (
     return false;
   }
 
-  // Check sortable mode
+  // Check sortable mode and edit mode
   if (prevProps.sortable !== nextProps.sortable) {
+    return false;
+  }
+  if (prevProps.tagEditMode !== nextProps.tagEditMode) {
     return false;
   }
 
@@ -260,6 +263,7 @@ const TagsDisplay = memo(TagsDisplayComponent, tagsDisplayPropsAreEqual);
 const TagListComponent = ({
   tags,
   sortable = false,
+  tagEditMode,
   assetId,
   sensors,
   onDragEnd,
@@ -444,6 +448,7 @@ const TagListComponent = ({
         <TagsDisplay
           tags={tags}
           sortable={sortable}
+          tagEditMode={tagEditMode}
           assetId={assetId}
           sensors={sensors}
           onDragEnd={onDragEnd}
@@ -503,9 +508,10 @@ const tagListPropsAreEqual = (
   prevProps: TagListProps,
   nextProps: TagListProps,
 ): boolean => {
-  // Check sortable mode and assetId
+  // Check sortable mode, edit mode, and assetId
   if (
     prevProps.sortable !== nextProps.sortable ||
+    prevProps.tagEditMode !== nextProps.tagEditMode ||
     prevProps.assetId !== nextProps.assetId
   ) {
     return false;

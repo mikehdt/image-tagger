@@ -16,10 +16,16 @@ export enum TagSortDirection {
   DESC = 'DESC',
 }
 
+export enum TagEditMode {
+  BUTTON = 'BUTTON',
+  DOUBLE_CLICK = 'DOUBLE_CLICK',
+}
+
 type ProjectConfig = {
   showCropVisualization: boolean;
   tagSortType: TagSortType;
   tagSortDirection: TagSortDirection;
+  tagEditMode: TagEditMode;
 };
 
 export type ProjectState = {

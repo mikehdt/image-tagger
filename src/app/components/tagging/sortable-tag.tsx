@@ -8,6 +8,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { memo } from 'react';
 
+import { TagEditMode } from '@/app/store/project';
+
 import { EditableTag } from './editable-tag';
 
 type SortableTagProps = {
@@ -18,6 +20,7 @@ type SortableTagProps = {
   isHighlighted: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
+  tagEditMode: TagEditMode;
   isEditing: boolean;
   editValue: string;
   onToggle: (tagName: string) => void;
@@ -37,6 +40,7 @@ const SortableTagComponent = ({
   isHighlighted,
   fade,
   isMatchingDuplicate,
+  tagEditMode,
   isEditing,
   editValue,
   onToggle,
@@ -89,6 +93,7 @@ const SortableTagComponent = ({
         isHighlighted={isHighlighted}
         fade={fade}
         isMatchingDuplicate={isMatchingDuplicate}
+        tagEditMode={tagEditMode}
         isEditing={isEditing}
         editValue={editValue}
         onToggle={onToggle}
@@ -132,6 +137,7 @@ const sortableTagPropsAreEqual = (
     prevProps.isHighlighted === nextProps.isHighlighted &&
     prevProps.fade === nextProps.fade &&
     prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
+    prevProps.tagEditMode === nextProps.tagEditMode &&
     prevProps.onToggle === nextProps.onToggle &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&

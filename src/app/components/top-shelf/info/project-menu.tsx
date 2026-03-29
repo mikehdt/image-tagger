@@ -14,10 +14,17 @@ import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
+import {
+  selectProjectName,
+  selectProjectThumbnail,
+  selectTagEditMode,
+  setTagEditMode,
+  TagEditMode,
+} from '@/app/store/project';
 import { useTheme } from '@/app/utils/use-theme';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
+import { MenuEditModeSwitcher } from './menu-edit-mode-switcher';
 import { MenuThemeSwitcher } from './menu-theme-switcher';
 
 // Inline configuration check function to avoid import issues
@@ -74,6 +81,7 @@ const ProjectMenuComponent = () => {
       ? sessionStorage.getItem('selectedProjectThumbnailVersion')
       : null;
   const { theme, setTheme } = useTheme();
+  const tagEditMode = useAppSelector(selectTagEditMode);
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
@@ -214,6 +222,13 @@ const ProjectMenuComponent = () => {
     dispatch(openSetupModal());
   }, [closePopup, popupId, dispatch]);
 
+  const handleSetTagEditMode = useCallback(
+    (mode: TagEditMode) => {
+      dispatch(setTagEditMode(mode));
+    },
+    [dispatch],
+  );
+
   if (!projectName) {
     return null;
   }
@@ -272,6 +287,10 @@ const ProjectMenuComponent = () => {
             onClick={handleOpenAutoTaggerSetup}
           />
           <MenuThemeSwitcher theme={theme} setTheme={setTheme} />
+          <MenuEditModeSwitcher
+            editMode={tagEditMode}
+            setEditMode={handleSetTagEditMode}
+          />
           <MenuItem
             icon={<ArrowLeftCircleIcon className="h-5 w-5" />}
             label="Back to Projects"

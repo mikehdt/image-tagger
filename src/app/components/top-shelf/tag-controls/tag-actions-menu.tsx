@@ -47,18 +47,29 @@ export const TagActionsMenu = () => {
   const hasReadyModel = useAppSelector(selectHasReadyModel);
   const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
 
-  // Fetch auto-tagger models on mount to determine if any are ready
+  // Fetch auto-tagger models on mount to determine if any are ready.
+  // Retries once after a short delay to handle Turbopack cold-compilation races
+  // where the API route may 404 on the very first request.
   useEffect(() => {
     if (!isAutoTaggerInitialised) {
-      fetch('/api/auto-tagger/models')
-        .then((res) => {
-          if (!res.ok) throw new Error(`Failed to fetch models: ${res.status}`);
-          return res.json();
-        })
-        .then((data) => {
-          dispatch(setModelsAndProviders(data));
-        })
-        .catch(console.error);
+      const fetchModels = (isRetry: boolean) => {
+        fetch('/api/auto-tagger/models')
+          .then((res) => {
+            if (!res.ok) throw new Error(`${res.status}`);
+            return res.json();
+          })
+          .then((data) => {
+            dispatch(setModelsAndProviders(data));
+          })
+          .catch((err) => {
+            if (!isRetry) {
+              setTimeout(() => fetchModels(true), 3000);
+            } else {
+              console.error('Failed to fetch auto-tagger models:', err);
+            }
+          });
+      };
+      fetchModels(false);
     }
   }, [isAutoTaggerInitialised, dispatch]);
 

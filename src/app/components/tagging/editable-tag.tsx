@@ -7,6 +7,8 @@
  */
 import { memo } from 'react';
 
+import { TagEditMode } from '@/app/store/project';
+
 import { InputTag } from './input-tag';
 import { Tag } from './tag';
 
@@ -17,6 +19,7 @@ type EditableTagProps = {
   isHighlighted: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
+  tagEditMode: TagEditMode;
   isEditing: boolean;
   editValue: string;
   onToggle: (tagName: string) => void;
@@ -35,6 +38,7 @@ const EditableTagComponent = ({
   isHighlighted,
   fade,
   isMatchingDuplicate,
+  tagEditMode,
   isEditing,
   editValue,
   onToggle,
@@ -67,6 +71,7 @@ const EditableTagComponent = ({
       isHighlighted={isHighlighted}
       fade={fade}
       isMatchingDuplicate={isMatchingDuplicate}
+      tagEditMode={tagEditMode}
       onToggle={onToggle}
       onEdit={onEdit}
       onDelete={onDelete}
@@ -102,6 +107,7 @@ const editableTagPropsAreEqual = (
     prevProps.isHighlighted === nextProps.isHighlighted &&
     prevProps.fade === nextProps.fade &&
     prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
+    prevProps.tagEditMode === nextProps.tagEditMode &&
     prevProps.onToggle === nextProps.onToggle &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&

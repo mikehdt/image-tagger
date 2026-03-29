@@ -3,7 +3,8 @@
  *
  * Phase 4: Full interactivity with edit button
  * - Click to toggle tag state (filter)
- * - Edit button (pencil icon) to start editing
+ * - Edit button (pencil icon) to start editing (BUTTON mode)
+ * - Double-click to start editing (DOUBLE_CLICK mode)
  * - Delete button (minus/plus icon based on state)
  * - Visual states (saved, to_delete, to_add, dirty)
  * - Highlight and fade support
@@ -13,6 +14,7 @@ import { MinusIcon, PencilIcon, PlusIcon } from 'lucide-react';
 import { SyntheticEvent, useCallback } from 'react';
 
 import { hasState, TagState } from '@/app/store/assets';
+import { TagEditMode } from '@/app/store/project';
 
 type TagProps = {
   tagName: string;
@@ -21,6 +23,7 @@ type TagProps = {
   isHighlighted: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
+  tagEditMode: TagEditMode;
   onToggle: (tagName: string) => void;
   onEdit: (tagName: string) => void;
   onDelete: (tagName: string) => void;
@@ -33,28 +36,44 @@ export const Tag = ({
   isHighlighted,
   fade,
   isMatchingDuplicate = false,
+  tagEditMode,
   onToggle,
   onEdit,
   onDelete,
 }: TagProps) => {
   // Non-interactive when faded OR when shown as matching duplicate
   const isNonInteractive = fade || isMatchingDuplicate;
+  const isMarkedForDeletion = hasState(tagState, TagState.TO_DELETE);
+  const isDoubleClickMode = tagEditMode === TagEditMode.DOUBLE_CLICK;
+  const canEdit = !isNonInteractive && !isMarkedForDeletion;
 
-  const handleClick = useCallback(() => {
-    if (!isNonInteractive) {
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isNonInteractive) return;
+
+      if (isDoubleClickMode && e.detail === 2) {
+        // Double-click in DOUBLE_CLICK mode: undo the toggle from the
+        // first click (which already fired) then trigger edit
+        onToggle(tagName);
+        if (canEdit) {
+          onEdit(tagName);
+        }
+        return;
+      }
+
       onToggle(tagName);
-    }
-  }, [onToggle, tagName, isNonInteractive]);
+    },
+    [onToggle, onEdit, tagName, isNonInteractive, isDoubleClickMode, canEdit],
+  );
 
   const handleEdit = useCallback(
     (e: SyntheticEvent) => {
       e.stopPropagation();
-      // Don't allow editing if non-interactive or marked for deletion
-      if (!isNonInteractive && !hasState(tagState, TagState.TO_DELETE)) {
+      if (canEdit) {
         onEdit(tagName);
       }
     },
-    [onEdit, tagName, tagState, isNonInteractive],
+    [onEdit, tagName, canEdit],
   );
 
   const handleDelete = useCallback(
@@ -67,7 +86,23 @@ export const Tag = ({
     [onDelete, tagName, isNonInteractive],
   );
 
-  const isMarkedForDeletion = hasState(tagState, TagState.TO_DELETE);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (isNonInteractive) return;
+
+      if (e.key === ' ' && isDoubleClickMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (canEdit) {
+          onEdit(tagName);
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        onToggle(tagName);
+      }
+    },
+    [isNonInteractive, isDoubleClickMode, canEdit, onEdit, onToggle, tagName],
+  );
 
   // Determine visual styling based on state
   const getStateStyles = () => {
@@ -120,6 +155,10 @@ export const Tag = ({
     <div
       className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()}`}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={isNonInteractive ? -1 : isDoubleClickMode ? 0 : undefined}
+      title={isDoubleClickMode && canEdit ? 'Double-click to edit' : undefined}
     >
       <span
         className={`relative mr-1 -ml-2 inline-flex px-1 text-xs tabular-nums text-shadow-xs/100 text-shadow-white dark:text-shadow-slate-900 ${getCountColour()}`}
@@ -130,23 +169,25 @@ export const Tag = ({
         {tagName}
       </span>
 
-      {/* Edit button */}
-      <span
-        className={`ml-1 inline-flex h-5 w-5 rounded-full p-0.5 transition-colors ${
-          isMarkedForDeletion || isNonInteractive
-            ? 'cursor-not-allowed opacity-20'
-            : 'text-slate-500 hover:bg-blue-500 hover:text-white dark:text-slate-400'
-        }`}
-        onClick={handleEdit}
-        title={
-          isMarkedForDeletion
-            ? "Can't edit a tag marked for deletion"
-            : 'Edit tag'
-        }
-        tabIndex={isMarkedForDeletion || isNonInteractive ? -1 : 0}
-      >
-        <PencilIcon size="100%" />
-      </span>
+      {/* Edit button — only in BUTTON mode */}
+      {!isDoubleClickMode && (
+        <span
+          className={`ml-1 inline-flex h-5 w-5 rounded-full p-0.5 transition-colors ${
+            isMarkedForDeletion || isNonInteractive
+              ? 'cursor-not-allowed opacity-20'
+              : 'text-slate-500 hover:bg-blue-500 hover:text-white dark:text-slate-400'
+          }`}
+          onClick={handleEdit}
+          title={
+            isMarkedForDeletion
+              ? "Can't edit a tag marked for deletion"
+              : 'Edit tag'
+          }
+          tabIndex={isMarkedForDeletion || isNonInteractive ? -1 : 0}
+        >
+          <PencilIcon size="100%" />
+        </span>
+      )}
 
       {/* Delete button */}
       <span
