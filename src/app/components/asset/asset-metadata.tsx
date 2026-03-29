@@ -163,13 +163,13 @@ const AssetMetadataComponent = ({
 
   return (
     <div
-      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-sm inset-shadow-white transition-colors dark:inset-shadow-slate-700 ${
+      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-sm transition-colors ${
         hasModifiedTags
-          ? 'border-t-amber-300 bg-amber-100 dark:border-t-amber-600 dark:bg-amber-900'
-          : 'border-t-(--border) bg-(--surface)'
+          ? 'border-t-amber-300 bg-amber-100 inset-shadow-white dark:border-t-amber-600 dark:bg-amber-900 dark:inset-shadow-amber-700'
+          : 'border-t-(--border) bg-(--surface) inset-shadow-white dark:inset-shadow-slate-700'
       }`}
     >
-      <span className="inline-flex min-w-0 flex-wrap items-center gap-2 py-0.5 tabular-nums">
+      <span className="inline-flex min-w-0 flex-1 flex-wrap items-center gap-2 py-0.5 tabular-nums">
         <Button
           type="button"
           color="sky"
@@ -219,7 +219,7 @@ const AssetMetadataComponent = ({
         )}
 
         <span
-          className="ml-2 cursor-pointer self-center overflow-hidden overflow-ellipsis text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
+          className="ml-2 cursor-pointer self-center truncate text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
           style={{ textShadow: 'var(--surface-elevated) 0 1px 0' }}
           onClick={handleCopyAssetPath}
           title="Click to copy the full filename"
@@ -229,7 +229,7 @@ const AssetMetadataComponent = ({
       </span>
 
       {hasModifiedTags ? (
-        <span className="ml-auto flex gap-2 pl-2">
+        <span className="flex shrink-0 gap-2 pl-2">
           <Button
             color="stone"
             size="medium"
