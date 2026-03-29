@@ -403,6 +403,50 @@ const TagListComponent = ({
     setEditValue('');
   }, []);
 
+  // Double-click timing: in DOUBLE_CLICK mode, defer single-click toggles
+  // so a rapid second click can cancel the toggle and trigger edit instead.
+  // This lives here (not in Tag) so the timer survives SortableTag↔EditableTag swaps.
+  const DOUBLE_CLICK_WINDOW = 200;
+  const pendingToggleRef = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    tagName: string;
+  } | null>(null);
+
+  const handleToggleTag = useCallback(
+    (tagName: string) => {
+      if (tagEditMode === TagEditMode.DOUBLE_CLICK) {
+        if (pendingToggleRef.current !== null) {
+          clearTimeout(pendingToggleRef.current.timer);
+        }
+        pendingToggleRef.current = {
+          tagName,
+          timer: setTimeout(() => {
+            pendingToggleRef.current = null;
+            onToggleTag(tagName);
+          }, DOUBLE_CLICK_WINDOW),
+        };
+      } else {
+        onToggleTag(tagName);
+      }
+    },
+    [onToggleTag, tagEditMode],
+  );
+
+  // When edit starts (via double-click), cancel the pending toggle for that tag
+  const handleStartEditWithCancel = useCallback(
+    (tagName: string) => {
+      if (
+        pendingToggleRef.current !== null &&
+        pendingToggleRef.current.tagName === tagName
+      ) {
+        clearTimeout(pendingToggleRef.current.timer);
+        pendingToggleRef.current = null;
+      }
+      handleStartEdit(tagName);
+    },
+    [handleStartEdit],
+  );
+
   // Determine which tags to copy and whether it's a partial copy
   const copyInfo = useMemo(() => {
     // Get highlighted tags (those matching filter) that are in this asset
@@ -456,8 +500,8 @@ const TagListComponent = ({
           editValue={editValue}
           isDuplicateEdit={isDuplicateEdit}
           matchingTagName={matchingTagName}
-          onToggleTag={onToggleTag}
-          onEditTag={handleStartEdit}
+          onToggleTag={handleToggleTag}
+          onEditTag={handleStartEditWithCancel}
           onDeleteTag={onDeleteTag}
           onEditChange={handleEditChange}
           onEditSubmit={handleEditSubmit}
