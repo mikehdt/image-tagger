@@ -192,7 +192,7 @@ const InputTagComponent = ({
   const canSubmit = value.trim() !== '' && !isDuplicate && !disabled;
 
   return (
-    <div className="relative mr-2 inline-flex">
+    <div className="relative mr-2 inline-flex bg-white dark:bg-slate-800">
       <input
         ref={inputRef}
         value={value}
