@@ -12,7 +12,7 @@ const options: { mode: TagEditMode; icon: React.ReactNode; label: string }[] = [
   {
     mode: TagEditMode.DOUBLE_CLICK,
     icon: <MousePointerClickIcon className="h-4 w-4" />,
-    label: 'Dbl-Click',
+    label: 'Double Click',
   },
 ];
 
@@ -36,7 +36,7 @@ const MenuEditModeSwitcherComponent = ({
   return (
     <div className="flex items-center gap-2 px-3 py-2">
       <span className="text-sm text-slate-700 dark:text-slate-300">
-        Tag Edit
+        Editing
       </span>
       <div className="ml-auto flex gap-0.5 rounded-md bg-slate-100 p-0.5 dark:bg-slate-700">
         {options.map(({ mode, icon, label }) => (
