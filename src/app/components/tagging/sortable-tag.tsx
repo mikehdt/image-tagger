@@ -8,7 +8,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { memo } from 'react';
 
-import { TagEditMode } from '@/app/store/project';
+import { TagEditMode } from '@/app/store/preferences';
 
 import { EditableTag } from './editable-tag';
 

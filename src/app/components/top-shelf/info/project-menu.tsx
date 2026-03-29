@@ -15,13 +15,14 @@ import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
-  selectProjectName,
-  selectProjectThumbnail,
   selectTagEditMode,
+  selectTheme,
   setTagEditMode,
+  setTheme,
   TagEditMode,
-} from '@/app/store/project';
-import { useTheme } from '@/app/utils/use-theme';
+  type ThemeMode,
+} from '@/app/store/preferences';
+import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 import { MenuEditModeSwitcher } from './menu-edit-mode-switcher';
@@ -80,8 +81,14 @@ const ProjectMenuComponent = () => {
     typeof window !== 'undefined'
       ? sessionStorage.getItem('selectedProjectThumbnailVersion')
       : null;
-  const { theme, setTheme } = useTheme();
+  const theme = useAppSelector(selectTheme);
   const tagEditMode = useAppSelector(selectTagEditMode);
+
+  // Show auto-tagger in project menu only in single-project (default) mode,
+  // since multi-project mode has it on the project list settings instead
+  const isSingleProjectMode =
+    typeof window !== 'undefined' &&
+    sessionStorage.getItem('configMode') === 'default';
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
@@ -222,6 +229,13 @@ const ProjectMenuComponent = () => {
     dispatch(openSetupModal());
   }, [closePopup, popupId, dispatch]);
 
+  const handleSetTheme = useCallback(
+    (mode: ThemeMode) => {
+      dispatch(setTheme(mode));
+    },
+    [dispatch],
+  );
+
   const handleSetTagEditMode = useCallback(
     (mode: TagEditMode) => {
       dispatch(setTagEditMode(mode));
@@ -281,12 +295,14 @@ const ProjectMenuComponent = () => {
             label="Bucket Crop Tool"
             onClick={handleOpenBucketModal}
           />
-          <MenuItem
-            icon={<SparklesIcon className="h-5 w-5" />}
-            label="Auto-Tagger Models"
-            onClick={handleOpenAutoTaggerSetup}
-          />
-          <MenuThemeSwitcher theme={theme} setTheme={setTheme} />
+          {isSingleProjectMode && (
+            <MenuItem
+              icon={<SparklesIcon className="h-5 w-5" />}
+              label="Auto-Tagger Models"
+              onClick={handleOpenAutoTaggerSetup}
+            />
+          )}
+          <MenuThemeSwitcher theme={theme} setTheme={handleSetTheme} />
           <MenuEditModeSwitcher
             editMode={tagEditMode}
             setEditMode={handleSetTagEditMode}

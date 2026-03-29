@@ -1,0 +1,42 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+import { loadPreferences, savePreferences } from './local-storage';
+import { coreReducers } from './reducers';
+import type { PreferencesState } from './types';
+
+const initialState: PreferencesState = loadPreferences();
+
+const preferencesSlice = createSlice({
+  name: 'preferences',
+  initialState,
+  reducers: coreReducers,
+  selectors: {
+    selectTheme: (state) => state.theme,
+    selectTagEditMode: (state) => state.tagEditMode,
+  },
+});
+
+export const { reducer: preferencesReducer } = preferencesSlice;
+export const { setTheme, setTagEditMode } = preferencesSlice.actions;
+export const { selectTheme, selectTagEditMode } = preferencesSlice.selectors;
+
+/**
+ * Subscribe to store changes and persist preferences to localStorage.
+ * Call once after store creation.
+ */
+export const subscribePreferencesPersistence = (store: {
+  getState: () => { preferences: PreferencesState };
+  subscribe: (listener: () => void) => () => void;
+}) => {
+  let prev = store.getState().preferences;
+  return store.subscribe(() => {
+    const next = store.getState().preferences;
+    if (next !== prev) {
+      prev = next;
+      savePreferences(next);
+    }
+  });
+};
+
+export type { PreferencesState, ThemeMode } from './types';
+export { TagEditMode } from './types';

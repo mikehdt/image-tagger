@@ -11,10 +11,12 @@
  * - When faded, all interactions are disabled
  */
 import { MinusIcon, PencilIcon, PlusIcon } from 'lucide-react';
-import { SyntheticEvent, useCallback } from 'react';
+import { SyntheticEvent, useCallback, useEffect, useRef } from 'react';
 
 import { hasState, TagState } from '@/app/store/assets';
-import { TagEditMode } from '@/app/store/project';
+import { TagEditMode } from '@/app/store/preferences';
+
+const DOUBLE_CLICK_WINDOW = 200;
 
 type TagProps = {
   tagName: string;
@@ -47,21 +49,52 @@ export const Tag = ({
   const isDoubleClickMode = tagEditMode === TagEditMode.DOUBLE_CLICK;
   const canEdit = !isNonInteractive && !isMarkedForDeletion;
 
+  // In DOUBLE_CLICK mode, defer the first click's toggle briefly so a
+  // rapid second click (double-click) can cancel it before Redux dispatches.
+  // This avoids the toolbar flicker of toggle→untoggle while keeping
+  // single-clicks feeling responsive (200ms is barely perceptible).
+  const pendingToggleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pendingToggleRef.current !== null) {
+        clearTimeout(pendingToggleRef.current);
+      }
+    };
+  }, []);
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       if (isNonInteractive) return;
 
-      if (isDoubleClickMode && e.detail === 2) {
-        // Double-click in DOUBLE_CLICK mode: undo the toggle from the
-        // first click (which already fired) then trigger edit
-        onToggle(tagName);
+      if (
+        isDoubleClickMode &&
+        e.detail === 2 &&
+        pendingToggleRef.current !== null
+      ) {
+        // Double-click on the same tag: cancel the pending toggle, then edit
+        clearTimeout(pendingToggleRef.current);
+        pendingToggleRef.current = null;
         if (canEdit) {
           onEdit(tagName);
         }
         return;
       }
 
-      onToggle(tagName);
+      if (isDoubleClickMode) {
+        // Single click (or rapid click on a different tag): defer the toggle
+        // briefly so a true double-click on this tag can cancel it
+        if (pendingToggleRef.current !== null) {
+          clearTimeout(pendingToggleRef.current);
+        }
+        pendingToggleRef.current = setTimeout(() => {
+          pendingToggleRef.current = null;
+          onToggle(tagName);
+        }, DOUBLE_CLICK_WINDOW);
+      } else {
+        // BUTTON mode: immediate toggle
+        onToggle(tagName);
+      }
     },
     [onToggle, onEdit, tagName, isNonInteractive, isDoubleClickMode, canEdit],
   );

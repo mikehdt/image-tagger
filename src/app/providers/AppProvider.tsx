@@ -15,6 +15,7 @@ import { clearFilters } from '../store/filters';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { resetProjectState, setProjectInfo } from '../store/project';
 import { clearSelection, clearSelectorCaches } from '../store/selection';
+import { useTheme } from '../utils/use-theme';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
 import { NoContent } from '../views/no-content';
@@ -34,6 +35,9 @@ const checkIfUsingDefaultProject = async (): Promise<boolean> => {
 };
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  // Apply theme class to document.documentElement globally
+  useTheme();
+
   const router = useRouter();
   const pathname = usePathname();
   const initialLoad = useRef<boolean>(true);

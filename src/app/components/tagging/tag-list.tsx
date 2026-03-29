@@ -11,7 +11,7 @@ import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { ClipboardIcon, ClipboardListIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { TagEditMode } from '@/app/store/project';
+import { TagEditMode } from '@/app/store/preferences';
 
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';

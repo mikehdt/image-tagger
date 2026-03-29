@@ -1,7 +1,7 @@
 import { MousePointerClickIcon, PencilIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
-import { TagEditMode } from '@/app/store/project';
+import { TagEditMode } from '@/app/store/preferences';
 
 const options: { mode: TagEditMode; icon: React.ReactNode; label: string }[] = [
   {

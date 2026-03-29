@@ -8,6 +8,7 @@ import { assetsReducer } from './assets';
 import { autoTaggerReducer } from './auto-tagger';
 import { filtersReducer } from './filters';
 import { filterManagerMiddleware } from './middleware/filter-manager';
+import { preferencesReducer } from './preferences';
 import { projectReducer } from './project';
 import { selectionReducer } from './selection';
 import { toastsReducer } from './toasts';
@@ -19,6 +20,7 @@ export const makeStore = () => {
       assets: assetsReducer,
       autoTagger: autoTaggerReducer,
       filters: filtersReducer,
+      preferences: preferencesReducer,
       project: projectReducer,
       selection: selectionReducer,
       toasts: toastsReducer,

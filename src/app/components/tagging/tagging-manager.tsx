@@ -27,11 +27,8 @@ import {
 } from '@/app/store/assets';
 import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  selectTagEditMode,
-  selectTagSortType,
-  TagSortType,
-} from '@/app/store/project';
+import { selectTagEditMode } from '@/app/store/preferences';
+import { selectTagSortType, TagSortType } from '@/app/store/project';
 
 import { TagList } from './tag-list';
 

@@ -7,7 +7,7 @@
  */
 import { memo } from 'react';
 
-import { TagEditMode } from '@/app/store/project';
+import { TagEditMode } from '@/app/store/preferences';
 
 import { InputTag } from './input-tag';
 import { Tag } from './tag';

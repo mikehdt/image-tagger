@@ -1,32 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
-export type ThemeMode = 'light' | 'dark' | 'auto';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import {
+  selectTheme,
+  setTheme as setThemeAction,
+  type ThemeMode,
+} from '@/app/store/preferences';
 
-const STORAGE_KEY = 'theme-preference';
+export type { ThemeMode } from '@/app/store/preferences';
 
 /**
  * Hook to manage theme (light/dark/auto) preference.
- * Persists to localStorage and applies class to document.documentElement.
+ * Reads from and writes to the Redux preferences slice (persisted to localStorage).
+ * Applies the appropriate class to document.documentElement for Tailwind dark: support.
  */
 export const useTheme = () => {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-      if (stored && ['light', 'dark', 'auto'].includes(stored)) {
-        return stored;
-      }
-    }
-    return 'auto';
-  });
-
-  // No need for useEffect to initialise from localStorage
+  const theme = useAppSelector(selectTheme);
+  const dispatch = useAppDispatch();
 
   // Apply theme class to document element
   useEffect(() => {
     const root = document.documentElement;
 
     const applyTheme = (mode: ThemeMode, systemPrefersDark: boolean) => {
-      // Remove existing theme classes
       root.classList.remove('light', 'dark');
 
       if (mode === 'light') {
@@ -35,18 +31,15 @@ export const useTheme = () => {
         root.classList.add('dark');
       } else {
         // Auto mode: add dark class if system prefers dark
-        // This ensures Tailwind dark: classes work in auto mode
         if (systemPrefersDark) {
           root.classList.add('dark');
         }
       }
     };
 
-    // Check system preference
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     applyTheme(theme, mediaQuery.matches);
 
-    // Listen for system preference changes (only matters in auto mode)
     const handleChange = (e: MediaQueryListEvent) => {
       if (theme === 'auto') {
         applyTheme('auto', e.matches);
@@ -57,10 +50,12 @@ export const useTheme = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
 
-  const setTheme = useCallback((newTheme: ThemeMode) => {
-    setThemeState(newTheme);
-    localStorage.setItem(STORAGE_KEY, newTheme);
-  }, []);
+  const setTheme = useCallback(
+    (newTheme: ThemeMode) => {
+      dispatch(setThemeAction(newTheme));
+    },
+    [dispatch],
+  );
 
   return { theme, setTheme };
 };

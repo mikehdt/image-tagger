@@ -9,7 +9,6 @@ import { useAppDispatch } from '@/app/store/hooks';
 import { resetProjectState, setProjectInfo } from '@/app/store/project';
 import { clearSelection, clearSelectorCaches } from '@/app/store/selection';
 import { getProjectList } from '@/app/utils/project-actions';
-import { ThemeMode, useTheme } from '@/app/utils/use-theme';
 
 import { useEditProject } from './use-edit-project';
 
@@ -27,8 +26,6 @@ const checkIfUsingDefaultProject = async (): Promise<boolean> => {
   }
 };
 
-const themeOrder: ThemeMode[] = ['light', 'dark', 'auto'];
-
 export const useProjectList = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -36,16 +33,9 @@ export const useProjectList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
-  const { theme, setTheme } = useTheme();
   const { showErrorToast } = useToast();
 
   const editActions = useEditProject(setProjects, { onError: showErrorToast });
-
-  const handleCycleTheme = useCallback(() => {
-    const currentIndex = themeOrder.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themeOrder.length;
-    setTheme(themeOrder[nextIndex]);
-  }, [theme, setTheme]);
 
   const loadProjects = useCallback(async () => {
     try {
@@ -131,7 +121,10 @@ export const useProjectList = () => {
       sessionStorage.setItem('selectedProject', folderName);
       sessionStorage.setItem('selectedProjectTitle', projectTitle);
       if (selectedProject?.thumbnail) {
-        sessionStorage.setItem('selectedProjectThumbnail', selectedProject.thumbnail);
+        sessionStorage.setItem(
+          'selectedProjectThumbnail',
+          selectedProject.thumbnail,
+        );
       } else {
         sessionStorage.removeItem('selectedProjectThumbnail');
       }
@@ -169,8 +162,6 @@ export const useProjectList = () => {
     regularProjects,
     showHidden,
     setShowHidden,
-    theme,
-    handleCycleTheme,
     handleProjectSelect,
     loadProjects,
     ...editActions,

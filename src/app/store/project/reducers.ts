@@ -2,12 +2,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 
 import { toggleDirection } from '../utils';
-import {
-  ProjectState,
-  TagEditMode,
-  TagSortDirection,
-  TagSortType,
-} from './types';
+import { ProjectState, TagSortDirection, TagSortType } from './types';
 
 export const coreReducers = {
   // Set project information
@@ -38,7 +33,6 @@ export const coreReducers = {
     state.config.showCropVisualization = false;
     state.config.tagSortType = TagSortType.SORTABLE;
     state.config.tagSortDirection = TagSortDirection.ASC;
-    state.config.tagEditMode = TagEditMode.BUTTON;
   },
 
   // Toggle crop visualization
@@ -71,11 +65,4 @@ export const coreReducers = {
     );
   },
 
-  // Set tag edit mode
-  setTagEditMode: (
-    state: ProjectState,
-    { payload }: PayloadAction<TagEditMode>,
-  ) => {
-    state.config.tagEditMode = payload;
-  },
 };
