@@ -51,7 +51,10 @@ export const TagActionsMenu = () => {
   useEffect(() => {
     if (!isAutoTaggerInitialised) {
       fetch('/api/auto-tagger/models')
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error(`Failed to fetch models: ${res.status}`);
+          return res.json();
+        })
         .then((data) => {
           dispatch(setModelsAndProviders(data));
         })
