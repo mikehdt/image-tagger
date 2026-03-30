@@ -360,7 +360,7 @@ export const moveAssetsToFolderThunk = createAsyncThunk<
     );
 
     // If collisions, return early — the modal will display the error
-    if (!result.success) return result;
+    if (result.collisions.length > 0) return result;
 
     if (result.moved.length > 0) {
       // Surgical Redux state updates

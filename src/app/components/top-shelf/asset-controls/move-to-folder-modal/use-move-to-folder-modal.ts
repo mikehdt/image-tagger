@@ -55,6 +55,7 @@ export const useMoveToFolderModal = ({
   // Progress and error state
   const [isMoving, setIsMoving] = useState(false);
   const [collisionError, setCollisionError] = useState<string[] | null>(null);
+  const [moveErrors, setMoveErrors] = useState<string[] | null>(null);
 
   // Selectors
   const hasExplicitFilters = useAppSelector(selectHasActiveFilters);
@@ -266,6 +267,7 @@ export const useMoveToFolderModal = ({
       setNewRepeatCount(1);
       setNewLabel('');
       setCollisionError(null);
+      setMoveErrors(null);
       setIsMoving(false);
 
       setApplyToSelectedAssets(hasSelectedAssets);
@@ -276,6 +278,7 @@ export const useMoveToFolderModal = ({
   // Clear collision error when destination changes
   useEffect(() => {
     setCollisionError(null);
+    setMoveErrors(null);
   }, [selectedDestination, newRepeatCount, newLabel]);
 
   const handleSubmit = useCallback(async () => {
@@ -283,6 +286,7 @@ export const useMoveToFolderModal = ({
 
     setIsMoving(true);
     setCollisionError(null);
+    setMoveErrors(null);
 
     try {
       const dest =
@@ -300,9 +304,12 @@ export const useMoveToFolderModal = ({
         }),
       ).unwrap();
 
-      if (!result.success && result.collisions.length > 0) {
+      if (result.collisions.length > 0) {
         setCollisionError(result.collisions);
-      } else if (result.success || result.moved.length > 0) {
+      } else if (result.errors.length > 0) {
+        // Partial failure — some moved, some didn't
+        setMoveErrors(result.errors);
+      } else if (result.moved.length > 0) {
         if (!keepSelection && hasSelectedAssets) {
           dispatch(clearSelection());
         }
@@ -341,7 +348,7 @@ export const useMoveToFolderModal = ({
     if (effectiveMoveCount === 0) {
       return `All assets are already in the selected destination.`;
     }
-    return `${count} ${assetWord} from ${sourceFolderCount} ${folderWord} will be moved.`;
+    return `${count} ${assetWord} from ${sourceFolderCount} ${folderWord} will be moved. Empty folders will be deleted.`;
   }, [resolvedAssetIds.length, sourceFolderCount, effectiveMoveCount]);
 
   return {
@@ -378,6 +385,7 @@ export const useMoveToFolderModal = ({
     isMoving,
     isIoBlocked,
     collisionError,
+    moveErrors,
     effectiveMoveCount,
 
     // Validation

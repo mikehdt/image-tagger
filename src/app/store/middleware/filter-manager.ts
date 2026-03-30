@@ -14,7 +14,12 @@ import {
   selectHasModifiedAssets,
   selectHasTaglessAssets,
 } from '../assets';
-import { loadAllAssets, saveAllAssets, saveAsset } from '../assets/actions';
+import {
+  loadAllAssets,
+  moveAssetsToFolderThunk,
+  saveAllAssets,
+  saveAsset,
+} from '../assets/actions';
 import { IoState } from '../assets/types';
 import {
   addFilenamePattern,
@@ -26,6 +31,7 @@ import {
   clearTagFilters,
   FilterMode,
   removeFilenamePattern,
+  removeSubfolderFilters,
   selectHasActiveFilters,
   setTagFilterMode,
   toggleBucketFilter,
@@ -55,15 +61,17 @@ const extractExistingValues = (state: RootState) => {
   const sizes = new Set<string>();
   const buckets = new Set<string>();
   const extensions = new Set<string>();
+  const subfolders = new Set<string>();
 
   state.assets.images.forEach((img) => {
     img.tagList.forEach((tag) => tags.add(tag));
     sizes.add(composeDimensions(img.dimensions));
     buckets.add(`${img.bucket.width}×${img.bucket.height}`);
     extensions.add(img.fileExtension);
+    if (img.subfolder) subfolders.add(img.subfolder);
   });
 
-  return { tags, sizes, buckets, extensions };
+  return { tags, sizes, buckets, extensions, subfolders };
 };
 
 /**
@@ -145,6 +153,16 @@ const cleanupInvalidFilters = (
       toggleExtensionFilter,
       dispatch,
     ) || hasChanges;
+
+  // Clean up subfolder filters referencing folders that no longer exist
+  const invalidSubfolders = findInvalidFilters(
+    filters.filterSubfolders,
+    existing.subfolders,
+  );
+  if (invalidSubfolders.length > 0) {
+    dispatch(removeSubfolderFilters(invalidSubfolders));
+    hasChanges = true;
+  }
 
   return hasChanges;
 };
@@ -242,12 +260,13 @@ const shouldResetFilterMode = (state: RootState): boolean => {
 
 export const filterManagerMiddleware = createListenerMiddleware();
 
-// Listen to save/load completion and clean up invalid filters
+// Listen to save/load/move completion and clean up invalid filters
 filterManagerMiddleware.startListening({
   matcher: isAnyOf(
     saveAllAssets.fulfilled,
     saveAsset.fulfilled,
     loadAllAssets.fulfilled,
+    moveAssetsToFolderThunk.fulfilled,
   ),
   effect: async (_action, listenerApi) => {
     const state = listenerApi.getState() as RootState;

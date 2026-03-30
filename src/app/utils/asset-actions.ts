@@ -453,6 +453,31 @@ export type MoveAssetsResult = {
 };
 
 /**
+ * Rename a file, retrying on EBUSY/EPERM errors (common on Windows when
+ * another process briefly locks the file, e.g. thumbnail caching).
+ */
+const renameWithRetry = async (
+  oldPath: string,
+  newPath: string,
+  retries = 5,
+  delayMs = 200,
+): Promise<void> => {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await fs.promises.rename(oldPath, newPath);
+      return;
+    } catch (err: unknown) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if ((code === 'EBUSY' || code === 'EPERM') && attempt < retries) {
+        await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+};
+
+/**
  * Extract the basename (filename without subfolder prefix) from a fileId.
  * "2_sonic/image" → "image", "image" → "image"
  */
@@ -573,13 +598,15 @@ export const moveAssetsToFolder = async (
         dir,
         `${plan.newFileId}.${plan.asset.fileExtension}`,
       );
-      fs.renameSync(oldImagePath, newImagePath);
+      await renameWithRetry(oldImagePath, newImagePath);
 
-      // Move tag file if it exists
-      const oldTagPath = path.join(dir, `${plan.oldFileId}.txt`);
-      const newTagPath = path.join(dir, `${plan.newFileId}.txt`);
-      if (fs.existsSync(oldTagPath)) {
-        fs.renameSync(oldTagPath, newTagPath);
+      // Move associated sidecar files (.txt tags, .npz cache) if they exist
+      for (const ext of ['.txt', '.npz']) {
+        const oldPath = path.join(dir, `${plan.oldFileId}${ext}`);
+        const newPath = path.join(dir, `${plan.newFileId}${ext}`);
+        if (fs.existsSync(oldPath)) {
+          await renameWithRetry(oldPath, newPath);
+        }
       }
 
       moved.push({
