@@ -15,6 +15,7 @@ import {
   selectProjectFolderName,
   setProjectInfo,
 } from '../store/project';
+import { getProjectInfo } from '../utils/project-actions';
 import { useTheme } from '../utils/use-theme';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
@@ -44,19 +45,36 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const isTagging = pathname.startsWith('/tagging');
 
   // Extract project from URL and set it in Redux — this runs in AppProvider
-  // so it's not blocked by the InitialLoad gate below
+  // so it's not blocked by the InitialLoad gate below.
+  // If navigated from the project list, Redux already has full info (title, thumbnail).
+  // If accessed directly via URL (refresh/bookmark), we fetch the metadata from the server.
   const urlProject = isTagging ? extractProjectFromPath(pathname) : null;
 
   useEffect(() => {
-    if (urlProject && urlProject !== projectFolderName) {
+    if (!urlProject || urlProject === projectFolderName) return;
+
+    // Set folderName immediately so asset loading can start,
+    // but leave name undefined — InitialLoad shows "Loading…" without a name
+    // until the server action resolves the proper title.
+    dispatch(
+      setProjectInfo({
+        name: '',
+        path: urlProject,
+        folderName: urlProject,
+      }),
+    );
+
+    // Fetch the real title/thumbnail from the server
+    getProjectInfo(urlProject).then((info) => {
       dispatch(
         setProjectInfo({
-          name: urlProject,
+          name: info?.title || urlProject,
           path: urlProject,
           folderName: urlProject,
+          thumbnail: info?.thumbnail,
         }),
       );
-    }
+    });
   }, [urlProject, projectFolderName, dispatch]);
 
   // Load assets when project is set and we're on a tagging page

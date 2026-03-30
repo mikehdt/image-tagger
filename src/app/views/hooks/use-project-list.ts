@@ -6,7 +6,7 @@ import { useToast } from '@/app/components/shared/toast/hooks/use-toast';
 import { resetAssetsState } from '@/app/store/assets';
 import { clearFilters } from '@/app/store/filters';
 import { useAppDispatch } from '@/app/store/hooks';
-import { resetProjectState } from '@/app/store/project';
+import { resetProjectState, setProjectInfo } from '@/app/store/project';
 import { clearSelection, clearSelectorCaches } from '@/app/store/selection';
 import { getProjectList } from '@/app/utils/project-actions';
 
@@ -52,11 +52,24 @@ export const useProjectList = () => {
 
   const handleProjectSelect = useCallback(
     (projectPath: string) => {
-      // Extract folder name from path (e.g., "dev" from "public/assets/dev")
+      const selectedProject = projects.find((p) => p.path === projectPath);
       const folderName = projectPath.split(/[/\\]/).pop() || 'Unknown Project';
+      const projectTitle = selectedProject?.title || folderName;
+
+      // Set full project info in Redux before navigating — AppProvider won't
+      // overwrite this since the folder name will already match
+      dispatch(
+        setProjectInfo({
+          name: projectTitle,
+          path: projectPath,
+          folderName,
+          thumbnail: selectedProject?.thumbnail,
+        }),
+      );
+
       router.push(`/tagging/${encodeURIComponent(folderName)}/1`);
     },
-    [router],
+    [router, dispatch, projects],
   );
 
   // Separate projects into featured and regular, filtering out hidden projects unless showHidden is true

@@ -140,6 +140,25 @@ const readLocalProjectInfo = (projectPath: string): LocalProjectInfo | null => {
 };
 
 /**
+ * Get display info for a single project by folder name.
+ * Used to resolve titles/thumbnails when navigating directly via URL.
+ */
+export const getProjectInfo = async (
+  folderName: string,
+): Promise<{ title: string; thumbnail?: string } | null> => {
+  try {
+    const centralInfo = readCentralizedProjectInfo(folderName);
+    const thumbnail = findThumbnailFile(folderName);
+    return {
+      title: centralInfo?.title || folderName,
+      thumbnail: thumbnail || undefined,
+    };
+  } catch {
+    return null;
+  }
+};
+
+/**
  * Get a list of project folders from the projects directory
  * Each project folder should contain image files and associated txt files
  * Private projects are never included, hidden projects are included but filtered client-side
