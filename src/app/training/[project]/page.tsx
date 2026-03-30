@@ -1,29 +1,44 @@
 'use client';
 
 import { ArrowLeftCircleIcon, CpuIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-import { Button } from '../components/shared/button';
-import { useAppSelector } from '../store/hooks';
-import { selectProjectName } from '../store/project';
+import { Button } from '../../components/shared/button';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  selectProjectFolderName,
+  selectProjectName,
+  setProjectInfo,
+} from '../../store/project';
 
 export default function TrainingPage() {
+  const params = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const project = decodeURIComponent(params.project as string);
   const projectName = useAppSelector(selectProjectName);
-  const [hasProject, setHasProject] = useState(false);
+  const loadedProject = useAppSelector(selectProjectFolderName);
 
   useEffect(() => {
-    // Check if a project is selected
-    const selectedProject = sessionStorage.getItem('selectedProject');
-    if (!selectedProject) {
+    if (!project) {
       router.replace('/');
       return;
     }
-    setHasProject(true);
-  }, [router]);
 
-  if (!hasProject) return null;
+    if (loadedProject !== project) {
+      dispatch(
+        setProjectInfo({
+          name: project,
+          path: project,
+          folderName: project,
+        }),
+      );
+    }
+  }, [project, loadedProject, dispatch, router]);
+
+  if (!project) return null;
 
   return (
     <div className="mx-auto flex w-full max-w-160 min-w-80 flex-col items-center px-4 py-20 text-center">

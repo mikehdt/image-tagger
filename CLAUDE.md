@@ -20,22 +20,32 @@ This is a Next.js 16 application for managing and tagging image collections with
 ### State Management
 
 - Redux Toolkit with typed hooks
-- Store slices: assets, filters, project, selection, toasts
+- Store slices: assets, autoTagger, filters, preferences, project, selection, toasts, training
 - Custom middleware: filter-manager for coordinating filter state changes
 - Async operations handled via AppThunk type
+
+### Routing
+
+- `/` — Project list (always shown, no single-project mode)
+- `/tagging/[project]/[page]` — Image tagging view with pagination
+- `/training/[project]` — Training configuration and monitoring (in development)
+
+Project context is derived from the URL slug, not sessionStorage. The `[project]` segment is the folder name within the configured `projectsFolder`.
 
 ### Core Features
 
 - Image gallery with pagination
 - Tag management (add/edit/reorder tags via drag-and-drop using @dnd-kit)
 - Advanced filtering (tags, dimensions, filetype)
-- Project-based organization
+- Project-based organisation (multi-project only, no single-project/default mode)
 - Tag persistence to associated text files
+- LoRA training system (in development) — Python sidecar with ai-toolkit and Kohya backends
 
 ### Key Directories
 
 - `src/app/store/` - Redux store configuration and slices
-- `src/app/components/` - React components organized by feature area
+- `src/app/components/` - React components organised by feature area
+- `src/app/services/` - Service layers (auto-tagger, training)
 - `src/app/utils/` - Utility functions and helpers
 - `src/app/api/` - Next.js API routes for serving images and project data
 - `public/projects/` - Static project data and thumbnails
@@ -50,13 +60,13 @@ This is a Next.js 16 application for managing and tagging image collections with
 ### API Structure
 
 - `/api/images/[...path]` - Dynamic image serving
-- `/api/projects/[projectName]` - Project data endpoints
-- `/api/config` - Configuration data
+- `/api/auto-tagger/*` - Auto-tagger model management, batch tagging, downloads
+- `/api/config` - Configuration data (projectsFolder, pythonPath, trainingBackends)
 
 ### Data Flow
 
 - Images and tags loaded via API routes
-- Redux manages application state
+- Project context derived from URL params (`[project]` slug), stored in Redux
 - Components use typed selectors and actions
 - Filter changes trigger middleware that coordinates related state updates
 

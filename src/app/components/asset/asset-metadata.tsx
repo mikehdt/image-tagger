@@ -22,6 +22,7 @@ import {
   toggleSubfolderFilter,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectProjectFolderName } from '@/app/store/project';
 import { parseSubfolder } from '@/app/utils/subfolder-utils';
 import { highlightPatterns } from '@/app/utils/text-highlight';
 
@@ -79,6 +80,7 @@ const AssetMetadataComponent = ({
   const filterExtensions = useAppSelector(selectFilterExtensions);
   const filterSubfolders = useAppSelector(selectFilterSubfolders);
   const saveProgress = useAppSelector(selectSaveProgress);
+  const projectFolderName = useAppSelector(selectProjectFolderName);
 
   // Use optimised selector - only re-renders when THIS asset's modified state changes
   const hasModifiedTags =
@@ -152,14 +154,13 @@ const AssetMetadataComponent = ({
     if (isTagEditing || isSaving) {
       return;
     }
-    const selectedProject = sessionStorage.getItem('selectedProject');
     dispatch(
       saveAsset({
         fileId: assetId,
-        projectPath: selectedProject || undefined,
+        projectPath: projectFolderName || undefined,
       }),
     );
-  }, [dispatch, assetId, isSaving, isTagEditing]);
+  }, [dispatch, assetId, isSaving, isTagEditing, projectFolderName]);
 
   return (
     <div

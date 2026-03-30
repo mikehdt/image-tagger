@@ -1,5 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { PaginationSize, selectPaginationSize } from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
@@ -13,8 +14,14 @@ type PaginationProps = {
 export const Pagination = ({
   currentPage,
   totalItems,
-  basePath = '/tagging',
+  basePath,
 }: PaginationProps) => {
+  const params = useParams();
+  const resolvedBasePath =
+    basePath ??
+    (params.project
+      ? `/tagging/${encodeURIComponent(params.project as string)}`
+      : '/tagging');
   const paginationSize = useAppSelector(selectPaginationSize);
 
   // Calculate total pages
@@ -30,7 +37,7 @@ export const Pagination = ({
     pages.push(
       <Link
         key="prev"
-        href={`${basePath}/${prevPage}`}
+        href={`${resolvedBasePath}/${prevPage}`}
         prefetch={true}
         scroll={true}
         className={`mr-1 flex items-center rounded p-1 ${
@@ -58,7 +65,7 @@ export const Pagination = ({
       pages.push(
         <Link
           key="1"
-          href={`${basePath}/1`}
+          href={`${resolvedBasePath}/1`}
           prefetch={true}
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
@@ -86,7 +93,7 @@ export const Pagination = ({
         pages.push(
           <Link
             key="2"
-            href={`${basePath}/2`}
+            href={`${resolvedBasePath}/2`}
             prefetch={true}
             scroll={true}
             className={`mx-1 rounded px-2 py-0.5 ${
@@ -106,7 +113,7 @@ export const Pagination = ({
       pages.push(
         <Link
           key={i}
-          href={`${basePath}/${i}`}
+          href={`${resolvedBasePath}/${i}`}
           prefetch={true}
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
@@ -137,7 +144,7 @@ export const Pagination = ({
         pages.push(
           <Link
             key={totalPages - 1}
-            href={`${basePath}/${totalPages - 1}`}
+            href={`${resolvedBasePath}/${totalPages - 1}`}
             prefetch={true}
             scroll={true}
             className={`mx-1 rounded px-2 py-0.5 ${
@@ -154,7 +161,7 @@ export const Pagination = ({
       pages.push(
         <Link
           key={totalPages}
-          href={`${basePath}/${totalPages}`}
+          href={`${resolvedBasePath}/${totalPages}`}
           prefetch={true}
           scroll={true}
           className={`mx-1 rounded px-2 py-0.5 ${
@@ -173,7 +180,7 @@ export const Pagination = ({
     pages.push(
       <Link
         key="next"
-        href={`${basePath}/${nextPage}`}
+        href={`${resolvedBasePath}/${nextPage}`}
         prefetch={true}
         scroll={true}
         className={`ml-1 flex items-center rounded p-1 ${

@@ -1,4 +1,4 @@
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import {
@@ -17,8 +17,14 @@ type PaginationControlsProps = {
 export const PaginationControls = ({
   currentPage,
   totalItems,
-  basePath = '/tagging',
+  basePath,
 }: PaginationControlsProps) => {
+  const params = useParams();
+  const resolvedBasePath =
+    basePath ??
+    (params.project
+      ? `/tagging/${encodeURIComponent(params.project as string)}`
+      : '/tagging');
   const router = useRouter();
   const dispatch = useAppDispatch();
   const paginationSize = useAppSelector(selectPaginationSize);
@@ -58,7 +64,7 @@ export const PaginationControls = ({
     requestAnimationFrame(() => {
       // If we're switching to "All", always go to page 1
       if (newSize === PaginationSize.ALL) {
-        router.push(`${basePath}/1`);
+        router.push(`${resolvedBasePath}/1`);
         return;
       }
 
@@ -67,7 +73,7 @@ export const PaginationControls = ({
 
       // If current page is beyond the new range, redirect to page 1
       if (currentPage > newTotalPages) {
-        router.push(`${basePath}/1`);
+        router.push(`${resolvedBasePath}/1`);
       }
     });
   };

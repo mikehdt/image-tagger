@@ -16,17 +16,6 @@ export const getImageUrl = (fileName: string, projectName?: string): string => {
   return `/api/images/${encodedFileName}?projectName=${encodedProjectName}`;
 };
 
-/**
- * Get the current project name from sessionStorage (client-side only)
- * Returns just the project folder name, not the full path
- */
-export const getCurrentProjectName = (): string | null => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  return sessionStorage.getItem('selectedProject');
-};
 
 /**
  * Kohya SS model configurations for different Stable Diffusion versions

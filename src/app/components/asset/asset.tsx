@@ -4,10 +4,13 @@ import { memo, MouseEvent, useCallback, useState } from 'react';
 
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectShowCropVisualization } from '@/app/store/project';
+import {
+  selectProjectFolderName,
+  selectShowCropVisualization,
+} from '@/app/store/project';
 import { handleAssetClick, selectAssetIsSelected } from '@/app/store/selection';
 import { composeDimensions, getAspectRatio } from '@/app/utils/helpers';
-import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
+import { getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
@@ -84,7 +87,7 @@ const AssetComponent = ({
   const dimensionsComposed = composeDimensions(dimensions);
 
   // Get the image URL for the current project with cache busting
-  const projectName = getCurrentProjectName();
+  const projectName = useAppSelector(selectProjectFolderName);
   const fileName = `${assetId}.${fileExtension}`;
   const baseUrl = getImageUrl(fileName, projectName || undefined);
   const imageUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}t=${lastModified}`;

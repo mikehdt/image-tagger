@@ -1,5 +1,5 @@
 import { ListOrderedIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useMemo, useRef } from 'react';
 
 import { Button } from '@/app/components/shared/button';
@@ -27,6 +27,7 @@ const CategoryNavigationComponent = ({
   currentPage,
 }: CategoryNavigationProps) => {
   const router = useRouter();
+  const params = useParams();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { openPopup, closePopup, getPopupState } = usePopup();
 
@@ -75,6 +76,10 @@ const CategoryNavigationComponent = ({
     closePopup(popupId);
   }, [closePopup, popupId]);
 
+  const basePath = params.project
+    ? `/tagging/${encodeURIComponent(params.project as string)}`
+    : '/tagging';
+
   const handleCategoryClick = useCallback(
     (page: number, anchorId: string) => {
       handleClose();
@@ -84,10 +89,10 @@ const CategoryNavigationComponent = ({
         scrollToAnchor(anchorId);
       } else {
         // Different page - navigate and then scroll
-        router.push(`/tagging/${page}#${anchorId}`);
+        router.push(`${basePath}/${page}#${anchorId}`);
       }
     },
-    [currentPage, handleClose, router],
+    [currentPage, handleClose, router, basePath],
   );
 
   return (

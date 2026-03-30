@@ -6,8 +6,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { copyTagsToAssets, selectTagCounts } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectProjectFolderName } from '@/app/store/project';
 import { selectSelectedAssetsData } from '@/app/store/selection/combinedSelectors';
-import { getCurrentProjectName, getImageUrl } from '@/app/utils/image-utils';
+import { getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../../shared/button';
 import { Modal } from '../../shared/modal';
@@ -155,7 +156,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
   }, [dispatch, selectedTags, recipientAssets, addToStart, onClose]);
 
   // Get project name for image URLs
-  const projectName = useMemo(() => getCurrentProjectName(), []);
+  const projectName = useAppSelector(selectProjectFolderName);
 
   // Determine if form is valid
   const isFormValid = selectedTags.size > 0 && recipientAssets.length > 0;

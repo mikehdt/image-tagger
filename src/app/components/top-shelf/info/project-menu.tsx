@@ -4,7 +4,6 @@ import {
   CalculatorIcon,
   ChevronDownIcon,
   RefreshCwIcon,
-  SparklesIcon,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -12,7 +11,6 @@ import { memo, useCallback, useId, useRef, useState } from 'react';
 
 import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
-import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectTagEditMode,
@@ -22,25 +20,15 @@ import {
   TagEditMode,
   type ThemeMode,
 } from '@/app/store/preferences';
-import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
+import {
+  selectProjectFolderName,
+  selectProjectName,
+  selectProjectThumbnail,
+} from '@/app/store/project';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 import { MenuEditModeSwitcher } from './menu-edit-mode-switcher';
 import { MenuThemeSwitcher } from './menu-theme-switcher';
-
-// Inline configuration check function to avoid import issues
-const checkIfUsingDefaultProject = async (): Promise<boolean> => {
-  try {
-    const response = await fetch('/api/config');
-    if (!response.ok) return true;
-    const config = await response.json();
-    const projectsFolder = config.projectsFolder || 'public/assets';
-    return projectsFolder === 'public/assets';
-  } catch (error) {
-    console.warn('Failed to check project config:', error);
-    return true;
-  }
-};
 
 type MenuItemProps = {
   icon: React.ReactNode;
@@ -73,28 +61,18 @@ const ProjectMenuComponent = () => {
   const popupId = useId();
 
   const projectName = useAppSelector(selectProjectName);
+  const projectFolderName = useAppSelector(selectProjectFolderName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
   const ioState = useAppSelector(selectIoState);
 
-  // Get thumbnail version from session storage for cache-busting
-  const thumbnailVersion =
-    typeof window !== 'undefined'
-      ? sessionStorage.getItem('selectedProjectThumbnailVersion')
-      : null;
   const theme = useAppSelector(selectTheme);
   const tagEditMode = useAppSelector(selectTagEditMode);
 
-  // Show auto-tagger in project menu only in single-project (default) mode,
-  // since multi-project mode has it on the project list settings instead
-  const isSingleProjectMode =
-    typeof window !== 'undefined' &&
-    sessionStorage.getItem('configMode') === 'default';
-
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
-  // Build thumbnail src with cache-busting version
+  // Build thumbnail src
   const thumbnailSrc = projectThumbnail
-    ? `/projects/${encodeURIComponent(projectThumbnail)}${thumbnailVersion ? `?v=${thumbnailVersion}` : ''}`
+    ? `/projects/${encodeURIComponent(projectThumbnail)}`
     : null;
 
   const isOpen = getPopupState(popupId).isOpen;
@@ -114,106 +92,22 @@ const ProjectMenuComponent = () => {
     }
   }, [isOpen, closePopup, openPopup, popupId]);
 
-  const handleBackToProjects = useCallback(async () => {
+  const handleBackToProjects = useCallback(() => {
     closePopup(popupId);
+    router.push('/');
+  }, [closePopup, popupId, router]);
 
-    try {
-      const isDefault = await checkIfUsingDefaultProject();
-      const storedConfigMode = sessionStorage.getItem('configMode');
-      const currentConfigMode = isDefault ? 'default' : 'custom';
-
-      if (storedConfigMode && storedConfigMode !== currentConfigMode) {
-        sessionStorage.removeItem('selectedProject');
-        sessionStorage.removeItem('selectedProjectTitle');
-        sessionStorage.removeItem('selectedProjectThumbnail');
-        sessionStorage.removeItem('selectedProjectThumbnailVersion');
-        sessionStorage.removeItem('configMode');
-        router.push('/');
-        return;
-      }
-
-      if (isDefault) {
-        const selectedProject = sessionStorage.getItem('selectedProject');
-        if (selectedProject) {
-          sessionStorage.removeItem('selectedProject');
-          sessionStorage.removeItem('selectedProjectTitle');
-          sessionStorage.removeItem('selectedProjectThumbnail');
-          sessionStorage.setItem('configMode', 'default');
-
-          dispatch(
-            loadAllAssets({
-              maintainIoState: false,
-              projectPath: undefined,
-            }),
-          );
-        }
-      } else {
-        router.push('/');
-      }
-    } catch (error) {
-      console.warn(
-        'Failed to check project config, navigating to home:',
-        error,
+  const handleRefresh = useCallback(() => {
+    closePopup(popupId);
+    if (projectFolderName) {
+      dispatch(
+        loadAllAssets({
+          maintainIoState: false,
+          projectPath: projectFolderName,
+        }),
       );
-      router.push('/');
     }
-  }, [closePopup, popupId, dispatch, router]);
-
-  const handleRefresh = useCallback(async () => {
-    closePopup(popupId);
-
-    try {
-      const isDefault = await checkIfUsingDefaultProject();
-      const storedConfigMode = sessionStorage.getItem('configMode');
-      const currentConfigMode = isDefault ? 'default' : 'custom';
-
-      if (storedConfigMode && storedConfigMode !== currentConfigMode) {
-        sessionStorage.removeItem('selectedProject');
-        sessionStorage.removeItem('selectedProjectTitle');
-        sessionStorage.removeItem('selectedProjectThumbnail');
-        sessionStorage.removeItem('selectedProjectThumbnailVersion');
-        sessionStorage.removeItem('configMode');
-        router.push('/');
-        return;
-      }
-
-      if (isDefault) {
-        sessionStorage.setItem('configMode', 'default');
-        dispatch(
-          loadAllAssets({
-            maintainIoState: false,
-            projectPath: undefined,
-          }),
-        );
-      } else {
-        const selectedProject = sessionStorage.getItem('selectedProject');
-        if (selectedProject) {
-          sessionStorage.setItem('configMode', 'custom');
-          dispatch(
-            loadAllAssets({
-              maintainIoState: false,
-              projectPath: selectedProject,
-            }),
-          );
-        } else {
-          router.push('/');
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to check project config during refresh:', error);
-      const selectedProject = sessionStorage.getItem('selectedProject');
-      if (selectedProject) {
-        dispatch(
-          loadAllAssets({
-            maintainIoState: false,
-            projectPath: selectedProject,
-          }),
-        );
-      } else {
-        router.push('/');
-      }
-    }
-  }, [closePopup, popupId, dispatch, router]);
+  }, [closePopup, popupId, dispatch, projectFolderName]);
 
   const handleOpenBucketModal = useCallback(() => {
     closePopup(popupId);
@@ -223,11 +117,6 @@ const ProjectMenuComponent = () => {
   const handleCloseBucketModal = useCallback(() => {
     setIsBucketModalOpen(false);
   }, []);
-
-  const handleOpenAutoTaggerSetup = useCallback(() => {
-    closePopup(popupId);
-    dispatch(openSetupModal());
-  }, [closePopup, popupId, dispatch]);
 
   const handleSetTheme = useCallback(
     (mode: ThemeMode) => {
@@ -295,13 +184,6 @@ const ProjectMenuComponent = () => {
             label="Bucket Visualisation Tool"
             onClick={handleOpenBucketModal}
           />
-          {isSingleProjectMode && (
-            <MenuItem
-              icon={<SparklesIcon className="h-5 w-5" />}
-              label="Auto-Tagger Models"
-              onClick={handleOpenAutoTaggerSetup}
-            />
-          )}
 
           <MenuEditModeSwitcher
             editMode={tagEditMode}

@@ -12,15 +12,9 @@ export const InitialLoad = () => {
   const projectName = useAppSelector(selectProjectName);
   const projectThumbnail = useAppSelector(selectProjectThumbnail);
 
-  // Get thumbnail version from session storage for cache-busting
-  const thumbnailVersion =
-    typeof window !== 'undefined'
-      ? sessionStorage.getItem('selectedProjectThumbnailVersion')
-      : null;
-
-  // Build thumbnail src with cache-busting version
+  // Build thumbnail src
   const thumbnailSrc = projectThumbnail
-    ? `/projects/${encodeURIComponent(projectThumbnail)}${thumbnailVersion ? `?v=${thumbnailVersion}` : ''}`
+    ? `/projects/${encodeURIComponent(projectThumbnail)}`
     : null;
 
   // Calculate progress percentage safely

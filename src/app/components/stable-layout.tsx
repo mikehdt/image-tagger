@@ -13,10 +13,13 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
+
+  const project = params.project as string | undefined;
   const currentPage = parseInt(params.page as string, 10) || 1;
 
   // Only show shelves on tagging pages
   const showShelves = pathname.startsWith('/tagging');
+  const basePath = project ? `/tagging/${encodeURIComponent(project)}` : '/tagging';
 
   const paginationSize = useAppSelector(selectPaginationSize);
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
@@ -30,16 +33,20 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   // Effect to redirect if current page is out of bounds after filter change
   useEffect(() => {
     if (showShelves && currentPage > totalPages) {
-      router.push('/tagging/1');
+      router.push(`${basePath}/1`);
     }
-  }, [showShelves, currentPage, totalPages, router]);
+  }, [showShelves, currentPage, totalPages, router, basePath]);
 
   return (
     <main className="relative mx-auto min-h-screen max-w-400 px-4 pt-24 pb-16">
       {showShelves && <TopShelf currentPage={currentPage} />}
       {children}
       {showShelves && (
-        <BottomShelf currentPage={currentPage} totalPages={totalPages} />
+        <BottomShelf
+          currentPage={currentPage}
+          totalPages={totalPages}
+          basePath={basePath}
+        />
       )}
     </main>
   );

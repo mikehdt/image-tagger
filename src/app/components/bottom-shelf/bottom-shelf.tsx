@@ -24,9 +24,10 @@ import { LoadingStatus } from './loading-status';
 type BottomShelfProps = {
   currentPage?: number;
   totalPages?: number;
+  basePath?: string;
 };
 
-export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
+export const BottomShelf = ({ currentPage = 1, basePath }: BottomShelfProps) => {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
 
@@ -112,12 +113,13 @@ export const BottomShelf = ({ currentPage = 1 }: BottomShelfProps) => {
             <PaginationControls
               currentPage={currentPage}
               totalItems={filteredCount}
+              basePath={basePath}
             />
           )}
         </div>
 
         <div className="flex w-2/4 items-center justify-center">
-          <Pagination currentPage={currentPage} totalItems={filteredCount} />
+          <Pagination currentPage={currentPage} totalItems={filteredCount} basePath={basePath} />
         </div>
 
         <div className="flex w-1/4 items-center justify-end gap-2 text-sm">

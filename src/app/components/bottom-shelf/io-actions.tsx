@@ -6,6 +6,7 @@ import {
   selectHasModifiedAssets,
 } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectProjectFolderName } from '@/app/store/project';
 
 import { Button } from '../shared/button';
 
@@ -13,10 +14,10 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
   const dispatch = useAppDispatch();
 
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const projectFolderName = useAppSelector(selectProjectFolderName);
 
   const saveAllChanges = () => {
-    const selectedProject = sessionStorage.getItem('selectedProject');
-    dispatch(saveAllAssets({ projectPath: selectedProject || undefined }));
+    dispatch(saveAllAssets({ projectPath: projectFolderName || undefined }));
   };
   const cancelAllChanges = () => dispatch(resetAllModifiedTags());
 
