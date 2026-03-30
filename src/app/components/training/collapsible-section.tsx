@@ -32,9 +32,16 @@ const CollapsibleSectionComponent = ({
 
   return (
     <div className="rounded-lg border border-(--border-subtle) bg-(--surface)/50">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleToggle();
+          }
+        }}
         className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left"
       >
         <div className="flex items-center gap-2">
@@ -64,7 +71,7 @@ const CollapsibleSectionComponent = ({
             }`}
           />
         </div>
-      </button>
+      </div>
 
       {isExpanded && (
         <div className="border-t border-(--border-subtle) px-4 py-3">
