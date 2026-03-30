@@ -48,7 +48,7 @@ Project context is derived from the URL slug, not sessionStorage. The `[project]
 - `src/app/services/` - Service layers (auto-tagger, training)
 - `src/app/utils/` - Utility functions and helpers
 - `src/app/api/` - Next.js API routes for serving images and project data
-- `public/projects/` - Static project data and thumbnails
+- `public/tagging-projects/` - Tagging project metadata and thumbnails
 
 ### Component Architecture
 

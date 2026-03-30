@@ -25,4 +25,4 @@ If need be, you can hide folders with the `_project.json` file
 }
 ```
 
-This is the only option available for individual folder project configuration. More broad configuration is available for projects in the `public/projects` folder.
+This is the only option available for individual folder project configuration. More broad configuration is available for projects in the `public/tagging-projects` folder.

@@ -24,7 +24,7 @@ const ProjectIconComponent = ({
 
   // Build thumbnail src with cache-busting version
   const thumbnailSrc = project.thumbnail
-    ? `/projects/${project.thumbnail}${project.thumbnailVersion ? `?v=${project.thumbnailVersion}` : ''}`
+    ? `/tagging-projects/${project.thumbnail}${project.thumbnailVersion ? `?v=${project.thumbnailVersion}` : ''}`
     : null;
 
   const handleStarClick = (e: React.MouseEvent) => {

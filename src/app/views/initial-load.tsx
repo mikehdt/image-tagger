@@ -14,7 +14,7 @@ export const InitialLoad = () => {
 
   // Build thumbnail src
   const thumbnailSrc = projectThumbnail
-    ? `/projects/${encodeURIComponent(projectThumbnail)}`
+    ? `/tagging-projects/${encodeURIComponent(projectThumbnail)}`
     : null;
 
   // Calculate progress percentage safely

@@ -72,7 +72,7 @@ const ProjectMenuComponent = () => {
 
   // Build thumbnail src
   const thumbnailSrc = projectThumbnail
-    ? `/projects/${encodeURIComponent(projectThumbnail)}`
+    ? `/tagging-projects/${encodeURIComponent(projectThumbnail)}`
     : null;
 
   const isOpen = getPopupState(popupId).isOpen;

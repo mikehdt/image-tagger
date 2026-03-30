@@ -62,11 +62,11 @@ type Project = {
 
 /**
  * Find thumbnail file for a project based on project name
- * Looks for [project-name].[ext] in /public/projects/ folder
+ * Looks for [project-name].[ext] in /public/tagging-projects/ folder
  */
 const findThumbnailFile = (projectName: string): string | undefined => {
   try {
-    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const projectsDir = path.join(process.cwd(), 'public', 'tagging-projects');
     const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
     for (const ext of supportedExtensions) {
@@ -84,7 +84,7 @@ const findThumbnailFile = (projectName: string): string | undefined => {
 };
 
 /**
- * Read centralized project info from /public/projects/[project-name].json
+ * Read centralized project info from /public/tagging-projects/[project-name].json
  */
 const readCentralizedProjectInfo = (
   projectName: string,
@@ -93,7 +93,7 @@ const readCentralizedProjectInfo = (
     const centralConfigPath = path.join(
       process.cwd(),
       'public',
-      'projects',
+      'tagging-projects',
       `${projectName}.json`,
     );
 
@@ -265,7 +265,7 @@ export const getProjectList = async (): Promise<Project[]> => {
 
 /**
  * Update a project's configuration
- * Updates the centralized config file in /public/projects/[project-name].json
+ * Updates the centralized config file in /public/tagging-projects/[project-name].json
  */
 export const updateProject = async (
   projectName: string,
@@ -292,7 +292,7 @@ export const updateProject = async (
       }
     }
 
-    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const projectsDir = path.join(process.cwd(), 'public', 'tagging-projects');
     const configPath = path.join(projectsDir, `${projectName}.json`);
 
     // Ensure the projects directory exists
@@ -358,7 +358,7 @@ export const createProjectThumbnail = async (
   imageData: ArrayBuffer,
 ): Promise<{ success: boolean; thumbnail: string; thumbnailVersion: number }> => {
   try {
-    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const projectsDir = path.join(process.cwd(), 'public', 'tagging-projects');
 
     // Ensure the projects directory exists
     if (!fs.existsSync(projectsDir)) {
@@ -416,7 +416,7 @@ export const removeProjectThumbnail = async (
   projectName: string,
 ): Promise<{ success: boolean }> => {
   try {
-    const projectsDir = path.join(process.cwd(), 'public', 'projects');
+    const projectsDir = path.join(process.cwd(), 'public', 'tagging-projects');
 
     // Remove any existing thumbnail files for this project
     const supportedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
