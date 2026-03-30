@@ -1,5 +1,6 @@
 """Training job lifecycle management."""
 
+import asyncio
 import json
 import uuid
 from datetime import datetime, timezone
@@ -13,6 +14,7 @@ from models import (
     StartJobRequest,
     StartJobResponse,
 )
+from providers.base import TrainingProvider
 from ws_manager import WebSocketManager
 
 
@@ -23,9 +25,15 @@ class JobManager:
         self._jobs_dir = jobs_dir
         self._ws = ws_manager
         self._active_job: Optional[JobState] = None
+        self._training_task: Optional[asyncio.Task] = None
+        self._providers: dict[str, TrainingProvider] = {}
 
         # Try to recover state from a previous run
         self._recover_state()
+
+    def register_provider(self, name: str, provider: TrainingProvider):
+        """Register a training provider (e.g. 'ai-toolkit', 'kohya')."""
+        self._providers[name] = provider
 
     @property
     def active_job_id(self) -> Optional[str]:
@@ -35,14 +43,18 @@ class JobManager:
     def active_job(self) -> Optional[JobState]:
         return self._active_job
 
+    @property
+    def providers(self) -> dict[str, TrainingProvider]:
+        return self._providers
+
     def get_status(self) -> Optional[dict]:
         """Get current job state as a dict, or None if no active job."""
         if self._active_job is None:
             return None
         return self._active_job.model_dump()
 
-    def create_job(self, request: StartJobRequest) -> StartJobResponse:
-        """Create a new training job. Fails if a job is already active."""
+    async def start_job(self, request: StartJobRequest) -> StartJobResponse:
+        """Create and start a training job. Returns immediately; training runs in background."""
         if self._active_job and self._active_job.status in (
             JobStatus.PENDING,
             JobStatus.PREPARING,
@@ -53,9 +65,17 @@ class JobManager:
                 f"(status: {self._active_job.status})"
             )
 
+        # Validate provider
+        provider = self._providers.get(request.provider.value)
+        if provider is None:
+            raise RuntimeError(
+                f"Provider '{request.provider.value}' is not registered. "
+                f"Available: {list(self._providers.keys())}"
+            )
+
+        # Create job state
         job_id = uuid.uuid4().hex[:12]
         now = datetime.now(timezone.utc).isoformat()
-
         progress = JobProgress(job_id=job_id, status=JobStatus.PENDING)
 
         self._active_job = JobState(
@@ -67,11 +87,70 @@ class JobManager:
             started_at=now,
             progress=progress,
         )
-
         self._persist_state()
+
+        # Launch training in the background
+        self._training_task = asyncio.create_task(
+            self._run_training(job_id, request, provider)
+        )
+
         return StartJobResponse(job_id=job_id, status=JobStatus.PENDING)
 
-    async def update_progress(self, progress: JobProgress):
+    async def cancel_job(self) -> bool:
+        """Cancel the active training job."""
+        if self._active_job is None:
+            return False
+
+        provider = self._providers.get(self._active_job.provider.value)
+        if provider:
+            await provider.cancel_training()
+
+        if self._training_task and not self._training_task.done():
+            self._training_task.cancel()
+
+        await self._update_progress(
+            JobProgress(
+                job_id=self._active_job.job_id,
+                status=JobStatus.CANCELLED,
+                current_step=self._active_job.progress.current_step,
+                total_steps=self._active_job.progress.total_steps,
+                error="Cancelled by user",
+            )
+        )
+        return True
+
+    async def _run_training(
+        self,
+        job_id: str,
+        request: StartJobRequest,
+        provider: TrainingProvider,
+    ):
+        """Background task that runs the full training pipeline."""
+        try:
+            # Generate config
+            config_dir = str(self._jobs_dir / job_id)
+            Path(config_dir).mkdir(parents=True, exist_ok=True)
+            config_path = await provider.generate_config(request, config_dir)
+
+            # Stream progress from provider
+            async for progress in provider.start_training(request, config_path):
+                # Override the job_id to match ours (provider may not know it)
+                progress.job_id = job_id
+                await self._update_progress(progress)
+
+        except asyncio.CancelledError:
+            # Job was cancelled — state already updated by cancel_job
+            pass
+        except Exception as e:
+            await self._update_progress(
+                JobProgress(
+                    job_id=job_id,
+                    status=JobStatus.FAILED,
+                    error=str(e),
+                )
+            )
+
+    async def _update_progress(self, progress: JobProgress):
         """Update job progress and broadcast to WebSocket clients."""
         if self._active_job is None:
             return
@@ -142,7 +221,11 @@ class JobManager:
             job = JobState(**data)
 
             # Only recover jobs that were in-progress (not completed/failed)
-            if job.status in (JobStatus.PENDING, JobStatus.PREPARING, JobStatus.TRAINING):
+            if job.status in (
+                JobStatus.PENDING,
+                JobStatus.PREPARING,
+                JobStatus.TRAINING,
+            ):
                 # Mark as failed since the sidecar restarted while it was running
                 job.status = JobStatus.FAILED
                 job.progress.status = JobStatus.FAILED

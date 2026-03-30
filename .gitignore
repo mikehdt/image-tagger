@@ -49,4 +49,4 @@ next-env.d.ts
 # training sidecar
 .training/
 training-sidecar/.venv/
-training-sidecar/__pycache__/
+**/__pycache__/
