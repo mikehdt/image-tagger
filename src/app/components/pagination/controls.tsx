@@ -17,7 +17,7 @@ type PaginationControlsProps = {
 export const PaginationControls = ({
   currentPage,
   totalItems,
-  basePath = '',
+  basePath = '/tagging',
 }: PaginationControlsProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();

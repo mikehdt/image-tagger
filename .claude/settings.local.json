@@ -5,7 +5,23 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm knip:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(curl -s https://raw.githubusercontent.com/ostris/ai-toolkit/main/extensions_built_in/sd_trainer/SDTrainer.py)",
+      "Bash(curl -s https://raw.githubusercontent.com/ostris/ai-toolkit/main/extensions_built_in/sd_trainer/DiffusionTrainer.py)",
+      "Bash(curl -s \"https://api.github.com/repos/ostris/ai-toolkit/contents/jobs/process\")",
+      "Bash(python -c \"import sys,json; [print\\(f''''{x[\"\"type\"\"]:4} {x[\"\"name\"\"]}''''\\) for x in json.load\\(sys.stdin\\)]\")",
+      "Bash(curl -s https://raw.githubusercontent.com/ostris/ai-toolkit/main/jobs/process/BaseSDTrainProcess.py)",
+      "Bash(curl -s \"https://api.github.com/repos/kohya-ss/sd-scripts/contents/\")",
+      "Bash(curl -s https://raw.githubusercontent.com/kohya-ss/sd-scripts/main/requirements.txt)",
+      "Bash(curl -s \"https://api.github.com/repos/kohya-ss/musubi-tuner/contents/\")",
+      "Bash(curl -s https://raw.githubusercontent.com/kohya-ss/sd-scripts/main/flux_train_network.py)",
+      "Bash(curl:*)",
+      "WebFetch(domain:github.com)",
+      "Read(//tmp/musubi-tuner/src/**)",
+      "Read(//tmp/musubi-tuner/**)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebSearch"
     ]
   }
 }

@@ -84,7 +84,7 @@ const CategoryNavigationComponent = ({
         scrollToAnchor(anchorId);
       } else {
         // Different page - navigate and then scroll
-        router.push(`/${page}#${anchorId}`);
+        router.push(`/tagging/${page}#${anchorId}`);
       }
     },
     [currentPage, handleClose, router],

@@ -12,6 +12,7 @@ import { preferencesReducer } from './preferences';
 import { projectReducer } from './project';
 import { selectionReducer } from './selection';
 import { toastsReducer } from './toasts';
+import { trainingReducer } from './training';
 
 export const makeStore = () => {
   return configureStore({
@@ -24,6 +25,7 @@ export const makeStore = () => {
       project: projectReducer,
       selection: selectionReducer,
       toasts: toastsReducer,
+      training: trainingReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(filterManagerMiddleware.middleware),
