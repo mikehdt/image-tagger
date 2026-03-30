@@ -45,3 +45,8 @@ next-env.d.ts
 
 # onnx models
 .auto-tagger/models
+
+# training sidecar
+.training/
+training-sidecar/.venv/
+training-sidecar/__pycache__/
