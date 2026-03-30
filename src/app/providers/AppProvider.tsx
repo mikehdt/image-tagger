@@ -11,11 +11,23 @@ import {
   selectIoState,
 } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectProjectFolderName } from '../store/project';
+import {
+  selectProjectFolderName,
+  setProjectInfo,
+} from '../store/project';
 import { useTheme } from '../utils/use-theme';
 import { Error } from '../views/error';
 import { InitialLoad } from '../views/initial-load';
 import { NoContent } from '../views/no-content';
+
+/**
+ * Extract the project slug from a tagging URL like /tagging/my-project/1
+ */
+function extractProjectFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/tagging\/([^/]+)/);
+  if (!match) return null;
+  return decodeURIComponent(match[1]);
+}
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // Apply theme class to document.documentElement globally
@@ -23,20 +35,34 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const router = useRouter();
   const pathname = usePathname();
-  const initialLoad = useRef<boolean>(true);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
   const dispatch = useAppDispatch();
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
   const projectFolderName = useAppSelector(selectProjectFolderName);
 
-  // Only load assets when we're on a tagging page route
-  const shouldLoadAssets = pathname.startsWith('/tagging');
+  const isTagging = pathname.startsWith('/tagging');
 
-  // Load assets when project changes or on initial tagging page visit
+  // Extract project from URL and set it in Redux — this runs in AppProvider
+  // so it's not blocked by the InitialLoad gate below
+  const urlProject = isTagging ? extractProjectFromPath(pathname) : null;
+
+  useEffect(() => {
+    if (urlProject && urlProject !== projectFolderName) {
+      dispatch(
+        setProjectInfo({
+          name: urlProject,
+          path: urlProject,
+          folderName: urlProject,
+        }),
+      );
+    }
+  }, [urlProject, projectFolderName, dispatch]);
+
+  // Load assets when project is set and we're on a tagging page
   const loadImageAssets = useCallback(
     (_args?: { maintainIoState: boolean }) => {
-      if (shouldLoadAssets && projectFolderName) {
+      if (isTagging && projectFolderName) {
         dispatch(
           loadAllAssets({
             maintainIoState: _args?.maintainIoState ?? false,
@@ -45,28 +71,34 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     },
-    [dispatch, shouldLoadAssets, projectFolderName],
+    [dispatch, isTagging, projectFolderName],
   );
 
+  // Track which project we last loaded so we know when to reload
+  const lastLoadedProject = useRef<string | null>(null);
+
   useEffect(() => {
-    if (initialLoad.current && shouldLoadAssets && projectFolderName) {
-      loadImageAssets();
-      initialLoad.current = false;
-    }
-    // Reset initial load flag when leaving tagging view
-    if (!shouldLoadAssets) {
-      initialLoad.current = true;
+    // Reset when leaving tagging view
+    if (!isTagging) {
+      lastLoadedProject.current = null;
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional state reset on navigation
       setHasCompletedInitialLoad(false);
+      return;
     }
-  }, [loadImageAssets, shouldLoadAssets, projectFolderName, pathname]);
+
+    // Load when we have a project and either haven't loaded yet or the project changed
+    if (projectFolderName && lastLoadedProject.current !== projectFolderName) {
+      lastLoadedProject.current = projectFolderName;
+      loadImageAssets();
+    }
+  }, [loadImageAssets, isTagging, projectFolderName]);
 
   // Redirect to root on I/O error
   useEffect(() => {
-    if (ioState === IoState.ERROR && shouldLoadAssets) {
+    if (ioState === IoState.ERROR && isTagging) {
       router.push('/');
     }
-  }, [ioState, router, shouldLoadAssets]);
+  }, [ioState, router, isTagging]);
 
   // Auto-trigger completion delay when state becomes COMPLETING
   useEffect(() => {
@@ -78,21 +110,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // Track initial load completion and reset flag if imageCount becomes 0 (crash recovery)
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
-    // Intentional state sync with Redux store for load tracking
     if (imageCount === 0) {
-      setHasCompletedInitialLoad(false); // Reset if we somehow lose all images
+      setHasCompletedInitialLoad(false);
     } else if (ioState === IoState.COMPLETE && !hasCompletedInitialLoad) {
-      setHasCompletedInitialLoad(true); // Mark initial load as completed
+      setHasCompletedInitialLoad(true);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [imageCount, ioState, hasCompletedInitialLoad]);
 
   // On non-tagging routes (project list, training), just show children
-  if (!shouldLoadAssets) {
+  if (!isTagging) {
     return children;
   }
 
-  // Only show the loading screen if we're loading AND we don't have any assets yet
+  // Show loading when INITIAL or loading with no assets yet
   if (
     ioState === IoState.INITIAL ||
     (ioState === IoState.LOADING && imageCount === 0) ||
@@ -105,7 +136,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return <Error onReload={loadImageAssets} />;
   }
 
-  // Handle empty state at the provider level instead of in page components
   if (ioState !== IoState.LOADING && imageCount === 0) {
     return <NoContent onReload={loadImageAssets} />;
   }
