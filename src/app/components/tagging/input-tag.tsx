@@ -192,7 +192,7 @@ const InputTagComponent = ({
   const canSubmit = value.trim() !== '' && !isDuplicate && !disabled;
 
   return (
-    <div className="relative mr-2 inline-flex bg-white dark:bg-slate-800">
+    <div className="relative mr-2 inline-flex">
       <input
         ref={inputRef}
         value={value}
@@ -205,12 +205,12 @@ const InputTagComponent = ({
         placeholder={placeholder}
         disabled={disabled}
         tabIndex={disabled ? -1 : 0}
-        className={`${inputWidth} rounded-full border py-1 ps-4 pe-14 transition-all ${borderColor} ${disabled ? 'pointer-events-none opacity-50' : ''} ${isFocused ? `inset-shadow-sm ${shadowColor} ring-2 ring-blue-500` : ''}`}
+        className={`${inputWidth} rounded-full border py-1 ps-4 pe-14 transition-all ${borderColor} ${disabled ? 'pointer-events-none opacity-50' : 'bg-white dark:bg-slate-800'} ${isFocused ? `inset-shadow-sm ${shadowColor} ring-2 ring-blue-500` : ''}`}
       />
 
       {/* Submit button */}
       <span
-        className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full p-0.5 transition-colors ${
+        className={`absolute top-0 right-8 bottom-0 mt-auto mb-auto ml-2 h-5 w-5 rounded-full transition-colors ${
           canSubmit
             ? 'cursor-pointer text-green-600 hover:bg-green-500 hover:text-white dark:text-green-400'
             : 'pointer-events-none text-slate-300 dark:text-slate-600'
@@ -220,9 +220,9 @@ const InputTagComponent = ({
         title={mode === 'add' ? 'Add tag' : 'Save tag'}
       >
         {mode === 'add' ? (
-          <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="h-5 w-5" />
         ) : (
-          <CheckIcon className="h-4 w-4" />
+          <CheckIcon className="h-5 w-5" />
         )}
       </span>
 

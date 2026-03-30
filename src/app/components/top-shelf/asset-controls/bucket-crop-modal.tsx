@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Dropdown } from '@/app/components/shared/dropdown';
+import { FormTitle } from '@/app/components/shared/form-title/form-title';
 import { Modal } from '@/app/components/shared/modal';
 import { calculateKohyaBucket, KOHYA_CONFIGS } from '@/app/utils/image-utils';
 
@@ -311,25 +312,8 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
-          Bucket Crop Visualization
+          Bucket Crop Visualisation
         </h2>
-
-        {/* Calculated bucket info */}
-        <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
-          <h3 className="mb-2 font-medium text-slate-700 dark:text-slate-400">
-            Calculated Bucket
-          </h3>
-          <div className="text-sm text-slate-600 dark:text-slate-300">
-            <p>
-              <span className="font-medium">Dimensions:</span> {bucket.width} ×{' '}
-              {bucket.height}
-            </p>
-            <p>
-              <span className="font-medium">Aspect Ratio:</span>{' '}
-              {bucket.aspectRatio.toFixed(3)}
-            </p>
-          </div>
-        </div>
 
         {/* Visualization box */}
         <div className="flex justify-center">
@@ -382,7 +366,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
 
               {/* Dimension labels */}
               <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-center text-xs whitespace-nowrap text-slate-500">
-                {dimensions.width} × {dimensions.height}
+                {dimensions.width} &times; {dimensions.height}
               </div>
             </div>
           </div>
@@ -391,18 +375,13 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
         {/* Input controls */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label
-                htmlFor="width-input"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-400"
-              >
-                Width
-              </label>
+            <div className="mb-2 flex items-center justify-between px-3">
+              <FormTitle htmlFor="width-input">Width</FormTitle>
               <Checkbox
                 isSelected={widthPriority}
                 onChange={handleWidthPriorityChange}
                 label="Priority"
-                className="text-xs"
+                size="small"
               />
             </div>
             {heightPriority ? (
@@ -416,7 +395,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                   )}
                 </div>
               ) : (
-                <Dropdown<number>
+                <Dropdown
                   openUpward
                   fullWidth
                   size="large"
@@ -440,25 +419,20 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 type="number"
                 value={inputWidth}
                 onChange={handleWidthChange}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-slate-600"
                 min="1"
                 max="4096"
               />
             )}
           </div>
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label
-                htmlFor="height-input"
-                className="block text-sm font-medium text-slate-700 dark:text-slate-400"
-              >
-                Height
-              </label>
+            <div className="mb-2 flex items-center justify-between px-3">
+              <FormTitle htmlFor="height-input">Height</FormTitle>
               <Checkbox
                 isSelected={heightPriority}
                 onChange={handleHeightPriorityChange}
                 label="Priority"
-                className="text-xs"
+                size="small"
               />
             </div>
             {widthPriority ? (
@@ -472,7 +446,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                   )}
                 </div>
               ) : (
-                <Dropdown<number>
+                <Dropdown
                   openUpward
                   fullWidth
                   size="large"
@@ -496,11 +470,27 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 type="number"
                 value={inputHeight}
                 onChange={handleHeightChange}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-slate-600"
                 min="1"
                 max="4096"
               />
             )}
+          </div>
+        </div>
+
+        {/* Calculated bucket info */}
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-950 dark:bg-slate-900">
+          <FormTitle as="span">Calculated Bucket</FormTitle>
+
+          <div className="mt-2 text-sm text-slate-600 tabular-nums dark:text-slate-300">
+            <p>
+              <span className="font-bold">Dimensions:</span> {bucket.width} ×{' '}
+              {bucket.height}
+            </p>
+            <p>
+              <span className="font-bold">Aspect Ratio:</span>{' '}
+              {bucket.aspectRatio.toFixed(3)}
+            </p>
           </div>
         </div>
       </div>

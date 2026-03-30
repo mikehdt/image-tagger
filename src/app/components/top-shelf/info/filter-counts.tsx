@@ -49,6 +49,20 @@ const FilterIndicatorsInfoComponent = () => {
             'bg-violet-50 border-violet-300 text-violet-600 dark:bg-violet-900 dark:text-violet-500',
         },
         {
+          count: visibility.scopeTagless ? 1 : 0,
+          label: 'Tagless',
+          color:
+            'bg-slate-50 border-slate-300 text-slate-600 dark:bg-slate-900 dark:text-slate-500',
+          hideCount: true,
+        },
+        {
+          count: visibility.scopeSelected ? 1 : 0,
+          label: 'Selected',
+          color:
+            'bg-purple-50 border-purple-300 text-purple-600 dark:bg-purple-900 dark:text-purple-500',
+          hideCount: true,
+        },
+        {
           count: visibility.showModified ? 1 : 0,
           label: 'Modified',
           color:
@@ -56,7 +70,7 @@ const FilterIndicatorsInfoComponent = () => {
           hideCount: true,
         },
       ].filter((filter) => filter.count > 0),
-    [filterCount, visibility.showModified],
+    [filterCount, visibility.scopeTagless, visibility.scopeSelected, visibility.showModified],
   );
 
   if (activeFilters.length === 0) {

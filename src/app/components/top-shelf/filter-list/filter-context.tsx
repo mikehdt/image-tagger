@@ -81,6 +81,7 @@ interface FilterContextType {
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleItemMouseMove: (index: number) => void;
   handleItemClick: (index: number) => void;
+  resetKeyboardIndex: () => void;
   handleListMouseLeave: () => void;
 
   // Sort options getter
@@ -227,9 +228,14 @@ export const FilterProvider = ({
     [selectedIndex, setSelectedIndex],
   );
 
-  // Clicking an item anchors the KB position to it
-  const handleItemClick = useCallback((index: number) => {
-    keyboardIndexRef.current = index;
+  // Mouse clicks don't anchor the KB position — only arrow keys do.
+  // This keeps mouse-leave from persisting a highlight set purely by mouse.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleItemClick = useCallback((_index: number) => {}, []);
+
+  // Allow consumers to reset the keyboard index (e.g. when input text changes)
+  const resetKeyboardIndex = useCallback(() => {
+    keyboardIndexRef.current = -1;
   }, []);
 
   // Mouse leave restores to KB position (or clears if no KB position)
@@ -275,6 +281,7 @@ export const FilterProvider = ({
       handleKeyDown,
       handleItemMouseMove,
       handleItemClick,
+      resetKeyboardIndex,
       handleListMouseLeave,
       getSortOptions: getSortOptionsForView,
     }),
@@ -296,6 +303,7 @@ export const FilterProvider = ({
       handleKeyDown,
       handleItemMouseMove,
       handleItemClick,
+      resetKeyboardIndex,
       handleListMouseLeave,
       getSortOptionsForView,
       setSizeSubView,

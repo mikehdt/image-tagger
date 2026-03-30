@@ -61,7 +61,7 @@ const VisibilityControlComponent = () => {
         id={popupId}
         position="bottom-left"
         triggerRef={buttonRef}
-        className="min-w-56 rounded-md border border-slate-200 bg-white whitespace-nowrap shadow-md shadow-slate-600/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
+        className="w-64 rounded-md border border-slate-200 bg-white shadow-md shadow-slate-600/50 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <VisibilityPanel />
       </Popup>

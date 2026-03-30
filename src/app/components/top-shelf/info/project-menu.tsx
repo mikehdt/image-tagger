@@ -292,7 +292,7 @@ const ProjectMenuComponent = () => {
           />
           <MenuItem
             icon={<CalculatorIcon className="h-5 w-5" />}
-            label="Bucket Crop Tool"
+            label="Bucket Visualisation Tool"
             onClick={handleOpenBucketModal}
           />
           {isSingleProjectMode && (
@@ -302,11 +302,14 @@ const ProjectMenuComponent = () => {
               onClick={handleOpenAutoTaggerSetup}
             />
           )}
-          <MenuThemeSwitcher theme={theme} setTheme={handleSetTheme} />
+
           <MenuEditModeSwitcher
             editMode={tagEditMode}
             setEditMode={handleSetTagEditMode}
           />
+
+          <MenuThemeSwitcher theme={theme} setTheme={handleSetTheme} />
+
           <MenuItem
             icon={<ArrowLeftCircleIcon className="h-5 w-5" />}
             label="Back to Projects"

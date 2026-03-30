@@ -46,7 +46,7 @@ export const EditTagsModal = ({
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md min-w-[24rem]">
       <div className="flex flex-wrap gap-4">
         {/* Title */}
-        <h2 className="w-full text-2xl font-semibold text-slate-700 dark:text-slate-200">
+        <h2 className="text-2xl font-semibold text-slate-700 dark:text-slate-200">
           Edit Tags
         </h2>
 
@@ -94,7 +94,7 @@ export const EditTagsModal = ({
 
         {/* Tag editing form */}
         <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex w-full flex-wrap gap-3">
             {tagStatuses.map(({ tag, status }, index) => {
               // Define style variants based on status
               const inputStyles = {
@@ -164,7 +164,7 @@ export const EditTagsModal = ({
           <div className="flex flex-wrap gap-4 text-xs text-slate-500">
             <p className="w-full">
               Editing a tag will update it across all assets where it appears.
-              Multiple tags can be renamed to the same value - duplicate tags
+              Multiple tags can be renamed to the same value. Duplicate tags
               within assets will be automatically cleaned up.
             </p>
 

@@ -35,7 +35,7 @@ export const coreReducers = {
     state.config.tagSortDirection = TagSortDirection.ASC;
   },
 
-  // Toggle crop visualization
+  // Toggle crop visualisation
   toggleCropVisualization: (state: ProjectState) => {
     state.config.showCropVisualization = !state.config.showCropVisualization;
   },
@@ -64,5 +64,4 @@ export const coreReducers = {
       TagSortDirection.DESC,
     );
   },
-
 };

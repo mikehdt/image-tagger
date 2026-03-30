@@ -27,19 +27,32 @@ export const useFileView = () => {
   const filenamePatterns = useAppSelector(selectFilenamePatterns);
   const patternCounts = useAppSelector(selectFilenamePatternCounts);
 
-  const [patternInput, setPatternInput] = useState('');
+  const [patternInput, setPatternInputRaw] = useState('');
 
   const {
     sortType,
     sortDirection,
     updateListLength,
     selectedIndex,
+    setSelectedIndex,
     inputRef,
     handleKeyDown,
     handleItemMouseMove,
     handleItemClick,
+    resetKeyboardIndex,
     handleListMouseLeave,
   } = useFilterContext();
+
+  // When the user edits the input text, pull focus back from list navigation
+  // so Enter adds the pattern instead of toggling the highlighted list item.
+  const setPatternInput = useCallback(
+    (value: string) => {
+      setPatternInputRaw(value);
+      setSelectedIndex(-1);
+      resetKeyboardIndex();
+    },
+    [setSelectedIndex, resetKeyboardIndex],
+  );
 
   // Sort the filename patterns based on current sort settings
   const sortedPatterns = useMemo(() => {
@@ -176,7 +189,7 @@ export const useFileView = () => {
       dispatch(addFilenamePattern(patternInput.trim()));
       setPatternInput('');
     }
-  }, [dispatch, patternInput]);
+  }, [dispatch, patternInput, setPatternInput]);
 
   // Combined keyboard handler: pattern input behaviour + list navigation
   const handleCombinedKeyDown = useCallback(
@@ -197,7 +210,7 @@ export const useFileView = () => {
       // Delegate to the shared keyboard navigation handler
       handleKeyDown(e);
     },
-    [patternInput, selectedIndex, dispatch, handleKeyDown],
+    [patternInput, selectedIndex, dispatch, handleKeyDown, setPatternInput],
   );
 
   // Resolve selectedIndex to the correct list item

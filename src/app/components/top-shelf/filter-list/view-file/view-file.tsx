@@ -6,6 +6,8 @@ import {
   XIcon,
 } from 'lucide-react';
 
+import { SectionDivider } from '@/app/components/shared/section-divider/section-divider';
+
 import { useFileView } from './use-file-view';
 
 export const FileView = () => {
@@ -64,14 +66,9 @@ export const FileView = () => {
       <div className="min-h-0 flex-1 overflow-y-auto" onMouseLeave={handleListMouseLeave}>
         {/* Filename patterns list */}
         {/* Divider with label */}
-        <div className="flex cursor-default items-center gap-2 py-1.5">
-          <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-slate-800" />
-          <span className="flex items-center gap-1 text-xs text-slate-400 text-shadow-white text-shadow-xs dark:text-shadow-slate-900">
-            <FileSearchIcon className="h-4 w-4" />
-            Name Search
-          </span>
-          <span className="h-px flex-1 bg-slate-200 shadow-2xs shadow-white dark:bg-slate-500 dark:shadow-stone-800" />
-        </div>
+        <SectionDivider icon={FileSearchIcon} className="py-1.5">
+          Name Search
+        </SectionDivider>
 
         <ul className="divide-y divide-slate-100 dark:divide-slate-700">
           {sortedPatterns.length > 0 ? (
@@ -108,14 +105,9 @@ export const FileView = () => {
         {subfolderList.length > 0 && (
           <>
             {/* Divider with label */}
-            <div className="flex cursor-default items-center gap-2 py-1.5">
-              <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
-              <span className="flex items-center gap-1 text-xs text-indigo-400 text-shadow-white text-shadow-xs dark:text-shadow-indigo-950">
-                <FolderOpenIcon className="h-4 w-4" />
-                Repeat Folders
-              </span>
-              <span className="h-px flex-1 bg-indigo-200 shadow-2xs shadow-white dark:bg-indigo-700 dark:shadow-indigo-950" />
-            </div>
+            <SectionDivider icon={FolderOpenIcon} color="indigo" className="py-1.5">
+              Repeat Folders
+            </SectionDivider>
 
             <ul className="divide-y divide-slate-100 dark:divide-slate-700">
               {subfolderList.map((item, index) => (
@@ -164,14 +156,9 @@ export const FileView = () => {
         )}
 
         {/* Divider with label */}
-        <div className="flex cursor-default items-center gap-2 py-1.5">
-          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />
-          <span className="flex items-center gap-1 text-xs text-stone-400 text-shadow-white text-shadow-xs dark:text-shadow-stone-900">
-            <FileImageIcon className="h-4 w-4" />
-            File Types
-          </span>
-          <span className="h-px flex-1 bg-stone-200 shadow-2xs shadow-white dark:bg-stone-500 dark:shadow-stone-800" />
-        </div>
+        <SectionDivider icon={FileImageIcon} color="stone" className="py-1.5">
+          File Types
+        </SectionDivider>
 
         {/* Extension list */}
         {extensionList.length === 0 ? (

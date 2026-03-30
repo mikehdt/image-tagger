@@ -1,8 +1,17 @@
+import {
+  ArchiveIcon,
+  FileImageIcon,
+  FileSearchIcon,
+  FolderOpenIcon,
+  ImageIcon,
+  type LucideIcon,
+  SwatchBookIcon,
+} from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 
+import { type ColorScheme } from '@/app/components/shared/section-divider/section-divider';
 import {
   selectHasModifiedAssets,
-  selectHasSubfolderAssets,
   selectHasTaglessAssets,
 } from '@/app/store/assets';
 import {
@@ -28,10 +37,12 @@ type VisibilityClassKey =
 export type SectionConfig = {
   key: VisibilityClassKey;
   label: string;
+  icon: LucideIcon;
+  color: ColorScheme;
   count: number;
   mode: ClassFilterMode;
   available: boolean;
-  emptyMessage: string;
+  emptyCategory: string;
 };
 
 export const useVisibilityControl = () => {
@@ -43,65 +54,72 @@ export const useVisibilityControl = () => {
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
-  const hasSubfolderAssets = useAppSelector(selectHasSubfolderAssets);
 
   const sections: SectionConfig[] = useMemo(() => {
     const all: SectionConfig[] = [
       {
         key: 'tags',
         label: 'Tags',
+        icon: SwatchBookIcon,
+        color: 'emerald',
         count: filterCount.tags,
         mode: visibility.tags,
         available: filterCount.tags > 0,
-        emptyMessage: 'No tags selected',
+        emptyCategory: 'tag',
       },
       {
         key: 'nameSearch',
         label: 'Name search',
+        icon: FileSearchIcon,
+        color: 'slate',
         count: filterCount.filenamePatterns,
         mode: visibility.nameSearch,
         available: filterCount.filenamePatterns > 0,
-        emptyMessage: 'No name searches',
+        emptyCategory: 'name search',
       },
       {
         key: 'sizes',
         label: 'Sizes',
+        icon: ImageIcon,
+        color: 'sky',
         count: filterCount.sizes,
         mode: visibility.sizes,
         available: filterCount.sizes > 0,
-        emptyMessage: 'No sizes selected',
+        emptyCategory: 'size',
       },
       {
         key: 'buckets',
         label: 'Buckets',
+        icon: ArchiveIcon,
+        color: 'slate',
         count: filterCount.buckets,
         mode: visibility.buckets,
         available: filterCount.buckets > 0,
-        emptyMessage: 'No buckets selected',
+        emptyCategory: 'bucket',
       },
       {
         key: 'extensions',
         label: 'Extensions',
+        icon: FileImageIcon,
+        color: 'stone',
         count: filterCount.extensions,
         mode: visibility.extensions,
         available: filterCount.extensions > 0,
-        emptyMessage: 'No types selected',
+        emptyCategory: 'file type',
       },
-      ...(hasSubfolderAssets
-        ? [
-            {
-              key: 'subfolders' as VisibilityClassKey,
-              label: 'Subfolders',
-              count: filterCount.subfolders,
-              mode: visibility.subfolders,
-              available: filterCount.subfolders > 0,
-              emptyMessage: 'No folders selected',
-            },
-          ]
-        : []),
+      {
+        key: 'subfolders',
+        label: 'Subfolders',
+        icon: FolderOpenIcon,
+        color: 'indigo',
+        count: filterCount.subfolders,
+        mode: visibility.subfolders,
+        available: filterCount.subfolders > 0,
+        emptyCategory: 'subfolder',
+      },
     ];
     return all;
-  }, [filterCount, hasSubfolderAssets, visibility]);
+  }, [filterCount, visibility]);
 
   const handleSetClassMode = useCallback(
     (classKey: VisibilityClassKey, mode: ClassFilterMode) => {

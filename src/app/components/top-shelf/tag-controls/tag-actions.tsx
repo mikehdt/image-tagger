@@ -16,6 +16,9 @@ const TagActionsComponent = () => {
       title="Tags"
       position="right"
     >
+      <span className="mx-0.5 cursor-default text-xs text-slate-500 max-xl:hidden">
+        by
+      </span>
       <TagSortControls />
 
       <ToolbarDivider />
@@ -23,6 +26,7 @@ const TagActionsComponent = () => {
       <AddTagsButton />
       <EditTagsButton />
       <DeleteToggleButton />
+
       <TagActionsMenu />
     </ResponsiveToolbarGroup>
   );

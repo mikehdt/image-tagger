@@ -145,7 +145,11 @@ export const MoveToFolderModal = ({
 
                   {/* Icon */}
                   {isRoot ? (
-                    <HomeIcon className="h-4 w-4 shrink-0 text-slate-400" />
+                    <HomeIcon
+                      className={`h-4 w-4 shrink-0 ${
+                        option.isSource ? 'text-indigo-400' : 'text-slate-400'
+                      }`}
+                    />
                   ) : (
                     <FolderOpenIcon
                       className={`h-4 w-4 shrink-0 ${
@@ -203,86 +207,90 @@ export const MoveToFolderModal = ({
               <FolderPlusIcon className="h-4 w-4 shrink-0 text-slate-400" />
               <span className="flex-1">New folder</span>
             </label>
+
+            {/* New folder form */}
+            {isNewFolderMode && (
+              <div className="flex w-full flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="repeat-count"
+                      className="text-xs text-slate-500"
+                    >
+                      Repeats
+                    </label>
+                    <input
+                      id="repeat-count"
+                      type="number"
+                      min={1}
+                      value={newRepeatCount}
+                      onChange={(e) =>
+                        setNewRepeatCount(
+                          Math.max(1, parseInt(e.target.value) || 1),
+                        )
+                      }
+                      className={`w-16 rounded border px-2 py-1 text-sm ${
+                        isNewRepeatCountValid
+                          ? 'border-slate-300 dark:border-slate-600'
+                          : 'border-rose-400'
+                      } bg-white dark:bg-slate-700 dark:text-slate-200`}
+                    />
+                  </div>
+
+                  <span className="cursor-default self-end pb-1.5 text-sm text-slate-500">
+                    &times;
+                  </span>
+
+                  <div className="flex flex-1 flex-col gap-1">
+                    <label
+                      htmlFor="folder-label"
+                      className="text-xs text-slate-500"
+                    >
+                      Name
+                    </label>
+                    <input
+                      id="folder-label"
+                      type="text"
+                      value={newLabel}
+                      onChange={(e) => setNewLabel(e.target.value)}
+                      placeholder="e.g. sonic"
+                      autoFocus
+                      className={`w-full rounded border px-2 py-1 text-sm ${
+                        !isNewFolderMode ||
+                        newLabel.trim() === '' ||
+                        isNewLabelValid
+                          ? 'border-slate-300 dark:border-slate-600'
+                          : 'border-rose-400'
+                      } bg-white dark:bg-slate-700 dark:text-slate-200`}
+                    />
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {newLabel.trim() && (
+                  <p className="text-xs text-slate-500">
+                    Folder name:{' '}
+                    <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
+                      {newFolderName}
+                    </span>
+                    {newFolderAlreadyExists && (
+                      <span className="ml-2 text-amber-600">
+                        (folder exists — assets will be moved into it)
+                      </span>
+                    )}
+                  </p>
+                )}
+
+                {/* Validation errors */}
+                {newLabel.trim() && !isNewLabelValid && (
+                  <p className="text-xs text-rose-600">
+                    Name may only contain letters, numbers, and hyphens.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* New folder form */}
-        {isNewFolderMode && (
-          <div className="flex w-full flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-800">
-            <div className="flex items-center gap-2">
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="repeat-count"
-                  className="text-xs text-slate-500"
-                >
-                  Repeats
-                </label>
-                <input
-                  id="repeat-count"
-                  type="number"
-                  min={1}
-                  value={newRepeatCount}
-                  onChange={(e) =>
-                    setNewRepeatCount(
-                      Math.max(1, parseInt(e.target.value) || 1),
-                    )
-                  }
-                  className={`w-16 rounded border px-2 py-1 text-sm ${
-                    isNewRepeatCountValid
-                      ? 'border-slate-300 dark:border-slate-600'
-                      : 'border-rose-400'
-                  } bg-white dark:bg-slate-700 dark:text-slate-200`}
-                />
-              </div>
-
-              <div className="flex flex-1 flex-col gap-1">
-                <label
-                  htmlFor="folder-label"
-                  className="text-xs text-slate-500"
-                >
-                  Name
-                </label>
-                <input
-                  id="folder-label"
-                  type="text"
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                  placeholder="e.g. sonic"
-                  autoFocus
-                  className={`w-full rounded border px-2 py-1 text-sm ${
-                    !isNewFolderMode ||
-                    newLabel.trim() === '' ||
-                    isNewLabelValid
-                      ? 'border-slate-300 dark:border-slate-600'
-                      : 'border-rose-400'
-                  } bg-white dark:bg-slate-700 dark:text-slate-200`}
-                />
-              </div>
-            </div>
-
-            {/* Preview */}
-            {newLabel.trim() && (
-              <p className="text-xs text-slate-500">
-                Folder name:{' '}
-                <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
-                  {newFolderName}
-                </span>
-                {newFolderAlreadyExists && (
-                  <span className="ml-2 text-amber-600">
-                    (folder exists — assets will be moved into it)
-                  </span>
-                )}
-              </p>
-            )}
-
-            {/* Validation errors */}
-            {newLabel.trim() && !isNewLabelValid && (
-              <p className="text-xs text-rose-600">
-                Name may only contain letters, numbers, and hyphens.
-              </p>
-            )}
-          </div>
-        )}
 
         {/* Keep selection checkbox */}
         {hasSelectedAssets && (

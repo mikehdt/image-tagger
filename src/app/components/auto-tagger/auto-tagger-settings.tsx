@@ -1,6 +1,7 @@
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import { FormTitle } from '@/app/components/shared/form-title/form-title';
 import { MultiTagInput } from '@/app/components/shared/multi-tag-input';
 import { RadioGroup } from '@/app/components/shared/radio-group';
 import type { TaggerOptions, TagInsertMode } from '@/app/services/auto-tagger';
@@ -52,9 +53,7 @@ export function AutoTaggerSettings({
 
       {/* Model selection */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
-          Model
-        </label>
+        <FormTitle as="span">Model</FormTitle>
         <Dropdown
           items={modelItems}
           selectedValue={selectedModelId || ''}
@@ -129,9 +128,7 @@ export function AutoTaggerSettings({
 
       {/* Tag insert mode */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
-          New tags
-        </label>
+        <FormTitle as="span">New tags</FormTitle>
         <RadioGroup
           name="tagInsertMode"
           options={insertModeOptions}
@@ -142,9 +139,7 @@ export function AutoTaggerSettings({
 
       {/* Include tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
-          Always Include Tags
-        </label>
+        <FormTitle as="span">Always Include Tags</FormTitle>
         <MultiTagInput
           tags={options.includeTags}
           onTagsChange={(tags) => onOptionChange('includeTags', tags)}
@@ -155,9 +150,7 @@ export function AutoTaggerSettings({
 
       {/* Exclude tags */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700 uppercase dark:text-slate-500">
-          Exclude Tags
-        </label>
+        <FormTitle as="span">Exclude Tags</FormTitle>
         <MultiTagInput
           tags={options.excludeTags}
           onTagsChange={(tags) => onOptionChange('excludeTags', tags)}
