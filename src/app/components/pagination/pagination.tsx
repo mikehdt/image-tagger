@@ -13,7 +13,7 @@ type PaginationProps = {
 export const Pagination = ({
   currentPage,
   totalItems,
-  basePath = '',
+  basePath = '/tagging',
 }: PaginationProps) => {
   const paginationSize = useAppSelector(selectPaginationSize);
 

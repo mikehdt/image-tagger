@@ -3,9 +3,9 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { useAppDispatch } from '../store/hooks';
-import { resetProjectState, setProjectInfo } from '../store/project';
-import { AssetList } from '../views/asset-list';
+import { useAppDispatch } from '../../store/hooks';
+import { resetProjectState, setProjectInfo } from '../../store/project';
+import { AssetList } from '../../views/asset-list';
 
 // Inline configuration check function to avoid import issues
 const checkIfUsingDefaultProject = async (): Promise<boolean> => {

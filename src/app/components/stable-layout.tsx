@@ -15,8 +15,8 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const currentPage = parseInt(params.page as string, 10) || 1;
 
-  // Don't show shelves on the project selection page (root path)
-  const showShelves = pathname !== '/';
+  // Only show shelves on tagging pages
+  const showShelves = pathname.startsWith('/tagging');
 
   const paginationSize = useAppSelector(selectPaginationSize);
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
@@ -29,10 +29,10 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
 
   // Effect to redirect if current page is out of bounds after filter change
   useEffect(() => {
-    if (currentPage > totalPages) {
-      router.push('/1');
+    if (showShelves && currentPage > totalPages) {
+      router.push('/tagging/1');
     }
-  }, [currentPage, totalPages, router]);
+  }, [showShelves, currentPage, totalPages, router]);
 
   return (
     <main className="relative mx-auto min-h-screen max-w-400 px-4 pt-24 pb-16">

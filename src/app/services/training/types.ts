@@ -1,0 +1,86 @@
+// --- Provider & Backend ---
+
+export type TrainingProvider = 'ai-toolkit' | 'kohya';
+
+// --- Job Lifecycle ---
+
+export type TrainingJobStatus =
+  | 'pending'
+  | 'preparing'
+  | 'training'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+// --- Sidecar ---
+
+export type SidecarStatus = 'stopped' | 'starting' | 'ready' | 'error';
+
+// --- Progress (received via WebSocket) ---
+
+export type TrainingProgress = {
+  jobId: string;
+  status: TrainingJobStatus;
+  currentStep: number;
+  totalSteps: number;
+  currentEpoch: number;
+  totalEpochs: number;
+  loss: number | null;
+  learningRate: number | null;
+  etaSeconds: number | null;
+  sampleImagePaths: string[];
+  logLines: string[];
+  error: string | null;
+};
+
+// --- Hyperparameters ---
+
+export type TrainingHyperparameters = {
+  learningRate: number;
+  epochs: number;
+  batchSize: number;
+  resolution: number;
+  networkDim: number; // LoRA rank
+  networkAlpha: number; // LoRA alpha
+  optimizer: string; // e.g. 'adamw8bit', 'prodigy'
+  scheduler: string; // e.g. 'cosine', 'constant'
+  warmupSteps: number;
+  saveEveryNEpochs: number;
+  sampleEveryNSteps: number;
+  gradientAccumulationSteps: number;
+  mixedPrecision: 'fp16' | 'bf16';
+  extra: Record<string, unknown>; // Provider-specific extras
+};
+
+// --- Dataset ---
+
+export type TrainingDataset = {
+  path: string;
+  numRepeats: number;
+};
+
+// --- Job Configuration ---
+
+export type TrainingJobConfig = {
+  projectPath: string;
+  provider: TrainingProvider;
+  baseModel: string;
+  outputPath: string;
+  outputName: string;
+  datasets: TrainingDataset[];
+  hyperparameters: TrainingHyperparameters;
+  samplePrompts: string[];
+};
+
+// --- Per-Project Settings (stored in project config JSON) ---
+
+export type TrainingSettings = {
+  datasets?: TrainingDataset[];
+  provider?: TrainingProvider;
+  baseModel?: string;
+  outputPath?: string;
+  outputName?: string;
+  hyperparameters?: Partial<TrainingHyperparameters>;
+  samplePrompts?: string[];
+  lastPreset?: string;
+};

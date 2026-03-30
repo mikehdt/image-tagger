@@ -58,7 +58,7 @@ export const useProjectList = () => {
         sessionStorage.removeItem('selectedProjectTitle');
         sessionStorage.removeItem('selectedProjectThumbnail');
         sessionStorage.removeItem('configMode');
-        router.replace('/1');
+        router.replace('/tagging/1');
         return;
       }
 
@@ -67,7 +67,7 @@ export const useProjectList = () => {
         console.warn(
           '[ProjectList] In default mode but on project list, redirecting to default assets',
         );
-        router.replace('/1');
+        router.replace('/tagging/1');
         return;
       }
 
@@ -136,7 +136,7 @@ export const useProjectList = () => {
       } else {
         sessionStorage.removeItem('selectedProjectThumbnailVersion');
       }
-      router.push('/1');
+      router.push('/tagging/1');
     },
     [router, dispatch, projects],
   );

@@ -46,8 +46,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const ioState = useAppSelector(selectIoState);
   const imageCount = useAppSelector(selectImageCount);
 
-  // Only load assets when we're on a page route (not root)
-  const shouldLoadAssets = pathname !== '/';
+  // Only load assets when we're on a tagging page route
+  const shouldLoadAssets = pathname.startsWith('/tagging');
 
   // Initialize project info from session storage on mount
   useEffect(() => {
