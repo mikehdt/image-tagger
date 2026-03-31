@@ -328,8 +328,8 @@ export const MoveToFolderModal = ({
         {moveErrors && (
           <div className="w-full rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/30">
             <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-              {moveErrors.length} file{moveErrors.length !== 1 ? 's' : ''}{' '}
-              could not be moved (file may be in use).
+              {moveErrors.length} file{moveErrors.length !== 1 ? 's' : ''} could
+              not be moved (file may be in use).
             </p>
             <ul className="mt-1 list-inside list-disc text-xs text-amber-600 dark:text-amber-400">
               {moveErrors.slice(0, 10).map((name) => (

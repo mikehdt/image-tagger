@@ -1,4 +1,4 @@
-import type { PreferencesState } from './types';
+import type { PreferencesState, TrainingViewMode } from './types';
 import { TagEditMode, type ThemeMode } from './types';
 
 const STORAGE_KEY = 'preferences';
@@ -6,10 +6,16 @@ const LEGACY_THEME_KEY = 'theme-preference';
 
 const VALID_THEMES = ['light', 'dark', 'auto'];
 const VALID_EDIT_MODES = Object.values(TagEditMode);
+const VALID_VIEW_MODES: TrainingViewMode[] = [
+  'simple',
+  'intermediate',
+  'advanced',
+];
 
 const defaults: PreferencesState = {
   theme: 'auto',
   tagEditMode: TagEditMode.BUTTON,
+  trainingViewMode: 'intermediate',
 };
 
 /** Read preferences from localStorage, migrating the legacy theme key if present. */
@@ -28,6 +34,9 @@ export const loadPreferences = (): PreferencesState => {
         tagEditMode: VALID_EDIT_MODES.includes(parsed.tagEditMode)
           ? parsed.tagEditMode
           : defaults.tagEditMode,
+        trainingViewMode: VALID_VIEW_MODES.includes(parsed.trainingViewMode)
+          ? (parsed.trainingViewMode as TrainingViewMode)
+          : defaults.trainingViewMode,
       };
     }
 

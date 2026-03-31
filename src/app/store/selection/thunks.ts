@@ -242,11 +242,15 @@ export const addMultipleTagsToAssetsWithDualSelection = createAsyncThunk(
       const selectedAssets = state.selection.selectedAssets;
       const filteredAssets = selectAssetsWithActiveFilters(state);
       const filteredIds = new Set(filteredAssets.map((asset) => asset.fileId));
-      finalAssets = selectedAssets.filter((assetId) => filteredIds.has(assetId));
+      finalAssets = selectedAssets.filter((assetId) =>
+        filteredIds.has(assetId),
+      );
     } else if (applyToSelectedAssets) {
       finalAssets = [...state.selection.selectedAssets];
     } else if (applyToAssetsWithActiveFilters) {
-      finalAssets = selectAssetsWithActiveFilters(state).map((asset) => asset.fileId);
+      finalAssets = selectAssetsWithActiveFilters(state).map(
+        (asset) => asset.fileId,
+      );
     }
 
     if (!finalAssets.length) {

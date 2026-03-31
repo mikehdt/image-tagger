@@ -196,8 +196,9 @@ export const getProjectList = async (): Promise<Project[]> => {
           // Count images in root directory
           const rootImageCount = projectEntries
             .filter((entry) => entry.isFile())
-            .filter((entry) => isSupportedImageExtension(path.extname(entry.name)))
-            .length;
+            .filter((entry) =>
+              isSupportedImageExtension(path.extname(entry.name)),
+            ).length;
 
           // Count images in valid repeat subfolders
           const subdirectories = projectEntries.filter((entry) =>
@@ -375,7 +376,11 @@ const THUMBNAIL_SIZE = 80;
 export const createProjectThumbnail = async (
   projectName: string,
   imageData: ArrayBuffer,
-): Promise<{ success: boolean; thumbnail: string; thumbnailVersion: number }> => {
+): Promise<{
+  success: boolean;
+  thumbnail: string;
+  thumbnailVersion: number;
+}> => {
   try {
     const projectsDir = path.join(process.cwd(), 'public', 'tagging-projects');
 
@@ -447,7 +452,10 @@ export const removeProjectThumbnail = async (
     }
 
     // Update the project config to disable thumbnail and clear version
-    await updateProject(projectName, { thumbnail: false, thumbnailVersion: undefined });
+    await updateProject(projectName, {
+      thumbnail: false,
+      thumbnailVersion: undefined,
+    });
 
     return { success: true };
   } catch (error) {

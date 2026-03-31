@@ -16,7 +16,6 @@ export const getImageUrl = (fileName: string, projectName?: string): string => {
   return `/api/images/${encodedFileName}?projectName=${encodedProjectName}`;
 };
 
-
 /**
  * Kohya SS model configurations for different Stable Diffusion versions
  */

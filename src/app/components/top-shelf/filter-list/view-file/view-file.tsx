@@ -63,7 +63,10 @@ export const FileView = () => {
       </div>
 
       {/* Scrollable content area */}
-      <div className="min-h-0 flex-1 overflow-y-auto" onMouseLeave={handleListMouseLeave}>
+      <div
+        className="min-h-0 flex-1 overflow-y-auto"
+        onMouseLeave={handleListMouseLeave}
+      >
         {/* Filename patterns list */}
         {/* Divider with label */}
         <SectionDivider icon={FileSearchIcon} className="py-1.5">
@@ -105,7 +108,11 @@ export const FileView = () => {
         {subfolderList.length > 0 && (
           <>
             {/* Divider with label */}
-            <SectionDivider icon={FolderOpenIcon} color="indigo" className="py-1.5">
+            <SectionDivider
+              icon={FolderOpenIcon}
+              color="indigo"
+              className="py-1.5"
+            >
               Repeat Folders
             </SectionDivider>
 
@@ -114,7 +121,10 @@ export const FileView = () => {
                 <li
                   id={`subfolder-${item.subfolder}`}
                   key={item.subfolder}
-                  onClick={() => { handleItemClick(index); handleToggleSubfolder(item.subfolder); }}
+                  onClick={() => {
+                    handleItemClick(index);
+                    handleToggleSubfolder(item.subfolder);
+                  }}
                   onMouseMove={() => handleItemMouseMove(index)}
                   className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                     index === selectedIndex
@@ -171,7 +181,10 @@ export const FileView = () => {
               <li
                 id={`ext-${item.ext}`}
                 key={item.ext}
-                onClick={() => { handleExtensionClick(index); handleToggle(item.ext); }}
+                onClick={() => {
+                  handleExtensionClick(index);
+                  handleToggle(item.ext);
+                }}
                 onMouseMove={() => handleExtensionMouseMove(index)}
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index + subfolderListLength === selectedIndex

@@ -63,11 +63,14 @@ export const selectHasActiveVisibility = createSelector(
     visibility.scopeSelected ||
     visibility.showModified ||
     (visibility.tags !== ClassFilterMode.OFF && filterTags.length > 0) ||
-    (visibility.nameSearch !== ClassFilterMode.OFF && filenamePatterns.length > 0) ||
+    (visibility.nameSearch !== ClassFilterMode.OFF &&
+      filenamePatterns.length > 0) ||
     (visibility.sizes !== ClassFilterMode.OFF && filterSizes.length > 0) ||
     (visibility.buckets !== ClassFilterMode.OFF && filterBuckets.length > 0) ||
-    (visibility.extensions !== ClassFilterMode.OFF && filterExtensions.length > 0) ||
-    (visibility.subfolders !== ClassFilterMode.OFF && filterSubfolders.length > 0),
+    (visibility.extensions !== ClassFilterMode.OFF &&
+      filterExtensions.length > 0) ||
+    (visibility.subfolders !== ClassFilterMode.OFF &&
+      filterSubfolders.length > 0),
 );
 
 export const selectHasNonTagFilters = createSelector(

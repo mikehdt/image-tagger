@@ -1,4 +1,8 @@
-import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 
 import type {
   SidecarStatus,
@@ -120,8 +124,7 @@ export const selectActiveJobProgress = createSelector(
 
 export const selectIsTraining = createSelector(
   selectTraining,
-  (t) =>
-    t.activeJobStatus === 'training' || t.activeJobStatus === 'preparing',
+  (t) => t.activeJobStatus === 'training' || t.activeJobStatus === 'preparing',
 );
 
 export const selectWsConnected = createSelector(

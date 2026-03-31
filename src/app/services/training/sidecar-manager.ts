@@ -190,9 +190,7 @@ async function spawnSidecar(): Promise<void> {
 
     proc.on('exit', (code, signal) => {
       clearTimeout(timeout);
-      console.log(
-        `[sidecar] Process exited (code=${code}, signal=${signal})`,
-      );
+      console.log(`[sidecar] Process exited (code=${code}, signal=${signal})`);
       state.process = null;
       if (state.status !== 'ready') {
         state.status = 'error';

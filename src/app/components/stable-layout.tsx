@@ -6,8 +6,9 @@ import { useEffect, useMemo } from 'react';
 import { selectFilteredAssetsCount } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
-import { BottomShelf } from './bottom-shelf/bottom-shelf';
-import { TopShelf } from './top-shelf/top-shelf';
+import { TaggingBottomShelf } from './bottom-shelf/bottom-shelf';
+import { TaggingTopShelf } from './top-shelf/top-shelf';
+import { TrainingTopShelf } from './training/training-top-shelf';
 
 export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -17,12 +18,11 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const project = params.project as string | undefined;
   const currentPage = parseInt(params.page as string, 10) || 1;
 
-  // Show TopShelf on tagging and training pages, BottomShelf only on tagging
   const isTagging = pathname.startsWith('/tagging');
   const isTraining = pathname.startsWith('/training');
-  const showTopShelf = isTagging || isTraining;
-  const showBottomShelf = isTagging;
-  const basePath = project ? `/tagging/${encodeURIComponent(project)}` : '/tagging';
+  const basePath = project
+    ? `/tagging/${encodeURIComponent(project)}`
+    : '/tagging';
 
   const paginationSize = useAppSelector(selectPaginationSize);
   const filteredCount = useAppSelector(selectFilteredAssetsCount);
@@ -40,12 +40,21 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isTagging, currentPage, totalPages, router, basePath]);
 
+  const mainPadding = isTagging
+    ? 'pt-24 pb-16'
+    : isTraining
+      ? 'pt-24 pb-4'
+      : '';
+
   return (
-    <main className="relative mx-auto min-h-screen max-w-400 px-4 pt-24 pb-16">
-      {showTopShelf && <TopShelf currentPage={currentPage} />}
+    <main
+      className={`relative mx-auto min-h-screen max-w-400 px-4 ${mainPadding}`}
+    >
+      {isTagging && <TaggingTopShelf currentPage={currentPage} />}
+      {isTraining && <TrainingTopShelf />}
       {children}
-      {showBottomShelf && (
-        <BottomShelf
+      {isTagging && (
+        <TaggingBottomShelf
           currentPage={currentPage}
           totalPages={totalPages}
           basePath={basePath}

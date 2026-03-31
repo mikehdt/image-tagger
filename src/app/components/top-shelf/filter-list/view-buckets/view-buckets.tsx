@@ -67,7 +67,10 @@ export const BucketsView = () => {
               <li
                 id={`bucket-${item.name}`}
                 key={item.name}
-                onClick={() => { handleItemClick(index); handleToggle(item.name); }}
+                onClick={() => {
+                  handleItemClick(index);
+                  handleToggle(item.name);
+                }}
                 onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex

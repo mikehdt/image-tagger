@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 import { ToolbarDivider } from '../shared/toolbar-divider';
+import { ShelfInfoRow, ShelfToolbarRow, TopShelfFrame } from '../shelf';
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
 import { CategoryNavigation } from './category-navigation/category-navigation';
 import { FilterListButton } from './filter-list/filter-list-button';
@@ -13,11 +14,11 @@ import { FilterIndicatorsInfo } from './info/filter-counts';
 import { ProjectMenu } from './info/project-menu';
 import { TagActions } from './tag-controls/tag-actions';
 
-type TopShelfProps = {
+type TaggingTopShelfProps = {
   currentPage?: number;
 };
 
-export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
+export const TaggingTopShelf = ({ currentPage = 1 }: TaggingTopShelfProps) => {
   const dispatch = useAppDispatch();
 
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
@@ -30,36 +31,30 @@ export const TopShelf = ({ currentPage = 1 }: TopShelfProps) => {
   }, [selectedAssetsCount, dispatch]);
 
   return (
-    <div className="fixed top-0 left-0 z-20 w-full">
-      {/* Top information row - z-10 ensures popups appear above the toolbar row */}
-      <div className="relative z-10 border-b border-b-(--border)/50 bg-(--surface-glass-alt) shadow-(--border) backdrop-blur-md">
-        <div className="mx-auto flex max-w-400 flex-wrap items-center gap-2 px-4 py-1 text-sm text-(--unselected-text)">
-          <ProjectMenu />
+    <TopShelfFrame>
+      <ShelfInfoRow>
+        <ProjectMenu />
 
-          <ToolbarDivider />
+        <ToolbarDivider />
 
-          <div className="mr-auto!">
-            <AssetCounts />
-          </div>
-
-          <FilterIndicatorsInfo />
+        <div className="mr-auto!">
+          <AssetCounts />
         </div>
-      </div>
 
-      {/* Main toolbar row */}
-      <div className="border-t border-t-(--border-subtle) bg-(--surface-glass) shadow-md backdrop-blur-md">
-        <div className="mx-auto flex min-h-12 max-w-400 items-center gap-2 px-4 text-sm">
-          <CategoryNavigation currentPage={currentPage} />
+        <FilterIndicatorsInfo />
+      </ShelfInfoRow>
 
-          <div className="mr-auto!">
-            <AssetSelectionControls />
-          </div>
+      <ShelfToolbarRow>
+        <CategoryNavigation currentPage={currentPage} />
 
-          <TagActions />
-
-          <FilterListButton />
+        <div className="mr-auto!">
+          <AssetSelectionControls />
         </div>
-      </div>
-    </div>
+
+        <TagActions />
+
+        <FilterListButton />
+      </ShelfToolbarRow>
+    </TopShelfFrame>
   );
 };

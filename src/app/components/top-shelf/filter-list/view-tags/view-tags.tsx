@@ -61,7 +61,10 @@ export const TagsView = () => {
               <li
                 id={`tag-${item.tag}`}
                 key={item.tag}
-                onClick={() => { handleItemClick(index); handleToggle(item.tag); }}
+                onClick={() => {
+                  handleItemClick(index);
+                  handleToggle(item.tag);
+                }}
                 onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex

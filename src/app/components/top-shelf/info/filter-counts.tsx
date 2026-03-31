@@ -70,7 +70,12 @@ const FilterIndicatorsInfoComponent = () => {
           hideCount: true,
         },
       ].filter((filter) => filter.count > 0),
-    [filterCount, visibility.scopeTagless, visibility.scopeSelected, visibility.showModified],
+    [
+      filterCount,
+      visibility.scopeTagless,
+      visibility.scopeSelected,
+      visibility.showModified,
+    ],
   );
 
   if (activeFilters.length === 0) {

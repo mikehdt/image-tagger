@@ -1,15 +1,24 @@
 import { PlayIcon } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import { Button } from '@/app/components/shared/button';
+import {
+  FIELD_REGISTRY,
+  getVisibleFields,
+} from '@/app/services/training/field-registry';
 
-import { AdvancedSection } from '../sections/advanced-section';
 import { DatasetSection } from '../sections/dataset-section';
-import { ModelSection } from '../sections/model-section';
-import { NetworkSection } from '../sections/network-section';
+import { LearningSection } from '../sections/learning-section';
+import { LoraShapeSection } from '../sections/lora-shape-section';
+import { PerformanceSection } from '../sections/performance-section';
+import { SamplingSection } from '../sections/sampling-section';
 import { SavingSection } from '../sections/saving-section';
-import { TrainingSection } from '../sections/training-section';
-import { useTrainingConfigForm } from './use-training-config-form';
+import { WhatToTrainSection } from '../sections/what-to-train-section';
+import { useTrainingViewMode } from '../use-training-view-mode';
+import {
+  type SectionName,
+  useTrainingConfigForm,
+} from './use-training-config-form';
 
 type TrainingConfigFormProps = {
   onStartTraining?: (config: Record<string, unknown>) => void;
@@ -18,6 +27,8 @@ type TrainingConfigFormProps = {
 const TrainingConfigFormComponent = ({
   onStartTraining,
 }: TrainingConfigFormProps) => {
+  const viewMode = useTrainingViewMode();
+
   const {
     state,
     currentModel,
@@ -29,10 +40,40 @@ const TrainingConfigFormComponent = ({
     setField,
     setModel,
     resetSection,
-    addDataset,
     removeDataset,
     setFolderRepeats,
   } = useTrainingConfigForm();
+
+  const visibleFields = useMemo(
+    () => getVisibleFields(viewMode, state.modelId),
+    [viewMode, state.modelId],
+  );
+
+  // Compute hidden changes per section
+  const hiddenChanges = useMemo(() => {
+    const perSection: Partial<Record<SectionName, number>> = {};
+
+    for (const [field, meta] of Object.entries(FIELD_REGISTRY)) {
+      if (visibleFields.has(field)) continue;
+      if (meta.defaultKey === null) continue;
+
+      const currentValue = state[field as keyof typeof state];
+      const defaultValue = defaults[meta.defaultKey];
+
+      // Compare values (handle arrays for resolution)
+      const isDifferent =
+        Array.isArray(currentValue) && Array.isArray(defaultValue)
+          ? JSON.stringify(currentValue) !== JSON.stringify(defaultValue)
+          : currentValue !== defaultValue;
+
+      if (isDifferent) {
+        const section = meta.group as SectionName;
+        perSection[section] = (perSection[section] ?? 0) + 1;
+      }
+    }
+
+    return perSection;
+  }, [state, defaults, visibleFields]);
 
   const handleStart = useCallback(() => {
     const effectiveSteps =
@@ -46,15 +87,23 @@ const TrainingConfigFormComponent = ({
       steps: effectiveSteps,
       learningRate: state.learningRate,
       optimizer: state.optimizer,
+      scheduler: state.scheduler,
+      warmupSteps: state.warmupSteps,
+      weightDecay: state.weightDecay,
       batchSize: state.batchSize,
       networkType: state.networkType,
       networkDim: state.networkDim,
       networkAlpha: state.networkAlpha,
-      scheduler: state.scheduler,
-      warmupSteps: state.warmupSteps,
-      gradientAccumulationSteps: state.gradientAccumulationSteps,
-      mixedPrecision: state.mixedPrecision,
       resolution: state.resolution,
+      mixedPrecision: state.mixedPrecision,
+      gradientAccumulationSteps: state.gradientAccumulationSteps,
+      gradientCheckpointing: state.gradientCheckpointing,
+      cacheLatents: state.cacheLatents,
+      captionDropoutRate: state.captionDropoutRate,
+      seed: state.seed,
+      guidanceScale: state.guidanceScale,
+      noiseScheduler: state.noiseScheduler,
+      sampleSteps: state.sampleSteps,
       saveEveryNEpochs: state.saveEveryNEpochs,
       sampleEveryNSteps: state.sampleEveryNSteps,
       samplePrompts: state.samplePrompts
@@ -69,12 +118,14 @@ const TrainingConfigFormComponent = ({
 
   return (
     <div className="mx-auto max-w-2xl space-y-3">
-      <ModelSection
+      <WhatToTrainSection
         modelId={state.modelId}
         outputName={state.outputName}
         onModelChange={setModel}
         onOutputNameChange={(name) => setField('outputName', name)}
         currentModel={currentModel}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.whatToTrain}
       />
 
       <DatasetSection
@@ -85,60 +136,79 @@ const TrainingConfigFormComponent = ({
         onSetFolderRepeats={setFolderRepeats}
       />
 
-      <TrainingSection
+      <LearningSection
         durationMode={state.durationMode}
         epochs={state.epochs}
         steps={state.steps}
         learningRate={state.learningRate}
         optimizer={state.optimizer}
-        batchSize={state.batchSize}
+        scheduler={state.scheduler}
+        warmupSteps={state.warmupSteps}
+        weightDecay={state.weightDecay}
         calculatedSteps={calculatedSteps}
         calculatedEpochs={calculatedEpochs}
         totalEffective={datasetStats.totalEffective}
-        hasChanges={sectionHasChanges.training}
+        batchSize={state.batchSize}
+        hasChanges={sectionHasChanges.learning}
         defaults={defaults}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.learning}
         onFieldChange={setField}
         onReset={resetSection}
       />
 
-      <NetworkSection
+      <LoraShapeSection
         networkType={state.networkType}
         networkDim={state.networkDim}
         networkAlpha={state.networkAlpha}
-        hasChanges={sectionHasChanges.network}
+        hasChanges={sectionHasChanges.loraShape}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.loraShape}
         onFieldChange={setField}
         onReset={resetSection}
       />
 
-      <AdvancedSection
-        scheduler={state.scheduler}
-        warmupSteps={state.warmupSteps}
-        gradientAccumulationSteps={state.gradientAccumulationSteps}
-        mixedPrecision={state.mixedPrecision}
-        resolution={state.resolution}
+      <PerformanceSection
         batchSize={state.batchSize}
-        hasChanges={sectionHasChanges.advanced}
-        defaults={defaults}
+        resolution={state.resolution}
+        mixedPrecision={state.mixedPrecision}
+        gradientAccumulationSteps={state.gradientAccumulationSteps}
+        gradientCheckpointing={state.gradientCheckpointing}
+        cacheLatents={state.cacheLatents}
+        captionDropoutRate={state.captionDropoutRate}
+        hasChanges={sectionHasChanges.performance}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.performance}
+        onFieldChange={setField}
+        onReset={resetSection}
+      />
+
+      <SamplingSection
+        samplePrompts={state.samplePrompts}
+        sampleEveryNSteps={state.sampleEveryNSteps}
+        sampleSteps={state.sampleSteps}
+        seed={state.seed}
+        guidanceScale={state.guidanceScale}
+        noiseScheduler={state.noiseScheduler}
+        hasChanges={sectionHasChanges.sampling}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.sampling}
         onFieldChange={setField}
         onReset={resetSection}
       />
 
       <SavingSection
         saveEveryNEpochs={state.saveEveryNEpochs}
-        sampleEveryNSteps={state.sampleEveryNSteps}
-        samplePrompts={state.samplePrompts}
         hasChanges={sectionHasChanges.saving}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.saving}
         onFieldChange={setField}
         onReset={resetSection}
       />
 
       {/* Start */}
       <div className="pt-2">
-        <Button
-          size="mediumWide"
-          onClick={handleStart}
-          disabled={!canStart}
-        >
+        <Button size="mediumWide" onClick={handleStart} disabled={!canStart}>
           <PlayIcon className="mr-2 h-4 w-4" />
           Start Training
         </Button>

@@ -12,8 +12,13 @@ const viewOptions: { value: FilterView; label: string }[] = [
 ];
 
 export const ViewSelector = () => {
-  const { activeView, setActiveView, setSearchTerm, setSelectedIndex, onClose } =
-    useFilterContext();
+  const {
+    activeView,
+    setActiveView,
+    setSearchTerm,
+    setSelectedIndex,
+    onClose,
+  } = useFilterContext();
 
   const handleViewChange = (view: FilterView) => {
     setActiveView(view);

@@ -44,7 +44,13 @@ export const applyVisibilityFilters = ({
     sortType,
     sortDirection,
     selectedAssets,
-    { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders },
+    {
+      filterTags,
+      filterSizes,
+      filterBuckets,
+      filterExtensions,
+      filterSubfolders,
+    },
   );
 
   // Pre-compute sets for fast lookups
@@ -69,88 +75,97 @@ export const applyVisibilityFilters = ({
 
   // Helper: check a single-value class (sizes, buckets, extensions, subfolders)
   // For single-value properties, ANY === ALL, so only one test is needed
-  const checkSingleValue = (mode: ClassFilterMode, matches: boolean): boolean => {
+  const checkSingleValue = (
+    mode: ClassFilterMode,
+    matches: boolean,
+  ): boolean => {
     if (mode === ClassFilterMode.OFF) return true;
     if (mode === ClassFilterMode.INVERSE) return !matches;
     return matches;
   };
 
-  const filteredAssets = sortedAssets.filter(
-    (img: ImageAsset) => {
-      // --- Scope filters (ANDed with everything) ---
+  const filteredAssets = sortedAssets.filter((img: ImageAsset) => {
+    // --- Scope filters (ANDed with everything) ---
 
-      // Scope: tagless — only assets with no persisted tags
-      if (visibility.scopeTagless) {
-        const hasPersisted = img.tagList.some(
-          (tag) =>
-            !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
-            !hasState(img.tagStatus[tag], TagState.TO_ADD),
-        );
-        if (hasPersisted) return false;
-      }
+    // Scope: tagless — only assets with no persisted tags
+    if (visibility.scopeTagless) {
+      const hasPersisted = img.tagList.some(
+        (tag) =>
+          !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
+          !hasState(img.tagStatus[tag], TagState.TO_ADD),
+      );
+      if (hasPersisted) return false;
+    }
 
-      // Scope: selected only
-      if (visibility.scopeSelected) {
-        if (!selectedSet.has(img.fileId)) return false;
-      }
+    // Scope: selected only
+    if (visibility.scopeSelected) {
+      if (!selectedSet.has(img.fileId)) return false;
+    }
 
-      // Scope: modified only
-      if (visibility.showModified) {
-        const hasModifiedTags = img.tagList.some(
-          (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
-        );
-        if (!hasModifiedTags) return false;
-      }
+    // Scope: modified only
+    if (visibility.showModified) {
+      const hasModifiedTags = img.tagList.some(
+        (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
+      );
+      if (!hasModifiedTags) return false;
+    }
 
-      // --- Per-class filters (AND between classes) ---
+    // --- Per-class filters (AND between classes) ---
 
-      // Tags class — skip when scopeTagless is on (tagless assets have no tags to filter)
-      if (!visibility.scopeTagless && filterTags.length > 0) {
-        const passes = checkClass(
-          visibility.tags,
-          () => filterTags.some((tag) => img.tagList.includes(tag)),
-          () => filterTags.every((tag) => img.tagList.includes(tag)),
-        );
-        if (!passes) return false;
-      }
+    // Tags class — skip when scopeTagless is on (tagless assets have no tags to filter)
+    if (!visibility.scopeTagless && filterTags.length > 0) {
+      const passes = checkClass(
+        visibility.tags,
+        () => filterTags.some((tag) => img.tagList.includes(tag)),
+        () => filterTags.every((tag) => img.tagList.includes(tag)),
+      );
+      if (!passes) return false;
+    }
 
-      // Name search class
-      if (filenamePatterns.length > 0) {
-        const lowerFilename = img.fileId.toLowerCase();
-        const passes = checkClass(
-          visibility.nameSearch,
-          () => filenamePatterns.some((p) => lowerFilename.includes(p)),
-          () => filenamePatterns.every((p) => lowerFilename.includes(p)),
-        );
-        if (!passes) return false;
-      }
+    // Name search class
+    if (filenamePatterns.length > 0) {
+      const lowerFilename = img.fileId.toLowerCase();
+      const passes = checkClass(
+        visibility.nameSearch,
+        () => filenamePatterns.some((p) => lowerFilename.includes(p)),
+        () => filenamePatterns.every((p) => lowerFilename.includes(p)),
+      );
+      if (!passes) return false;
+    }
 
-      // Sizes class
-      if (filterSizes.length > 0) {
-        const matches = filterSizesSet.has(composeDimensions(img.dimensions));
-        if (!checkSingleValue(visibility.sizes, matches)) return false;
-      }
+    // Sizes class
+    if (filterSizes.length > 0) {
+      const matches = filterSizesSet.has(composeDimensions(img.dimensions));
+      if (!checkSingleValue(visibility.sizes, matches)) return false;
+    }
 
-      // Buckets class
-      if (filterBuckets.length > 0) {
-        const matches = filterBucketsSet.has(`${img.bucket.width}×${img.bucket.height}`);
-        if (!checkSingleValue(visibility.buckets, matches)) return false;
-      }
+    // Buckets class
+    if (filterBuckets.length > 0) {
+      const matches = filterBucketsSet.has(
+        `${img.bucket.width}×${img.bucket.height}`,
+      );
+      if (!checkSingleValue(visibility.buckets, matches)) return false;
+    }
 
-      // Extensions class
-      if (filterExtensions.length > 0) {
-        if (!checkSingleValue(visibility.extensions, filterExtensionsSet.has(img.fileExtension))) return false;
-      }
+    // Extensions class
+    if (filterExtensions.length > 0) {
+      if (
+        !checkSingleValue(
+          visibility.extensions,
+          filterExtensionsSet.has(img.fileExtension),
+        )
+      )
+        return false;
+    }
 
-      // Subfolders class
-      if (filterSubfolders.length > 0) {
-        const matches = !!img.subfolder && filterSubfoldersSet.has(img.subfolder);
-        if (!checkSingleValue(visibility.subfolders, matches)) return false;
-      }
+    // Subfolders class
+    if (filterSubfolders.length > 0) {
+      const matches = !!img.subfolder && filterSubfoldersSet.has(img.subfolder);
+      if (!checkSingleValue(visibility.subfolders, matches)) return false;
+    }
 
-      return true;
-    },
-  );
+    return true;
+  });
 
   return filteredAssets;
 };
@@ -182,8 +197,13 @@ const applySorting = (
   let filteredSet: Set<string> | null = null;
   if (sortType === SortType.FILTERED && filterCriteria) {
     filteredSet = new Set<string>();
-    const { filterTags, filterSizes, filterBuckets, filterExtensions, filterSubfolders } =
-      filterCriteria;
+    const {
+      filterTags,
+      filterSizes,
+      filterBuckets,
+      filterExtensions,
+      filterSubfolders,
+    } = filterCriteria;
     const safeFilterSubfolders = filterSubfolders || [];
     const filterSizesSet = new Set(filterSizes);
     const filterBucketsSet = new Set(filterBuckets);

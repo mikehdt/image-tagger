@@ -1,0 +1,195 @@
+/**
+ * Centralised field registry for the training configuration form.
+ * Maps every form field to its expertise tier, conceptual group,
+ * and corresponding TrainingDefaults key (for change detection).
+ */
+
+import type { TrainingDefaults } from './models';
+import { getModelById } from './models';
+
+export type ExpertiseTier = 'simple' | 'intermediate' | 'advanced' | 'expert';
+
+export type ConceptualGroup =
+  | 'whatToTrain'
+  | 'learning'
+  | 'loraShape'
+  | 'performance'
+  | 'sampling'
+  | 'saving';
+
+export type FieldMeta = {
+  tier: ExpertiseTier;
+  group: ConceptualGroup;
+  /** Key on TrainingDefaults to compare against (null for fields with no model default) */
+  defaultKey: keyof TrainingDefaults | null;
+};
+
+/**
+ * Every form field mapped to its tier, group, and default key.
+ * Fields without a defaultKey (modelId, outputName, datasets, durationMode, networkType)
+ * are user choices that don't have model-specific defaults to compare against.
+ */
+export const FIELD_REGISTRY: Record<string, FieldMeta> = {
+  // What to Train
+  modelId: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+  outputName: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+  datasets: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+
+  // Learning
+  durationMode: { tier: 'simple', group: 'learning', defaultKey: null },
+  epochs: { tier: 'simple', group: 'learning', defaultKey: 'epochs' },
+  steps: { tier: 'simple', group: 'learning', defaultKey: 'steps' },
+  learningRate: {
+    tier: 'simple',
+    group: 'learning',
+    defaultKey: 'learningRate',
+  },
+  optimizer: {
+    tier: 'intermediate',
+    group: 'learning',
+    defaultKey: 'optimizer',
+  },
+  scheduler: {
+    tier: 'intermediate',
+    group: 'learning',
+    defaultKey: 'scheduler',
+  },
+  warmupSteps: {
+    tier: 'advanced',
+    group: 'learning',
+    defaultKey: 'warmupSteps',
+  },
+  weightDecay: {
+    tier: 'advanced',
+    group: 'learning',
+    defaultKey: 'weightDecay',
+  },
+
+  // LoRA Shape
+  networkDim: { tier: 'simple', group: 'loraShape', defaultKey: 'networkDim' },
+  networkAlpha: {
+    tier: 'intermediate',
+    group: 'loraShape',
+    defaultKey: 'networkAlpha',
+  },
+  networkType: { tier: 'intermediate', group: 'loraShape', defaultKey: null },
+
+  // Performance
+  batchSize: {
+    tier: 'intermediate',
+    group: 'performance',
+    defaultKey: 'batchSize',
+  },
+  resolution: {
+    tier: 'intermediate',
+    group: 'performance',
+    defaultKey: 'resolution',
+  },
+  mixedPrecision: {
+    tier: 'intermediate',
+    group: 'performance',
+    defaultKey: 'mixedPrecision',
+  },
+  gradientAccumulationSteps: {
+    tier: 'advanced',
+    group: 'performance',
+    defaultKey: 'gradientAccumulationSteps',
+  },
+  gradientCheckpointing: {
+    tier: 'advanced',
+    group: 'performance',
+    defaultKey: 'gradientCheckpointing',
+  },
+  cacheLatents: {
+    tier: 'advanced',
+    group: 'performance',
+    defaultKey: 'cacheLatents',
+  },
+  captionDropoutRate: {
+    tier: 'advanced',
+    group: 'performance',
+    defaultKey: 'captionDropoutRate',
+  },
+
+  // Sampling
+  samplePrompts: { tier: 'intermediate', group: 'sampling', defaultKey: null },
+  sampleEveryNSteps: {
+    tier: 'intermediate',
+    group: 'sampling',
+    defaultKey: 'sampleEveryNSteps',
+  },
+  sampleSteps: {
+    tier: 'intermediate',
+    group: 'sampling',
+    defaultKey: 'sampleSteps',
+  },
+  seed: { tier: 'advanced', group: 'sampling', defaultKey: 'seed' },
+  guidanceScale: {
+    tier: 'advanced',
+    group: 'sampling',
+    defaultKey: 'guidanceScale',
+  },
+  noiseScheduler: {
+    tier: 'advanced',
+    group: 'sampling',
+    defaultKey: 'noiseScheduler',
+  },
+
+  // Saving
+  saveEveryNEpochs: {
+    tier: 'intermediate',
+    group: 'saving',
+    defaultKey: 'saveEveryNEpochs',
+  },
+};
+
+export const GROUP_META: Record<
+  ConceptualGroup,
+  { label: string; order: number }
+> = {
+  whatToTrain: { label: 'What to Train', order: 0 },
+  learning: { label: 'Learning', order: 1 },
+  loraShape: { label: 'LoRA Shape', order: 2 },
+  performance: { label: 'Performance', order: 3 },
+  sampling: { label: 'Sampling', order: 4 },
+  saving: { label: 'Saving', order: 5 },
+};
+
+const TIER_ORDER: ExpertiseTier[] = [
+  'simple',
+  'intermediate',
+  'advanced',
+  'expert',
+];
+
+/** Check if `current` tier is at least as high as `required`. */
+export function isTierAtLeast(
+  current: ExpertiseTier,
+  required: ExpertiseTier,
+): boolean {
+  return TIER_ORDER.indexOf(current) >= TIER_ORDER.indexOf(required);
+}
+
+/** Get the set of visible field names for a given tier and model. */
+export function getVisibleFields(
+  tier: ExpertiseTier,
+  modelId: string,
+): Set<string> {
+  const model = getModelById(modelId);
+  const hiddenByModel = new Set(model?.hiddenFields ?? []);
+
+  const visible = new Set<string>();
+  for (const [field, meta] of Object.entries(FIELD_REGISTRY)) {
+    if (!isTierAtLeast(tier, meta.tier)) continue;
+    if (meta.defaultKey && hiddenByModel.has(meta.defaultKey)) continue;
+    visible.add(field);
+  }
+  return visible;
+}
+
+/** Get all field names belonging to a conceptual group. */
+export function getFieldsForGroup(group: ConceptualGroup): string[] {
+  return Object.entries(FIELD_REGISTRY)
+    .filter(([, meta]) => meta.group === group)
+    .map(([field]) => field);
+}

@@ -185,11 +185,18 @@ export const selectAssetsWithActiveFilters = createSelector(
       const bucketSet = new Set(filterBuckets);
 
       return allImages.filter((img) => {
-        if (tagSet.size > 0 && img.tagList.some((t) => tagSet.has(t))) return true;
+        if (tagSet.size > 0 && img.tagList.some((t) => tagSet.has(t)))
+          return true;
         if (extSet.size > 0 && extSet.has(img.fileExtension)) return true;
-        if (subSet.size > 0 && img.subfolder && subSet.has(img.subfolder)) return true;
-        if (sizeSet.size > 0 && sizeSet.has(composeDimensions(img.dimensions))) return true;
-        if (bucketSet.size > 0 && bucketSet.has(`${img.bucket.width}×${img.bucket.height}`)) return true;
+        if (subSet.size > 0 && img.subfolder && subSet.has(img.subfolder))
+          return true;
+        if (sizeSet.size > 0 && sizeSet.has(composeDimensions(img.dimensions)))
+          return true;
+        if (
+          bucketSet.size > 0 &&
+          bucketSet.has(`${img.bucket.width}×${img.bucket.height}`)
+        )
+          return true;
         if (filenamePatterns.length > 0) {
           const lower = img.fileId.toLowerCase();
           if (filenamePatterns.some((p) => lower.includes(p))) return true;

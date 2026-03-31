@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react';
 
-import type { Project, ProjectColor } from '@/app/components/project-list/types';
+import type {
+  Project,
+  ProjectColor,
+} from '@/app/components/project-list/types';
 import {
   createProjectThumbnail,
   type ProjectConfig,
@@ -151,7 +154,11 @@ export const useEditProject = (
         setProjects((prev) =>
           prev.map((project) =>
             project.name === projectName
-              ? { ...project, thumbnail: undefined, thumbnailVersion: undefined }
+              ? {
+                  ...project,
+                  thumbnail: undefined,
+                  thumbnailVersion: undefined,
+                }
               : project,
           ),
         );

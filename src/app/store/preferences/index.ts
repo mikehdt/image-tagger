@@ -13,12 +13,15 @@ const preferencesSlice = createSlice({
   selectors: {
     selectTheme: (state) => state.theme,
     selectTagEditMode: (state) => state.tagEditMode,
+    selectTrainingViewMode: (state) => state.trainingViewMode,
   },
 });
 
 export const { reducer: preferencesReducer } = preferencesSlice;
-export const { setTheme, setTagEditMode } = preferencesSlice.actions;
-export const { selectTheme, selectTagEditMode } = preferencesSlice.selectors;
+export const { setTheme, setTagEditMode, setTrainingViewMode } =
+  preferencesSlice.actions;
+export const { selectTheme, selectTagEditMode, selectTrainingViewMode } =
+  preferencesSlice.selectors;
 
 /**
  * Subscribe to store changes and persist preferences to localStorage.
@@ -38,5 +41,5 @@ export const subscribePreferencesPersistence = (store: {
   });
 };
 
-export type { PreferencesState, ThemeMode } from './types';
+export type { PreferencesState, ThemeMode, TrainingViewMode } from './types';
 export { TagEditMode } from './types';

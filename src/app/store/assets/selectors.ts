@@ -118,7 +118,6 @@ export const selectImageSizes = createSelector([selectAllImages], (images) => {
   return counts;
 });
 
-
 // Custom selector to check if any assets have modified tags
 export const selectHasModifiedAssets = wrapSelector(
   'selectHasModifiedAssets',

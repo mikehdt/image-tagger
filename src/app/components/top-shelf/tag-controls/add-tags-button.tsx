@@ -2,7 +2,10 @@ import { TagIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import { selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
+import {
+  selectHasActiveFilters,
+  selectHasActiveVisibility,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   addMultipleTagsToAssetsWithDualSelection,

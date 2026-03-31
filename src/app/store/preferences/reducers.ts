@@ -1,6 +1,11 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { PreferencesState, TagEditMode, ThemeMode } from './types';
+import {
+  PreferencesState,
+  TagEditMode,
+  ThemeMode,
+  TrainingViewMode,
+} from './types';
 
 export const coreReducers = {
   setTheme: (
@@ -15,5 +20,12 @@ export const coreReducers = {
     { payload }: PayloadAction<TagEditMode>,
   ) => {
     state.tagEditMode = payload;
+  },
+
+  setTrainingViewMode: (
+    state: PreferencesState,
+    { payload }: PayloadAction<TrainingViewMode>,
+  ) => {
+    state.trainingViewMode = payload;
   },
 };

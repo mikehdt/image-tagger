@@ -198,7 +198,7 @@ const AssetComponent = ({
         </span>
       </div>
 
-      <div className="flex min-w-0 w-full flex-wrap">
+      <div className="flex w-full min-w-0 flex-wrap">
         <div
           className={`relative flex min-h-40 w-full cursor-pointer items-center justify-center self-stretch bg-(--surface-muted) transition-all ${!imageZoom ? 'md:w-1/4' : 'md:w-3/4'}`}
           onClick={toggleImageZoom}

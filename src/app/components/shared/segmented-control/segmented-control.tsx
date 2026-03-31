@@ -17,7 +17,9 @@ export function SegmentedControl<T extends string>({
   disabled = false,
 }: SegmentedControlProps<T>) {
   return (
-    <div className={`flex w-full items-center rounded-sm bg-slate-100 shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:border dark:border-slate-600 dark:bg-slate-700 dark:shadow-slate-600/50 dark:inset-shadow-slate-800 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
+    <div
+      className={`flex w-full items-center rounded-sm bg-slate-100 shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:border dark:border-slate-600 dark:bg-slate-700 dark:shadow-slate-600/50 dark:inset-shadow-slate-800 ${disabled ? 'pointer-events-none opacity-40' : ''}`}
+    >
       {options.map((option, index) => {
         const isSelected = value === option.value;
         const isFirst = index === 0;

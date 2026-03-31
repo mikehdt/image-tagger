@@ -24,56 +24,71 @@ export type DatasetFolder = {
 export type DurationMode = 'epochs' | 'steps';
 
 export type FormState = {
-  // Model
+  // What to Train
   modelId: string;
-
-  // Output
   outputName: string;
-
-  // Dataset
   datasets: DatasetSource[];
 
-  // Training
+  // Learning
   durationMode: DurationMode;
   epochs: number;
   steps: number;
   learningRate: number;
   optimizer: string;
-  batchSize: number;
+  scheduler: string;
+  warmupSteps: number;
+  weightDecay: number;
 
-  // Network
+  // LoRA Shape
   networkType: 'lora' | 'locon' | 'lokr';
   networkDim: number;
   networkAlpha: number;
 
-  // Advanced
-  scheduler: string;
-  warmupSteps: number;
-  gradientAccumulationSteps: number;
-  mixedPrecision: 'bf16' | 'fp16';
+  // Performance
+  batchSize: number;
   resolution: number[];
+  mixedPrecision: 'bf16' | 'fp16';
+  gradientAccumulationSteps: number;
+  gradientCheckpointing: boolean;
+  cacheLatents: boolean;
+  captionDropoutRate: number;
 
-  // Saving & Samples
-  saveEveryNEpochs: number;
-  sampleEveryNSteps: number;
+  // Sampling
   samplePrompts: string;
+  sampleEveryNSteps: number;
+  sampleSteps: number;
+  seed: number;
+  guidanceScale: number;
+  noiseScheduler: string;
+
+  // Saving
+  saveEveryNEpochs: number;
 };
 
 type FormAction =
-  | { type: 'SET_FIELD'; field: keyof FormState; value: FormState[keyof FormState] }
+  | {
+      type: 'SET_FIELD';
+      field: keyof FormState;
+      value: FormState[keyof FormState];
+    }
   | { type: 'SET_MODEL'; modelId: string }
   | { type: 'RESET_SECTION'; section: SectionName }
   | { type: 'RESET_ALL' }
   | { type: 'ADD_DATASET'; projectName: string; folders: DatasetFolder[] }
   | { type: 'REMOVE_DATASET'; index: number }
-  | { type: 'SET_FOLDER_REPEATS'; datasetIndex: number; folderName: string; repeats: number | null };
+  | {
+      type: 'SET_FOLDER_REPEATS';
+      datasetIndex: number;
+      folderName: string;
+      repeats: number | null;
+    };
 
 export type SectionName =
-  | 'model'
-  | 'dataset'
-  | 'training'
-  | 'network'
-  | 'advanced'
+  | 'whatToTrain'
+  | 'learning'
+  | 'loraShape'
+  | 'performance'
+  | 'sampling'
   | 'saving';
 
 // --- Helpers ---
@@ -91,18 +106,26 @@ function defaultsToFormState(
     steps: defaults.steps,
     learningRate: defaults.learningRate,
     optimizer: defaults.optimizer,
-    batchSize: defaults.batchSize,
+    scheduler: defaults.scheduler,
+    warmupSteps: defaults.warmupSteps,
+    weightDecay: defaults.weightDecay,
     networkType: 'lora',
     networkDim: defaults.networkDim,
     networkAlpha: defaults.networkAlpha,
-    scheduler: defaults.scheduler,
-    warmupSteps: defaults.warmupSteps,
-    gradientAccumulationSteps: defaults.gradientAccumulationSteps,
-    mixedPrecision: defaults.mixedPrecision,
+    batchSize: defaults.batchSize,
     resolution: defaults.resolution,
-    saveEveryNEpochs: defaults.saveEveryNEpochs,
-    sampleEveryNSteps: defaults.sampleEveryNSteps,
+    mixedPrecision: defaults.mixedPrecision,
+    gradientAccumulationSteps: defaults.gradientAccumulationSteps,
+    gradientCheckpointing: defaults.gradientCheckpointing,
+    cacheLatents: defaults.cacheLatents,
+    captionDropoutRate: defaults.captionDropoutRate,
     samplePrompts: '',
+    sampleEveryNSteps: defaults.sampleEveryNSteps,
+    sampleSteps: defaults.sampleSteps,
+    seed: defaults.seed,
+    guidanceScale: defaults.guidanceScale,
+    noiseScheduler: defaults.noiseScheduler,
+    saveEveryNEpochs: defaults.saveEveryNEpochs,
   };
 }
 
@@ -132,37 +155,50 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case 'RESET_SECTION': {
       const defaults = getDefaults(state.modelId);
       switch (action.section) {
-        case 'training':
+        case 'learning':
           return {
             ...state,
+            durationMode: 'epochs',
             epochs: defaults.epochs,
             steps: defaults.steps,
             learningRate: defaults.learningRate,
             optimizer: defaults.optimizer,
-            batchSize: defaults.batchSize,
+            scheduler: defaults.scheduler,
+            warmupSteps: defaults.warmupSteps,
+            weightDecay: defaults.weightDecay,
           };
-        case 'network':
+        case 'loraShape':
           return {
             ...state,
             networkType: 'lora',
             networkDim: defaults.networkDim,
             networkAlpha: defaults.networkAlpha,
           };
-        case 'advanced':
+        case 'performance':
           return {
             ...state,
-            scheduler: defaults.scheduler,
-            warmupSteps: defaults.warmupSteps,
-            gradientAccumulationSteps: defaults.gradientAccumulationSteps,
-            mixedPrecision: defaults.mixedPrecision,
+            batchSize: defaults.batchSize,
             resolution: defaults.resolution,
+            mixedPrecision: defaults.mixedPrecision,
+            gradientAccumulationSteps: defaults.gradientAccumulationSteps,
+            gradientCheckpointing: defaults.gradientCheckpointing,
+            cacheLatents: defaults.cacheLatents,
+            captionDropoutRate: defaults.captionDropoutRate,
+          };
+        case 'sampling':
+          return {
+            ...state,
+            samplePrompts: '',
+            sampleEveryNSteps: defaults.sampleEveryNSteps,
+            sampleSteps: defaults.sampleSteps,
+            seed: defaults.seed,
+            guidanceScale: defaults.guidanceScale,
+            noiseScheduler: defaults.noiseScheduler,
           };
         case 'saving':
           return {
             ...state,
             saveEveryNEpochs: defaults.saveEveryNEpochs,
-            sampleEveryNSteps: defaults.sampleEveryNSteps,
-            samplePrompts: '',
           };
         default:
           return state;
@@ -276,27 +312,34 @@ export function useTrainingConfigForm() {
   // Check which sections have been modified from defaults
   const sectionHasChanges = useMemo(
     () => ({
-      model: false, // Model selection is always intentional
-      dataset: false, // Dataset selection is always intentional
-      training:
+      whatToTrain: false, // Model/dataset selection is always intentional
+      learning:
         state.learningRate !== defaults.learningRate ||
         state.optimizer !== defaults.optimizer ||
-        state.batchSize !== defaults.batchSize ||
-        state.epochs !== defaults.epochs,
-      network:
+        state.scheduler !== defaults.scheduler ||
+        state.epochs !== defaults.epochs ||
+        state.warmupSteps !== defaults.warmupSteps ||
+        state.weightDecay !== defaults.weightDecay,
+      loraShape:
         state.networkDim !== defaults.networkDim ||
         state.networkAlpha !== defaults.networkAlpha ||
         state.networkType !== 'lora',
-      advanced:
-        state.scheduler !== defaults.scheduler ||
-        state.warmupSteps !== defaults.warmupSteps ||
+      performance:
+        state.batchSize !== defaults.batchSize ||
+        state.mixedPrecision !== defaults.mixedPrecision ||
         state.gradientAccumulationSteps !==
           defaults.gradientAccumulationSteps ||
-        state.mixedPrecision !== defaults.mixedPrecision,
-      saving:
-        state.saveEveryNEpochs !== defaults.saveEveryNEpochs ||
+        state.gradientCheckpointing !== defaults.gradientCheckpointing ||
+        state.cacheLatents !== defaults.cacheLatents ||
+        state.captionDropoutRate !== defaults.captionDropoutRate,
+      sampling:
         state.sampleEveryNSteps !== defaults.sampleEveryNSteps ||
+        state.sampleSteps !== defaults.sampleSteps ||
+        state.seed !== defaults.seed ||
+        state.guidanceScale !== defaults.guidanceScale ||
+        state.noiseScheduler !== defaults.noiseScheduler ||
         state.samplePrompts !== '',
+      saving: state.saveEveryNEpochs !== defaults.saveEveryNEpochs,
     }),
     [state, defaults],
   );
@@ -334,7 +377,12 @@ export function useTrainingConfigForm() {
 
   const setFolderRepeats = useCallback(
     (datasetIndex: number, folderName: string, repeats: number | null) => {
-      dispatch({ type: 'SET_FOLDER_REPEATS', datasetIndex, folderName, repeats });
+      dispatch({
+        type: 'SET_FOLDER_REPEATS',
+        datasetIndex,
+        folderName,
+        repeats,
+      });
     },
     [],
   );

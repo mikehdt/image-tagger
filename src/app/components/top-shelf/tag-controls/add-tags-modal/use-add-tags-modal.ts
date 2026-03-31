@@ -1,7 +1,10 @@
 import { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { RootState } from '@/app/store';
-import { selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
+import {
+  selectHasActiveFilters,
+  selectHasActiveVisibility,
+} from '@/app/store/filters';
 import { useAppSelector } from '@/app/store/hooks';
 import {
   selectAssetsWithActiveFilters,

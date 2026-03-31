@@ -61,9 +61,7 @@ export const useTagsView = () => {
       // If sort type is count, compare by count then alphabetical (A-Z) as tie-breaker
       else if (sortType === 'count') {
         const countDiff =
-          sortDirection === 'asc'
-            ? a.count - b.count
-            : b.count - a.count;
+          sortDirection === 'asc' ? a.count - b.count : b.count - a.count;
         if (countDiff !== 0) return countDiff;
         return a.tag.localeCompare(b.tag);
       }

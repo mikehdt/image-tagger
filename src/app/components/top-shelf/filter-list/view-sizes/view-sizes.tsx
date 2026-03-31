@@ -237,7 +237,10 @@ export const SizesView = () => {
               <li
                 id={`size-${item.dimensions}`}
                 key={item.dimensions}
-                onClick={() => { handleItemClick(index); handleToggle(item.dimensions); }}
+                onClick={() => {
+                  handleItemClick(index);
+                  handleToggle(item.dimensions);
+                }}
                 onMouseMove={() => handleItemMouseMove(index)}
                 className={`flex min-h-14 cursor-pointer items-center justify-between px-3 py-2 transition-colors ${
                   index === selectedIndex

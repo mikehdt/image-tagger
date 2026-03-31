@@ -18,16 +18,20 @@ import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
 import { Button } from '../shared/button';
 import { useToast } from '../shared/toast';
+import { BottomShelfFrame } from '../shelf';
 import { IoActions } from './io-actions';
 import { LoadingStatus } from './loading-status';
 
-type BottomShelfProps = {
+type TaggingBottomShelfProps = {
   currentPage?: number;
   totalPages?: number;
   basePath?: string;
 };
 
-export const BottomShelf = ({ currentPage = 1, basePath }: BottomShelfProps) => {
+export const TaggingBottomShelf = ({
+  currentPage = 1,
+  basePath,
+}: TaggingBottomShelfProps) => {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
 
@@ -85,47 +89,49 @@ export const BottomShelf = ({ currentPage = 1, basePath }: BottomShelfProps) => 
     ioState === IoState.COMPLETING;
 
   return (
-    <div className="fixed bottom-0 left-0 z-10 w-full border-t border-t-(--border-subtle) bg-(--surface-glass) inset-shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-400 items-center px-4">
-        <div className="flex w-1/4 items-center gap-2 text-xs whitespace-nowrap">
-          <Button
-            variant="ghost"
-            color="slate"
-            size="small"
-            onClick={handleToggleCropVisualization}
-            isPressed={showCropVisualization}
-            title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
-          >
-            {showCropVisualization ? (
-              <EyeOffIcon className="h-5 w-5" />
-            ) : (
-              <EyeIcon className="h-5 w-5" />
-            )}
-          </Button>
-
-          {ioInProgress ? (
-            <LoadingStatus
-              ioState={ioState}
-              saveProgress={saveProgress}
-              loadProgress={loadProgress}
-            />
+    <BottomShelfFrame>
+      <div className="flex w-1/4 items-center gap-2 text-xs whitespace-nowrap">
+        <Button
+          variant="ghost"
+          color="slate"
+          size="small"
+          onClick={handleToggleCropVisualization}
+          isPressed={showCropVisualization}
+          title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}
+        >
+          {showCropVisualization ? (
+            <EyeOffIcon className="h-5 w-5" />
           ) : (
-            <PaginationControls
-              currentPage={currentPage}
-              totalItems={filteredCount}
-              basePath={basePath}
-            />
+            <EyeIcon className="h-5 w-5" />
           )}
-        </div>
+        </Button>
 
-        <div className="flex w-2/4 items-center justify-center">
-          <Pagination currentPage={currentPage} totalItems={filteredCount} basePath={basePath} />
-        </div>
-
-        <div className="flex w-1/4 items-center justify-end gap-2 text-sm">
-          <IoActions ioInProgress={ioInProgress} />
-        </div>
+        {ioInProgress ? (
+          <LoadingStatus
+            ioState={ioState}
+            saveProgress={saveProgress}
+            loadProgress={loadProgress}
+          />
+        ) : (
+          <PaginationControls
+            currentPage={currentPage}
+            totalItems={filteredCount}
+            basePath={basePath}
+          />
+        )}
       </div>
-    </div>
+
+      <div className="flex w-2/4 items-center justify-center">
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredCount}
+          basePath={basePath}
+        />
+      </div>
+
+      <div className="flex w-1/4 items-center justify-end gap-2 text-sm">
+        <IoActions ioInProgress={ioInProgress} />
+      </div>
+    </BottomShelfFrame>
   );
 };

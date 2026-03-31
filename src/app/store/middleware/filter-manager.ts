@@ -382,7 +382,9 @@ filterManagerMiddleware.startListening({
   effect: async (_action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
     if (state.filters.visibility.scopeSelected) {
-      listenerApi.dispatch(batchCleanupVisibility({ clearScopeSelected: true }));
+      listenerApi.dispatch(
+        batchCleanupVisibility({ clearScopeSelected: true }),
+      );
     }
   },
 });

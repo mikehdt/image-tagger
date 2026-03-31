@@ -11,10 +11,7 @@ import {
   selectIoState,
 } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  selectProjectFolderName,
-  setProjectInfo,
-} from '../store/project';
+import { selectProjectFolderName, setProjectInfo } from '../store/project';
 import { getProjectInfo } from '../utils/project-actions';
 import { useTheme } from '../utils/use-theme';
 import { Error } from '../views/error';

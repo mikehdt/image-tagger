@@ -79,7 +79,13 @@ export const AssetSortControls = () => {
       dispatch(setSortType(SortType.NAME));
       dispatch(setSortDirection(SortDirection.ASC));
     }
-  }, [sortType, selectedAssetsCount, filteredSortDisabled, hasSubfolderAssets, dispatch]);
+  }, [
+    sortType,
+    selectedAssetsCount,
+    filteredSortDisabled,
+    hasSubfolderAssets,
+    dispatch,
+  ]);
 
   const handleSortTypeChange = useCallback(
     (newSortType: SortType) => {

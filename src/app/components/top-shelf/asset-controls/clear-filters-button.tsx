@@ -2,7 +2,11 @@ import { FunnelXIcon } from 'lucide-react';
 import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
-import { clearFilters, selectHasActiveFilters, selectHasActiveVisibility } from '@/app/store/filters';
+import {
+  clearFilters,
+  selectHasActiveFilters,
+  selectHasActiveVisibility,
+} from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 
 export const ClearFiltersButton = () => {

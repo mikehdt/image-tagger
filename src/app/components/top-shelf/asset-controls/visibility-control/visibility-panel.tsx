@@ -112,7 +112,11 @@ const ClassModeSection = ({
 
   return (
     <>
-      <SectionDivider icon={section.icon} color={section.color} className="my-2">
+      <SectionDivider
+        icon={section.icon}
+        color={section.color}
+        className="my-2"
+      >
         <span className="font-semibold">{section.label}</span>{' '}
         <span className="tabular-nums">{section.count}</span>
       </SectionDivider>

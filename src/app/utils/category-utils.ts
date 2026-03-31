@@ -177,9 +177,10 @@ export const sortCategories = (
 
             // Primary: repeat count (direction-aware), tiebreak: label (always a-z)
             if (aRepeat !== bRepeat) {
-              comparison = sortDirection === SortDirection.ASC
-                ? aRepeat - bRepeat
-                : bRepeat - aRepeat;
+              comparison =
+                sortDirection === SortDirection.ASC
+                  ? aRepeat - bRepeat
+                  : bRepeat - aRepeat;
             } else {
               comparison = aLabel.localeCompare(bLabel);
             }

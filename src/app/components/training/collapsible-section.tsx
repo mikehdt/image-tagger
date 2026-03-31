@@ -6,6 +6,8 @@ type CollapsibleSectionProps = {
   defaultExpanded?: boolean;
   hasChanges?: boolean;
   onReset?: () => void;
+  /** Count of hidden fields (in higher tiers) that have non-default values */
+  hiddenChangesCount?: number;
   children: ReactNode;
 };
 
@@ -14,6 +16,7 @@ const CollapsibleSectionComponent = ({
   defaultExpanded = true,
   hasChanges = false,
   onReset,
+  hiddenChangesCount = 0,
   children,
 }: CollapsibleSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
@@ -45,11 +48,15 @@ const CollapsibleSectionComponent = ({
         className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left"
       >
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-(--foreground)">
-            {title}
-          </h3>
+          <h3 className="text-sm font-semibold text-(--foreground)">{title}</h3>
           {hasChanges && (
             <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+          )}
+          {hiddenChangesCount > 0 && (
+            <span className="text-xs text-amber-500/70">
+              {hiddenChangesCount} hidden{' '}
+              {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+            </span>
           )}
         </div>
 

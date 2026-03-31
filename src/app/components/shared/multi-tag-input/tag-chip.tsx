@@ -70,9 +70,7 @@ const TagChipComponent = ({
         className={`ml-1 cursor-pointer rounded-full p-0.5 transition-colors ${getButtonHoverStyle(status, isHighlighted)}`}
         aria-label={`Remove tag ${tag}`}
       >
-        <XIcon
-          className={`h-4 w-4 ${getIconStyle(status, isHighlighted)}`}
-        />
+        <XIcon className={`h-4 w-4 ${getIconStyle(status, isHighlighted)}`} />
       </button>
     </div>
   );

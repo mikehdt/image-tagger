@@ -12,7 +12,11 @@ const toastsSlice = createSlice({
   reducers: {
     addToast: (
       state,
-      action: PayloadAction<Omit<Toast, 'id' | 'timestamp' | 'variant'> & { variant?: Toast['variant'] }>,
+      action: PayloadAction<
+        Omit<Toast, 'id' | 'timestamp' | 'variant'> & {
+          variant?: Toast['variant'];
+        }
+      >,
     ) => {
       const toast: Toast = {
         id: crypto.randomUUID(),

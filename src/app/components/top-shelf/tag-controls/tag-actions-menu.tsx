@@ -43,7 +43,9 @@ export const TagActionsMenu = () => {
 
   const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
   const filteredAssets = useAppSelector(selectFilteredAssets);
-  const filteredAssetsCount = useAppSelector(selectAssetsWithActiveFiltersCount);
+  const filteredAssetsCount = useAppSelector(
+    selectAssetsWithActiveFiltersCount,
+  );
   const hasReadyModel = useAppSelector(selectHasReadyModel);
   const isAutoTaggerInitialised = useAppSelector(selectIsInitialised);
 
@@ -80,7 +82,8 @@ export const TagActionsMenu = () => {
   // Prepare assets for auto-tagger: only compute the full mapped array when modal is open
   const assetsForTagger = useMemo(() => {
     if (!isTaggerModalOpen) return [];
-    const source = selectedAssetsData.length > 0 ? selectedAssetsData : filteredAssets;
+    const source =
+      selectedAssetsData.length > 0 ? selectedAssetsData : filteredAssets;
     return source.map((asset) => ({
       fileId: asset.fileId,
       fileExtension: asset.fileExtension,
