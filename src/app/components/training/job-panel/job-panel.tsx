@@ -118,7 +118,7 @@ const JobPanelComponent = () => {
               curve={schedulerCurve}
               width={264}
               height={40}
-              className="text-sky-500"
+              className="w-full text-sky-500"
             />
           </div>
         </div>

@@ -1,10 +1,11 @@
 'use client';
 
-import { FolderIcon, Loader2Icon } from 'lucide-react';
+import { FolderIcon, Loader2Icon, StarIcon } from 'lucide-react';
 import Image from 'next/image';
-import React, { memo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
+import { Checkbox } from '@/app/components/shared/checkbox/checkbox';
 import { Popup } from '@/app/components/shared/popup';
 
 import type { DatasetFolder } from '../training-config-form/use-training-config-form';
@@ -42,6 +43,78 @@ const ProjectPickerComponent = ({
     selectProject,
   } = useProjectPicker({ excludeFolders, onSelect });
 
+  const [showHidden, setShowHidden] = useState(false);
+
+  const { featured, regular, hasHidden } = useMemo(() => {
+    const visible = projects.filter((p) => showHidden || !p.hidden);
+    return {
+      featured: visible.filter((p) => p.featured),
+      regular: visible.filter((p) => !p.featured),
+      hasHidden: projects.some((p) => p.hidden),
+    };
+  }, [projects, showHidden]);
+
+  const isEmpty = featured.length === 0 && regular.length === 0;
+
+  const renderProject = (project: (typeof projects)[number]) => {
+    const isExcluded = excludeFolders.includes(project.name);
+    const isSelecting = selectingFolder === project.name;
+    const thumbnailSrc = project.thumbnail
+      ? `/tagging-projects/${project.thumbnail}${project.thumbnailVersion ? `?v=${project.thumbnailVersion}` : ''}`
+      : null;
+
+    return (
+      <button
+        key={project.name}
+        type="button"
+        disabled={isExcluded || isSelecting}
+        onClick={() => selectProject(project)}
+        className={`flex w-full items-center gap-3 px-3 py-2 text-left ${
+          isExcluded
+            ? 'cursor-not-allowed opacity-40'
+            : isSelecting
+              ? 'bg-sky-50 dark:bg-sky-900/30'
+              : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700'
+        }`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-600">
+          {thumbnailSrc ? (
+            <Image
+              src={thumbnailSrc}
+              alt={project.title || project.name}
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <FolderIcon className="h-4 w-4 text-slate-400" />
+          )}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium text-(--foreground)">
+            {project.title || project.name}
+          </div>
+          {project.title && project.title !== project.name && (
+            <div className="truncate text-xs text-slate-400">
+              {project.name}
+            </div>
+          )}
+        </div>
+
+        <span className="shrink-0 text-xs text-slate-400 tabular-nums">
+          {isSelecting ? (
+            <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
+          ) : isExcluded ? (
+            'Added'
+          ) : (
+            `${project.imageCount ?? 0}`
+          )}
+        </span>
+      </button>
+    );
+  };
+
   return (
     <>
       <Button
@@ -63,73 +136,51 @@ const ProjectPickerComponent = ({
           <div className="flex items-center justify-center py-6">
             <Loader2Icon className="h-5 w-5 animate-spin text-slate-400" />
           </div>
-        ) : projects.length === 0 ? (
+        ) : isEmpty ? (
           <div className="px-4 py-6 text-center text-sm text-slate-400">
             No projects found
           </div>
         ) : (
           <div className="py-1">
-            {projects.map((project) => {
-              const isExcluded = excludeFolders.includes(project.name);
-              const isSelecting = selectingFolder === project.name;
-              const thumbnailSrc = project.thumbnail
-                ? `/tagging-projects/${project.thumbnail}${project.thumbnailVersion ? `?v=${project.thumbnailVersion}` : ''}`
-                : null;
+            {/* Show hidden toggle — at top so toggling doesn't shift scroll */}
+            {hasHidden && (
+              <div className="border-b border-slate-100 px-3 py-1.5 dark:border-slate-700">
+                <Checkbox
+                  isSelected={showHidden}
+                  onChange={() => setShowHidden(!showHidden)}
+                  label="Show hidden"
+                  size="small"
+                />
+              </div>
+            )}
 
-              return (
-                <button
-                  key={project.name}
-                  type="button"
-                  disabled={isExcluded || isSelecting}
-                  onClick={() => selectProject(project)}
-                  className={`flex w-full items-center gap-3 px-3 py-2 text-left ${
-                    isExcluded
-                      ? 'cursor-not-allowed opacity-40'
-                      : isSelecting
-                        ? 'bg-sky-50 dark:bg-sky-900/30'
-                        : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {/* Thumbnail or folder icon */}
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-600">
-                    {thumbnailSrc ? (
-                      <Image
-                        src={thumbnailSrc}
-                        alt={project.title || project.name}
-                        width={32}
-                        height={32}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <FolderIcon className="h-4 w-4 text-slate-400" />
-                    )}
+            {/* Featured */}
+            {featured.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+                  <StarIcon className="h-3 w-3 fill-current text-amber-500" />
+                  <span className="text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
+                    Featured
                   </span>
+                </div>
+                {featured.map(renderProject)}
+              </>
+            )}
 
-                  {/* Project info */}
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-(--foreground)">
-                      {project.title || project.name}
-                    </div>
-                    {project.title && project.title !== project.name && (
-                      <div className="truncate text-xs text-slate-400">
-                        {project.name}
-                      </div>
-                    )}
+            {/* Regular */}
+            {regular.length > 0 && (
+              <>
+                {featured.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+                    <FolderIcon className="h-3 w-3 text-slate-400" />
+                    <span className="text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
+                      Projects
+                    </span>
                   </div>
-
-                  {/* Image count or status */}
-                  <span className="shrink-0 text-xs text-slate-400 tabular-nums">
-                    {isSelecting ? (
-                      <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                    ) : isExcluded ? (
-                      'Added'
-                    ) : (
-                      `${project.imageCount ?? 0}`
-                    )}
-                  </span>
-                </button>
-              );
-            })}
+                )}
+                {regular.map(renderProject)}
+              </>
+            )}
           </div>
         )}
       </Popup>
