@@ -8,6 +8,7 @@ import { ModalProvider } from './components/shared/modal';
 import { PopupProvider } from './components/shared/popup';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
+import { JobPanel } from './components/training/job-panel/job-panel';
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
 
@@ -65,6 +66,7 @@ export default function Root({
               </PopupProvider>
               <ToastContainer />
               <AutoTaggerSetupModal />
+              <JobPanel />
             </ModalProvider>
           </AppProvider>
         </StoreProvider>

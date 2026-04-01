@@ -22,6 +22,7 @@ const initialState: TrainingState = {
   activeJobConfig: null,
   activeJobProgress: null,
   wsConnected: false,
+  panelOpen: false,
 };
 
 const trainingSlice = createSlice({
@@ -69,6 +70,18 @@ const trainingSlice = createSlice({
       state.wsConnected = action.payload;
     },
 
+    togglePanel: (state) => {
+      state.panelOpen = !state.panelOpen;
+    },
+
+    openPanel: (state) => {
+      state.panelOpen = true;
+    },
+
+    closePanel: (state) => {
+      state.panelOpen = false;
+    },
+
     // Restore state from sidecar on reconnection (e.g., after tab reopen)
     restoreJobState: (
       state,
@@ -94,6 +107,9 @@ export const {
   clearJob,
   setWsConnected,
   restoreJobState,
+  togglePanel,
+  openPanel,
+  closePanel,
 } = trainingSlice.actions;
 
 export const trainingReducer = trainingSlice.reducer;
@@ -117,6 +133,11 @@ export const selectActiveJobStatus = createSelector(
   (t) => t.activeJobStatus,
 );
 
+export const selectActiveJobConfig = createSelector(
+  selectTraining,
+  (t) => t.activeJobConfig,
+);
+
 export const selectActiveJobProgress = createSelector(
   selectTraining,
   (t) => t.activeJobProgress,
@@ -130,4 +151,9 @@ export const selectIsTraining = createSelector(
 export const selectWsConnected = createSelector(
   selectTraining,
   (t) => t.wsConnected,
+);
+
+export const selectPanelOpen = createSelector(
+  selectTraining,
+  (t) => t.panelOpen,
 );

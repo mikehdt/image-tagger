@@ -18,4 +18,7 @@ export type TrainingState = {
 
   // WebSocket connection state
   wsConnected: boolean;
+
+  // Job panel visibility (persists across navigation)
+  panelOpen: boolean;
 };
