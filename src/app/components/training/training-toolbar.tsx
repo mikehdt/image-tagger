@@ -1,7 +1,7 @@
 'use client';
 
 import { ListIcon, SaveIcon } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useSyncExternalStore } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown } from '@/app/components/shared/dropdown';
@@ -20,6 +20,10 @@ import {
 
 import { useTrainingViewMode } from './use-training-view-mode';
 
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 const VIEW_MODE_OPTIONS: { value: TrainingViewMode; label: string }[] = [
   { value: 'simple', label: 'Simple' },
   { value: 'intermediate', label: 'Intermediate' },
@@ -31,11 +35,19 @@ const VERSION_ITEMS = [{ value: 'v1', label: 'v1 — current' }];
 const TrainingToolbarComponent = () => {
   const dispatch = useAppDispatch();
   const viewMode = useTrainingViewMode();
+  const isClient = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
   const jobStatus = useAppSelector(selectActiveJobStatus);
   const panelOpen = useAppSelector(selectPanelOpen);
 
-  const hasActiveJob = jobStatus !== null;
-  const isRunning = jobStatus === 'training' || jobStatus === 'preparing';
+  // Defer Redux-dependent state until after hydration
+  const hasActiveJob = Boolean(isClient && jobStatus !== null);
+  const isRunning = Boolean(
+    isClient && (jobStatus === 'training' || jobStatus === 'preparing'),
+  );
 
   const handleViewModeChange = useCallback(
     (mode: TrainingViewMode) => {
