@@ -17,6 +17,8 @@ export type DatasetSource = {
   /** Thumbnail path for display (e.g. "projectname.png") */
   thumbnail?: string;
   thumbnailVersion?: number;
+  /** Image dimension histogram, e.g. { "1920x1080": 15 } */
+  dimensionHistogram?: Record<string, number>;
   folders: DatasetFolder[];
 };
 
@@ -93,7 +95,7 @@ type FormAction =
   | { type: 'ADD_SAMPLE_PROMPT' }
   | { type: 'REMOVE_SAMPLE_PROMPT'; index: number }
   | { type: 'SET_SAMPLE_PROMPT'; index: number; value: string }
-  | { type: 'ADD_DATASET'; folderName: string; displayName: string; thumbnail?: string; thumbnailVersion?: number; folders: DatasetFolder[] }
+  | { type: 'ADD_DATASET'; folderName: string; displayName: string; thumbnail?: string; thumbnailVersion?: number; dimensionHistogram?: Record<string, number>; folders: DatasetFolder[] }
   | { type: 'REMOVE_DATASET'; index: number }
   | {
       type: 'SET_FOLDER_REPEATS';
@@ -190,6 +192,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
             durationMode: 'epochs',
             epochs: defaults.epochs,
             steps: defaults.steps,
+            batchSize: defaults.batchSize,
             learningRate: defaults.learningRate,
             optimizer: defaults.optimizer,
             scheduler: defaults.scheduler,
@@ -207,7 +210,6 @@ function formReducer(state: FormState, action: FormAction): FormState {
         case 'performance':
           return {
             ...state,
-            batchSize: defaults.batchSize,
             resolution: defaults.resolution,
             mixedPrecision: defaults.mixedPrecision,
             gradientAccumulationSteps: defaults.gradientAccumulationSteps,
@@ -281,6 +283,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
             folderName: action.folderName,
             thumbnail: action.thumbnail,
             thumbnailVersion: action.thumbnailVersion,
+            dimensionHistogram: action.dimensionHistogram,
             folders: action.folders,
           },
         ],
@@ -386,6 +389,7 @@ export function useTrainingConfigForm() {
         state.optimizer !== defaults.optimizer ||
         state.scheduler !== defaults.scheduler ||
         state.epochs !== defaults.epochs ||
+        state.batchSize !== defaults.batchSize ||
         state.warmupSteps !== defaults.warmupSteps ||
         state.numRestarts !== defaults.numRestarts ||
         state.weightDecay !== defaults.weightDecay,
@@ -394,7 +398,6 @@ export function useTrainingConfigForm() {
         state.networkAlpha !== defaults.networkAlpha ||
         state.networkType !== 'lora',
       performance:
-        state.batchSize !== defaults.batchSize ||
         state.mixedPrecision !== defaults.mixedPrecision ||
         state.gradientAccumulationSteps !==
           defaults.gradientAccumulationSteps ||
@@ -436,8 +439,17 @@ export function useTrainingConfigForm() {
       folders: DatasetFolder[],
       thumbnail?: string,
       thumbnailVersion?: number,
+      dimensionHistogram?: Record<string, number>,
     ) => {
-      dispatch({ type: 'ADD_DATASET', folderName, displayName, folders, thumbnail, thumbnailVersion });
+      dispatch({
+        type: 'ADD_DATASET',
+        folderName,
+        displayName,
+        folders,
+        thumbnail,
+        thumbnailVersion,
+        dimensionHistogram,
+      });
     },
     [],
   );

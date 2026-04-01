@@ -98,7 +98,7 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   // Performance
   batchSize: {
     tier: 'simple',
-    group: 'performance',
+    group: 'learning',
     defaultKey: 'batchSize',
   },
   mixedPrecision: {

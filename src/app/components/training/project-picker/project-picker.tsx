@@ -17,6 +17,7 @@ type ProjectPickerProps = {
     folders: DatasetFolder[],
     thumbnail?: string,
     thumbnailVersion?: number,
+    dimensionHistogram?: Record<string, number>,
   ) => void;
   excludeFolders: string[];
   children: React.ReactNode;

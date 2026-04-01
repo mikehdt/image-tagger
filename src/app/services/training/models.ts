@@ -15,6 +15,8 @@ export type ModelDefinition = {
   defaults: TrainingDefaults;
   /** Optional training tips displayed below the model description */
   tips?: string[];
+  /** Resolution steps the user can toggle on/off for this model */
+  availableResolutions: number[];
   /** Fields that are irrelevant for this model (auto-set, not configurable) */
   hiddenFields?: (keyof TrainingDefaults)[];
 };
@@ -59,6 +61,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Constant scheduler with 1e-4 LR works well for most LoRAs',
       'Multi-resolution training (512/768/1024) improves flexibility',
     ],
+    availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,
@@ -99,6 +102,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Constant scheduler with 1e-4 LR is reliable for most use cases',
       'Rank 16 is a good starting point; increase for complex subjects',
     ],
+    availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,
@@ -139,6 +143,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Needs fewer training steps than Flux.1 Dev',
       'Uses unconditioned generation (guidance scale 1.0)',
     ],
+    availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 1500,
@@ -177,10 +182,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     provider: 'kohya',
     tips: [
       'Cosine scheduler recommended for fine-tuning',
-      'Only supports 1024px resolution',
       'Lower alpha (8) helps prevent overfitting',
     ],
-    hiddenFields: ['resolution'],
+    availableResolutions: [768, 1024, 1280, 1536, 1920],
     defaults: {
       steps: 3000,
       epochs: 20,
@@ -217,6 +221,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Fast, high-quality image generation',
     provider: 'ai-toolkit',
     tips: ['Fewer sample steps needed (8) due to turbo architecture'],
+    availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,
@@ -257,6 +262,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Higher rank (32) and learning rate (2e-4) suit this larger model',
       'Supports image-only training via single-frame clips',
     ],
+    availableResolutions: [256, 512, 768, 1024],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,
@@ -297,6 +303,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Higher rank (32) recommended for video model capacity',
       'Supports image-only training via single-frame clips',
     ],
+    availableResolutions: [256, 512, 768, 1024],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,
@@ -337,6 +344,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       'Higher rank (32) recommended for video model capacity',
       'Supports image-only training via single-frame clips',
     ],
+    availableResolutions: [256, 512, 768, 1024],
     hiddenFields: ['noiseScheduler'],
     defaults: {
       steps: 2000,

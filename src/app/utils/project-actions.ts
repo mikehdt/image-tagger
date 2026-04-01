@@ -551,3 +551,57 @@ export const getProjectFolders = async (
 
   return folders;
 };
+
+/**
+ * Scan all images in a project and return a dimension histogram.
+ * Uses sharp metadata (header-only reads) so this is fast even for
+ * hundreds of images. Returns e.g. { "1920x1080": 15, "1024x768": 8 }.
+ */
+export const getProjectDimensionHistogram = async (
+  projectName: string,
+): Promise<Record<string, number>> => {
+  const config = getServerConfig();
+  const projectPath = path.join(config.projectsFolder, projectName);
+  if (!fs.existsSync(projectPath)) return {};
+
+  // Collect all image file paths (root + repeat subfolders)
+  const imagePaths: string[] = [];
+  const entries = fs.readdirSync(projectPath, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isFile() && isSupportedImageExtension(path.extname(entry.name))) {
+      imagePaths.push(path.join(projectPath, entry.name));
+    }
+    if (entry.isDirectory() && isValidRepeatFolder(entry.name)) {
+      try {
+        const subdirPath = path.join(projectPath, entry.name);
+        for (const file of fs.readdirSync(subdirPath)) {
+          if (isSupportedImageExtension(path.extname(file))) {
+            imagePaths.push(path.join(subdirPath, file));
+          }
+        }
+      } catch {
+        // Skip unreadable subfolders
+      }
+    }
+  }
+
+  // Read dimensions in parallel (header-only, fast)
+  const results = await Promise.all(
+    imagePaths.map(async (filePath) => {
+      try {
+        const meta = await sharp(filePath).metadata();
+        if (meta.width && meta.height) return `${meta.width}x${meta.height}`;
+      } catch {
+        // Skip unreadable files
+      }
+      return null;
+    }),
+  );
+
+  const histogram: Record<string, number> = {};
+  for (const key of results) {
+    if (key) histogram[key] = (histogram[key] ?? 0) + 1;
+  }
+  return histogram;
+};

@@ -48,6 +48,43 @@ export const KOHYA_CONFIGS = {
 } as const;
 
 /**
+ * Generate all Kohya-style resolution buckets for a given base resolution.
+ * Buckets maintain approximately the same pixel area (targetResolution²)
+ * with dimensions in step-size increments. Returns only landscape-or-square
+ * pairs (width >= height); portrait is the transpose.
+ */
+export function generateBucketList(
+  targetResolution: number,
+  stepSize = 64,
+  minSize = 256,
+  maxSize = targetResolution * 2,
+): { width: number; height: number }[] {
+  const maxArea = targetResolution * targetResolution;
+  const resos = new Set<string>();
+
+  const squareSide = Math.floor(Math.sqrt(maxArea) / stepSize) * stepSize;
+  resos.add(`${squareSide}x${squareSide}`);
+
+  let w = minSize;
+  while (w <= maxSize) {
+    const h = Math.min(maxSize, Math.floor(maxArea / w / stepSize) * stepSize);
+    if (h >= minSize) {
+      // Store landscape only (w >= h); caller can transpose for portrait
+      if (w >= h) resos.add(`${w}x${h}`);
+      else resos.add(`${h}x${w}`);
+    }
+    w += stepSize;
+  }
+
+  return Array.from(resos)
+    .map((r) => {
+      const [bw, bh] = r.split('x').map(Number);
+      return { width: bw, height: bh };
+    })
+    .sort((a, b) => a.width / a.height - b.width / b.height);
+}
+
+/**
  * Calculate the Kohya SS bucket dimensions for a given image
  * Based on the actual Kohya SS bucketing logic from make_bucket_resolutions():
  * - Buckets are generated with area constraint (width * height = targetResolution²)

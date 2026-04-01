@@ -264,6 +264,31 @@ const LearningSectionComponent = ({
           </div>
         )}
 
+        {/* Batch Size */}
+        {visibleFields.has('batchSize' satisfies keyof FormState) && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
+              Batch Size
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={8}
+              value={batchSize}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (val > 0) onFieldChange('batchSize', val);
+              }}
+              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+            />
+            {batchSize > 1 && (
+              <p className="mt-1 text-xs text-amber-500">
+                Higher batch sizes use significantly more VRAM
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Learning Rate */}
         {visibleFields.has('learningRate' satisfies keyof FormState) && (
           <div>

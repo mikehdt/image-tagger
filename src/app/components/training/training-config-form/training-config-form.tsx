@@ -189,6 +189,9 @@ const TrainingConfigFormComponent = ({
       <PerformanceSection
         batchSize={state.batchSize}
         resolution={state.resolution}
+        availableResolutions={currentModel.availableResolutions}
+        provider={currentModel.provider}
+        datasets={state.datasets}
         mixedPrecision={state.mixedPrecision}
         gradientAccumulationSteps={state.gradientAccumulationSteps}
         gradientCheckpointing={state.gradientCheckpointing}

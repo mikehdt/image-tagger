@@ -19,6 +19,7 @@ type DatasetSectionProps = {
     folders: DatasetFolder[],
     thumbnail?: string,
     thumbnailVersion?: number,
+    dimensionHistogram?: Record<string, number>,
   ) => void;
   onRemoveDataset: (index: number) => void;
   onSetFolderRepeats: (

@@ -2,6 +2,7 @@ import { useCallback, useId, useRef, useState } from 'react';
 
 import { usePopup } from '@/app/components/shared/popup';
 import {
+  getProjectDimensionHistogram,
   getProjectFolders,
   getProjectList,
   type Project,
@@ -20,6 +21,7 @@ export function useProjectPicker({
     folders: DatasetFolder[],
     thumbnail?: string,
     thumbnailVersion?: number,
+    dimensionHistogram?: Record<string, number>,
   ) => void;
 }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -55,7 +57,10 @@ export function useProjectPicker({
 
       setSelectingFolder(project.name);
       try {
-        const details = await getProjectFolders(project.name);
+        const [details, dimensionHistogram] = await Promise.all([
+          getProjectFolders(project.name),
+          getProjectDimensionHistogram(project.name),
+        ]);
         const folders: DatasetFolder[] = details.map((f) => ({
           ...f,
           overrideRepeats: null,
@@ -66,6 +71,7 @@ export function useProjectPicker({
           folders,
           project.thumbnail || undefined,
           project.thumbnailVersion,
+          dimensionHistogram,
         );
         close();
       } finally {

@@ -1,17 +1,22 @@
-import { XIcon } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useMemo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
+import { calculateKohyaBucket, generateBucketList } from '@/app/utils/image-utils';
 
 import { CollapsibleSection } from '../collapsible-section';
 import type {
+  DatasetSource,
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
 
 type PerformanceSectionProps = {
+  /** Read-only, for effective batch size display in gradient accumulation */
   batchSize: number;
   resolution: number[];
+  availableResolutions: number[];
+  provider: 'ai-toolkit' | 'kohya';
+  datasets: DatasetSource[];
   mixedPrecision: 'bf16' | 'fp16' | 'fp8';
   gradientAccumulationSteps: number;
   gradientCheckpointing: boolean;
@@ -38,6 +43,9 @@ const PRECISION_ITEMS: DropdownItem<string>[] = [
 const PerformanceSectionComponent = ({
   batchSize,
   resolution,
+  availableResolutions,
+  provider,
+  datasets,
   mixedPrecision,
   gradientAccumulationSteps,
   gradientCheckpointing,
@@ -51,10 +59,9 @@ const PerformanceSectionComponent = ({
   onFieldChange,
   onReset,
 }: PerformanceSectionProps) => {
-  const [resolutionInput, setResolutionInput] = useState('');
+  const isKohya = provider === 'kohya';
 
   const hasVisibleFields =
-    visibleFields.has('batchSize') ||
     visibleFields.has('resolution') ||
     visibleFields.has('mixedPrecision') ||
     visibleFields.has('gradientAccumulationSteps') ||
@@ -66,22 +73,24 @@ const PerformanceSectionComponent = ({
 
   if (!hasVisibleFields) return null;
 
-  const handleAddResolution = () => {
-    const val = parseInt(resolutionInput, 10);
-    if (val > 0 && !resolution.includes(val)) {
-      onFieldChange(
-        'resolution',
-        [...resolution, val].sort((a, b) => a - b),
-      );
-      setResolutionInput('');
+  const handleToggleResolution = (res: number) => {
+    if (isKohya) {
+      // Kohya: single-select — replace the entire array
+      onFieldChange('resolution', [res]);
+      return;
     }
-  };
-
-  const handleRemoveResolution = (val: number) => {
-    if (resolution.length > 1) {
+    // ai-toolkit: multi-select toggle
+    if (resolution.includes(res)) {
+      if (resolution.length > 1) {
+        onFieldChange(
+          'resolution',
+          resolution.filter((r) => r !== res),
+        );
+      }
+    } else {
       onFieldChange(
         'resolution',
-        resolution.filter((r) => r !== val),
+        [...resolution, res].sort((a, b) => a - b),
       );
     }
   };
@@ -94,36 +103,11 @@ const PerformanceSectionComponent = ({
       hiddenChangesCount={hiddenChangesCount}
     >
       <div className="space-y-3">
-        {/* Batch Size */}
-        {visibleFields.has('batchSize' satisfies keyof FormState) && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Batch Size
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={8}
-              value={batchSize}
-              onChange={(e) => {
-                const val = parseInt(e.target.value, 10);
-                if (val > 0) onFieldChange('batchSize', val);
-              }}
-              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
-            />
-            {batchSize > 1 && (
-              <p className="mt-1 text-xs text-amber-500">
-                Higher batch sizes use significantly more VRAM
-              </p>
-            )}
-          </div>
-        )}
-
         {/* Mixed Precision */}
         {visibleFields.has('mixedPrecision' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Mixed Precision
+              Training Precision
             </label>
             <Dropdown
               items={PRECISION_ITEMS}
@@ -134,11 +118,11 @@ const PerformanceSectionComponent = ({
                   val as FormState['mixedPrecision'],
                 )
               }
-              aria-label="Mixed precision"
+              aria-label="Training precision"
             />
             <p className="mt-1 text-xs text-slate-400">
-              Training precision — independent of the base model&apos;s format.
-              BF16 is more stable on modern GPUs (RTX 3000+)
+              Independent of the base model&apos;s format. BF16 is more stable
+              on modern GPUs (RTX 3000+)
             </p>
           </div>
         )}
@@ -147,45 +131,33 @@ const PerformanceSectionComponent = ({
         {visibleFields.has('resolution' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Resolution
+              {isKohya ? 'Base Resolution' : 'Training Resolutions'}
             </label>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {resolution.map((res) => (
-                <span
-                  key={res}
-                  className="flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
-                >
-                  {res}
-                  {resolution.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveResolution(res)}
-                      className="cursor-pointer rounded-full p-0.5 hover:bg-sky-200 dark:hover:bg-sky-800"
-                    >
-                      <XIcon className="h-2.5 w-2.5" />
-                    </button>
-                  )}
-                </span>
-              ))}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleAddResolution();
-                }}
-                className="inline-flex"
-              >
-                <input
-                  type="number"
-                  min={128}
-                  max={2048}
-                  step={64}
-                  value={resolutionInput}
-                  onChange={(e) => setResolutionInput(e.target.value)}
-                  placeholder="Add"
-                  className="w-16 rounded border border-(--border-subtle) bg-(--surface) px-2 py-0.5 text-xs text-(--foreground) tabular-nums placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
-                />
-              </form>
+            <div className="flex flex-wrap gap-1.5">
+              {availableResolutions.map((res) => {
+                const isActive = resolution.includes(res);
+                return (
+                  <button
+                    key={res}
+                    type="button"
+                    onClick={() => handleToggleResolution(res)}
+                    className={`cursor-pointer rounded-sm border px-3 py-1 text-xs font-medium tabular-nums transition-colors ${
+                      isActive
+                        ? 'border-sky-400 bg-sky-100 text-sky-700 dark:border-sky-600 dark:bg-sky-900/40 dark:text-sky-300'
+                        : 'border-(--border-subtle) text-slate-400 hover:border-slate-400 hover:text-slate-600 dark:hover:border-slate-500 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    {res}
+                  </button>
+                );
+              })}
             </div>
+            {isKohya && resolution.length > 0 && datasets.length > 0 && (
+              <KohyaBucketPreview
+                baseResolution={resolution[0]}
+                datasets={datasets}
+              />
+            )}
           </div>
         )}
 
@@ -324,5 +296,79 @@ const PerformanceSectionComponent = ({
     </CollapsibleSection>
   );
 };
+
+/** Informational preview of Kohya bucketing for a given base resolution. */
+const KohyaBucketPreview = memo(
+  ({
+    baseResolution,
+    datasets,
+  }: {
+    baseResolution: number;
+    datasets: DatasetSource[];
+  }) => {
+    const buckets = useMemo(
+      () => generateBucketList(baseResolution),
+      [baseResolution],
+    );
+
+    // Assign images from dimension histograms to buckets
+    const bucketCounts = useMemo(() => {
+      const counts = new Map<string, number>();
+
+      // Aggregate histograms across all datasets
+      for (const ds of datasets) {
+        if (!ds.dimensionHistogram) continue;
+        for (const [dimKey, count] of Object.entries(ds.dimensionHistogram)) {
+          const [w, h] = dimKey.split('x').map(Number);
+          if (!w || !h) continue;
+          const bucket = calculateKohyaBucket(w, h, {
+            targetResolution: baseResolution,
+            stepSize: 64,
+            minSize: 256,
+            maxSize: baseResolution * 2,
+          });
+          const key = `${bucket.width}x${bucket.height}`;
+          counts.set(key, (counts.get(key) ?? 0) + count);
+        }
+      }
+      return counts;
+    }, [datasets, baseResolution]);
+
+    if (buckets.length === 0) return null;
+
+    const hasImageData = bucketCounts.size > 0;
+    const squareCount = buckets.filter((b) => b.width === b.height).length;
+    const totalBuckets = buckets.length + (buckets.length - squareCount);
+
+    return (
+      <div className="mt-1.5">
+        <p className="text-xs text-slate-400">
+          {totalBuckets} buckets ({buckets.length} unique ratios + portrait
+          mirrors)
+        </p>
+        <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-xs tabular-nums text-slate-400">
+          {buckets.map((b) => {
+            const key = `${b.width}x${b.height}`;
+            const portraitKey = `${b.height}x${b.width}`;
+            const count =
+              (bucketCounts.get(key) ?? 0) +
+              (b.width !== b.height ? (bucketCounts.get(portraitKey) ?? 0) : 0);
+            // When we have image data, only show buckets that have images
+            if (hasImageData && count === 0) return null;
+            return (
+              <span key={key}>
+                {b.width}&times;{b.height}
+                {hasImageData && (
+                  <span className="ml-0.5 text-sky-500">({count})</span>
+                )}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    );
+  },
+);
+KohyaBucketPreview.displayName = 'KohyaBucketPreview';
 
 export const PerformanceSection = memo(PerformanceSectionComponent);

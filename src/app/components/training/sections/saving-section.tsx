@@ -87,7 +87,7 @@ const SavingSectionComponent = ({
         {visibleFields.has('saveFormat' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Output Format
+              Output Precision
             </label>
             <Dropdown
               items={SAVE_FORMAT_ITEMS}
