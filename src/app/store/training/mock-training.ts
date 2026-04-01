@@ -54,6 +54,7 @@ export function startMockTraining(
 
     dispatch(openPanel());
 
+    const startedAt = Date.now();
     let step = 0;
     mockInterval = setInterval(() => {
       step += Math.ceil(totalSteps / 50); // ~50 ticks to complete
@@ -69,6 +70,8 @@ export function startMockTraining(
         updateProgress({
           jobId,
           status: step >= totalSteps ? 'completed' : 'training',
+          startedAt,
+          completedAt: step >= totalSteps ? Date.now() : null,
           currentStep: step,
           totalSteps,
           currentEpoch: Math.floor(progress * 20) + 1,

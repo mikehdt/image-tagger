@@ -21,6 +21,8 @@ export type SidecarStatus = 'stopped' | 'starting' | 'ready' | 'error';
 export type TrainingProgress = {
   jobId: string;
   status: TrainingJobStatus;
+  startedAt: number;
+  completedAt: number | null;
   currentStep: number;
   totalSteps: number;
   currentEpoch: number;
