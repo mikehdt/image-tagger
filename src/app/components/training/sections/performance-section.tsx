@@ -12,11 +12,13 @@ import type {
 type PerformanceSectionProps = {
   batchSize: number;
   resolution: number[];
-  mixedPrecision: 'bf16' | 'fp16';
+  mixedPrecision: 'bf16' | 'fp16' | 'fp8';
   gradientAccumulationSteps: number;
   gradientCheckpointing: boolean;
   cacheLatents: boolean;
   captionDropoutRate: number;
+  captionShuffling: boolean;
+  flipAugment: boolean;
   hasChanges: boolean;
   visibleFields: Set<string>;
   hiddenChangesCount?: number;
@@ -30,6 +32,7 @@ type PerformanceSectionProps = {
 const PRECISION_ITEMS: DropdownItem<string>[] = [
   { value: 'bf16', label: 'bfloat16 (recommended)' },
   { value: 'fp16', label: 'float16' },
+  { value: 'fp8', label: 'float8 (lower VRAM)' },
 ];
 
 const PerformanceSectionComponent = ({
@@ -40,6 +43,8 @@ const PerformanceSectionComponent = ({
   gradientCheckpointing,
   cacheLatents,
   captionDropoutRate,
+  captionShuffling,
+  flipAugment,
   hasChanges,
   visibleFields,
   hiddenChangesCount,
@@ -55,7 +60,9 @@ const PerformanceSectionComponent = ({
     visibleFields.has('gradientAccumulationSteps') ||
     visibleFields.has('gradientCheckpointing') ||
     visibleFields.has('cacheLatents') ||
-    visibleFields.has('captionDropoutRate');
+    visibleFields.has('captionDropoutRate') ||
+    visibleFields.has('captionShuffling') ||
+    visibleFields.has('flipAugment');
 
   if (!hasVisibleFields) return null;
 
@@ -129,6 +136,10 @@ const PerformanceSectionComponent = ({
               }
               aria-label="Mixed precision"
             />
+            <p className="mt-1 text-xs text-slate-400">
+              Training precision — independent of the base model&apos;s format.
+              BF16 is more stable on modern GPUs (RTX 3000+)
+            </p>
           </div>
         )}
 
@@ -270,6 +281,44 @@ const PerformanceSectionComponent = ({
               Probability of dropping captions during training (0 = disabled)
             </p>
           </div>
+        )}
+
+        {/* Caption Shuffling */}
+        {visibleFields.has('captionShuffling' satisfies keyof FormState) && (
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={captionShuffling}
+              onChange={(e) =>
+                onFieldChange('captionShuffling', e.target.checked)
+              }
+              className="accent-sky-500"
+            />
+            <span className="text-xs font-medium text-(--foreground)/70">
+              Caption Shuffling
+            </span>
+            <span className="text-xs text-slate-400">
+              Randomise tag order during training
+            </span>
+          </label>
+        )}
+
+        {/* Flip Augment */}
+        {visibleFields.has('flipAugment' satisfies keyof FormState) && (
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={flipAugment}
+              onChange={(e) => onFieldChange('flipAugment', e.target.checked)}
+              className="accent-sky-500"
+            />
+            <span className="text-xs font-medium text-(--foreground)/70">
+              Flip Augment
+            </span>
+            <span className="text-xs text-slate-400">
+              Randomly flip images horizontally
+            </span>
+          </label>
         )}
       </div>
     </CollapsibleSection>

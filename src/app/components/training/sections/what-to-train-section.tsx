@@ -11,9 +11,7 @@ import type { FormState } from '../training-config-form/use-training-config-form
 
 type WhatToTrainSectionProps = {
   modelId: string;
-  outputName: string;
   onModelChange: (modelId: string) => void;
-  onOutputNameChange: (name: string) => void;
   currentModel: ModelDefinition;
   visibleFields: Set<string>;
   hiddenChangesCount?: number;
@@ -21,9 +19,7 @@ type WhatToTrainSectionProps = {
 
 const WhatToTrainSectionComponent = ({
   modelId,
-  outputName,
   onModelChange,
-  onOutputNameChange,
   currentModel,
   visibleFields,
   hiddenChangesCount,
@@ -48,7 +44,7 @@ const WhatToTrainSectionComponent = ({
 
   return (
     <CollapsibleSection
-      title="Model & Output"
+      title="Model"
       hiddenChangesCount={hiddenChangesCount}
     >
       <div className="space-y-3">
@@ -67,7 +63,7 @@ const WhatToTrainSectionComponent = ({
               aria-label="Select base model"
             />
             <p className="mt-1 text-xs text-slate-400">
-              {currentModel.description} · Backend: {currentModel.provider}
+              {currentModel.description}
             </p>
             {currentModel.tips && currentModel.tips.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
@@ -81,20 +77,26 @@ const WhatToTrainSectionComponent = ({
           </div>
         )}
 
-        {visibleFields.has('outputName' satisfies keyof FormState) && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Output Name
-            </label>
-            <input
-              type="text"
-              value={outputName}
-              onChange={(e) => onOutputNameChange(e.target.value)}
-              placeholder="my-lora"
-              className="w-full rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
-            />
-          </div>
-        )}
+        {/* Backend — single-item Dropdown renders as static label */}
+        <div>
+          <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
+            Backend
+          </label>
+          <Dropdown
+            items={[
+              {
+                value: currentModel.provider,
+                label:
+                  currentModel.provider === 'kohya'
+                    ? 'Kohya (sd-scripts)'
+                    : 'ai-toolkit',
+              },
+            ]}
+            selectedValue={currentModel.provider}
+            onChange={() => {}}
+            aria-label="Training backend"
+          />
+        </div>
       </div>
     </CollapsibleSection>
   );

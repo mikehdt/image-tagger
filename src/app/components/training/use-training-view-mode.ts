@@ -20,6 +20,10 @@ const getServerSnapshot = () => false;
  */
 export function useTrainingViewMode(): TrainingViewMode {
   const storeValue = useAppSelector(selectTrainingViewMode);
-  const isClient = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isClient = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
   return isClient ? storeValue : SERVER_DEFAULT;
 }

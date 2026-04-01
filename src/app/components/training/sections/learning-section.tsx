@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
@@ -6,6 +6,7 @@ import {
   SCHEDULER_OPTIONS,
   type TrainingDefaults,
 } from '@/app/services/training/models';
+import type { TrainingViewMode } from '@/app/store/preferences';
 
 import { CollapsibleSection } from '../collapsible-section';
 import { SchedulerSparkline } from '../scheduler-sparkline';
@@ -15,6 +16,68 @@ import type {
   SectionName,
 } from '../training-config-form/use-training-config-form';
 
+/** Common LR presets mapped to human-readable labels */
+const LR_PRESETS = [
+  { value: 1e-6, label: 'Very Low', position: 0 },
+  { value: 5e-5, label: 'Conservative', position: 25 },
+  { value: 1e-4, label: 'Standard', position: 50 },
+  { value: 2e-4, label: 'Higher', position: 62 },
+  { value: 5e-4, label: 'Aggressive', position: 75 },
+  { value: 1e-3, label: 'Very High', position: 100 },
+] as const;
+
+/** Map a slider position (0-100) to a learning rate value */
+function sliderToLr(position: number): number {
+  // Find the two presets we're between and interpolate
+  for (let i = 0; i < LR_PRESETS.length - 1; i++) {
+    const curr = LR_PRESETS[i];
+    const next = LR_PRESETS[i + 1];
+    if (position <= next.position) {
+      const t = (position - curr.position) / (next.position - curr.position);
+      // Logarithmic interpolation for better feel
+      const logCurr = Math.log10(curr.value);
+      const logNext = Math.log10(next.value);
+      return parseFloat(
+        Math.pow(10, logCurr + t * (logNext - logCurr)).toPrecision(2),
+      );
+    }
+  }
+  return LR_PRESETS[LR_PRESETS.length - 1].value;
+}
+
+/** Map a learning rate value to a slider position (0-100) */
+function lrToSlider(lr: number): number {
+  if (lr <= LR_PRESETS[0].value) return 0;
+  if (lr >= LR_PRESETS[LR_PRESETS.length - 1].value) return 100;
+
+  for (let i = 0; i < LR_PRESETS.length - 1; i++) {
+    const curr = LR_PRESETS[i];
+    const next = LR_PRESETS[i + 1];
+    if (lr <= next.value) {
+      const logCurr = Math.log10(curr.value);
+      const logNext = Math.log10(next.value);
+      const logLr = Math.log10(lr);
+      const t = (logLr - logCurr) / (logNext - logCurr);
+      return curr.position + t * (next.position - curr.position);
+    }
+  }
+  return 100;
+}
+
+/** Find the closest preset label for a given LR */
+function getLrLabel(lr: number): string {
+  let closestLabel = LR_PRESETS[0].label as string;
+  let closestDist = Infinity;
+  for (const preset of LR_PRESETS) {
+    const dist = Math.abs(Math.log10(lr) - Math.log10(preset.value));
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestLabel = preset.label;
+    }
+  }
+  return closestLabel;
+}
+
 type LearningSectionProps = {
   durationMode: DurationMode;
   epochs: number;
@@ -23,6 +86,7 @@ type LearningSectionProps = {
   optimizer: string;
   scheduler: string;
   warmupSteps: number;
+  numRestarts: number;
   weightDecay: number;
   calculatedSteps: number;
   calculatedEpochs: number;
@@ -32,6 +96,7 @@ type LearningSectionProps = {
   defaults: TrainingDefaults;
   visibleFields: Set<string>;
   hiddenChangesCount?: number;
+  viewMode: TrainingViewMode;
   onFieldChange: <K extends keyof FormState>(
     field: K,
     value: FormState[K],
@@ -47,6 +112,7 @@ const LearningSectionComponent = ({
   optimizer,
   scheduler,
   warmupSteps,
+  numRestarts,
   weightDecay,
   calculatedSteps,
   calculatedEpochs,
@@ -56,9 +122,12 @@ const LearningSectionComponent = ({
   defaults,
   visibleFields,
   hiddenChangesCount,
+  viewMode,
   onFieldChange,
   onReset,
 }: LearningSectionProps) => {
+  const isSimple = viewMode === 'simple';
+
   const optimizerItems = useMemo(() => {
     return OPTIMIZER_OPTIONS.map((group) => ({
       groupLabel: group.group,
@@ -110,6 +179,17 @@ const LearningSectionComponent = ({
     visibleFields.has('durationMode' satisfies keyof FormState) ||
     visibleFields.has('epochs' satisfies keyof FormState) ||
     visibleFields.has('steps' satisfies keyof FormState);
+
+  const sliderPosition = lrToSlider(learningRate);
+  const lrLabel = getLrLabel(learningRate);
+
+  const handleLrSlider = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const pos = parseInt(e.target.value, 10);
+      onFieldChange('learningRate', sliderToLr(pos));
+    },
+    [onFieldChange],
+  );
 
   return (
     <CollapsibleSection
@@ -190,75 +270,133 @@ const LearningSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Learning Rate
             </label>
-            <input
-              type="text"
-              value={learningRate}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val > 0) {
-                  onFieldChange('learningRate', val);
-                }
-              }}
-              placeholder={String(defaults.learningRate)}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
-            />
+            {isSimple ? (
+              /* Simple mode: labelled slider with value display */
+              <div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={Math.round(sliderPosition)}
+                    onChange={handleLrSlider}
+                    className="flex-1"
+                  />
+                  <span className="w-16 text-right text-sm font-medium text-(--foreground) tabular-nums">
+                    {learningRate}
+                  </span>
+                </div>
+                <div className="mt-0.5 flex justify-between text-xs text-slate-400">
+                  <span>Slower</span>
+                  <span className="font-medium text-slate-500">{lrLabel}</span>
+                  <span>Faster</span>
+                </div>
+              </div>
+            ) : (
+              /* Intermediate+: direct number input */
+              <input
+                type="text"
+                value={learningRate}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val > 0) {
+                    onFieldChange('learningRate', val);
+                  }
+                }}
+                placeholder={String(defaults.learningRate)}
+                className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              />
+            )}
           </div>
         )}
 
-        {/* Optimizer */}
+        {/* Optimizer — read-only in Simple, interactive in Intermediate+ */}
         {visibleFields.has('optimizer' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Optimizer
             </label>
-            <Dropdown
-              items={optimizerItems}
-              selectedValue={optimizer}
-              onChange={(val) => onFieldChange('optimizer', val)}
-              selectedValueRenderer={() => (
-                <span className="text-sm">
-                  {selectedOptimizer?.label ?? optimizer}
-                </span>
-              )}
-              aria-label="Select optimizer"
-            />
-            {selectedOptimizer && (
-              <p className="mt-1 text-xs text-slate-400">
-                {selectedOptimizer.hint}
+            {isSimple ? (
+              <p className="text-sm text-(--foreground)/80">
+                {selectedOptimizer?.label ?? optimizer}
+                {selectedOptimizer && (
+                  <span className="ml-1 text-xs text-slate-400">
+                    — {selectedOptimizer.hint}
+                  </span>
+                )}
               </p>
+            ) : (
+              <>
+                <Dropdown
+                  items={optimizerItems}
+                  selectedValue={optimizer}
+                  onChange={(val) => onFieldChange('optimizer', val)}
+                  selectedValueRenderer={() => (
+                    <span className="text-sm">
+                      {selectedOptimizer?.label ?? optimizer}
+                    </span>
+                  )}
+                  aria-label="Select optimizer"
+                />
+                {selectedOptimizer && (
+                  <p className="mt-1 text-xs text-slate-400">
+                    {selectedOptimizer.hint}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
 
-        {/* Scheduler */}
+        {/* Scheduler — read-only in Simple, interactive in Intermediate+ */}
         {visibleFields.has('scheduler' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               LR Scheduler
             </label>
-            <Dropdown
-              items={schedulerItems}
-              selectedValue={scheduler}
-              onChange={(val) => onFieldChange('scheduler', val)}
-              selectedValueRenderer={() => (
-                <div className="flex items-center gap-2">
-                  {selectedScheduler && (
-                    <SchedulerSparkline
-                      curve={selectedScheduler.curve}
-                      className="text-sky-500"
-                    />
-                  )}
-                  <span className="text-sm">
-                    {selectedScheduler?.label ?? scheduler}
+            {isSimple ? (
+              <div className="flex items-center gap-2 text-sm text-(--foreground)/80">
+                {selectedScheduler && (
+                  <SchedulerSparkline
+                    curve={selectedScheduler.curve}
+                    className="text-sky-500"
+                  />
+                )}
+                <span>{selectedScheduler?.label ?? scheduler}</span>
+                {selectedScheduler && (
+                  <span className="text-xs text-slate-400">
+                    — {selectedScheduler.hint}
                   </span>
-                </div>
-              )}
-              aria-label="LR scheduler"
-            />
-            {selectedScheduler && (
-              <p className="mt-1 text-xs text-slate-400">
-                {selectedScheduler.hint}
-              </p>
+                )}
+              </div>
+            ) : (
+              <>
+                <Dropdown
+                  items={schedulerItems}
+                  selectedValue={scheduler}
+                  onChange={(val) => onFieldChange('scheduler', val)}
+                  selectedValueRenderer={() => (
+                    <div className="flex items-center gap-2">
+                      {selectedScheduler && (
+                        <SchedulerSparkline
+                          curve={selectedScheduler.curve}
+                          className="text-sky-500"
+                        />
+                      )}
+                      <span className="text-sm">
+                        {selectedScheduler?.label ?? scheduler}
+                      </span>
+                    </div>
+                  )}
+                  aria-label="LR scheduler"
+                />
+                {selectedScheduler && (
+                  <p className="mt-1 text-xs text-slate-400">
+                    {selectedScheduler.hint}
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}
@@ -280,6 +418,29 @@ const LearningSectionComponent = ({
               placeholder={String(defaults.warmupSteps)}
               className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
             />
+          </div>
+        )}
+
+        {/* Restarts (cosine_with_restarts only) */}
+        {visibleFields.has('numRestarts' satisfies keyof FormState) && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
+              Restarts
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={numRestarts}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (val >= 1) onFieldChange('numRestarts', val);
+              }}
+              placeholder={String(defaults.numRestarts)}
+              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              Number of cosine cycles during training
+            </p>
           </div>
         )}
 

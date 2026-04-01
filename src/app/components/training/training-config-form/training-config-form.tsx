@@ -40,14 +40,22 @@ const TrainingConfigFormComponent = ({
     setField,
     setModel,
     resetSection,
+    addDataset,
     removeDataset,
     setFolderRepeats,
+    addSamplePrompt,
+    removeSamplePrompt,
+    setSamplePrompt,
   } = useTrainingConfigForm();
 
-  const visibleFields = useMemo(
-    () => getVisibleFields(viewMode, state.modelId),
-    [viewMode, state.modelId],
-  );
+  const visibleFields = useMemo(() => {
+    const fields = getVisibleFields(viewMode, state.modelId);
+    // Warmup steps are only meaningful for schedulers that use them
+    if (state.scheduler === 'constant') fields.delete('warmupSteps');
+    // Restarts only apply to cosine_with_restarts
+    if (state.scheduler !== 'cosine_with_restarts') fields.delete('numRestarts');
+    return fields;
+  }, [viewMode, state.modelId, state.scheduler]);
 
   // Compute hidden changes per section
   const hiddenChanges = useMemo(() => {
@@ -89,6 +97,7 @@ const TrainingConfigFormComponent = ({
       optimizer: state.optimizer,
       scheduler: state.scheduler,
       warmupSteps: state.warmupSteps,
+      numRestarts: state.numRestarts,
       weightDecay: state.weightDecay,
       batchSize: state.batchSize,
       networkType: state.networkType,
@@ -100,14 +109,22 @@ const TrainingConfigFormComponent = ({
       gradientCheckpointing: state.gradientCheckpointing,
       cacheLatents: state.cacheLatents,
       captionDropoutRate: state.captionDropoutRate,
+      captionShuffling: state.captionShuffling,
+      flipAugment: state.flipAugment,
       seed: state.seed,
       guidanceScale: state.guidanceScale,
       noiseScheduler: state.noiseScheduler,
       sampleSteps: state.sampleSteps,
-      saveEveryNEpochs: state.saveEveryNEpochs,
-      sampleEveryNSteps: state.sampleEveryNSteps,
+      saveEnabled: state.saveEnabled,
+      saveMode: state.saveMode,
+      saveEveryEpochs: state.saveEveryEpochs,
+      saveEverySteps: state.saveEverySteps,
+      saveFormat: state.saveFormat,
+      samplingEnabled: state.samplingEnabled,
+      sampleMode: state.sampleMode,
+      sampleEveryEpochs: state.sampleEveryEpochs,
+      sampleEverySteps: state.sampleEverySteps,
       samplePrompts: state.samplePrompts
-        .split('\n')
         .map((s) => s.trim())
         .filter(Boolean),
     });
@@ -120,9 +137,7 @@ const TrainingConfigFormComponent = ({
     <div className="mx-auto max-w-2xl space-y-3">
       <WhatToTrainSection
         modelId={state.modelId}
-        outputName={state.outputName}
         onModelChange={setModel}
-        onOutputNameChange={(name) => setField('outputName', name)}
         currentModel={currentModel}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.whatToTrain}
@@ -132,6 +147,7 @@ const TrainingConfigFormComponent = ({
         datasets={state.datasets}
         totalImages={datasetStats.totalImages}
         totalEffective={datasetStats.totalEffective}
+        onAddDataset={addDataset}
         onRemoveDataset={removeDataset}
         onSetFolderRepeats={setFolderRepeats}
       />
@@ -144,6 +160,7 @@ const TrainingConfigFormComponent = ({
         optimizer={state.optimizer}
         scheduler={state.scheduler}
         warmupSteps={state.warmupSteps}
+        numRestarts={state.numRestarts}
         weightDecay={state.weightDecay}
         calculatedSteps={calculatedSteps}
         calculatedEpochs={calculatedEpochs}
@@ -153,6 +170,7 @@ const TrainingConfigFormComponent = ({
         defaults={defaults}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.learning}
+        viewMode={viewMode}
         onFieldChange={setField}
         onReset={resetSection}
       />
@@ -176,6 +194,8 @@ const TrainingConfigFormComponent = ({
         gradientCheckpointing={state.gradientCheckpointing}
         cacheLatents={state.cacheLatents}
         captionDropoutRate={state.captionDropoutRate}
+        captionShuffling={state.captionShuffling}
+        flipAugment={state.flipAugment}
         hasChanges={sectionHasChanges.performance}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.performance}
@@ -184,25 +204,35 @@ const TrainingConfigFormComponent = ({
       />
 
       <SamplingSection
+        samplingEnabled={state.samplingEnabled}
         samplePrompts={state.samplePrompts}
-        sampleEveryNSteps={state.sampleEveryNSteps}
+        sampleMode={state.sampleMode}
+        sampleEveryEpochs={state.sampleEveryEpochs}
+        sampleEverySteps={state.sampleEverySteps}
         sampleSteps={state.sampleSteps}
         seed={state.seed}
         guidanceScale={state.guidanceScale}
         noiseScheduler={state.noiseScheduler}
-        hasChanges={sectionHasChanges.sampling}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.sampling}
         onFieldChange={setField}
+        onAddPrompt={addSamplePrompt}
+        onRemovePrompt={removeSamplePrompt}
+        onSetPrompt={setSamplePrompt}
         onReset={resetSection}
       />
 
       <SavingSection
-        saveEveryNEpochs={state.saveEveryNEpochs}
-        hasChanges={sectionHasChanges.saving}
+        outputName={state.outputName}
+        saveEnabled={state.saveEnabled}
+        saveMode={state.saveMode}
+        saveEveryEpochs={state.saveEveryEpochs}
+        saveEverySteps={state.saveEverySteps}
+        saveFormat={state.saveFormat}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.saving}
         onFieldChange={setField}
+        onOutputNameChange={(name) => setField('outputName', name)}
         onReset={resetSection}
       />
 

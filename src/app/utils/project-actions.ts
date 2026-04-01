@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import { isSupportedImageExtension } from '@/app/constants';
 import type { AutoTaggerSettings } from '@/app/services/auto-tagger';
 
-import { isValidRepeatFolder } from './subfolder-utils';
+import { isValidRepeatFolder, parseSubfolder } from './subfolder-utils';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -47,7 +47,7 @@ type LocalProjectInfo = {
   private?: boolean;
 };
 
-type Project = {
+export type Project = {
   name: string;
   path: string;
   imageCount?: number;
@@ -493,4 +493,61 @@ export const saveAutoTaggerSettings = async (
     console.error('Error saving auto-tagger settings:', error);
     throw error;
   }
+};
+
+export type ProjectFolderDetail = {
+  name: string;
+  imageCount: number;
+  detectedRepeats: number;
+};
+
+/**
+ * Get the folder breakdown for a project: root images and repeat subfolders.
+ * Used by the training system to build dataset sources.
+ */
+export const getProjectFolders = async (
+  projectName: string,
+): Promise<ProjectFolderDetail[]> => {
+  const config = getServerConfig();
+  const projectPath = path.join(config.projectsFolder, projectName);
+
+  if (!fs.existsSync(projectPath)) return [];
+
+  const entries = fs.readdirSync(projectPath, { withFileTypes: true });
+  const folders: ProjectFolderDetail[] = [];
+
+  // Root images
+  const rootImageCount = entries
+    .filter((e) => e.isFile())
+    .filter((e) => isSupportedImageExtension(path.extname(e.name))).length;
+
+  if (rootImageCount > 0) {
+    folders.push({ name: '(root)', imageCount: rootImageCount, detectedRepeats: 1 });
+  }
+
+  // Repeat subfolders
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !isValidRepeatFolder(entry.name)) continue;
+    const parsed = parseSubfolder(entry.name);
+    if (!parsed) continue;
+
+    try {
+      const subdirPath = path.join(projectPath, entry.name);
+      const imageCount = fs
+        .readdirSync(subdirPath)
+        .filter((f) => isSupportedImageExtension(path.extname(f))).length;
+
+      if (imageCount > 0) {
+        folders.push({
+          name: entry.name,
+          imageCount,
+          detectedRepeats: parsed.repeatCount,
+        });
+      }
+    } catch {
+      // Skip unreadable subfolders
+    }
+  }
+
+  return folders;
 };

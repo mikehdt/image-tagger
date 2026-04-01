@@ -9,7 +9,7 @@ import type {
 } from '../training-config-form/use-training-config-form';
 
 type LoraShapeSectionProps = {
-  networkType: 'lora' | 'locon' | 'lokr';
+  networkType: 'lora' | 'lokr';
   networkDim: number;
   networkAlpha: number;
   hasChanges: boolean;
@@ -24,7 +24,6 @@ type LoraShapeSectionProps = {
 
 const NETWORK_TYPE_ITEMS: DropdownItem<string>[] = [
   { value: 'lora', label: 'LoRA' },
-  { value: 'locon', label: 'LoCoN' },
   { value: 'lokr', label: 'LoKr' },
 ];
 

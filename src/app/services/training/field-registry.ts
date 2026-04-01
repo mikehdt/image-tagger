@@ -26,13 +26,20 @@ export type FieldMeta = {
 
 /**
  * Every form field mapped to its tier, group, and default key.
- * Fields without a defaultKey (modelId, outputName, datasets, durationMode, networkType)
- * are user choices that don't have model-specific defaults to compare against.
+ *
+ * Simple tier: enough to start a training run with good defaults.
+ * Intermediate tier: tune behaviour, interactive controls.
+ * Advanced tier: full control for experienced users.
+ * Expert tier: future (block weights etc).
+ *
+ * Note: optimizer and scheduler are Simple tier but render as read-only info
+ * in Simple mode, becoming interactive dropdowns in Intermediate+. This is
+ * handled by the section components, not the registry.
  */
 export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   // What to Train
   modelId: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
-  outputName: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+  outputName: { tier: 'simple', group: 'saving', defaultKey: null },
   datasets: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
 
   // Learning
@@ -44,20 +51,26 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
     group: 'learning',
     defaultKey: 'learningRate',
   },
+  // Shown as read-only info in Simple, interactive in Intermediate+
   optimizer: {
-    tier: 'intermediate',
+    tier: 'simple',
     group: 'learning',
     defaultKey: 'optimizer',
   },
   scheduler: {
-    tier: 'intermediate',
+    tier: 'simple',
     group: 'learning',
     defaultKey: 'scheduler',
   },
   warmupSteps: {
-    tier: 'advanced',
+    tier: 'intermediate',
     group: 'learning',
     defaultKey: 'warmupSteps',
+  },
+  numRestarts: {
+    tier: 'intermediate',
+    group: 'learning',
+    defaultKey: 'numRestarts',
   },
   weightDecay: {
     tier: 'advanced',
@@ -66,29 +79,42 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   },
 
   // LoRA Shape
-  networkDim: { tier: 'simple', group: 'loraShape', defaultKey: 'networkDim' },
+  networkDim: {
+    tier: 'intermediate',
+    group: 'loraShape',
+    defaultKey: 'networkDim',
+  },
   networkAlpha: {
     tier: 'intermediate',
     group: 'loraShape',
     defaultKey: 'networkAlpha',
   },
-  networkType: { tier: 'intermediate', group: 'loraShape', defaultKey: null },
+  networkType: {
+    tier: 'intermediate',
+    group: 'loraShape',
+    defaultKey: null,
+  },
 
   // Performance
   batchSize: {
-    tier: 'intermediate',
+    tier: 'simple',
     group: 'performance',
     defaultKey: 'batchSize',
+  },
+  mixedPrecision: {
+    tier: 'simple',
+    group: 'performance',
+    defaultKey: 'mixedPrecision',
+  },
+  cacheLatents: {
+    tier: 'simple',
+    group: 'performance',
+    defaultKey: 'cacheLatents',
   },
   resolution: {
     tier: 'intermediate',
     group: 'performance',
     defaultKey: 'resolution',
-  },
-  mixedPrecision: {
-    tier: 'intermediate',
-    group: 'performance',
-    defaultKey: 'mixedPrecision',
   },
   gradientAccumulationSteps: {
     tier: 'advanced',
@@ -100,30 +126,50 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
     group: 'performance',
     defaultKey: 'gradientCheckpointing',
   },
-  cacheLatents: {
-    tier: 'advanced',
-    group: 'performance',
-    defaultKey: 'cacheLatents',
-  },
   captionDropoutRate: {
     tier: 'advanced',
     group: 'performance',
     defaultKey: 'captionDropoutRate',
   },
+  captionShuffling: {
+    tier: 'intermediate',
+    group: 'performance',
+    defaultKey: 'captionShuffling',
+  },
+  flipAugment: {
+    tier: 'intermediate',
+    group: 'performance',
+    defaultKey: 'flipAugment',
+  },
 
   // Sampling
-  samplePrompts: { tier: 'intermediate', group: 'sampling', defaultKey: null },
-  sampleEveryNSteps: {
+  samplingEnabled: {
     tier: 'intermediate',
     group: 'sampling',
-    defaultKey: 'sampleEveryNSteps',
+    defaultKey: null,
+  },
+  samplePrompts: {
+    tier: 'intermediate',
+    group: 'sampling',
+    defaultKey: null,
+  },
+  sampleMode: { tier: 'intermediate', group: 'sampling', defaultKey: null },
+  sampleEveryEpochs: {
+    tier: 'intermediate',
+    group: 'sampling',
+    defaultKey: null,
+  },
+  sampleEverySteps: {
+    tier: 'intermediate',
+    group: 'sampling',
+    defaultKey: null,
   },
   sampleSteps: {
     tier: 'intermediate',
     group: 'sampling',
     defaultKey: 'sampleSteps',
   },
-  seed: { tier: 'advanced', group: 'sampling', defaultKey: 'seed' },
+  seed: { tier: 'simple', group: 'sampling', defaultKey: null },
   guidanceScale: {
     tier: 'advanced',
     group: 'sampling',
@@ -136,11 +182,15 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   },
 
   // Saving
-  saveEveryNEpochs: {
-    tier: 'intermediate',
+  saveFormat: {
+    tier: 'simple',
     group: 'saving',
-    defaultKey: 'saveEveryNEpochs',
+    defaultKey: 'saveFormat',
   },
+  saveEnabled: { tier: 'simple', group: 'saving', defaultKey: null },
+  saveMode: { tier: 'simple', group: 'saving', defaultKey: null },
+  saveEveryEpochs: { tier: 'simple', group: 'saving', defaultKey: null },
+  saveEverySteps: { tier: 'simple', group: 'saving', defaultKey: null },
 };
 
 export const GROUP_META: Record<

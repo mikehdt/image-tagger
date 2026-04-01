@@ -66,9 +66,14 @@ export function useListHighlight({
   const idPrefix = useId();
 
   // Two-layer highlight: keyboard is the anchor, mouse overrides while hovering.
+  // keyboardActive tracks whether the user has actually pressed arrow keys —
+  // the keyboard index is seeded to the selected item on open (so arrows start
+  // from the right place), but we only visually highlight it after KB nav occurs.
   const [keyboardIndex, setKeyboardIndex] = useState(-1);
   const [hoverIndex, setHoverIndex] = useState(-1);
-  const highlightedIndex = hoverIndex >= 0 ? hoverIndex : keyboardIndex;
+  const [keyboardActive, setKeyboardActive] = useState(false);
+  const highlightedIndex =
+    hoverIndex >= 0 ? hoverIndex : keyboardActive ? keyboardIndex : -1;
 
   /** Get the DOM id for an option at `index` (for aria-activedescendant). */
   const getOptionId = useCallback(
@@ -86,6 +91,7 @@ export function useListHighlight({
   const resetHighlight = useCallback(() => {
     setKeyboardIndex(-1);
     setHoverIndex(-1);
+    setKeyboardActive(false);
   }, []);
 
   /**
@@ -94,13 +100,13 @@ export function useListHighlight({
    * so no additional frame delay is needed here.
    */
   const handlePositioned = useCallback(() => {
+    setKeyboardActive(false);
+    setHoverIndex(-1);
     const start =
       initialIndex >= 0 && isNavigable(initialIndex)
         ? initialIndex
         : findNext(count, isNavigable, 0, 1);
-    if (start >= 0) {
-      setKeyboardIndex(start);
-    }
+    setKeyboardIndex(start >= 0 ? start : -1);
   }, [initialIndex, count, isNavigable]);
 
   /**
@@ -120,19 +126,25 @@ export function useListHighlight({
           e.preventDefault();
           break;
         case 'ArrowDown': {
-          const next = findNext(count, isNavigable, highlightedIndex + 1, 1);
+          // When KB nav starts from no active highlight, begin from the
+          // seeded keyboard index (selected item) rather than -1.
+          const base = keyboardActive ? highlightedIndex : keyboardIndex;
+          const next = findNext(count, isNavigable, base + 1, 1);
           if (next >= 0) {
             setKeyboardIndex(next);
             setHoverIndex(-1);
+            setKeyboardActive(true);
           }
           e.preventDefault();
           break;
         }
         case 'ArrowUp': {
-          const prev = findNext(count, isNavigable, highlightedIndex - 1, -1);
+          const base = keyboardActive ? highlightedIndex : keyboardIndex;
+          const prev = findNext(count, isNavigable, base - 1, -1);
           if (prev >= 0) {
             setKeyboardIndex(prev);
             setHoverIndex(-1);
+            setKeyboardActive(true);
           }
           e.preventDefault();
           break;
@@ -142,6 +154,7 @@ export function useListHighlight({
           if (first >= 0) {
             setKeyboardIndex(first);
             setHoverIndex(-1);
+            setKeyboardActive(true);
           }
           e.preventDefault();
           break;
@@ -151,6 +164,7 @@ export function useListHighlight({
           if (last >= 0) {
             setKeyboardIndex(last);
             setHoverIndex(-1);
+            setKeyboardActive(true);
           }
           e.preventDefault();
           break;
@@ -160,7 +174,7 @@ export function useListHighlight({
           break;
       }
     },
-    [count, isNavigable, highlightedIndex, onSelect, onClose],
+    [count, isNavigable, highlightedIndex, keyboardActive, keyboardIndex, onSelect, onClose],
   );
 
   /** Props to spread on each item element for hover tracking. */

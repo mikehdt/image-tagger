@@ -10,7 +10,13 @@ import {
 // --- Types ---
 
 export type DatasetSource = {
+  /** Display name (title or folder name) */
   projectName: string;
+  /** Disk folder name — unique identifier */
+  folderName: string;
+  /** Thumbnail path for display (e.g. "projectname.png") */
+  thumbnail?: string;
+  thumbnailVersion?: number;
   folders: DatasetFolder[];
 };
 
@@ -37,32 +43,42 @@ export type FormState = {
   optimizer: string;
   scheduler: string;
   warmupSteps: number;
+  numRestarts: number;
   weightDecay: number;
 
   // LoRA Shape
-  networkType: 'lora' | 'locon' | 'lokr';
+  networkType: 'lora' | 'lokr';
   networkDim: number;
   networkAlpha: number;
 
   // Performance
   batchSize: number;
   resolution: number[];
-  mixedPrecision: 'bf16' | 'fp16';
+  mixedPrecision: 'bf16' | 'fp16' | 'fp8';
   gradientAccumulationSteps: number;
   gradientCheckpointing: boolean;
   cacheLatents: boolean;
   captionDropoutRate: number;
+  captionShuffling: boolean;
+  flipAugment: boolean;
 
   // Sampling
-  samplePrompts: string;
-  sampleEveryNSteps: number;
+  samplingEnabled: boolean;
+  samplePrompts: string[];
+  sampleMode: 'epochs' | 'steps';
+  sampleEveryEpochs: number;
+  sampleEverySteps: number;
   sampleSteps: number;
   seed: number;
   guidanceScale: number;
   noiseScheduler: string;
 
   // Saving
-  saveEveryNEpochs: number;
+  saveEnabled: boolean;
+  saveMode: 'epochs' | 'steps';
+  saveEveryEpochs: number;
+  saveEverySteps: number;
+  saveFormat: 'fp16' | 'bf16' | 'fp32';
 };
 
 type FormAction =
@@ -74,7 +90,10 @@ type FormAction =
   | { type: 'SET_MODEL'; modelId: string }
   | { type: 'RESET_SECTION'; section: SectionName }
   | { type: 'RESET_ALL' }
-  | { type: 'ADD_DATASET'; projectName: string; folders: DatasetFolder[] }
+  | { type: 'ADD_SAMPLE_PROMPT' }
+  | { type: 'REMOVE_SAMPLE_PROMPT'; index: number }
+  | { type: 'SET_SAMPLE_PROMPT'; index: number; value: string }
+  | { type: 'ADD_DATASET'; folderName: string; displayName: string; thumbnail?: string; thumbnailVersion?: number; folders: DatasetFolder[] }
   | { type: 'REMOVE_DATASET'; index: number }
   | {
       type: 'SET_FOLDER_REPEATS';
@@ -108,6 +127,7 @@ function defaultsToFormState(
     optimizer: defaults.optimizer,
     scheduler: defaults.scheduler,
     warmupSteps: defaults.warmupSteps,
+    numRestarts: defaults.numRestarts,
     weightDecay: defaults.weightDecay,
     networkType: 'lora',
     networkDim: defaults.networkDim,
@@ -119,13 +139,22 @@ function defaultsToFormState(
     gradientCheckpointing: defaults.gradientCheckpointing,
     cacheLatents: defaults.cacheLatents,
     captionDropoutRate: defaults.captionDropoutRate,
-    samplePrompts: '',
-    sampleEveryNSteps: defaults.sampleEveryNSteps,
+    captionShuffling: defaults.captionShuffling,
+    flipAugment: defaults.flipAugment,
+    samplingEnabled: false,
+    samplePrompts: [''],
+    sampleMode: 'steps',
+    sampleEveryEpochs: 1,
+    sampleEverySteps: defaults.sampleEvery,
     sampleSteps: defaults.sampleSteps,
     seed: defaults.seed,
     guidanceScale: defaults.guidanceScale,
     noiseScheduler: defaults.noiseScheduler,
-    saveEveryNEpochs: defaults.saveEveryNEpochs,
+    saveEnabled: false,
+    saveMode: 'epochs',
+    saveEveryEpochs: defaults.saveEvery,
+    saveEverySteps: 250,
+    saveFormat: defaults.saveFormat,
   };
 }
 
@@ -165,6 +194,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
             optimizer: defaults.optimizer,
             scheduler: defaults.scheduler,
             warmupSteps: defaults.warmupSteps,
+            numRestarts: defaults.numRestarts,
             weightDecay: defaults.weightDecay,
           };
         case 'loraShape':
@@ -184,12 +214,17 @@ function formReducer(state: FormState, action: FormAction): FormState {
             gradientCheckpointing: defaults.gradientCheckpointing,
             cacheLatents: defaults.cacheLatents,
             captionDropoutRate: defaults.captionDropoutRate,
+            captionShuffling: defaults.captionShuffling,
+            flipAugment: defaults.flipAugment,
           };
         case 'sampling':
           return {
             ...state,
-            samplePrompts: '',
-            sampleEveryNSteps: defaults.sampleEveryNSteps,
+            samplingEnabled: false,
+            samplePrompts: [''],
+            sampleMode: 'steps' as const,
+            sampleEveryEpochs: 1,
+            sampleEverySteps: defaults.sampleEvery,
             sampleSteps: defaults.sampleSteps,
             seed: defaults.seed,
             guidanceScale: defaults.guidanceScale,
@@ -198,7 +233,11 @@ function formReducer(state: FormState, action: FormAction): FormState {
         case 'saving':
           return {
             ...state,
-            saveEveryNEpochs: defaults.saveEveryNEpochs,
+            saveEnabled: false,
+            saveMode: 'epochs' as const,
+            saveEveryEpochs: defaults.saveEvery,
+            saveEverySteps: 250,
+            saveFormat: defaults.saveFormat,
           };
         default:
           return state;
@@ -210,12 +249,40 @@ function formReducer(state: FormState, action: FormAction): FormState {
       return defaultsToFormState(defaults, state.modelId);
     }
 
+    case 'ADD_SAMPLE_PROMPT':
+      return {
+        ...state,
+        samplePrompts: [...state.samplePrompts, ''],
+      };
+
+    case 'REMOVE_SAMPLE_PROMPT': {
+      const prompts = state.samplePrompts.filter(
+        (_, i) => i !== action.index,
+      );
+      return {
+        ...state,
+        samplePrompts: prompts.length === 0 ? [''] : prompts,
+      };
+    }
+
+    case 'SET_SAMPLE_PROMPT': {
+      const prompts = [...state.samplePrompts];
+      prompts[action.index] = action.value;
+      return { ...state, samplePrompts: prompts };
+    }
+
     case 'ADD_DATASET':
       return {
         ...state,
         datasets: [
           ...state.datasets,
-          { projectName: action.projectName, folders: action.folders },
+          {
+            projectName: action.displayName,
+            folderName: action.folderName,
+            thumbnail: action.thumbnail,
+            thumbnailVersion: action.thumbnailVersion,
+            folders: action.folders,
+          },
         ],
       };
 
@@ -262,13 +329,14 @@ export function useTrainingConfigForm() {
 
   const defaults = useMemo(() => getDefaults(state.modelId), [state.modelId]);
 
-  // Calculate effective dataset stats
+  // Calculate effective dataset stats (folders with 0 repeats are excluded)
   const datasetStats = useMemo(() => {
     let totalImages = 0;
     let totalEffective = 0;
     for (const ds of state.datasets) {
       for (const folder of ds.folders) {
         const repeats = folder.overrideRepeats ?? folder.detectedRepeats;
+        if (repeats === 0) continue;
         totalImages += folder.imageCount;
         totalEffective += folder.imageCount * repeats;
       }
@@ -319,6 +387,7 @@ export function useTrainingConfigForm() {
         state.scheduler !== defaults.scheduler ||
         state.epochs !== defaults.epochs ||
         state.warmupSteps !== defaults.warmupSteps ||
+        state.numRestarts !== defaults.numRestarts ||
         state.weightDecay !== defaults.weightDecay,
       loraShape:
         state.networkDim !== defaults.networkDim ||
@@ -331,15 +400,11 @@ export function useTrainingConfigForm() {
           defaults.gradientAccumulationSteps ||
         state.gradientCheckpointing !== defaults.gradientCheckpointing ||
         state.cacheLatents !== defaults.cacheLatents ||
-        state.captionDropoutRate !== defaults.captionDropoutRate,
-      sampling:
-        state.sampleEveryNSteps !== defaults.sampleEveryNSteps ||
-        state.sampleSteps !== defaults.sampleSteps ||
-        state.seed !== defaults.seed ||
-        state.guidanceScale !== defaults.guidanceScale ||
-        state.noiseScheduler !== defaults.noiseScheduler ||
-        state.samplePrompts !== '',
-      saving: state.saveEveryNEpochs !== defaults.saveEveryNEpochs,
+        state.captionDropoutRate !== defaults.captionDropoutRate ||
+        state.captionShuffling !== defaults.captionShuffling ||
+        state.flipAugment !== defaults.flipAugment,
+      sampling: false, // Sampling is opt-in, not compared to defaults
+      saving: false, // Saving is opt-in, not compared to defaults
     }),
     [state, defaults],
   );
@@ -365,8 +430,14 @@ export function useTrainingConfigForm() {
   }, []);
 
   const addDataset = useCallback(
-    (projectName: string, folders: DatasetFolder[]) => {
-      dispatch({ type: 'ADD_DATASET', projectName, folders });
+    (
+      folderName: string,
+      displayName: string,
+      folders: DatasetFolder[],
+      thumbnail?: string,
+      thumbnailVersion?: number,
+    ) => {
+      dispatch({ type: 'ADD_DATASET', folderName, displayName, folders, thumbnail, thumbnailVersion });
     },
     [],
   );
@@ -387,6 +458,18 @@ export function useTrainingConfigForm() {
     [],
   );
 
+  const addSamplePrompt = useCallback(() => {
+    dispatch({ type: 'ADD_SAMPLE_PROMPT' });
+  }, []);
+
+  const removeSamplePrompt = useCallback((index: number) => {
+    dispatch({ type: 'REMOVE_SAMPLE_PROMPT', index });
+  }, []);
+
+  const setSamplePrompt = useCallback((index: number, value: string) => {
+    dispatch({ type: 'SET_SAMPLE_PROMPT', index, value });
+  }, []);
+
   return {
     state,
     currentModel: currentModel as ModelDefinition,
@@ -402,5 +485,8 @@ export function useTrainingConfigForm() {
     addDataset,
     removeDataset,
     setFolderRepeats,
+    addSamplePrompt,
+    removeSamplePrompt,
+    setSamplePrompt,
   };
 }
