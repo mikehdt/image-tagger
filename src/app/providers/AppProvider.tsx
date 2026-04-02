@@ -11,7 +11,12 @@ import {
   selectIoState,
 } from '../store/assets';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectProjectFolderName, setProjectInfo } from '../store/project';
+import {
+  selectProjectFolderName,
+  setCaptionMode,
+  setProjectInfo,
+  setTriggerPhrases,
+} from '../store/project';
 import { getProjectInfo } from '../utils/project-actions';
 import { useTheme } from '../utils/use-theme';
 import { Error } from '../views/error';
@@ -61,8 +66,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       }),
     );
 
-    // Fetch the real title/thumbnail from the server
+    // Fetch the real title/thumbnail/caption config from the server
     getProjectInfo(urlProject).then((info) => {
+      if (info?.captionMode) dispatch(setCaptionMode(info.captionMode));
+      if (info?.triggerPhrases)
+        dispatch(setTriggerPhrases(info.triggerPhrases));
       dispatch(
         setProjectInfo({
           name: info?.title || urlProject,

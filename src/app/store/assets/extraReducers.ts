@@ -82,13 +82,19 @@ export const setupExtraReducers = (
     state.ioState = IoState.COMPLETE;
     state.ioMessage = undefined;
 
-    // Use the index from the payload directly
     const { assetIndex, tagList, tagStatus, savedTagList } = action.payload;
 
     state.images[assetIndex].ioState = IoState.COMPLETE;
     state.images[assetIndex].tagList = tagList;
     state.images[assetIndex].tagStatus = tagStatus;
     state.images[assetIndex].savedTagList = savedTagList;
+
+    // Apply caption fields if present (caption mode save)
+    if (action.payload.captionText !== undefined) {
+      state.images[assetIndex].captionText = action.payload.captionText;
+      state.images[assetIndex].savedCaptionText =
+        action.payload.savedCaptionText ?? action.payload.captionText;
+    }
 
     // Invalidate cache since TO_DELETE tags are removed and TO_ADD become SAVED
     state.tagCountsCache = null;
@@ -133,6 +139,13 @@ export const setupExtraReducers = (
           state.images[assetIndex].tagList = tagList;
           state.images[assetIndex].tagStatus = tagStatus;
           state.images[assetIndex].savedTagList = savedTagList;
+
+          // Apply caption fields if present (caption mode save)
+          if (result.captionText !== undefined) {
+            state.images[assetIndex].captionText = result.captionText;
+            state.images[assetIndex].savedCaptionText =
+              result.savedCaptionText ?? result.captionText;
+          }
         }
       });
     }

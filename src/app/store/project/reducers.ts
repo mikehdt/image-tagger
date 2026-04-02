@@ -2,7 +2,12 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 
 import { toggleDirection } from '../utils';
-import { ProjectState, TagSortDirection, TagSortType } from './types';
+import {
+  CaptionMode,
+  ProjectState,
+  TagSortDirection,
+  TagSortType,
+} from './types';
 
 export const coreReducers = {
   // Set project information
@@ -33,6 +38,8 @@ export const coreReducers = {
     state.config.showCropVisualization = false;
     state.config.tagSortType = TagSortType.SORTABLE;
     state.config.tagSortDirection = TagSortDirection.ASC;
+    state.config.captionMode = 'tags';
+    state.config.triggerPhrases = [];
   },
 
   // Toggle crop visualisation
@@ -63,5 +70,21 @@ export const coreReducers = {
       TagSortDirection.ASC,
       TagSortDirection.DESC,
     );
+  },
+
+  // Set caption mode
+  setCaptionMode: (
+    state: ProjectState,
+    { payload }: PayloadAction<CaptionMode>,
+  ) => {
+    state.config.captionMode = payload;
+  },
+
+  // Set trigger phrases for caption highlighting
+  setTriggerPhrases: (
+    state: ProjectState,
+    { payload }: PayloadAction<string[]>,
+  ) => {
+    state.config.triggerPhrases = payload;
   },
 };

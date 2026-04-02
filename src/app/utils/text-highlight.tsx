@@ -74,11 +74,13 @@ export const highlightText = (
  * Highlights matching segments of text for multiple patterns
  * @param text - The text to highlight
  * @param patterns - Array of patterns to highlight (case-insensitive)
+ * @param highlightClassName - CSS class for highlight spans (default: font-bold)
  * @returns Array of React elements with highlighted matches
  */
 export const highlightPatterns = (
   text: string,
   patterns: string[],
+  highlightClassName = 'font-bold',
 ): React.ReactNode => {
   if (!patterns || patterns.length === 0) {
     return text;
@@ -91,10 +93,11 @@ export const highlightPatterns = (
 
   for (const pattern of patterns) {
     if (!pattern) continue;
-    let index = normalizedText.indexOf(pattern);
+    const normalizedPattern = pattern.toLowerCase();
+    let index = normalizedText.indexOf(normalizedPattern);
     while (index !== -1) {
       ranges.push({ start: index, end: index + pattern.length });
-      index = normalizedText.indexOf(pattern, index + 1);
+      index = normalizedText.indexOf(normalizedPattern, index + 1);
     }
   }
 
@@ -134,7 +137,7 @@ export const highlightPatterns = (
 
     // Add the highlighted match
     result.push(
-      <span key={`match-${range.start}`} className="font-bold">
+      <span key={`match-${range.start}`} className={highlightClassName}>
         {text.substring(range.start, range.end)}
       </span>,
     );
@@ -152,4 +155,21 @@ export const highlightPatterns = (
   }
 
   return result;
+};
+
+/**
+ * Highlights trigger phrases in caption text with a background highlight
+ * @param text - The caption text
+ * @param phrases - Array of trigger phrases to highlight
+ * @returns Array of React elements with highlighted trigger phrases
+ */
+export const highlightTriggerPhrases = (
+  text: string,
+  phrases: string[],
+): React.ReactNode => {
+  return highlightPatterns(
+    text,
+    phrases,
+    'rounded bg-sky-200/60 px-0.5 -mx-0.5 dark:bg-sky-700/50',
+  );
 };

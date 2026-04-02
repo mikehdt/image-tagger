@@ -204,9 +204,7 @@ const SamplingSectionComponent = ({
             )}
 
             {/* Guidance Scale */}
-            {visibleFields.has(
-              'guidanceScale' satisfies keyof FormState,
-            ) && (
+            {visibleFields.has('guidanceScale' satisfies keyof FormState) && (
               <div>
                 <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
                   Guidance Scale
@@ -228,9 +226,7 @@ const SamplingSectionComponent = ({
             )}
 
             {/* Noise Scheduler */}
-            {visibleFields.has(
-              'noiseScheduler' satisfies keyof FormState,
-            ) && (
+            {visibleFields.has('noiseScheduler' satisfies keyof FormState) && (
               <div>
                 <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
                   Noise Scheduler

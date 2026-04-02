@@ -5,6 +5,8 @@ type ProjectInfo = {
   projectThumbnail?: string;
 };
 
+export type CaptionMode = 'tags' | 'caption';
+
 export enum TagSortType {
   SORTABLE = 'SORTABLE',
   ALPHABETICAL = 'ALPHABETICAL',
@@ -20,6 +22,8 @@ type ProjectConfig = {
   showCropVisualization: boolean;
   tagSortType: TagSortType;
   tagSortDirection: TagSortDirection;
+  captionMode: CaptionMode;
+  triggerPhrases: string[];
 };
 
 export type ProjectState = {

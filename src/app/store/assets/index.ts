@@ -50,6 +50,7 @@ export const {
   gatherTags,
   copyTagsToAssets,
   moveAssetsToFolder,
+  setCaptionText,
   setSortType,
   setSortDirection,
   toggleSortDirection,

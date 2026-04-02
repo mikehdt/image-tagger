@@ -15,6 +15,8 @@ const initialState: ProjectState = {
     showCropVisualization: false,
     tagSortType: TagSortType.SORTABLE,
     tagSortDirection: TagSortDirection.ASC,
+    captionMode: 'tags',
+    triggerPhrases: [],
   },
 };
 
@@ -33,6 +35,8 @@ const projectSlice = createSlice({
     selectShowCropVisualization: (state) => state.config.showCropVisualization,
     selectTagSortType: (state) => state.config.tagSortType,
     selectTagSortDirection: (state) => state.config.tagSortDirection,
+    selectCaptionMode: (state) => state.config.captionMode,
+    selectTriggerPhrases: (state) => state.config.triggerPhrases,
   },
 });
 
@@ -45,6 +49,8 @@ export const {
   setTagSortType,
   setTagSortDirection,
   toggleTagSortDirection,
+  setCaptionMode,
+  setTriggerPhrases,
 } = projectSlice.actions;
 
 // Export the selectors from the slice
@@ -56,6 +62,8 @@ export const {
   selectShowCropVisualization,
   selectTagSortType,
   selectTagSortDirection,
+  selectCaptionMode,
+  selectTriggerPhrases,
 } = projectSlice.selectors;
 
 // Main exports for project module

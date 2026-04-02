@@ -1,9 +1,6 @@
 import { memo } from 'react';
 
-import {
-  Dropdown,
-  type DropdownItem,
-} from '@/app/components/shared/dropdown';
+import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
 import { CollapsibleSection } from '../collapsible-section';
 import type {
@@ -57,8 +54,7 @@ const SavingSectionComponent = ({
 
   const activeField =
     saveMode === 'epochs' ? 'saveEveryEpochs' : 'saveEverySteps';
-  const activeValue =
-    saveMode === 'epochs' ? saveEveryEpochs : saveEverySteps;
+  const activeValue = saveMode === 'epochs' ? saveEveryEpochs : saveEverySteps;
 
   return (
     <CollapsibleSection
@@ -111,9 +107,7 @@ const SavingSectionComponent = ({
               <input
                 type="checkbox"
                 checked={saveEnabled}
-                onChange={(e) =>
-                  onFieldChange('saveEnabled', e.target.checked)
-                }
+                onChange={(e) => onFieldChange('saveEnabled', e.target.checked)}
                 className="accent-sky-500"
               />
               <span className="text-xs font-medium text-(--foreground)/70">

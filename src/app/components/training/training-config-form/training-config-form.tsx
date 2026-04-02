@@ -53,7 +53,8 @@ const TrainingConfigFormComponent = ({
     // Warmup steps are only meaningful for schedulers that use them
     if (state.scheduler === 'constant') fields.delete('warmupSteps');
     // Restarts only apply to cosine_with_restarts
-    if (state.scheduler !== 'cosine_with_restarts') fields.delete('numRestarts');
+    if (state.scheduler !== 'cosine_with_restarts')
+      fields.delete('numRestarts');
     return fields;
   }, [viewMode, state.modelId, state.scheduler]);
 
@@ -124,9 +125,7 @@ const TrainingConfigFormComponent = ({
       sampleMode: state.sampleMode,
       sampleEveryEpochs: state.sampleEveryEpochs,
       sampleEverySteps: state.sampleEverySteps,
-      samplePrompts: state.samplePrompts
-        .map((s) => s.trim())
-        .filter(Boolean),
+      samplePrompts: state.samplePrompts.map((s) => s.trim()).filter(Boolean),
     });
   }, [state, currentModel, calculatedSteps, onStartTraining]);
 

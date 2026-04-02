@@ -108,7 +108,7 @@ const JobPanelComponent = () => {
               LR Schedule
             </span>
             {progress?.learningRate != null && (
-              <span className="text-[10px] tabular-nums text-slate-400">
+              <span className="text-[10px] text-slate-400 tabular-nums">
                 LR {progress.learningRate}
               </span>
             )}

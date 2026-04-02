@@ -6,6 +6,7 @@ import {
 } from '../store/assets';
 import { hasState } from '../store/assets/utils';
 import { ClassFilterMode, type VisibilitySettings } from '../store/filters';
+import type { CaptionMode } from '../store/project/types';
 import { composeDimensions, naturalCompare } from './helpers';
 
 /**
@@ -25,6 +26,7 @@ export const applyVisibilityFilters = ({
   selectedAssets,
   sortType,
   sortDirection,
+  captionMode,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
@@ -37,6 +39,7 @@ export const applyVisibilityFilters = ({
   selectedAssets: string[];
   sortType?: SortType;
   sortDirection?: SortDirection;
+  captionMode?: CaptionMode;
 }): ImageAsset[] => {
   // Sort first, operating on raw asset references (no spreading yet)
   const sortedAssets = applySorting(
@@ -104,10 +107,13 @@ export const applyVisibilityFilters = ({
 
     // Scope: modified only
     if (visibility.showModified) {
-      const hasModifiedTags = img.tagList.some(
-        (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
-      );
-      if (!hasModifiedTags) return false;
+      const isModified =
+        captionMode === 'caption'
+          ? img.captionText !== img.savedCaptionText
+          : img.tagList.some(
+              (tag) => !hasState(img.tagStatus[tag], TagState.SAVED),
+            );
+      if (!isModified) return false;
     }
 
     // --- Per-class filters (AND between classes) ---

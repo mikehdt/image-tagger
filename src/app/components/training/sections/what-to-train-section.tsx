@@ -43,10 +43,7 @@ const WhatToTrainSectionComponent = ({
   }, []);
 
   return (
-    <CollapsibleSection
-      title="Model"
-      hiddenChangesCount={hiddenChangesCount}
-    >
+    <CollapsibleSection title="Model" hiddenChangesCount={hiddenChangesCount}>
       <div className="space-y-3">
         {visibleFields.has('modelId' satisfies keyof FormState) && (
           <div>

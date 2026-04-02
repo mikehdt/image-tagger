@@ -319,6 +319,7 @@ export const getImageAssetDetails = async (
 
   let tagStatus: { [key: string]: TagState } = {};
   let tagList: string[] = [];
+  let captionText = '';
 
   try {
     // Tag file is co-located with image (in same folder)
@@ -328,7 +329,10 @@ export const getImageAssetDetails = async (
     if (fs.existsSync(tagFilePath)) {
       const tagContent = fs.readFileSync(tagFilePath, 'utf8').trim();
 
-      // Only process if the file has actual content
+      // Always store raw text for caption mode
+      captionText = tagContent;
+
+      // Parse comma-separated tags for tag mode
       if (tagContent) {
         tagStatus = tagContent
           .split(', ')
@@ -362,6 +366,8 @@ export const getImageAssetDetails = async (
     tagStatus,
     tagList,
     savedTagList: [...tagList], // Make a copy of the initial tag list
+    captionText,
+    savedCaptionText: captionText,
     lastModified,
     blurDataUrl,
   };

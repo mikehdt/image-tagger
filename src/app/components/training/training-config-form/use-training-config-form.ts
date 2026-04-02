@@ -95,7 +95,15 @@ type FormAction =
   | { type: 'ADD_SAMPLE_PROMPT' }
   | { type: 'REMOVE_SAMPLE_PROMPT'; index: number }
   | { type: 'SET_SAMPLE_PROMPT'; index: number; value: string }
-  | { type: 'ADD_DATASET'; folderName: string; displayName: string; thumbnail?: string; thumbnailVersion?: number; dimensionHistogram?: Record<string, number>; folders: DatasetFolder[] }
+  | {
+      type: 'ADD_DATASET';
+      folderName: string;
+      displayName: string;
+      thumbnail?: string;
+      thumbnailVersion?: number;
+      dimensionHistogram?: Record<string, number>;
+      folders: DatasetFolder[];
+    }
   | { type: 'REMOVE_DATASET'; index: number }
   | {
       type: 'SET_FOLDER_REPEATS';
@@ -258,9 +266,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
 
     case 'REMOVE_SAMPLE_PROMPT': {
-      const prompts = state.samplePrompts.filter(
-        (_, i) => i !== action.index,
-      );
+      const prompts = state.samplePrompts.filter((_, i) => i !== action.index);
       return {
         ...state,
         samplePrompts: prompts.length === 0 ? [''] : prompts,

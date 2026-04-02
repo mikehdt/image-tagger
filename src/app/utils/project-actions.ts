@@ -39,6 +39,8 @@ export type ProjectConfig = {
   hidden?: boolean;
   featured?: boolean;
   autoTagger?: AutoTaggerSettings;
+  captionMode?: 'tags' | 'caption';
+  triggerPhrases?: string[];
 };
 
 type CentralizedProjectInfo = ProjectConfig;
@@ -145,13 +147,20 @@ const readLocalProjectInfo = (projectPath: string): LocalProjectInfo | null => {
  */
 export const getProjectInfo = async (
   folderName: string,
-): Promise<{ title: string; thumbnail?: string } | null> => {
+): Promise<{
+  title: string;
+  thumbnail?: string;
+  captionMode?: 'tags' | 'caption';
+  triggerPhrases?: string[];
+} | null> => {
   try {
     const centralInfo = readCentralizedProjectInfo(folderName);
     const thumbnail = findThumbnailFile(folderName);
     return {
       title: centralInfo?.title || folderName,
       thumbnail: thumbnail || undefined,
+      captionMode: centralInfo?.captionMode,
+      triggerPhrases: centralInfo?.triggerPhrases,
     };
   } catch {
     return null;
@@ -522,7 +531,11 @@ export const getProjectFolders = async (
     .filter((e) => isSupportedImageExtension(path.extname(e.name))).length;
 
   if (rootImageCount > 0) {
-    folders.push({ name: '(root)', imageCount: rootImageCount, detectedRepeats: 1 });
+    folders.push({
+      name: '(root)',
+      imageCount: rootImageCount,
+      detectedRepeats: 1,
+    });
   }
 
   // Repeat subfolders

@@ -5,6 +5,7 @@ import { memo, MouseEvent, useCallback, useState } from 'react';
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
+  selectCaptionMode,
   selectProjectFolderName,
   selectShowCropVisualization,
 } from '@/app/store/project';
@@ -14,6 +15,7 @@ import { getImageUrl } from '@/app/utils/image-utils';
 
 import { Button } from '../shared/button';
 import { Checkbox } from '../shared/checkbox';
+import { CaptionManager } from '../tagging/caption-manager';
 import { TaggingManager } from '../tagging/tagging-manager';
 import { AssetMetadata } from './asset-metadata';
 import { CropVisualization } from './crop-visualization';
@@ -67,6 +69,7 @@ const AssetComponent = ({
   const globalShowCropVisualization = useAppSelector(
     selectShowCropVisualization,
   );
+  const captionMode = useAppSelector(selectCaptionMode);
 
   // Reset local override when global state changes (derived state pattern)
   if (globalShowCropVisualization !== lastGlobalValue) {
@@ -233,10 +236,14 @@ const AssetComponent = ({
         <div
           className={`min-h-40 bg-slate-50 p-4 max-md:p-2 ${imageZoom ? 'md:w-1/4' : 'md:w-3/4'} dark:bg-slate-900`}
         >
-          <TaggingManager
-            assetId={assetId}
-            onTagEditingChange={setIsTagInteracting}
-          />
+          {captionMode === 'caption' ? (
+            <CaptionManager assetId={assetId} />
+          ) : (
+            <TaggingManager
+              assetId={assetId}
+              onTagEditingChange={setIsTagInteracting}
+            />
+          )}
         </div>
 
         <AssetMetadata

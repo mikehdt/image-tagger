@@ -1,4 +1,5 @@
 import { DEFAULT_BATCH_SIZE } from '../../constants';
+import type { CaptionMode } from '../project/types';
 import { ImageAsset, SaveAssetResult, TagState } from './types';
 import { hasState } from './utils';
 
@@ -61,16 +62,23 @@ export function createSaveAssetResult(
 }
 
 /**
- * Finds assets with modified tags (not in SAVED state)
+ * Finds assets with modified tags or captions (not in SAVED state)
  * @param images Array of assets to check
- * @returns Array of assets with modified tags
+ * @param captionMode Current caption mode for the project
+ * @returns Array of assets with modifications
  */
-export function findModifiedAssets(images: ImageAsset[]): ImageAsset[] {
-  return images.filter((asset) =>
-    asset.tagList.some(
+export function findModifiedAssets(
+  images: ImageAsset[],
+  captionMode: CaptionMode = 'tags',
+): ImageAsset[] {
+  return images.filter((asset) => {
+    if (captionMode === 'caption') {
+      return asset.captionText !== asset.savedCaptionText;
+    }
+    return asset.tagList.some(
       (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
-    ),
-  );
+    );
+  });
 }
 
 /**
@@ -84,6 +92,7 @@ export function processSaveResults(
   writeResults: { fileId: string; success: boolean }[],
   modifiedAssets: ImageAsset[],
   imageIndexById: { [fileId: string]: number },
+  captionMode: CaptionMode = 'tags',
 ): {
   results: SaveAssetResult[];
   successCount: number;
@@ -97,14 +106,30 @@ export function processSaveResults(
     const asset = modifiedAssets.find((a) => a.fileId === writeResult.fileId);
 
     if (asset && writeResult.success) {
-      // Process successful write
-      const updateTags = getUpdatedTags(asset);
-      const newTagStatus = createCleanTagStatus(updateTags);
-
-      // Create and add save result to results array
-      results.push(
-        createSaveAssetResult(asset, updateTags, newTagStatus, imageIndexById),
-      );
+      // Caption-mode asset: caption text was written directly
+      if (captionMode === 'caption') {
+        results.push({
+          assetIndex: imageIndexById[asset.fileId] ?? -1,
+          fileId: asset.fileId,
+          tagList: asset.tagList,
+          tagStatus: asset.tagStatus,
+          savedTagList: asset.savedTagList,
+          captionText: asset.captionText,
+          savedCaptionText: asset.captionText,
+        });
+      } else {
+        // Tag-mode asset: process tag updates
+        const updateTags = getUpdatedTags(asset);
+        const newTagStatus = createCleanTagStatus(updateTags);
+        results.push(
+          createSaveAssetResult(
+            asset,
+            updateTags,
+            newTagStatus,
+            imageIndexById,
+          ),
+        );
+      }
 
       successCount++;
     } else {

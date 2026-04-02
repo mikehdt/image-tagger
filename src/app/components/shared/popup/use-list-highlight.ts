@@ -174,7 +174,15 @@ export function useListHighlight({
           break;
       }
     },
-    [count, isNavigable, highlightedIndex, keyboardActive, keyboardIndex, onSelect, onClose],
+    [
+      count,
+      isNavigable,
+      highlightedIndex,
+      keyboardActive,
+      keyboardIndex,
+      onSelect,
+      onClose,
+    ],
   );
 
   /** Props to spread on each item element for hover tracking. */

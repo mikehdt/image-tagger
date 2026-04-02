@@ -31,6 +31,7 @@ import {
   saveMultipleAssetTags,
 } from '@/app/utils/asset-actions';
 
+import type { ProjectState } from '../project/types';
 import { addToast } from '../toasts';
 import {
   createCleanTagStatus,
@@ -64,7 +65,7 @@ export const clearLoadErrors = createAction('assets/clearLoadErrors');
 export const loadAllAssets = createAsyncThunk<
   ImageAsset[],
   { maintainIoState?: boolean; projectPath?: string } | undefined,
-  { state: { assets: ImageAssets } }
+  { state: { assets: ImageAssets; project: ProjectState } }
 >('assets/loadAllAssets', async (options, { dispatch, getState }) => {
   try {
     // Build blur cache from existing assets to reuse unchanged blur data
@@ -180,11 +181,13 @@ export const loadAllAssets = createAsyncThunk<
 export const saveAsset = createAsyncThunk<
   SaveAssetResult,
   { fileId: string; projectPath?: string },
-  { state: { assets: ImageAssets } }
+  { state: { assets: ImageAssets; project: ProjectState } }
 >('assets/saveAsset', async ({ fileId, projectPath }, { getState }) => {
   const {
     assets: { images, imageIndexById },
+    project,
   } = getState();
+  const captionMode = project.config.captionMode;
 
   const assetIndex = imageIndexById[fileId];
   if (assetIndex === undefined) {
@@ -193,19 +196,31 @@ export const saveAsset = createAsyncThunk<
 
   const asset = images[assetIndex];
 
-  // Get updated tags using the helper function
-  const updateTags = getUpdatedTags(asset);
+  // Caption mode: write raw caption text directly
+  if (captionMode === 'caption') {
+    const success = await saveAssetTags(fileId, asset.captionText, projectPath);
+    if (success) {
+      return {
+        assetIndex,
+        fileId,
+        tagList: asset.tagList,
+        tagStatus: asset.tagStatus,
+        savedTagList: asset.savedTagList,
+        captionText: asset.captionText,
+        savedCaptionText: asset.captionText,
+      };
+    }
+    throw new Error(`Unable to save caption for ${fileId}`);
+  }
 
-  // Create flattened tags for disk storage
+  // Tag mode: compose from tag list
+  const updateTags = getUpdatedTags(asset);
   const flattenedTags = createFlattenedTags(updateTags);
 
   const success = await saveAssetTags(fileId, flattenedTags, projectPath);
 
   if (success) {
-    // Create a clean tag status object with helper function
     const newTagStatus = createCleanTagStatus(updateTags);
-
-    // Create and return the save result object
     return createSaveAssetResult(
       asset,
       updateTags,
@@ -221,14 +236,16 @@ export const saveAsset = createAsyncThunk<
 export const saveAllAssets = createAsyncThunk<
   { savedCount: number; errorCount?: number; results?: Array<SaveAssetResult> },
   { projectPath?: string } | undefined,
-  { state: { assets: ImageAssets } }
+  { state: { assets: ImageAssets; project: ProjectState } }
 >('assets/saveAllAssets', async (options, { getState, dispatch }) => {
   const {
     assets: { images, imageIndexById },
+    project,
   } = getState();
+  const captionMode = project.config.captionMode;
 
-  // Find all images with modified tags
-  const modifiedAssets = findModifiedAssets(images);
+  // Find all images with modifications
+  const modifiedAssets = findModifiedAssets(images, captionMode);
 
   if (modifiedAssets.length === 0) {
     return { savedCount: 0 };
@@ -241,12 +258,13 @@ export const saveAllAssets = createAsyncThunk<
 
   // Prepare batch operations for disk writes using helper functions
   const writeOperations: AssetTagOperation[] = modifiedAssets.map((asset) => {
+    if (captionMode === 'caption') {
+      return { fileId: asset.fileId, composedTags: asset.captionText };
+    }
     const updateTags = getUpdatedTags(asset);
-    const flattenedTags = createFlattenedTags(updateTags);
-
     return {
       fileId: asset.fileId,
-      composedTags: flattenedTags,
+      composedTags: createFlattenedTags(updateTags),
     };
   });
 
@@ -311,6 +329,7 @@ export const saveAllAssets = createAsyncThunk<
       writeResults,
       modifiedAssets,
       imageIndexById,
+      captionMode,
     );
 
     successCount = processedResults.successCount;

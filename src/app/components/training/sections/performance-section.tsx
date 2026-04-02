@@ -1,7 +1,10 @@
 import { memo, useMemo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
-import { calculateKohyaBucket, generateBucketList } from '@/app/utils/image-utils';
+import {
+  calculateKohyaBucket,
+  generateBucketList,
+} from '@/app/utils/image-utils';
 
 import { CollapsibleSection } from '../collapsible-section';
 import type {
@@ -346,7 +349,7 @@ const KohyaBucketPreview = memo(
           {totalBuckets} buckets ({buckets.length} unique ratios + portrait
           mirrors)
         </p>
-        <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-xs tabular-nums text-slate-400">
+        <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-slate-400 tabular-nums">
           {buckets.map((b) => {
             const key = `${b.width}x${b.height}`;
             const portraitKey = `${b.height}x${b.width}`;

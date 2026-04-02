@@ -315,11 +315,25 @@ export const coreReducers = {
     );
   },
 
+  // Set caption text for a single asset (caption mode editing)
+  setCaptionText: (
+    state: ImageAssets,
+    { payload }: PayloadAction<{ assetId: string; text: string }>,
+  ) => {
+    const index = state.imageIndexById[payload.assetId];
+    if (index === undefined) return;
+    state.images[index].captionText = payload.text;
+  },
+
   resetTags: (state: ImageAssets, { payload }: PayloadAction<string>) => {
     const assetIndex = state.imageIndexById[payload];
     if (assetIndex === undefined) return;
 
     const asset = state.images[assetIndex];
+
+    // Also revert caption text (safe in both modes)
+    asset.captionText = asset.savedCaptionText;
+
     const tagStatus = asset.tagStatus;
     const savedList = asset.savedTagList || [];
     const savedTagsSet = new Set(savedList);
@@ -355,6 +369,13 @@ export const coreReducers = {
     let hasReset = false;
 
     for (const asset of state.images) {
+      // Check caption modifications
+      const hasCaptionModified = asset.captionText !== asset.savedCaptionText;
+      if (hasCaptionModified) {
+        asset.captionText = asset.savedCaptionText;
+        hasReset = true;
+      }
+
       const hasModified = asset.tagList.some(
         (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
       );

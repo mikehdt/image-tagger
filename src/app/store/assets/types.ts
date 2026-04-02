@@ -52,6 +52,8 @@ export type ImageAsset = {
   tagStatus: { [key: string]: number }; // Changed from TagState to number to support bit flags
   tagList: string[];
   savedTagList: string[]; // Original tag order from last save
+  captionText: string; // Raw text from .txt file (for caption mode)
+  savedCaptionText: string; // Last-saved caption text (for dirty detection)
   lastModified: number; // Unix timestamp for cache busting
   blurDataUrl?: string; // Base64 data URL for blur placeholder (max 10px)
 };
@@ -93,4 +95,6 @@ export type SaveAssetResult = {
   tagList: string[];
   tagStatus: { [key: string]: number };
   savedTagList: string[];
+  captionText?: string;
+  savedCaptionText?: string;
 };

@@ -37,6 +37,7 @@ export const selectTagCounts = wrapSelector(
 // Plain function — returns boolean primitive so useSelector handles equality.
 // No createSelector wrapper needed since parameterized selectors with cache
 // size 1 always recompute when called from different components anyway.
+// Covers both tag mode and caption mode modifications.
 export const selectAssetHasModifiedTags = (
   state: RootState,
   assetId: string,
@@ -44,11 +45,28 @@ export const selectAssetHasModifiedTags = (
   const images = selectAllImages(state);
   const indexById = selectImageIndexById(state);
   const asset = images[indexById[assetId]];
-  if (!asset || asset.tagList.length === 0) return false;
+  if (!asset) return false;
 
+  const captionMode = state.project.config.captionMode;
+
+  if (captionMode === 'caption') {
+    return asset.captionText !== asset.savedCaptionText;
+  }
+
+  if (asset.tagList.length === 0) return false;
   return asset.tagList.some(
     (tagName) => !hasState(asset.tagStatus[tagName], TagState.SAVED),
   );
+};
+
+// Plain selector for caption text — returns primitive string so useSelector handles equality
+export const selectAssetCaptionText = (
+  state: RootState,
+  assetId: string,
+): string => {
+  const images = selectAllImages(state);
+  const indexById = selectImageIndexById(state);
+  return images[indexById[assetId]]?.captionText ?? '';
 };
 
 // Selectors for tag sorting from project store
@@ -118,17 +136,22 @@ export const selectImageSizes = createSelector([selectAllImages], (images) => {
   return counts;
 });
 
-// Custom selector to check if any assets have modified tags
+// Custom selector to check if any assets have modified tags or captions
 export const selectHasModifiedAssets = wrapSelector(
   'selectHasModifiedAssets',
-  createSelector([selectAllImages], (images) => {
-    // Check if any asset has tags that aren't in the SAVED state
-    return images.some((asset) =>
-      asset.tagList.some(
-        (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
-      ),
-    );
-  }),
+  createSelector(
+    [selectAllImages, (state: RootState) => state.project.config.captionMode],
+    (images, captionMode) => {
+      return images.some((asset) => {
+        if (captionMode === 'caption') {
+          return asset.captionText !== asset.savedCaptionText;
+        }
+        return asset.tagList.some(
+          (tag) => !hasState(asset.tagStatus[tag], TagState.SAVED),
+        );
+      });
+    },
+  ),
 );
 
 // Custom selector to check if any assets have no persisted tags
@@ -222,6 +245,7 @@ export const selectFilteredAssets = wrapSelector(
       selectRelevantSelectedAssets,
       (state: RootState) => state.assets.sortType,
       (state: RootState) => state.assets.sortDirection,
+      (state: RootState) => state.project.config.captionMode,
     ],
     (
       assets,
@@ -235,6 +259,7 @@ export const selectFilteredAssets = wrapSelector(
       selectedAssets,
       sortType,
       sortDirection,
+      captionMode,
     ) => {
       return applyVisibilityFilters({
         assets,
@@ -248,6 +273,7 @@ export const selectFilteredAssets = wrapSelector(
         selectedAssets,
         sortType,
         sortDirection,
+        captionMode,
       });
     },
   ),
