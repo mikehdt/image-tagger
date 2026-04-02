@@ -123,12 +123,12 @@ const CaptionEditorComponent = ({
         {/* Backdrop: renders highlighted text, always visible */}
         <div
           data-caption-backdrop
-          className={`rounded border p-2 ${textStyles} ${
+          className={`rounded border p-2 transition-colors ${textStyles} ${
             isFocused
-              ? 'border-amber-300 ring-1 ring-amber-300 dark:border-amber-600 dark:ring-amber-600'
+              ? 'border-sky-300 ring-1 ring-sky-300 dark:border-sky-600 dark:ring-sky-600'
               : isActive
-                ? 'border-slate-300 dark:border-slate-600'
-                : 'border-slate-200 transition-colors hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
+                ? 'border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-800'
+                : 'border-slate-200 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
           }`}
         >
           {captionText ? (
@@ -152,7 +152,7 @@ const CaptionEditorComponent = ({
             onFocus={handleFocus}
             onBlur={handleBlur}
             onScroll={handleScroll}
-            className={`absolute inset-0 resize-none rounded border border-transparent bg-transparent p-2 text-transparent caret-slate-800 outline-none select-text dark:caret-slate-200 ${textStyles}`}
+            className={`absolute inset-0 resize-none overflow-hidden rounded border border-transparent bg-transparent p-2 text-transparent caret-slate-800 outline-none select-text dark:caret-slate-200 ${textStyles}`}
             rows={1}
           />
         )}

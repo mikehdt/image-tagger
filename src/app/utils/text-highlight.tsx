@@ -170,6 +170,6 @@ export const highlightTriggerPhrases = (
   return highlightPatterns(
     text,
     phrases,
-    'rounded bg-sky-200/60 px-0.5 -mx-0.5 dark:bg-sky-700/50',
+    'rounded bg-amber-200/60 px-0.5 -mx-0.5 dark:bg-amber-700/50 shadow-sm',
   );
 };

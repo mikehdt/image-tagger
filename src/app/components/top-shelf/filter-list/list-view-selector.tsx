@@ -1,11 +1,14 @@
 import { XIcon } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectCaptionMode } from '@/app/store/project';
 
 import { useFilterContext } from './filter-context';
 import { FilterView } from './types';
 
-const viewOptions: { value: FilterView; label: string }[] = [
+const allViewOptions: { value: FilterView; label: string }[] = [
   { value: 'tag', label: 'Tag' },
   { value: 'size', label: 'Size' },
   { value: 'filetype', label: 'File' },
@@ -19,6 +22,17 @@ export const ViewSelector = () => {
     setSelectedIndex,
     onClose,
   } = useFilterContext();
+
+  const captionMode = useAppSelector(selectCaptionMode);
+
+  // Hide the Tag view in caption mode — comma-split fragments aren't useful
+  const viewOptions = useMemo(
+    () =>
+      captionMode === 'caption'
+        ? allViewOptions.filter((o) => o.value !== 'tag')
+        : allViewOptions,
+    [captionMode],
+  );
 
   const handleViewChange = (view: FilterView) => {
     setActiveView(view);

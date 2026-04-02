@@ -9,6 +9,9 @@ import {
   useState,
 } from 'react';
 
+import { useAppSelector } from '@/app/store/hooks';
+import { selectCaptionMode } from '@/app/store/project';
+
 import {
   FilterView,
   getSortOptions,
@@ -106,8 +109,15 @@ export const FilterProvider = ({
   onClose,
   inputRef,
 }: FilterProviderProps) => {
+  const captionMode = useAppSelector(selectCaptionMode);
+
   // Persistent state for view and sort settings (initialized from module-level variables)
-  const [activeView, setActiveView] = useState<FilterView>(persistedActiveView);
+  // In caption mode, the 'tag' view is hidden — fall back to 'size'
+  const [activeView, setActiveView] = useState<FilterView>(
+    captionMode === 'caption' && persistedActiveView === 'tag'
+      ? 'size'
+      : persistedActiveView,
+  );
   const [sizeSubView, setSizeSubViewState] =
     useState<SizeSubViewType>(persistedSizeSubView);
   const [sortSettings, setSortSettingsState] = useState(persistedSortSettings);

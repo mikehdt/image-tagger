@@ -1,4 +1,4 @@
-import { HighlighterIcon, SparklesIcon, TextIcon } from 'lucide-react';
+import { HighlighterIcon, SparklesIcon, SwatchBookIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AutoTaggerModal } from '@/app/components/auto-tagger';
@@ -66,10 +66,10 @@ const TriggerPhrasesModal = ({
         autoFocus
       />
       <div className="mt-3 flex justify-end gap-2">
-        <Button size="medium" color="stone" onClick={onClose}>
+        <Button size="medium" onClick={onClose}>
           Cancel
         </Button>
-        <Button size="medium" color="amber" onClick={handleSave}>
+        <Button size="medium" color="teal" onClick={handleSave}>
           Save
         </Button>
       </div>
@@ -134,9 +134,7 @@ const AutoTaggerButton = () => {
   return (
     <>
       <Button
-        size="small"
-        variant="default"
-        color="indigo"
+        variant="ghost"
         onClick={openTaggerModal}
         disabled={!hasReadyModel || !hasAssetsForTagger}
         title={
@@ -148,7 +146,7 @@ const AutoTaggerButton = () => {
         }
       >
         <SparklesIcon className="h-4 w-4" />
-        <span className="max-lg:hidden">Auto Tag</span>
+        <span className="ml-2 max-lg:hidden">Auto Tag</span>
       </Button>
 
       <AutoTaggerModal
@@ -166,21 +164,25 @@ const CaptionActionsComponent = () => {
 
   return (
     <ResponsiveToolbarGroup
-      icon={<TextIcon className="h-4 w-4" />}
+      icon={<SwatchBookIcon className="h-4 w-4" />}
       title="Captions"
       position="right"
     >
       <Button
-        size="small"
-        variant="default"
-        color="amber"
+        variant="ghost"
         onClick={() => setIsTriggersModalOpen(true)}
         title="Edit trigger phrases"
       >
         <HighlighterIcon className="h-4 w-4" />
-        <span className="max-lg:hidden">
-          Triggers
-          {triggerPhrases.length > 0 ? ` (${triggerPhrases.length})` : ''}
+
+        <span className="ml-2 flex items-center">
+          <span className="mr-2 text-nowrap max-lg:hidden">Triggers</span>
+
+          {triggerPhrases.length > 0 && (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white tabular-nums dark:bg-amber-800">
+              {triggerPhrases.length}
+            </span>
+          )}
         </span>
       </Button>
 
