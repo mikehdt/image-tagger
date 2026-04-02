@@ -71,7 +71,9 @@ export const loadAllAssets = createAsyncThunk<
     // Build blur cache from existing assets to reuse unchanged blur data
     const {
       assets: { images },
+      project,
     } = getState();
+    const captionMode = project.config.captionMode;
     const blurCache: BlurCache = {};
     for (const asset of images) {
       if (asset.blurDataUrl) {
@@ -139,6 +141,7 @@ export const loadAllAssets = createAsyncThunk<
           batch,
           options?.projectPath,
           blurCache,
+          captionMode,
         );
         // Update error count and track failed files for this batch
         if (errors.length > 0) {
@@ -158,6 +161,7 @@ export const loadAllAssets = createAsyncThunk<
             file,
             options?.projectPath,
             blurCache,
+            captionMode,
           );
         } catch (error) {
           console.error(`Failed to process file ${file}:`, error);
@@ -213,9 +217,9 @@ export const saveAsset = createAsyncThunk<
     throw new Error(`Unable to save caption for ${fileId}`);
   }
 
-  // Tag mode: compose from tag list
+  // Tag/sentences mode: compose from tag list
   const updateTags = getUpdatedTags(asset);
-  const flattenedTags = createFlattenedTags(updateTags);
+  const flattenedTags = createFlattenedTags(updateTags, captionMode);
 
   const success = await saveAssetTags(fileId, flattenedTags, projectPath);
 
@@ -264,7 +268,7 @@ export const saveAllAssets = createAsyncThunk<
     const updateTags = getUpdatedTags(asset);
     return {
       fileId: asset.fileId,
-      composedTags: createFlattenedTags(updateTags),
+      composedTags: createFlattenedTags(updateTags, captionMode),
     };
   });
 

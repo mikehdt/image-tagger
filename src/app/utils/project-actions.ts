@@ -39,7 +39,7 @@ export type ProjectConfig = {
   hidden?: boolean;
   featured?: boolean;
   autoTagger?: AutoTaggerSettings;
-  captionMode?: 'tags' | 'caption';
+  captionMode?: 'tags' | 'sentences' | 'caption';
   triggerPhrases?: string[];
 };
 
@@ -60,7 +60,7 @@ export type Project = {
   hidden?: boolean;
   private?: boolean;
   featured?: boolean;
-  captionMode?: 'tags' | 'caption';
+  captionMode?: 'tags' | 'sentences' | 'caption';
   triggerPhrases?: string[];
 };
 
@@ -152,7 +152,7 @@ export const getProjectInfo = async (
 ): Promise<{
   title: string;
   thumbnail?: string;
-  captionMode?: 'tags' | 'caption';
+  captionMode?: 'tags' | 'sentences' | 'caption';
   triggerPhrases?: string[];
 } | null> => {
   try {

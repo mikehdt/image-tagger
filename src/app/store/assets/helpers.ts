@@ -17,10 +17,14 @@ export function getUpdatedTags(asset: ImageAsset): string[] {
 /**
  * Creates a flattened string of tags for disk storage
  * @param tags Array of tags to flatten
- * @returns Comma-separated list of tags
+ * @param captionMode Determines the separator: comma for tags, space for sentences
+ * @returns Joined string of tags
  */
-export function createFlattenedTags(tags: string[]): string {
-  return tags.join(', ');
+export function createFlattenedTags(
+  tags: string[],
+  captionMode: CaptionMode = 'tags',
+): string {
+  return tags.join(captionMode === 'sentences' ? ' ' : ', ');
 }
 
 /**

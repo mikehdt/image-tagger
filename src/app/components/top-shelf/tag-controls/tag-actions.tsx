@@ -16,9 +16,9 @@ import { TagSortControls } from './tag-sort-controls';
 const TagActionsComponent = () => {
   const captionMode = useAppSelector(selectCaptionMode);
 
-  if (captionMode === 'caption') return <CaptionActions />;
-
-  return (
+  return captionMode === 'caption' ? (
+    <CaptionActions />
+  ) : (
     <ResponsiveToolbarGroup
       icon={<SwatchBookIcon className="h-4 w-4" />}
       title="Tags"

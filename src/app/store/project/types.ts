@@ -5,7 +5,7 @@ type ProjectInfo = {
   projectThumbnail?: string;
 };
 
-export type CaptionMode = 'tags' | 'caption';
+export type CaptionMode = 'tags' | 'sentences' | 'caption';
 
 export enum TagSortType {
   SORTABLE = 'SORTABLE',

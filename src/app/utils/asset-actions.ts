@@ -206,6 +206,7 @@ export const getMultipleImageAssetDetails = async (
   files: string[],
   projectPath?: string,
   blurCache?: BlurCache,
+  captionMode?: string,
 ): Promise<{ assets: ImageAsset[]; errors: string[] }> => {
   // Check for duplicate fileIds and get filtered files
   const { uniqueFiles, duplicateWarnings } = detectDuplicateFileIds(files);
@@ -223,7 +224,7 @@ export const getMultipleImageAssetDetails = async (
 
   const results = await Promise.allSettled(
     uniqueFiles.map((file) =>
-      getImageAssetDetails(file, projectPath, blurCache),
+      getImageAssetDetails(file, projectPath, blurCache, captionMode),
     ),
   );
 
@@ -276,6 +277,7 @@ export const getImageAssetDetails = async (
   file: string,
   projectPath?: string,
   blurCache?: BlurCache,
+  captionMode?: string,
 ): Promise<ImageAsset> => {
   const fileId = file.substring(0, file.lastIndexOf('.'));
   const fileExtension = file.substring(file.lastIndexOf('.') + 1);
@@ -332,18 +334,22 @@ export const getImageAssetDetails = async (
       // Always store raw text for caption mode
       captionText = tagContent;
 
-      // Parse comma-separated tags for tag mode
+      // Parse text into tags based on caption mode
       if (tagContent) {
-        tagStatus = tagContent
-          .split(', ')
-          .filter((tag) => tag.trim() !== '') // Filter out empty tags
-          .reduce(
-            (acc, tag) => ({
-              ...acc,
-              [tag.trim()]: TagState.SAVED,
-            }),
-            {} as { [key: string]: TagState },
-          );
+        const parts =
+          captionMode === 'sentences'
+            ? // Split on sentence-ending punctuation followed by whitespace
+              tagContent.split(/(?<=[.?!])\s+/).filter((s) => s.trim() !== '')
+            : // Default: comma-separated tags
+              tagContent.split(', ').filter((tag) => tag.trim() !== '');
+
+        tagStatus = parts.reduce(
+          (acc, tag) => ({
+            ...acc,
+            [tag.trim()]: TagState.SAVED,
+          }),
+          {} as { [key: string]: TagState },
+        );
 
         tagList = Object.keys(tagStatus);
       }

@@ -23,26 +23,26 @@ import {
 // Uses discrete Tailwind classes for proper CSS extraction
 const useInputWidth = (textLength: number): string => {
   return useMemo(() => {
-    const MIN_CHAR_LENGTH = 6;
-    const MAX_CHAR_LENGTH = 20;
+    // A note on Tailwind classes: They must be whole strings (`w-40` etc.)
+    // as otherwise Tailwind's parser won't properly extract the correct CSS.
+    // Steps from w-40 (160px) up to w-full for long sentence editing.
+    const widthClasses = [
+      { maxChars: 6, className: 'w-40' },
+      { maxChars: 8, className: 'w-44' },
+      { maxChars: 10, className: 'w-48' },
+      { maxChars: 13, className: 'w-52' },
+      { maxChars: 16, className: 'w-56' },
+      { maxChars: 20, className: 'w-60' },
+      { maxChars: 25, className: 'w-68' },
+      { maxChars: 35, className: 'w-80' },
+      { maxChars: 50, className: 'w-96' },
+      { maxChars: 70, className: 'w-120' },
+    ];
 
-    // A note on Tailwind classes: They must be whole strings (`w-24` etc.)
-    // as otherwise Tailwind's parser won't properly extract the correct CSS
-    if (textLength <= MIN_CHAR_LENGTH) {
-      return 'w-40';
-    } else if (textLength >= MAX_CHAR_LENGTH) {
-      return 'w-68';
-    } else {
-      // Dynamic width between min and max based on character count
-      const widthStep =
-        (textLength - MIN_CHAR_LENGTH) / (MAX_CHAR_LENGTH - MIN_CHAR_LENGTH);
-      const widthClasses = ['w-44', 'w-48', 'w-52', 'w-56', 'w-60', 'w-64'];
-      const index = Math.min(
-        Math.floor(widthStep * widthClasses.length),
-        widthClasses.length - 1,
-      );
-      return widthClasses[index];
+    for (const { maxChars, className } of widthClasses) {
+      if (textLength <= maxChars) return className;
     }
+    return 'w-full';
   }, [textLength]);
 };
 
