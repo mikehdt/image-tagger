@@ -16,6 +16,7 @@ export type ProviderInfo = {
   id: string;
   name: string;
   description: string;
+  providerType: 'onnx' | 'vlm';
 };
 
 export type DownloadProgress = {

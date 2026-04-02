@@ -1,98 +1,26 @@
 /**
- * WD14 model definitions from SmilingWolf
+ * WD v3 model definitions from SmilingWolf
  * https://huggingface.co/SmilingWolf
+ *
+ * v3 models are the latest generation — v2 models are superseded and removed.
+ * EVA02-Large is the most accurate; ConvNext and SwinV2 are lighter alternatives.
  */
 
 import type { TaggerModel } from '../../types';
 
 const PROVIDER_ID = 'wd14';
 
-/**
- * WD14 v2 models - support both TensorFlow and ONNX
- */
-const WD14_V2_MODELS: TaggerModel[] = [
+export const WD14_MODELS: TaggerModel[] = [
   {
-    id: 'wd-convnextv2-tagger-v2',
-    name: 'ConvNextV2 v2',
+    id: 'wd-eva02-large-tagger-v3',
+    name: 'EVA02-Large v3',
     provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-v1-4-convnextv2-tagger-v2',
-    description: 'Good balance of speed and accuracy (recommended)',
+    repoId: 'SmilingWolf/wd-eva02-large-tagger-v3',
+    description: 'Most accurate WD tagger (recommended)',
     isDefault: true,
     files: [
-      { name: 'model.onnx', size: 378_000_000 }, // ~378MB
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-  {
-    id: 'wd-convnext-tagger-v2',
-    name: 'ConvNext v2',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-v1-4-convnext-tagger-v2',
-    description: 'Original ConvNext architecture',
-    files: [
-      { name: 'model.onnx', size: 378_000_000 },
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-  {
-    id: 'wd-vit-tagger-v2',
-    name: 'ViT v2',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-v1-4-vit-tagger-v2',
-    description: 'Vision Transformer architecture',
-    files: [
-      { name: 'model.onnx', size: 344_000_000 }, // ~344MB
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-  {
-    id: 'wd-swinv2-tagger-v2',
-    name: 'SwinV2 v2',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-v1-4-swinv2-tagger-v2',
-    description: 'Swin Transformer V2',
-    files: [
-      { name: 'model.onnx', size: 220_000_000 }, // ~220MB
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-  {
-    id: 'wd-moat-tagger-v2',
-    name: 'MOAT v2',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-v1-4-moat-tagger-v2',
-    description: 'MOAT architecture',
-    files: [
-      { name: 'model.onnx', size: 220_000_000 },
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-];
-
-/**
- * WD14 v3 models - ONNX only
- */
-const WD14_V3_MODELS: TaggerModel[] = [
-  {
-    id: 'wd-swinv2-tagger-v3',
-    name: 'SwinV2 v3',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-swinv2-tagger-v3',
-    description: 'Latest SwinV2, ONNX-only',
-    files: [
-      { name: 'model.onnx', size: 220_000_000 },
-      { name: 'selected_tags.csv', size: 500_000 },
-    ],
-  },
-  {
-    id: 'wd-vit-tagger-v3',
-    name: 'ViT v3',
-    provider: PROVIDER_ID,
-    repoId: 'SmilingWolf/wd-vit-tagger-v3',
-    description: 'Latest ViT, ONNX-only',
-    files: [
-      { name: 'model.onnx', size: 344_000_000 },
-      { name: 'selected_tags.csv', size: 500_000 },
+      { name: 'model.onnx', size: 1_260_435_999 }, // ~1.2GB
+      { name: 'selected_tags.csv', size: 308_468 },
     ],
   },
   {
@@ -100,15 +28,21 @@ const WD14_V3_MODELS: TaggerModel[] = [
     name: 'ConvNext v3',
     provider: PROVIDER_ID,
     repoId: 'SmilingWolf/wd-convnext-tagger-v3',
-    description: 'Latest ConvNext, ONNX-only',
+    description: 'Smallest and fastest',
     files: [
-      { name: 'model.onnx', size: 378_000_000 },
-      { name: 'selected_tags.csv', size: 500_000 },
+      { name: 'model.onnx', size: 394_990_732 }, // ~377MB
+      { name: 'selected_tags.csv', size: 308_468 },
     ],
   },
-];
-
-export const ALL_WD14_MODELS: TaggerModel[] = [
-  ...WD14_V2_MODELS,
-  ...WD14_V3_MODELS,
+  {
+    id: 'wd-swinv2-tagger-v3',
+    name: 'SwinV2 v3',
+    provider: PROVIDER_ID,
+    repoId: 'SmilingWolf/wd-swinv2-tagger-v3',
+    description: 'Good balance of speed and accuracy',
+    files: [
+      { name: 'model.onnx', size: 467_460_978 }, // ~446MB
+      { name: 'selected_tags.csv', size: 308_468 },
+    ],
+  },
 ];

@@ -6,6 +6,8 @@ import { FormTitle } from '@/app/components/shared/form-title/form-title';
 import { SectionDivider } from '@/app/components/shared/section-divider/section-divider';
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import { ClassFilterMode } from '@/app/store/filters';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectCaptionMode } from '@/app/store/project';
 
 import {
   type SectionConfig,
@@ -42,8 +44,11 @@ export const VisibilityPanel = () => {
     handleToggleModified,
   } = useVisibilityControl();
 
+  const captionMode = useAppSelector(selectCaptionMode);
   const tagSection = sections.find((s) => s.key === 'tags');
   const hasTagSelections = tagSection && tagSection.count > 0;
+  const taglessLabel =
+    captionMode === 'caption' ? 'Uncaptioned only' : 'Tagless only';
 
   return (
     <>
@@ -58,7 +63,7 @@ export const VisibilityPanel = () => {
             isSelected={visibility.scopeTagless}
             disabled={!hasTaglessAssets}
             onChange={handleToggleScopeTagless}
-            label="Tagless only"
+            label={taglessLabel}
           />
           {hasTagSelections && hasTaglessAssets ? (
             <span title="Tag filters are ignored while Tagless is active — tagless assets have no tags to match against">

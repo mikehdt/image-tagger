@@ -154,17 +154,20 @@ export const selectHasModifiedAssets = wrapSelector(
   ),
 );
 
-// Custom selector to check if any assets have no persisted tags
+// Custom selector to check if any assets have no persisted tags (or no caption text)
 export const selectHasTaglessAssets = createSelector(
-  [selectAllImages],
-  (images) =>
-    images.some((asset) =>
-      asset.tagList.every(
+  [selectAllImages, (state: RootState) => state.project.config.captionMode],
+  (images, captionMode) =>
+    images.some((asset) => {
+      if (captionMode === 'caption') {
+        return !asset.captionText?.trim();
+      }
+      return asset.tagList.every(
         (tag) =>
           hasState(asset.tagStatus[tag], TagState.TO_DELETE) ||
           hasState(asset.tagStatus[tag], TagState.TO_ADD),
-      ),
-    ),
+      );
+    }),
 );
 
 export const selectHasSubfolderAssets = createSelector(

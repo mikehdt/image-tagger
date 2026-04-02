@@ -18,6 +18,7 @@ export async function GET() {
       id: provider.id,
       name: provider.name,
       description: provider.description,
+      providerType: provider.providerType,
     }));
 
     const models = getAllModels().map((model) => ({
@@ -27,6 +28,7 @@ export async function GET() {
       description: model.description,
       isDefault: model.isDefault,
       totalSize: getModelTotalSize(model),
+      vramEstimate: model.vramEstimate,
       status: checkModelStatus(model),
     }));
 

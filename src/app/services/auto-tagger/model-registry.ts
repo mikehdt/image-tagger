@@ -3,14 +3,12 @@
  * Central registry of all available tagger providers and models
  */
 
+import { vlmProvider } from './providers/vlm';
 import { wd14Provider } from './providers/wd14';
 import type { TaggerModel, TaggerProvider } from './types';
 
 // Register all providers here
-const providers: TaggerProvider[] = [
-  wd14Provider,
-  // Future: blip2Provider, etc.
-];
+const providers: TaggerProvider[] = [wd14Provider, vlmProvider];
 
 /**
  * Get all registered providers

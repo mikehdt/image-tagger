@@ -90,14 +90,18 @@ export const applyVisibilityFilters = ({
   const filteredAssets = sortedAssets.filter((img: ImageAsset) => {
     // --- Scope filters (ANDed with everything) ---
 
-    // Scope: tagless — only assets with no persisted tags
+    // Scope: tagless/uncaptioned — only assets with no persisted tags (or empty caption)
     if (visibility.scopeTagless) {
-      const hasPersisted = img.tagList.some(
-        (tag) =>
-          !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
-          !hasState(img.tagStatus[tag], TagState.TO_ADD),
-      );
-      if (hasPersisted) return false;
+      if (captionMode === 'caption') {
+        if (img.captionText?.trim()) return false;
+      } else {
+        const hasPersisted = img.tagList.some(
+          (tag) =>
+            !hasState(img.tagStatus[tag], TagState.TO_DELETE) &&
+            !hasState(img.tagStatus[tag], TagState.TO_ADD),
+        );
+        if (hasPersisted) return false;
+      }
     }
 
     // Scope: selected only

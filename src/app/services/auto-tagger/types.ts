@@ -1,12 +1,16 @@
 /**
  * Types for the auto-tagger service
- * Designed to support multiple tagger providers (WD14, BLIP2, etc.)
+ * Supports ONNX booru taggers (Node.js) and NL vision-language models (Python sidecar)
  */
+
+/** How the provider runs inference */
+export type ProviderType = 'onnx' | 'vlm';
 
 export type TaggerProvider = {
   id: string;
   name: string;
   description: string;
+  providerType: ProviderType;
   models: TaggerModel[];
 };
 
@@ -18,6 +22,8 @@ export type TaggerModel = {
   files: ModelFile[];
   description?: string;
   isDefault?: boolean;
+  /** VRAM estimate in GB for VLM models (helps users pick the right quant) */
+  vramEstimate?: number;
 };
 
 export type ModelFile = {

@@ -27,6 +27,7 @@ type ModelInfo = {
   description?: string;
   isDefault?: boolean;
   totalSize: number;
+  vramEstimate?: number;
   status: 'not_installed' | 'downloading' | 'ready' | 'error' | 'checking';
 };
 
@@ -186,7 +187,7 @@ export function AutoTaggerSetupModal() {
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-slate-500 tabular-nums">
                 <span>{downloadProgress?.currentFile || 'Preparing...'}</span>
                 <span>
                   {formatBytes(downloadProgress?.bytesDownloaded || 0)} /{' '}
@@ -204,31 +205,39 @@ export function AutoTaggerSetupModal() {
           <>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Select a model to download. The model will then be available for
-              automatic image tagging.
+              automatic image tagging or captioning.
             </p>
 
-            {/* Provider info */}
-            {providers.length > 0 && (
-              <div className="rounded-md bg-slate-50 p-3 dark:bg-slate-900">
-                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                  {providers[0].name}
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  {providers[0].description}
-                </p>
-              </div>
-            )}
-
-            {/* Model list */}
-            <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
-              {models.map((model) => (
-                <ModelOption
-                  key={model.id}
-                  model={model}
-                  isSelected={model.id === selectedModelId}
-                  onSelect={() => setSelectedModelId(model.id)}
-                />
-              ))}
+            {/* Models grouped by provider */}
+            <div className="flex max-h-80 flex-col gap-3 overflow-y-auto">
+              {providers.map((provider) => {
+                const providerModels = models.filter(
+                  (m) => m.provider === provider.id,
+                );
+                if (providerModels.length === 0) return null;
+                return (
+                  <div key={provider.id}>
+                    <div className="mb-2 rounded-md bg-slate-50 p-3 dark:bg-slate-900">
+                      <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {provider.name}
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {provider.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {providerModels.map((model) => (
+                        <ModelOption
+                          key={model.id}
+                          model={model}
+                          isSelected={model.id === selectedModelId}
+                          onSelect={() => setSelectedModelId(model.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Error message */}
@@ -324,8 +333,13 @@ function ModelOption({
             <p className="mt-1 text-xs text-slate-500">{model.description}</p>
           )}
         </div>
-        <span className="ml-2 text-xs text-slate-400">
-          {formatBytes(model.totalSize)}
+        <span className="ml-2 shrink-0 text-right text-xs text-slate-400 tabular-nums">
+          <span>{formatBytes(model.totalSize)}</span>
+          {model.vramEstimate && (
+            <span className="block text-slate-400/70">
+              ~{model.vramEstimate}GB VRAM
+            </span>
+          )}
         </span>
       </div>
     </button>
