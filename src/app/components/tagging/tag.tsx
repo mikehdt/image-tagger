@@ -159,7 +159,7 @@ export const Tag = ({
       >
         {count}
       </span>
-      <span className={isMarkedForDeletion ? 'line-through' : ''}>
+      <span className={isMarkedForDeletion ? 'flex-1 line-through' : 'flex-1'}>
         {tagName}
       </span>
 
