@@ -25,7 +25,7 @@ const CaptionEditorComponent = ({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight + 2}px`;
+    textarea.style.height = `${textarea.scrollHeight + 2}px`; // +2px of border
   }, []);
 
   // Adjust height on mount, text changes, and parent resize
@@ -77,7 +77,7 @@ const CaptionEditorComponent = ({
           rows={1}
         />
       ) : (
-        <div className="rounded border border-slate-200 bg-transparent p-2 transition-colors dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-800">
+        <div className="rounded border border-slate-200 bg-transparent p-2 transition-colors hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:hover:border-slate-600 dark:hover:bg-slate-800">
           {captionText ? (
             highlightTriggerPhrases(captionText, triggerPhrases)
           ) : (

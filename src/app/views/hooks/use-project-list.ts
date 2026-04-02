@@ -6,7 +6,12 @@ import { useToast } from '@/app/components/shared/toast/hooks/use-toast';
 import { resetAssetsState } from '@/app/store/assets';
 import { clearFilters } from '@/app/store/filters';
 import { useAppDispatch } from '@/app/store/hooks';
-import { resetProjectState, setProjectInfo } from '@/app/store/project';
+import {
+  resetProjectState,
+  setCaptionMode,
+  setProjectInfo,
+  setTriggerPhrases,
+} from '@/app/store/project';
 import { clearSelection, clearSelectorCaches } from '@/app/store/selection';
 import { getProjectList } from '@/app/utils/project-actions';
 
@@ -58,6 +63,12 @@ export const useProjectList = () => {
 
       // Set full project info in Redux before navigating — AppProvider won't
       // overwrite this since the folder name will already match
+      if (selectedProject?.captionMode) {
+        dispatch(setCaptionMode(selectedProject.captionMode));
+      }
+      if (selectedProject?.triggerPhrases) {
+        dispatch(setTriggerPhrases(selectedProject.triggerPhrases));
+      }
       dispatch(
         setProjectInfo({
           name: projectTitle,

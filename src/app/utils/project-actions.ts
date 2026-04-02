@@ -60,6 +60,8 @@ export type Project = {
   hidden?: boolean;
   private?: boolean;
   featured?: boolean;
+  captionMode?: 'tags' | 'caption';
+  triggerPhrases?: string[];
 };
 
 /**
@@ -268,6 +270,8 @@ export const getProjectList = async (): Promise<Project[]> => {
           hidden: isHidden,
           private: isPrivate,
           featured: centralizedInfo?.featured || false,
+          captionMode: centralizedInfo?.captionMode,
+          triggerPhrases: centralizedInfo?.triggerPhrases,
         };
       }),
     );

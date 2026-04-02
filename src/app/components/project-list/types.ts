@@ -18,4 +18,6 @@ export type Project = {
   featured?: boolean;
   hidden?: boolean;
   private?: boolean;
+  captionMode?: 'tags' | 'caption';
+  triggerPhrases?: string[];
 };
