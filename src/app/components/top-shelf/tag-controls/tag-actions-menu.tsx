@@ -2,6 +2,7 @@ import {
   ArrowUpFromLineIcon,
   ChevronsDownIcon,
   CopyIcon,
+  HighlighterIcon,
   SparklesIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -25,11 +26,13 @@ import {
 } from '@/app/store/selection/combinedSelectors';
 
 import { CopyTagsModal } from './copy-tags-modal';
+import { TriggerPhrasesModal } from './trigger-phrases-button';
 
 export const TagActionsMenu = () => {
   const dispatch = useAppDispatch();
   const [isCopyTagsModalOpen, setIsCopyTagsModalOpen] = useState(false);
   const [isTaggerModalOpen, setIsTaggerModalOpen] = useState(false);
+  const [isTriggersModalOpen, setIsTriggersModalOpen] = useState(false);
 
   const filterTags = useAppSelector(selectFilterTags);
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
@@ -101,6 +104,12 @@ export const TagActionsMenu = () => {
     }
   }, [dispatch, filterTags, effectiveScopeAssetIds]);
 
+  const openTriggersModal = useCallback(() => setIsTriggersModalOpen(true), []);
+  const closeTriggersModal = useCallback(
+    () => setIsTriggersModalOpen(false),
+    [],
+  );
+
   const overflowMenuItems: MenuItem[] = [
     {
       label: 'Copy Tags',
@@ -119,6 +128,11 @@ export const TagActionsMenu = () => {
       icon: <SparklesIcon className="h-4 w-4" />,
       onClick: openTaggerModal,
       disabled: !hasReadyModel || !hasAssetsForTagger,
+    },
+    {
+      label: 'Trigger Phrases',
+      icon: <HighlighterIcon className="h-4 w-4" />,
+      onClick: openTriggersModal,
     },
   ];
 
@@ -140,6 +154,11 @@ export const TagActionsMenu = () => {
         isOpen={isTaggerModalOpen}
         onClose={closeTaggerModal}
         selectedAssets={assetsForTagger}
+      />
+
+      <TriggerPhrasesModal
+        isOpen={isTriggersModalOpen}
+        onClose={closeTriggersModal}
       />
     </>
   );

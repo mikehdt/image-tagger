@@ -249,6 +249,7 @@ export const selectFilteredAssets = wrapSelector(
       (state: RootState) => state.assets.sortType,
       (state: RootState) => state.assets.sortDirection,
       (state: RootState) => state.project.config.captionMode,
+      (state: RootState) => state.project.config.triggerPhrases,
     ],
     (
       assets,
@@ -263,6 +264,7 @@ export const selectFilteredAssets = wrapSelector(
       sortType,
       sortDirection,
       captionMode,
+      triggerPhrases,
     ) => {
       return applyVisibilityFilters({
         assets,
@@ -277,6 +279,7 @@ export const selectFilteredAssets = wrapSelector(
         sortType,
         sortDirection,
         captionMode,
+        triggerPhrases,
       });
     },
   ),

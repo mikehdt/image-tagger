@@ -1,7 +1,13 @@
 import { type LucideIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
-export type ColorScheme = 'slate' | 'emerald' | 'sky' | 'indigo' | 'stone';
+export type ColorScheme =
+  | 'slate'
+  | 'emerald'
+  | 'sky'
+  | 'indigo'
+  | 'stone'
+  | 'amber';
 
 interface SectionDividerProps {
   children: ReactNode;
@@ -18,6 +24,7 @@ const lineClasses: Record<ColorScheme, string> = {
   indigo:
     'bg-indigo-200 shadow-white dark:bg-indigo-700 dark:shadow-indigo-950',
   stone: 'bg-stone-200 shadow-white dark:bg-stone-500 dark:shadow-stone-800',
+  amber: 'bg-amber-200 shadow-white dark:bg-amber-700 dark:shadow-amber-950',
 };
 
 const textClasses: Record<ColorScheme, string> = {
@@ -26,6 +33,7 @@ const textClasses: Record<ColorScheme, string> = {
   sky: 'text-sky-400 text-shadow-white dark:text-shadow-sky-950',
   indigo: 'text-indigo-400 text-shadow-white dark:text-shadow-indigo-950',
   stone: 'text-stone-400 text-shadow-white dark:text-shadow-stone-900',
+  amber: 'text-amber-500 text-shadow-white dark:text-shadow-amber-950',
 };
 
 export const SectionDivider = ({

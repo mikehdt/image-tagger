@@ -17,6 +17,7 @@ type EditableTagProps = {
   tagState: number;
   count: number;
   isHighlighted: boolean;
+  isTriggerMatch: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
   tagEditMode: TagEditMode;
@@ -36,6 +37,7 @@ const EditableTagComponent = ({
   tagState,
   count,
   isHighlighted,
+  isTriggerMatch,
   fade,
   isMatchingDuplicate,
   tagEditMode,
@@ -69,6 +71,7 @@ const EditableTagComponent = ({
       tagState={tagState}
       count={count}
       isHighlighted={isHighlighted}
+      isTriggerMatch={isTriggerMatch}
       fade={fade}
       isMatchingDuplicate={isMatchingDuplicate}
       tagEditMode={tagEditMode}
@@ -105,6 +108,7 @@ const editableTagPropsAreEqual = (
     prevProps.tagState === nextProps.tagState &&
     prevProps.count === nextProps.count &&
     prevProps.isHighlighted === nextProps.isHighlighted &&
+    prevProps.isTriggerMatch === nextProps.isTriggerMatch &&
     prevProps.fade === nextProps.fade &&
     prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
     prevProps.tagEditMode === nextProps.tagEditMode &&

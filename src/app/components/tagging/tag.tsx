@@ -20,6 +20,7 @@ type TagProps = {
   tagState: number;
   count: number;
   isHighlighted: boolean;
+  isTriggerMatch: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
   tagEditMode: TagEditMode;
@@ -33,6 +34,7 @@ export const Tag = ({
   tagState,
   count,
   isHighlighted,
+  isTriggerMatch,
   fade,
   isMatchingDuplicate = false,
   tagEditMode,
@@ -147,7 +149,7 @@ export const Tag = ({
 
   return (
     <div
-      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()}`}
+      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()} ${isTriggerMatch ? 'border-l-3 border-l-amber-500 pl-3.5 dark:border-l-amber-400' : ''}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="button"

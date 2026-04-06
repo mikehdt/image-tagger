@@ -27,6 +27,7 @@ export const applyVisibilityFilters = ({
   sortType,
   sortDirection,
   captionMode,
+  triggerPhrases,
 }: {
   assets: ImageAsset[];
   filterTags: string[];
@@ -40,6 +41,7 @@ export const applyVisibilityFilters = ({
   sortType?: SortType;
   sortDirection?: SortDirection;
   captionMode?: CaptionMode;
+  triggerPhrases?: string[];
 }): ImageAsset[] => {
   // Sort first, operating on raw asset references (no spreading yet)
   const sortedAssets = applySorting(
@@ -62,6 +64,14 @@ export const applyVisibilityFilters = ({
   const filterExtensionsSet = new Set(filterExtensions);
   const filterSubfoldersSet = new Set(filterSubfolders);
   const selectedSet = new Set(selectedAssets);
+  const triggerSet =
+    triggerPhrases && triggerPhrases.length > 0
+      ? new Set(triggerPhrases.map((p) => p.toLowerCase()))
+      : null;
+  const triggerPhrasesLower =
+    triggerPhrases && triggerPhrases.length > 0
+      ? triggerPhrases.map((p) => p.toLowerCase())
+      : null;
 
   // Helper: check a multi-value class (tags, name search) against an asset
   const checkClass = (
@@ -172,6 +182,43 @@ export const applyVisibilityFilters = ({
     if (filterSubfolders.length > 0) {
       const matches = !!img.subfolder && filterSubfoldersSet.has(img.subfolder);
       if (!checkSingleValue(visibility.subfolders, matches)) return false;
+    }
+
+    // Trigger phrases class — selections come from project config, not filter state
+    if (triggerSet && triggerPhrasesLower) {
+      const passes = checkClass(
+        visibility.triggerPhrases,
+        () => {
+          if (captionMode === 'caption') {
+            const lowerCaption = img.captionText?.toLowerCase() ?? '';
+            return triggerPhrasesLower.some((p) => lowerCaption.includes(p));
+          }
+          if (captionMode === 'sentences') {
+            return img.tagList.some((tag) => {
+              const lowerTag = tag.toLowerCase();
+              return triggerPhrasesLower.some((p) => lowerTag.includes(p));
+            });
+          }
+          // tags mode: exact match
+          return img.tagList.some((tag) => triggerSet.has(tag.toLowerCase()));
+        },
+        () => {
+          if (captionMode === 'caption') {
+            const lowerCaption = img.captionText?.toLowerCase() ?? '';
+            return triggerPhrasesLower.every((p) => lowerCaption.includes(p));
+          }
+          if (captionMode === 'sentences') {
+            return triggerPhrasesLower.every((p) =>
+              img.tagList.some((tag) => tag.toLowerCase().includes(p)),
+            );
+          }
+          // tags mode: exact match
+          return triggerPhrasesLower.every((p) =>
+            img.tagList.some((tag) => tag.toLowerCase() === p),
+          );
+        },
+      );
+      if (!passes) return false;
     }
 
     return true;

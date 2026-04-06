@@ -24,6 +24,7 @@ type TagData = {
   state: number;
   count: number;
   isHighlighted: boolean;
+  isTriggerMatch: boolean;
 };
 
 type TagListProps = {
@@ -136,6 +137,7 @@ const TagsDisplayComponent = ({
         tagState={tag.state}
         count={tag.count}
         isHighlighted={tag.isHighlighted}
+        isTriggerMatch={tag.isTriggerMatch}
         fade={fade}
         isMatchingDuplicate={isMatchingTag}
         tagEditMode={tagEditMode}
@@ -156,6 +158,7 @@ const TagsDisplayComponent = ({
           tagState={tag.state}
           count={tag.count}
           isHighlighted={tag.isHighlighted}
+          isTriggerMatch={tag.isTriggerMatch}
           fade={fade}
           isMatchingDuplicate={isMatchingTag}
           tagEditMode={tagEditMode}
@@ -248,7 +251,8 @@ const tagsDisplayPropsAreEqual = (
       prevTag.name === nextTag.name &&
       prevTag.state === nextTag.state &&
       prevTag.count === nextTag.count &&
-      prevTag.isHighlighted === nextTag.isHighlighted
+      prevTag.isHighlighted === nextTag.isHighlighted &&
+      prevTag.isTriggerMatch === nextTag.isTriggerMatch
     );
   });
 
@@ -590,7 +594,8 @@ const tagListPropsAreEqual = (
       prevTag.name === nextTag.name &&
       prevTag.state === nextTag.state &&
       prevTag.count === nextTag.count &&
-      prevTag.isHighlighted === nextTag.isHighlighted
+      prevTag.isHighlighted === nextTag.isHighlighted &&
+      prevTag.isTriggerMatch === nextTag.isTriggerMatch
     );
   });
 };

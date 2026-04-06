@@ -11,7 +11,8 @@ type VisibilityClassKey =
   | 'sizes'
   | 'buckets'
   | 'extensions'
-  | 'subfolders';
+  | 'subfolders'
+  | 'triggerPhrases';
 
 export const coreReducers = {
   setTagFilterMode: (
@@ -84,6 +85,7 @@ export const coreReducers = {
     state.visibility.buckets = ClassFilterMode.OFF;
     state.visibility.extensions = ClassFilterMode.OFF;
     state.visibility.subfolders = ClassFilterMode.OFF;
+    state.visibility.triggerPhrases = ClassFilterMode.OFF;
     state.visibility.scopeTagless = false;
     state.visibility.scopeSelected = false;
     state.visibility.showModified = false;
@@ -197,6 +199,7 @@ export const coreReducers = {
         | 'buckets'
         | 'extensions'
         | 'subfolders'
+        | 'triggerPhrases'
       )[];
     }>,
   ) => {

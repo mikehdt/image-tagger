@@ -139,8 +139,13 @@ const ClassModeSection = ({
 };
 
 const EmptyHint = ({ sections }: { sections: SectionConfig[] }) => {
+  // Exclude trigger phrases from empty hints — they're configured in project
+  // settings, not selected in the filter UI
   const emptyCategories = useMemo(
-    () => sections.filter((s) => !s.available).map((s) => s.emptyCategory),
+    () =>
+      sections
+        .filter((s) => !s.available && s.key !== 'triggerPhrases')
+        .map((s) => s.emptyCategory),
     [sections],
   );
 

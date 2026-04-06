@@ -3,6 +3,7 @@ import {
   FileImageIcon,
   FileSearchIcon,
   FolderOpenIcon,
+  HighlighterIcon,
   ImageIcon,
   type LucideIcon,
   SwatchBookIcon,
@@ -24,6 +25,7 @@ import {
   toggleVisibilityScopeTagless,
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectTriggerPhrases } from '@/app/store/project';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 
 type VisibilityClassKey =
@@ -32,7 +34,8 @@ type VisibilityClassKey =
   | 'sizes'
   | 'buckets'
   | 'extensions'
-  | 'subfolders';
+  | 'subfolders'
+  | 'triggerPhrases';
 
 export type SectionConfig = {
   key: VisibilityClassKey;
@@ -54,6 +57,7 @@ export const useVisibilityControl = () => {
   const selectedAssetsCount = useAppSelector(selectSelectedAssetsCount);
   const hasTaglessAssets = useAppSelector(selectHasTaglessAssets);
   const hasModifiedAssets = useAppSelector(selectHasModifiedAssets);
+  const triggerPhrases = useAppSelector(selectTriggerPhrases);
 
   const sections: SectionConfig[] = useMemo(() => {
     const all: SectionConfig[] = [
@@ -117,9 +121,19 @@ export const useVisibilityControl = () => {
         available: filterCount.subfolders > 0,
         emptyCategory: 'subfolder',
       },
+      {
+        key: 'triggerPhrases',
+        label: 'Trigger words',
+        icon: HighlighterIcon,
+        color: 'amber',
+        count: triggerPhrases.length,
+        mode: visibility.triggerPhrases,
+        available: triggerPhrases.length > 0,
+        emptyCategory: 'trigger word',
+      },
     ];
     return all;
-  }, [filterCount, visibility]);
+  }, [filterCount, visibility, triggerPhrases]);
 
   const handleSetClassMode = useCallback(
     (classKey: VisibilityClassKey, mode: ClassFilterMode) => {

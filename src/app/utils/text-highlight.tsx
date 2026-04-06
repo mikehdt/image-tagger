@@ -70,6 +70,50 @@ export const highlightText = (
   return result;
 };
 
+export type HighlightRange = { start: number; end: number };
+
+/**
+ * Computes merged, sorted highlight ranges for multiple patterns in text.
+ * Pure function — no React dependency — reusable for both rendering and filtering.
+ */
+export const computeHighlightRanges = (
+  text: string,
+  patterns: string[],
+): HighlightRange[] => {
+  if (!patterns || patterns.length === 0) return [];
+
+  const normalizedText = text.toLowerCase();
+  const ranges: HighlightRange[] = [];
+
+  for (const pattern of patterns) {
+    if (!pattern) continue;
+    const normalizedPattern = pattern.toLowerCase();
+    let index = normalizedText.indexOf(normalizedPattern);
+    while (index !== -1) {
+      ranges.push({ start: index, end: index + pattern.length });
+      index = normalizedText.indexOf(normalizedPattern, index + 1);
+    }
+  }
+
+  if (ranges.length === 0) return [];
+
+  // Sort by start position
+  ranges.sort((a, b) => a.start - b.start);
+
+  // Merge overlapping ranges
+  const merged: HighlightRange[] = [];
+  for (const range of ranges) {
+    const last = merged[merged.length - 1];
+    if (last && range.start <= last.end) {
+      last.end = Math.max(last.end, range.end);
+    } else {
+      merged.push({ ...range });
+    }
+  }
+
+  return merged;
+};
+
 /**
  * Highlights matching segments of text for multiple patterns
  * @param text - The text to highlight
@@ -82,51 +126,14 @@ export const highlightPatterns = (
   patterns: string[],
   highlightClassName = 'font-bold',
 ): React.ReactNode => {
-  if (!patterns || patterns.length === 0) {
-    return text;
-  }
+  const ranges = computeHighlightRanges(text, patterns);
 
-  const normalizedText = text.toLowerCase();
+  if (ranges.length === 0) return text;
 
-  // Find all match ranges
-  const ranges: Array<{ start: number; end: number }> = [];
-
-  for (const pattern of patterns) {
-    if (!pattern) continue;
-    const normalizedPattern = pattern.toLowerCase();
-    let index = normalizedText.indexOf(normalizedPattern);
-    while (index !== -1) {
-      ranges.push({ start: index, end: index + pattern.length });
-      index = normalizedText.indexOf(normalizedPattern, index + 1);
-    }
-  }
-
-  // If no matches, return text
-  if (ranges.length === 0) {
-    return text;
-  }
-
-  // Sort by start position
-  ranges.sort((a, b) => a.start - b.start);
-
-  // Merge overlapping ranges
-  const mergedRanges: Array<{ start: number; end: number }> = [];
-  for (const range of ranges) {
-    const last = mergedRanges[mergedRanges.length - 1];
-    if (last && range.start <= last.end) {
-      // Overlapping or adjacent - extend the previous range
-      last.end = Math.max(last.end, range.end);
-    } else {
-      mergedRanges.push({ ...range });
-    }
-  }
-
-  // Build result with highlighted segments
   const result: React.ReactNode[] = [];
   let lastIndex = 0;
 
-  for (const range of mergedRanges) {
-    // Add text before the match
+  for (const range of ranges) {
     if (range.start > lastIndex) {
       result.push(
         <Fragment key={`text-${lastIndex}`}>
@@ -135,7 +142,6 @@ export const highlightPatterns = (
       );
     }
 
-    // Add the highlighted match
     result.push(
       <span key={`match-${range.start}`} className={highlightClassName}>
         {text.substring(range.start, range.end)}
@@ -145,7 +151,6 @@ export const highlightPatterns = (
     lastIndex = range.end;
   }
 
-  // Add any remaining text
   if (lastIndex < text.length) {
     result.push(
       <Fragment key={`text-${lastIndex}`}>

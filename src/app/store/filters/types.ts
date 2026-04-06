@@ -35,6 +35,7 @@ export type VisibilitySettings = {
   buckets: ClassFilterMode;
   extensions: ClassFilterMode;
   subfolders: ClassFilterMode;
+  triggerPhrases: ClassFilterMode;
   // Scope flags — boolean on/off, ANDed with everything
   scopeTagless: boolean;
   scopeSelected: boolean;

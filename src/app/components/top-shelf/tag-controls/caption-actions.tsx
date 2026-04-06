@@ -1,9 +1,8 @@
-import { HighlighterIcon, SparklesIcon, SwatchBookIcon } from 'lucide-react';
+import { SparklesIcon, SwatchBookIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AutoTaggerModal } from '@/app/components/auto-tagger';
 import { Button } from '@/app/components/shared/button';
-import { Modal } from '@/app/components/shared/modal';
 import { selectFilteredAssets } from '@/app/store/assets';
 import {
   selectHasReadyModel,
@@ -11,71 +10,15 @@ import {
   setModelsAndProviders,
 } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  selectProjectFolderName,
-  selectTriggerPhrases,
-  setTriggerPhrases,
-} from '@/app/store/project';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 import {
   selectAssetsWithActiveFiltersCount,
   selectSelectedAssetsData,
 } from '@/app/store/selection/combinedSelectors';
-import { updateProject } from '@/app/utils/project-actions';
 
 import { ResponsiveToolbarGroup } from '../../shared/responsive-toolbar-group';
 import { ToolbarDivider } from '../../shared/toolbar-divider';
-
-/** Modal for editing trigger phrases — one per line in a textarea */
-const TriggerPhrasesModal = ({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
-  const dispatch = useAppDispatch();
-  const triggerPhrases = useAppSelector(selectTriggerPhrases);
-  const projectFolderName = useAppSelector(selectProjectFolderName);
-  const [text, setText] = useState(() => triggerPhrases.join('\n'));
-
-  const handleSave = useCallback(() => {
-    const phrases = text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-    dispatch(setTriggerPhrases(phrases));
-    if (projectFolderName) {
-      updateProject(projectFolderName, { triggerPhrases: phrases });
-    }
-    onClose();
-  }, [text, dispatch, projectFolderName, onClose]);
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md">
-      <h2 className="mb-1 text-lg font-semibold">Trigger Phrases</h2>
-      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
-        One phrase per line. These are highlighted in captions.
-      </p>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        className="w-full rounded border border-slate-300 bg-white p-2 text-sm outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-300 dark:border-slate-600 dark:bg-slate-700 dark:focus:border-amber-500"
-        rows={5}
-        placeholder={'ohwx\na photo of sks'}
-        autoFocus
-      />
-      <div className="mt-3 flex justify-end gap-2">
-        <Button size="medium" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button size="medium" color="teal" onClick={handleSave}>
-          Save
-        </Button>
-      </div>
-    </Modal>
-  );
-};
+import { TriggerPhrasesButton } from './trigger-phrases-button';
 
 /** Auto Tagger button — first-class in caption mode */
 const AutoTaggerButton = () => {
@@ -159,37 +102,13 @@ const AutoTaggerButton = () => {
 };
 
 const CaptionActionsComponent = () => {
-  const [isTriggersModalOpen, setIsTriggersModalOpen] = useState(false);
-  const triggerPhrases = useAppSelector(selectTriggerPhrases);
-
   return (
     <ResponsiveToolbarGroup
       icon={<SwatchBookIcon className="h-4 w-4" />}
       title="Captions"
       position="right"
     >
-      <Button
-        variant="ghost"
-        onClick={() => setIsTriggersModalOpen(true)}
-        title="Edit trigger phrases"
-      >
-        <HighlighterIcon className="h-4 w-4" />
-
-        <span className="ml-2 flex items-center">
-          <span className="mr-2 text-nowrap max-lg:hidden">Triggers</span>
-
-          {triggerPhrases.length > 0 && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white tabular-nums dark:bg-amber-800">
-              {triggerPhrases.length}
-            </span>
-          )}
-        </span>
-      </Button>
-
-      <TriggerPhrasesModal
-        isOpen={isTriggersModalOpen}
-        onClose={() => setIsTriggersModalOpen(false)}
-      />
+      <TriggerPhrasesButton />
 
       <ToolbarDivider />
 

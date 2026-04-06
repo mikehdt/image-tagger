@@ -28,7 +28,12 @@ import {
 import { toggleTagFilter } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectTagEditMode } from '@/app/store/preferences';
-import { selectTagSortType, TagSortType } from '@/app/store/project';
+import {
+  selectCaptionMode,
+  selectTagSortType,
+  selectTriggerPhrases,
+  TagSortType,
+} from '@/app/store/project';
 
 import { TagList } from './tag-list';
 
@@ -55,18 +60,38 @@ const TaggingManagerComponent = ({ assetId }: TaggingManagerProps) => {
   const tagSortType = useAppSelector(selectTagSortType);
   const isSortable = tagSortType === TagSortType.SORTABLE;
   const tagEditMode = useAppSelector(selectTagEditMode);
+  const triggerPhrases = useAppSelector(selectTriggerPhrases);
+  const captionMode = useAppSelector(selectCaptionMode);
 
   // Transform to the shape TagList expects - memoized to maintain reference stability
-  const tags = useMemo(
-    () =>
-      orderedTagsWithStatus.map((tag: { name: string; status: number }) => ({
+  const tags = useMemo(() => {
+    const hasTriggers = triggerPhrases.length > 0;
+    const triggerSet = hasTriggers
+      ? new Set(triggerPhrases.map((p) => p.toLowerCase()))
+      : null;
+
+    return orderedTagsWithStatus.map(
+      (tag: { name: string; status: number }) => ({
         name: tag.name,
         state: tag.status,
         count: tagCounts[tag.name] || 0,
         isHighlighted: highlightedTags.has(tag.name),
-      })),
-    [orderedTagsWithStatus, tagCounts, highlightedTags],
-  );
+        isTriggerMatch: hasTriggers
+          ? captionMode === 'sentences'
+            ? triggerPhrases.some((p) =>
+                tag.name.toLowerCase().includes(p.toLowerCase()),
+              )
+            : triggerSet!.has(tag.name.toLowerCase())
+          : false,
+      }),
+    );
+  }, [
+    orderedTagsWithStatus,
+    tagCounts,
+    highlightedTags,
+    triggerPhrases,
+    captionMode,
+  ]);
 
   // Ref for current tags — lets handleDragEnd read the latest tag order
   // without depending on the tags array reference (which would destabilise the callback)

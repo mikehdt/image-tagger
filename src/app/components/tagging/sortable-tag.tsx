@@ -18,6 +18,7 @@ type SortableTagProps = {
   tagState: number;
   count: number;
   isHighlighted: boolean;
+  isTriggerMatch: boolean;
   fade: boolean;
   isMatchingDuplicate?: boolean;
   tagEditMode: TagEditMode;
@@ -38,6 +39,7 @@ const SortableTagComponent = ({
   tagState,
   count,
   isHighlighted,
+  isTriggerMatch,
   fade,
   isMatchingDuplicate,
   tagEditMode,
@@ -91,6 +93,7 @@ const SortableTagComponent = ({
         tagState={tagState}
         count={count}
         isHighlighted={isHighlighted}
+        isTriggerMatch={isTriggerMatch}
         fade={fade}
         isMatchingDuplicate={isMatchingDuplicate}
         tagEditMode={tagEditMode}
@@ -135,6 +138,7 @@ const sortableTagPropsAreEqual = (
     prevProps.tagState === nextProps.tagState &&
     prevProps.count === nextProps.count &&
     prevProps.isHighlighted === nextProps.isHighlighted &&
+    prevProps.isTriggerMatch === nextProps.isTriggerMatch &&
     prevProps.fade === nextProps.fade &&
     prevProps.isMatchingDuplicate === nextProps.isMatchingDuplicate &&
     prevProps.tagEditMode === nextProps.tagEditMode &&

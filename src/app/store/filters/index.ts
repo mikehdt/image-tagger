@@ -17,6 +17,7 @@ const initialVisibility: VisibilitySettings = {
   buckets: ClassFilterMode.OFF,
   extensions: ClassFilterMode.OFF,
   subfolders: ClassFilterMode.OFF,
+  triggerPhrases: ClassFilterMode.OFF,
   scopeTagless: false,
   scopeSelected: false,
   showModified: false,

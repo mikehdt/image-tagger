@@ -42,6 +42,9 @@ export const selectHasActiveFilters = createSelector(
 
 const selectVisibility = (state: RootState) => state.filters.visibility;
 
+const selectProjectTriggerPhrases = (state: RootState) =>
+  state.project.config.triggerPhrases;
+
 export const selectHasActiveVisibility = createSelector(
   selectVisibility,
   selectFilterTags,
@@ -50,6 +53,7 @@ export const selectHasActiveVisibility = createSelector(
   selectFilterBuckets,
   selectFilterExtensions,
   selectFilterSubfolders,
+  selectProjectTriggerPhrases,
   (
     visibility,
     filterTags,
@@ -58,6 +62,7 @@ export const selectHasActiveVisibility = createSelector(
     filterBuckets,
     filterExtensions,
     filterSubfolders,
+    triggerPhrases,
   ) =>
     visibility.scopeTagless ||
     visibility.scopeSelected ||
@@ -70,7 +75,9 @@ export const selectHasActiveVisibility = createSelector(
     (visibility.extensions !== ClassFilterMode.OFF &&
       filterExtensions.length > 0) ||
     (visibility.subfolders !== ClassFilterMode.OFF &&
-      filterSubfolders.length > 0),
+      filterSubfolders.length > 0) ||
+    (visibility.triggerPhrases !== ClassFilterMode.OFF &&
+      triggerPhrases.length > 0),
 );
 
 export const selectHasNonTagFilters = createSelector(
