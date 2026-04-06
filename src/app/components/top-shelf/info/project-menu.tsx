@@ -21,12 +21,17 @@ import {
   type ThemeMode,
 } from '@/app/store/preferences';
 import {
+  type CaptionMode,
+  selectCaptionMode,
   selectProjectFolderName,
   selectProjectName,
   selectProjectThumbnail,
+  setCaptionMode,
 } from '@/app/store/project';
+import { updateProject } from '@/app/utils/project-actions';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
+import { MenuCaptionModeSwitcher } from './menu-caption-mode-switcher';
 import { MenuEditModeSwitcher } from './menu-edit-mode-switcher';
 import { MenuThemeSwitcher } from './menu-theme-switcher';
 
@@ -67,6 +72,7 @@ const ProjectMenuComponent = () => {
 
   const theme = useAppSelector(selectTheme);
   const tagEditMode = useAppSelector(selectTagEditMode);
+  const captionMode = useAppSelector(selectCaptionMode);
 
   const [isBucketModalOpen, setIsBucketModalOpen] = useState(false);
 
@@ -132,6 +138,16 @@ const ProjectMenuComponent = () => {
     [dispatch],
   );
 
+  const handleSetCaptionMode = useCallback(
+    (mode: CaptionMode) => {
+      dispatch(setCaptionMode(mode));
+      if (projectFolderName) {
+        updateProject(projectFolderName, { captionMode: mode });
+      }
+    },
+    [dispatch, projectFolderName],
+  );
+
   if (!projectName) {
     return null;
   }
@@ -183,6 +199,11 @@ const ProjectMenuComponent = () => {
             icon={<CalculatorIcon className="h-5 w-5" />}
             label="Bucket Visualisation Tool"
             onClick={handleOpenBucketModal}
+          />
+
+          <MenuCaptionModeSwitcher
+            captionMode={captionMode}
+            setCaptionMode={handleSetCaptionMode}
           />
 
           <MenuEditModeSwitcher
