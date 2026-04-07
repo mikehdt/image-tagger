@@ -88,10 +88,15 @@ export function useAutoTagger({
     }
   }, [isOpen, models.length, fetchModels]);
 
-  // Load saved settings when modal opens
+  // Load saved settings when modal opens (after models are available)
   // Use projectFolderName for config file operations (not projectName which is the display title)
   useEffect(() => {
-    if (isOpen && projectInfo.projectFolderName && !settingsLoaded) {
+    if (
+      isOpen &&
+      projectInfo.projectFolderName &&
+      !settingsLoaded &&
+      models.length > 0
+    ) {
       getAutoTaggerSettings(projectInfo.projectFolderName).then(
         (savedSettings) => {
           if (savedSettings) {
@@ -115,7 +120,11 @@ export function useAutoTagger({
                   : prev.tagInsertMode,
             }));
 
-            if (savedSettings.defaultModelId) {
+            // Try to restore the previously used model, but only if it's still available
+            if (
+              savedSettings.defaultModelId &&
+              readyModels.some((m) => m.id === savedSettings.defaultModelId)
+            ) {
               dispatch(setSelectedModel(savedSettings.defaultModelId));
             }
           }
@@ -123,7 +132,7 @@ export function useAutoTagger({
         },
       );
     }
-  }, [isOpen, projectInfo.projectFolderName, settingsLoaded, dispatch]);
+  }, [isOpen, projectInfo.projectFolderName, settingsLoaded, models, readyModels, dispatch]);
 
   // Model dropdown items
   const modelItems: DropdownItem<string>[] = useMemo(

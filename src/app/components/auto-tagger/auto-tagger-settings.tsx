@@ -1,3 +1,5 @@
+import { OctagonAlertIcon } from 'lucide-react';
+
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
@@ -46,8 +48,8 @@ export function AutoTaggerSettings({
       </p>
 
       {error && (
-        <div className="rounded-md bg-rose-50 p-3 text-sm text-rose-700">
-          {error}
+        <div className="flex rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-200">
+          <OctagonAlertIcon className="mr-2 h-5 w-5" /> {error}
         </div>
       )}
 
