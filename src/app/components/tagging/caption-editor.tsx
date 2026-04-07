@@ -110,7 +110,7 @@ const CaptionEditorComponent = ({
 
   // Shared text styles — must be identical on backdrop and textarea
   const textStyles =
-    'text-sm leading-relaxed whitespace-pre-wrap break-words font-[inherit]';
+    'text-md leading-relaxed whitespace-pre-wrap break-words font-[inherit]';
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -123,11 +123,11 @@ const CaptionEditorComponent = ({
         {/* Backdrop: renders highlighted text, always visible */}
         <div
           data-caption-backdrop
-          className={`rounded border p-2 transition-colors ${textStyles} ${
+          className={`rounded-md border bg-white px-2 py-1 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-800 ${textStyles} ${
             isFocused
               ? 'border-sky-300 ring-1 ring-sky-300 dark:border-sky-600 dark:ring-sky-600'
               : isActive
-                ? 'border-slate-300 bg-slate-100 dark:border-slate-600 dark:bg-slate-800'
+                ? 'border-slate-300 dark:border-slate-600'
                 : 'border-slate-200 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600'
           }`}
         >
@@ -152,7 +152,7 @@ const CaptionEditorComponent = ({
             onFocus={handleFocus}
             onBlur={handleBlur}
             onScroll={handleScroll}
-            className={`absolute inset-0 resize-none overflow-hidden rounded border border-transparent bg-transparent p-2 text-transparent caret-slate-800 outline-none select-text dark:caret-slate-200 ${textStyles}`}
+            className={`absolute inset-0 resize-none overflow-hidden rounded-md border border-transparent bg-transparent px-2 py-1 text-transparent caret-slate-800 outline-none select-text dark:caret-slate-200 ${textStyles}`}
             rows={1}
           />
         )}

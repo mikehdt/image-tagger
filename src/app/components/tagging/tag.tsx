@@ -149,7 +149,7 @@ export const Tag = ({
 
   return (
     <div
-      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()} ${isTriggerMatch ? 'border-l-3 border-l-amber-500 pl-3.5 dark:border-l-amber-400' : ''}`}
+      className={`inline-flex items-center rounded-2xl border py-1 pr-2 pl-4 transition-all ${getStateStyles()} ${getInteractionStyles()} ${isTriggerMatch && !isMarkedForDeletion ? 'shadow-sm inset-shadow-sm shadow-green-500/50 inset-shadow-green-500/50 dark:shadow-green-500 dark:inset-shadow-green-500' : ''}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="button"

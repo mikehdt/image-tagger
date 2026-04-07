@@ -183,7 +183,7 @@ const TriggerPhrasesButtonComponent = () => {
           <span className="mr-2 text-nowrap max-lg:hidden">Triggers</span>
 
           {triggerPhrases.length > 0 && (
-            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-bold text-white tabular-nums dark:bg-amber-800">
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-green-500 px-1 text-xs font-bold text-white tabular-nums dark:bg-green-800">
               {triggerPhrases.length}
             </span>
           )}

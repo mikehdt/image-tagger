@@ -125,7 +125,7 @@ export const useVisibilityControl = () => {
         key: 'triggerPhrases',
         label: 'Trigger words',
         icon: HighlighterIcon,
-        color: 'amber',
+        color: 'green',
         count: triggerPhrases.length,
         mode: visibility.triggerPhrases,
         available: triggerPhrases.length > 0,
