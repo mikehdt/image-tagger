@@ -11,6 +11,7 @@ export type ExpertiseTier = 'simple' | 'intermediate' | 'advanced' | 'expert';
 
 export type ConceptualGroup =
   | 'whatToTrain'
+  | 'dataset'
   | 'learning'
   | 'loraShape'
   | 'performance'
@@ -41,7 +42,8 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   modelId: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
   modelPaths: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
   outputName: { tier: 'simple', group: 'saving', defaultKey: null },
-  datasets: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+  datasets: { tier: 'simple', group: 'dataset', defaultKey: null },
+  extraFolders: { tier: 'intermediate', group: 'dataset', defaultKey: null },
 
   // Learning
   durationMode: { tier: 'simple', group: 'learning', defaultKey: null },
@@ -129,18 +131,23 @@ export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   },
   captionDropoutRate: {
     tier: 'advanced',
-    group: 'performance',
+    group: 'dataset',
     defaultKey: 'captionDropoutRate',
   },
   captionShuffling: {
     tier: 'intermediate',
-    group: 'performance',
+    group: 'dataset',
     defaultKey: 'captionShuffling',
   },
   flipAugment: {
     tier: 'intermediate',
-    group: 'performance',
+    group: 'dataset',
     defaultKey: 'flipAugment',
+  },
+  flipVAugment: {
+    tier: 'advanced',
+    group: 'dataset',
+    defaultKey: 'flipVAugment',
   },
 
   // Sampling
@@ -199,11 +206,12 @@ export const GROUP_META: Record<
   { label: string; order: number }
 > = {
   whatToTrain: { label: 'What to Train', order: 0 },
-  learning: { label: 'Learning', order: 1 },
-  loraShape: { label: 'LoRA Shape', order: 2 },
-  performance: { label: 'Performance', order: 3 },
-  sampling: { label: 'Sampling', order: 4 },
-  saving: { label: 'Saving', order: 5 },
+  dataset: { label: 'Dataset', order: 1 },
+  learning: { label: 'Learning', order: 2 },
+  loraShape: { label: 'LoRA Shape', order: 3 },
+  performance: { label: 'Performance', order: 4 },
+  sampling: { label: 'Sampling', order: 5 },
+  saving: { label: 'Saving', order: 6 },
 };
 
 const TIER_ORDER: ExpertiseTier[] = [

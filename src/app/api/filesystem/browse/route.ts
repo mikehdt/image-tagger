@@ -11,14 +11,19 @@ type BrowseResult =
  * Query params:
  *   title  — dialog title (optional)
  *   filter — file extension filter, e.g. "safetensors,ckpt,bin" (optional)
+ *   mode   — "file" (default) or "folder"
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title') ?? 'Select file';
   const filter = searchParams.get('filter') ?? '';
+  const mode = searchParams.get('mode') === 'folder' ? 'folder' : 'file';
 
   try {
-    const result = await openFileDialog(title, filter);
+    const result =
+      mode === 'folder'
+        ? await openFolderDialog(title)
+        : await openFileDialog(title, filter);
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -178,6 +183,92 @@ function openKDialog(
         return resolve({ cancelled: true });
       }
       if (error) return reject(error);
+      const selected = stdout.trim();
+      resolve(selected ? { path: selected } : { cancelled: true });
+    });
+  });
+}
+
+// --- Folder dialog (cross-platform) ---
+
+function openFolderDialog(title: string): Promise<BrowseResult> {
+  switch (process.platform) {
+    case 'win32':
+      return openFolderWindows(title);
+    case 'darwin':
+      return openFolderMacOS(title);
+    default:
+      return openFolderLinux(title);
+  }
+}
+
+function openFolderWindows(title: string): Promise<BrowseResult> {
+  const script = [
+    'Add-Type -AssemblyName System.Windows.Forms',
+    '$d = New-Object System.Windows.Forms.FolderBrowserDialog',
+    `$d.Description = '${escapePS(title)}'`,
+    'if ($d.ShowDialog() -eq "OK") { $d.SelectedPath } else { "" }',
+  ].join('; ');
+
+  return new Promise((resolve, reject) => {
+    execFile(
+      'powershell',
+      ['-NoProfile', '-Sta', '-Command', script],
+      { timeout: 120_000 },
+      (error, stdout) => {
+        if (error) return reject(error);
+        const selected = stdout.trim();
+        resolve(selected ? { path: selected } : { cancelled: true });
+      },
+    );
+  });
+}
+
+function openFolderMacOS(title: string): Promise<BrowseResult> {
+  const script = `choose folder with prompt "${escapeAS(title)}"`;
+
+  return new Promise((resolve, reject) => {
+    execFile(
+      'osascript',
+      ['-e', script],
+      { timeout: 120_000 },
+      (error, stdout) => {
+        if (error && 'code' in error && error.code === 1) {
+          return resolve({ cancelled: true });
+        }
+        if (error) return reject(error);
+        const aliasPath = stdout.trim();
+        const posix = aliasPath
+          .replace(/^alias /, '')
+          .replace(/:/g, '/')
+          .replace(/^([^/])/, '/$1');
+        resolve(posix ? { path: posix } : { cancelled: true });
+      },
+    );
+  });
+}
+
+function openFolderLinux(title: string): Promise<BrowseResult> {
+  const args = ['--file-selection', '--directory', `--title=${title}`];
+
+  return new Promise((resolve, reject) => {
+    execFile('zenity', args, { timeout: 120_000 }, (error, stdout) => {
+      if (error && 'code' in error && (error.code === 1 || error.code === 5)) {
+        return resolve({ cancelled: true });
+      }
+      if (error) {
+        // Fallback to kdialog
+        const kdArgs = ['--getexistingdirectory', '.', '--title', title];
+        execFile('kdialog', kdArgs, { timeout: 120_000 }, (err2, out2) => {
+          if (err2 && 'code' in err2 && err2.code === 1) {
+            return resolve({ cancelled: true });
+          }
+          if (err2) return reject(err2);
+          const selected = out2.trim();
+          resolve(selected ? { path: selected } : { cancelled: true });
+        });
+        return;
+      }
       const selected = stdout.trim();
       resolve(selected ? { path: selected } : { cancelled: true });
     });

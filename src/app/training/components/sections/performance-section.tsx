@@ -25,9 +25,6 @@ type PerformanceSectionProps = {
   gradientAccumulationSteps: number;
   gradientCheckpointing: boolean;
   cacheLatents: boolean;
-  captionDropoutRate: number;
-  captionShuffling: boolean;
-  flipAugment: boolean;
   hasChanges: boolean;
   visibleFields: Set<string>;
   hiddenChangesCount?: number;
@@ -54,9 +51,6 @@ const PerformanceSectionComponent = ({
   gradientAccumulationSteps,
   gradientCheckpointing,
   cacheLatents,
-  captionDropoutRate,
-  captionShuffling,
-  flipAugment,
   hasChanges,
   visibleFields,
   hiddenChangesCount,
@@ -70,10 +64,7 @@ const PerformanceSectionComponent = ({
     visibleFields.has('mixedPrecision') ||
     visibleFields.has('gradientAccumulationSteps') ||
     visibleFields.has('gradientCheckpointing') ||
-    visibleFields.has('cacheLatents') ||
-    visibleFields.has('captionDropoutRate') ||
-    visibleFields.has('captionShuffling') ||
-    visibleFields.has('flipAugment');
+    visibleFields.has('cacheLatents');
 
   if (!hasVisibleFields) return null;
 
@@ -251,66 +242,6 @@ const PerformanceSectionComponent = ({
           </label>
         )}
 
-        {/* Caption Dropout Rate */}
-        {visibleFields.has('captionDropoutRate' satisfies keyof FormState) && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
-              Caption Dropout Rate
-            </label>
-            <input
-              type="text"
-              value={captionDropoutRate}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val >= 0 && val <= 1) {
-                  onFieldChange('captionDropoutRate', val);
-                }
-              }}
-              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
-            />
-            <p className="mt-1 text-xs text-slate-400">
-              Probability of dropping captions during training (0 = disabled)
-            </p>
-          </div>
-        )}
-
-        {/* Caption Shuffling */}
-        {visibleFields.has('captionShuffling' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={captionShuffling}
-              onChange={(e) =>
-                onFieldChange('captionShuffling', e.target.checked)
-              }
-              className="accent-sky-500"
-            />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Caption Shuffling
-            </span>
-            <span className="text-xs text-slate-400">
-              Randomise tag order during training
-            </span>
-          </label>
-        )}
-
-        {/* Flip Augment */}
-        {visibleFields.has('flipAugment' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={flipAugment}
-              onChange={(e) => onFieldChange('flipAugment', e.target.checked)}
-              className="accent-sky-500"
-            />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Flip Augment
-            </span>
-            <span className="text-xs text-slate-400">
-              Randomly flip images horizontally
-            </span>
-          </label>
-        )}
       </div>
     </CollapsibleSection>
   );

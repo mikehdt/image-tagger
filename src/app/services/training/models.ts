@@ -57,6 +57,7 @@ export type TrainingDefaults = {
   captionDropoutRate: number;
   captionShuffling: boolean;
   flipAugment: boolean;
+  flipVAugment: boolean;
   seed: number;
   saveFormat: 'fp16' | 'bf16' | 'fp32';
   saveEvery: number;
@@ -105,6 +106,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -152,6 +154,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -199,6 +202,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -248,6 +252,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -292,6 +297,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -336,6 +342,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -380,6 +387,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,
@@ -424,6 +432,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
       captionDropoutRate: 0,
       captionShuffling: false,
       flipAugment: false,
+      flipVAugment: false,
       seed: -1,
       saveFormat: 'fp16',
       saveEvery: 1,

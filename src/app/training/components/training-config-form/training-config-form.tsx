@@ -47,6 +47,8 @@ const TrainingConfigFormComponent = ({
     addDataset,
     removeDataset,
     setFolderRepeats,
+    addExtraFolder,
+    removeExtraFolder,
     addSamplePrompt,
     removeSamplePrompt,
     setSamplePrompt,
@@ -123,6 +125,8 @@ const TrainingConfigFormComponent = ({
       captionDropoutRate: state.captionDropoutRate,
       captionShuffling: state.captionShuffling,
       flipAugment: state.flipAugment,
+      flipVAugment: state.flipVAugment,
+      extraFolders: state.extraFolders,
       seed: state.seed,
       guidanceScale: state.guidanceScale,
       noiseScheduler: state.noiseScheduler,
@@ -165,11 +169,23 @@ const TrainingConfigFormComponent = ({
 
       <DatasetSection
         datasets={state.datasets}
+        extraFolders={state.extraFolders}
         totalImages={datasetStats.totalImages}
         totalEffective={datasetStats.totalEffective}
+        captionDropoutRate={state.captionDropoutRate}
+        captionShuffling={state.captionShuffling}
+        flipAugment={state.flipAugment}
+        flipVAugment={state.flipVAugment}
+        hasChanges={sectionHasChanges.dataset}
+        visibleFields={visibleFields}
+        hiddenChangesCount={hiddenChanges.dataset}
         onAddDataset={addDataset}
         onRemoveDataset={removeDataset}
         onSetFolderRepeats={setFolderRepeats}
+        onAddExtraFolder={addExtraFolder}
+        onRemoveExtraFolder={removeExtraFolder}
+        onFieldChange={setField}
+        onReset={resetSection}
       />
 
       <LearningSection
@@ -216,9 +232,6 @@ const TrainingConfigFormComponent = ({
         gradientAccumulationSteps={state.gradientAccumulationSteps}
         gradientCheckpointing={state.gradientCheckpointing}
         cacheLatents={state.cacheLatents}
-        captionDropoutRate={state.captionDropoutRate}
-        captionShuffling={state.captionShuffling}
-        flipAugment={state.flipAugment}
         hasChanges={sectionHasChanges.performance}
         visibleFields={visibleFields}
         hiddenChangesCount={hiddenChanges.performance}

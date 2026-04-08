@@ -44,7 +44,10 @@ export type FormState = {
   modelId: string;
   modelPaths: ModelPaths;
   outputName: string;
+
+  // Dataset
   datasets: DatasetSource[];
+  extraFolders: string[];
 
   // Learning
   durationMode: DurationMode;
@@ -72,6 +75,7 @@ export type FormState = {
   captionDropoutRate: number;
   captionShuffling: boolean;
   flipAugment: boolean;
+  flipVAugment: boolean;
 
   // Sampling
   samplingEnabled: boolean;
@@ -121,10 +125,13 @@ type FormAction =
       datasetIndex: number;
       folderName: string;
       repeats: number | null;
-    };
+    }
+  | { type: 'ADD_EXTRA_FOLDER'; path: string }
+  | { type: 'REMOVE_EXTRA_FOLDER'; index: number };
 
 export type SectionName =
   | 'whatToTrain'
+  | 'dataset'
   | 'learning'
   | 'loraShape'
   | 'performance'
@@ -142,6 +149,7 @@ function defaultsToFormState(
     modelPaths: {},
     outputName: '',
     datasets: [],
+    extraFolders: [],
     durationMode: 'epochs',
     epochs: defaults.epochs,
     steps: defaults.steps,
@@ -163,6 +171,7 @@ function defaultsToFormState(
     captionDropoutRate: defaults.captionDropoutRate,
     captionShuffling: defaults.captionShuffling,
     flipAugment: defaults.flipAugment,
+    flipVAugment: defaults.flipVAugment,
     samplingEnabled: false,
     samplePrompts: [''],
     sampleMode: 'steps',
@@ -199,6 +208,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         // Preserve user's dataset and output choices
         outputName: state.outputName,
         datasets: state.datasets,
+        extraFolders: state.extraFolders,
         samplePrompts: state.samplePrompts,
       };
     }
@@ -225,6 +235,15 @@ function formReducer(state: FormState, action: FormAction): FormState {
       switch (action.section) {
         case 'whatToTrain':
           return { ...state, modelPaths: {} };
+        case 'dataset':
+          return {
+            ...state,
+            captionDropoutRate: defaults.captionDropoutRate,
+            captionShuffling: defaults.captionShuffling,
+            flipAugment: defaults.flipAugment,
+            flipVAugment: defaults.flipVAugment,
+            extraFolders: [],
+          };
         case 'learning':
           return {
             ...state,
@@ -254,9 +273,6 @@ function formReducer(state: FormState, action: FormAction): FormState {
             gradientAccumulationSteps: defaults.gradientAccumulationSteps,
             gradientCheckpointing: defaults.gradientCheckpointing,
             cacheLatents: defaults.cacheLatents,
-            captionDropoutRate: defaults.captionDropoutRate,
-            captionShuffling: defaults.captionShuffling,
-            flipAugment: defaults.flipAugment,
           };
         case 'sampling':
           return {
@@ -347,6 +363,16 @@ function formReducer(state: FormState, action: FormAction): FormState {
       }
       return { ...state, datasets: newDatasets };
     }
+
+    case 'ADD_EXTRA_FOLDER':
+      if (state.extraFolders.includes(action.path)) return state;
+      return { ...state, extraFolders: [...state.extraFolders, action.path] };
+
+    case 'REMOVE_EXTRA_FOLDER':
+      return {
+        ...state,
+        extraFolders: state.extraFolders.filter((_, i) => i !== action.index),
+      };
 
     default:
       return state;
@@ -442,6 +468,12 @@ export function useTrainingConfigForm() {
   const sectionHasChanges = useMemo(
     () => ({
       whatToTrain: false, // Model/dataset selection is always intentional
+      dataset:
+        state.captionDropoutRate !== defaults.captionDropoutRate ||
+        state.captionShuffling !== defaults.captionShuffling ||
+        state.flipAugment !== defaults.flipAugment ||
+        state.flipVAugment !== defaults.flipVAugment ||
+        state.extraFolders.length > 0,
       learning:
         state.learningRate !== defaults.learningRate ||
         state.optimizer !== defaults.optimizer ||
@@ -460,10 +492,7 @@ export function useTrainingConfigForm() {
         state.gradientAccumulationSteps !==
           defaults.gradientAccumulationSteps ||
         state.gradientCheckpointing !== defaults.gradientCheckpointing ||
-        state.cacheLatents !== defaults.cacheLatents ||
-        state.captionDropoutRate !== defaults.captionDropoutRate ||
-        state.captionShuffling !== defaults.captionShuffling ||
-        state.flipAugment !== defaults.flipAugment,
+        state.cacheLatents !== defaults.cacheLatents,
       sampling: false, // Sampling is opt-in, not compared to defaults
       saving: false, // Saving is opt-in, not compared to defaults
     }),
@@ -535,6 +564,14 @@ export function useTrainingConfigForm() {
     [],
   );
 
+  const addExtraFolder = useCallback((path: string) => {
+    dispatch({ type: 'ADD_EXTRA_FOLDER', path });
+  }, []);
+
+  const removeExtraFolder = useCallback((index: number) => {
+    dispatch({ type: 'REMOVE_EXTRA_FOLDER', index });
+  }, []);
+
   const addSamplePrompt = useCallback(() => {
     dispatch({ type: 'ADD_SAMPLE_PROMPT' });
   }, []);
@@ -564,6 +601,8 @@ export function useTrainingConfigForm() {
     addDataset,
     removeDataset,
     setFolderRepeats,
+    addExtraFolder,
+    removeExtraFolder,
     addSamplePrompt,
     removeSamplePrompt,
     setSamplePrompt,
