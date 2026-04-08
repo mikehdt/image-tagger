@@ -5,9 +5,8 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm knip:*)",
-      "Bash(npx tsc:*)",
-      "Bash(pnpm format:check)",
-      "Bash(pnpm format:write)"
+      "Bash(pnpm format:*)",
+      "Bash(pnpm tsc:*)"
     ]
   }
 }

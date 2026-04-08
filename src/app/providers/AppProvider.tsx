@@ -19,9 +19,9 @@ import {
 } from '../store/project';
 import { getProjectInfo } from '../utils/project-actions';
 import { useTheme } from '../utils/use-theme';
-import { Error } from '../views/error';
-import { InitialLoad } from '../views/initial-load';
-import { NoContent } from '../views/no-content';
+import { Error } from '../tagging/views/error';
+import { InitialLoad } from '../tagging/views/initial-load';
+import { NoContent } from '../tagging/views/no-content';
 
 /**
  * Extract the project slug from a tagging URL like /tagging/my-project/1

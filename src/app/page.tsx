@@ -1,6 +1,6 @@
 'use client';
 
-import { ProjectList } from './views/project-list';
+import { ProjectList } from './project-list/project-list';
 
 export default function Home() {
   return <ProjectList />;

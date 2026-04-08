@@ -1,0 +1,260 @@
+import {
+  ArchiveIcon,
+  BookmarkIcon,
+  FolderOpenIcon,
+  ImageIcon,
+} from 'lucide-react';
+import { memo, useCallback } from 'react';
+
+import type { RootState } from '@/app/store';
+import {
+  IoState,
+  KohyaBucket,
+  resetTags,
+  saveAsset,
+  selectAssetHasModifiedTags,
+  selectSaveProgress,
+} from '@/app/store/assets';
+import {
+  toggleBucketFilter,
+  toggleExtensionFilter,
+  toggleSizeFilter,
+  toggleSubfolderFilter,
+} from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectProjectFolderName } from '@/app/store/project';
+import { parseSubfolder } from '@/app/utils/subfolder-utils';
+import { highlightPatterns } from '@/app/tagging/utils/text-highlight';
+
+import { Button } from '@/app/components/shared/button';
+import { useToast } from '@/app/components/shared/toast';
+
+// Individual selectors for metadata - avoids creating new object references
+const selectFilenamePatterns = (state: RootState) =>
+  state.filters.filenamePatterns;
+const selectFilterSizes = (state: RootState) => state.filters.filterSizes;
+const selectFilterBuckets = (state: RootState) => state.filters.filterBuckets;
+const selectFilterExtensions = (state: RootState) =>
+  state.filters.filterExtensions;
+const selectFilterSubfolders = (state: RootState) =>
+  state.filters.filterSubfolders;
+
+type AssetMetadataProps = {
+  assetId: string;
+  fileExtension: string;
+  subfolder?: string;
+  dimensions: { width: number; height: number };
+  bucket: KohyaBucket;
+  ioState: IoState;
+  dimensionsComposed: string;
+  isTagEditing?: boolean; // True when either editing or adding a tag
+};
+
+const AssetMetadataComponent = ({
+  assetId,
+  fileExtension,
+  subfolder,
+  dimensions,
+  bucket,
+  ioState,
+  dimensionsComposed,
+  isTagEditing = false,
+}: AssetMetadataProps) => {
+  const dispatch = useAppDispatch();
+
+  // Parse subfolder to display repeat count and label
+  const parsed = subfolder ? parseSubfolder(subfolder) : null;
+  const subfolderDisplay = parsed
+    ? `${parsed.repeatCount}× ${parsed.label}`
+    : null;
+
+  // Extract filename without subfolder path for display
+  const slashIndex = subfolder ? assetId.indexOf('/') : -1;
+  const displayFilename =
+    slashIndex !== -1 ? assetId.substring(slashIndex + 1) : assetId;
+
+  // Individual selector calls - each only triggers re-render when its specific value changes
+  const filenamePatterns = useAppSelector(selectFilenamePatterns);
+  const filterSizes = useAppSelector(selectFilterSizes);
+  const filterBuckets = useAppSelector(selectFilterBuckets);
+  const filterExtensions = useAppSelector(selectFilterExtensions);
+  const filterSubfolders = useAppSelector(selectFilterSubfolders);
+  const saveProgress = useAppSelector(selectSaveProgress);
+  const projectFolderName = useAppSelector(selectProjectFolderName);
+
+  // Use optimised selector - only re-renders when THIS asset's modified state changes
+  const hasModifiedTags =
+    useAppSelector((state) => selectAssetHasModifiedTags(state, assetId)) &&
+    ioState !== IoState.SAVING;
+
+  const { showToast } = useToast();
+
+  // Calculate pressed states based on filter arrays
+  const dimensionsActive = filterSizes.includes(dimensionsComposed);
+  const bucketComposed = `${bucket.width}×${bucket.height}`;
+  const bucketActive = filterBuckets.includes(bucketComposed);
+  const extensionActive = filterExtensions.includes(fileExtension);
+  const subfolderActive = subfolder
+    ? filterSubfolders.includes(subfolder)
+    : false;
+
+  // Disable buttons when either individual asset is saving, a batch save is in progress, or a tag operation is in progress
+  const isBatchSaveInProgress =
+    saveProgress &&
+    saveProgress.total > 0 &&
+    saveProgress.completed < saveProgress.total;
+
+  const isSaving =
+    ioState === IoState.SAVING || isBatchSaveInProgress || isTagEditing;
+
+  const handleToggleSize = useCallback(
+    () => dispatch(toggleSizeFilter(dimensionsComposed)),
+    [dispatch, dimensionsComposed],
+  );
+
+  const handleToggleBucket = useCallback(
+    () => dispatch(toggleBucketFilter(bucketComposed)),
+    [dispatch, bucketComposed],
+  );
+
+  const handleToggleExtension = useCallback(
+    () => dispatch(toggleExtensionFilter(fileExtension)),
+    [dispatch, fileExtension],
+  );
+
+  const handleToggleSubfolder = useCallback(() => {
+    if (subfolder) {
+      dispatch(toggleSubfolderFilter(subfolder));
+    }
+  }, [dispatch, subfolder]);
+
+  const handleCopyAssetPath = useCallback(async () => {
+    // Copy just the filename without subfolder path
+    const fullPath = `${displayFilename}.${fileExtension}`;
+
+    try {
+      await navigator.clipboard.writeText(fullPath);
+      showToast('Filename copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      showToast('Failed to copy file path');
+    }
+  }, [displayFilename, fileExtension, showToast]);
+
+  const handleCancelAction = useCallback(() => {
+    // Extra guard to prevent clicking during tag editing
+    if (isTagEditing || isSaving) {
+      return;
+    }
+    dispatch(resetTags(assetId));
+  }, [dispatch, assetId, isSaving, isTagEditing]);
+
+  const handleSaveAction = useCallback(() => {
+    // Extra guard to prevent clicking during tag editing
+    if (isTagEditing || isSaving) {
+      return;
+    }
+    dispatch(
+      saveAsset({
+        fileId: assetId,
+        projectPath: projectFolderName || undefined,
+      }),
+    );
+  }, [dispatch, assetId, isSaving, isTagEditing, projectFolderName]);
+
+  return (
+    <div
+      className={`flex w-full items-end gap-2 border-t px-2 py-1 text-sm inset-shadow-sm transition-colors ${
+        hasModifiedTags
+          ? 'border-t-amber-300 bg-amber-100 inset-shadow-white dark:border-t-amber-600 dark:bg-amber-900 dark:inset-shadow-amber-700'
+          : 'border-t-(--border) bg-(--surface) inset-shadow-white dark:inset-shadow-slate-700'
+      }`}
+    >
+      <span className="inline-flex min-w-0 flex-1 flex-wrap items-center gap-2 py-0.5 tabular-nums">
+        <Button
+          type="button"
+          color="sky"
+          size="smallWide"
+          isPressed={dimensionsActive}
+          onClick={handleToggleSize}
+          title="Image dimensions"
+        >
+          <ImageIcon className="mr-1 h-4 w-4" />
+          {dimensions.width}&times;{dimensions.height}
+        </Button>
+
+        <Button
+          type="button"
+          color="slate"
+          size="smallWide"
+          isPressed={bucketActive}
+          onClick={handleToggleBucket}
+          title="Bucket dimensions"
+        >
+          <ArchiveIcon className="mr-1 h-4 w-4" />
+          {bucket.width}&times;{bucket.height}
+        </Button>
+
+        <Button
+          type="button"
+          color="stone"
+          size="smallWide"
+          isPressed={extensionActive}
+          onClick={handleToggleExtension}
+        >
+          {fileExtension}
+        </Button>
+
+        {subfolderDisplay && (
+          <Button
+            type="button"
+            color="indigo"
+            size="smallWide"
+            isPressed={subfolderActive}
+            onClick={handleToggleSubfolder}
+            title={`Repeat folder: ${subfolder}`}
+          >
+            <FolderOpenIcon className="mr-1 h-4 w-4" />
+            {subfolderDisplay}
+          </Button>
+        )}
+
+        <span
+          className="ml-2 cursor-pointer self-center truncate text-(--unselected-text) transition-colors hover:text-(--foreground) max-sm:order-1 max-sm:w-full max-sm:pt-2"
+          style={{ textShadow: 'var(--surface-elevated) 0 1px 0' }}
+          onClick={handleCopyAssetPath}
+          title="Click to copy the full filename"
+        >
+          {highlightPatterns(displayFilename, filenamePatterns)}
+        </span>
+      </span>
+
+      {hasModifiedTags ? (
+        <span className="flex shrink-0 gap-2 pl-2">
+          <Button
+            color="stone"
+            size="medium"
+            onClick={handleCancelAction}
+            disabled={isTagEditing || isSaving}
+            title={isTagEditing ? 'Finish tag operation first' : ''}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color="teal"
+            size="medium"
+            onClick={handleSaveAction}
+            disabled={isTagEditing || isSaving}
+            title={isTagEditing ? 'Finish tag operation first' : ''}
+          >
+            <BookmarkIcon className="mr-1 h-4 w-4" />
+            Save
+          </Button>
+        </span>
+      ) : null}
+    </div>
+  );
+};
+
+export const AssetMetadata = memo(AssetMetadataComponent);

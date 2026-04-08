@@ -6,9 +6,9 @@ import { useEffect, useMemo } from 'react';
 import { selectFilteredAssetsCount } from '../store/assets';
 import { selectPaginationSize } from '../store/filters';
 import { useAppSelector } from '../store/hooks';
-import { TaggingBottomShelf } from './bottom-shelf/bottom-shelf';
-import { TaggingTopShelf } from './top-shelf/top-shelf';
-import { TrainingTopShelf } from './training/training-top-shelf';
+import { TaggingBottomShelf } from '@/app/tagging/components/bottom-shelf/bottom-shelf';
+import { TaggingTopShelf } from '@/app/tagging/components/top-shelf/top-shelf';
+import { TrainingTopShelf } from '@/app/training/components/training-top-shelf';
 
 export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();

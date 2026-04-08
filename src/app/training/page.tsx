@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 
-import { TrainingConfigForm } from '../components/training/training-config-form/training-config-form';
+import { TrainingConfigForm } from './components/training-config-form/training-config-form';
 import { useAppDispatch } from '../store/hooks';
 import { startMockTraining } from '../store/training/mock-training';
 

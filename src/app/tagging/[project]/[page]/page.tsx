@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { AssetList } from '../../../views/asset-list';
+import { AssetList } from '../../views/asset-list';
 
 export default function TaggingPage() {
   const params = useParams();

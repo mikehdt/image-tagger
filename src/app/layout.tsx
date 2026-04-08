@@ -3,12 +3,12 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
-import { AutoTaggerSetupModal } from './components/auto-tagger';
+import { AutoTaggerSetupModal } from './tagging/components/auto-tagger';
 import { ModalProvider } from './components/shared/modal';
 import { PopupProvider } from './components/shared/popup';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
-import { JobPanel } from './components/training/job-panel/job-panel';
+import { JobPanel } from './training/components/job-panel/job-panel';
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
 

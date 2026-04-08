@@ -1,0 +1,46 @@
+import { IdCardIcon } from 'lucide-react';
+import { memo } from 'react';
+
+import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
+import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
+import { AssetSortControls } from './asset-sort-controls';
+import { ClearFiltersButton } from './clear-filters-button';
+import { ClearSelectionButton } from './clear-selection-button';
+import { MoveToFolderButton } from './move-to-folder-button';
+import { SelectAllButton } from './select-all-button';
+import { VisibilityControl } from './visibility-control/visibility-control';
+
+const AssetSelectionControlsComponent = () => {
+  return (
+    <ResponsiveToolbarGroup
+      icon={<IdCardIcon className="h-4 w-4" />}
+      title="Assets"
+      position="left"
+      breakpoint="lg"
+    >
+      <VisibilityControl />
+
+      <ToolbarDivider />
+
+      <span className="mx-0.5 cursor-default text-xs text-slate-500 max-xl:hidden">
+        by
+      </span>
+      <AssetSortControls />
+
+      <ToolbarDivider />
+
+      <ClearFiltersButton />
+
+      <ToolbarDivider />
+
+      <SelectAllButton />
+      <ClearSelectionButton />
+
+      <ToolbarDivider />
+
+      <MoveToFolderButton />
+    </ResponsiveToolbarGroup>
+  );
+};
+
+export const AssetSelectionControls = memo(AssetSelectionControlsComponent);
