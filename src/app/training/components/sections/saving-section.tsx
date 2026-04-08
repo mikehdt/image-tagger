@@ -68,8 +68,10 @@ const SavingSectionComponent = ({
           </span>
         ) : undefined
       }
-      headerActions={
-        <SectionResetButton onClick={() => onReset('saving')} />
+      headerActions={(expanded) =>
+        saveEnabled && expanded ? (
+          <SectionResetButton onClick={() => onReset('saving')} />
+        ) : undefined
       }
     >
       <div className="space-y-3">

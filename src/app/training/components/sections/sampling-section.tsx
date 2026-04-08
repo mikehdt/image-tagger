@@ -76,8 +76,10 @@ const SamplingSectionComponent = ({
           </span>
         ) : undefined
       }
-      headerActions={
-        <SectionResetButton onClick={() => onReset('sampling')} />
+      headerActions={(expanded) =>
+        samplingEnabled && expanded ? (
+          <SectionResetButton onClick={() => onReset('sampling')} />
+        ) : undefined
       }
     >
       <div className="space-y-3">
