@@ -118,22 +118,38 @@ const DatasetSectionComponent = ({
       }
     >
       <div className="space-y-3">
-        {datasets.length === 0 ? (
+        {datasets.length === 0 && extraFolders.length === 0 ? (
           <div className="rounded border border-dashed border-slate-300 px-4 py-6 text-center dark:border-slate-600">
             <p className="text-sm text-slate-400">
               No dataset sources added yet
             </p>
             <p className="mt-1 text-xs text-slate-400">
-              Add a tagging project as a dataset source to begin
+              Add a tagging project
+              {visibleFields.has(
+                'extraFolders' satisfies keyof FormState,
+              ) && ' or folder of images'}{' '}
+              to begin
             </p>
-            <div className="mt-3 inline-block">
+            <div className="mt-3 flex items-center justify-center gap-2">
               <ProjectPicker
                 onSelect={onAddDataset}
                 excludeFolders={excludeFolders}
               >
                 <PlusIcon className="mr-1 h-3.5 w-3.5" />
-                Add Project Source
+                Add Project
               </ProjectPicker>
+              {visibleFields.has(
+                'extraFolders' satisfies keyof FormState,
+              ) && (
+                <button
+                  type="button"
+                  onClick={handleBrowseFolder}
+                  className="flex cursor-pointer items-center gap-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground)/70 transition-colors hover:bg-(--surface-hover) hover:text-(--foreground)"
+                >
+                  <FolderOpenIcon className="mr-1 h-3.5 w-3.5" />
+                  Add Folder
+                </button>
+              )}
             </div>
           </div>
         ) : (
