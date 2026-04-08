@@ -2,7 +2,7 @@ import { EyeIcon, EyeOffIcon, FolderIcon, PlusIcon, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import { memo, useMemo } from 'react';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { ProjectPicker } from '../project-picker/project-picker';
 import type {
   DatasetFolder,

@@ -3,6 +3,7 @@
 import {
   ArrowLeftCircleIcon,
   ChevronDownIcon,
+  FolderCogIcon,
   GraduationCapIcon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -13,6 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectTheme, setTheme } from '@/app/store/preferences';
 import { type ThemeMode } from '@/app/utils/use-theme';
 
+import { useModelDefaultsModal } from './model-defaults-modal/use-model-defaults-modal';
 import { ShelfInfoRow, ShelfToolbarRow, TopShelfFrame } from '../shelf';
 import { MenuThemeSwitcher } from '../top-shelf/info/menu-theme-switcher';
 import { TrainingToolbar } from './training-toolbar';
@@ -25,6 +27,7 @@ const TrainingMenuComponent = () => {
   const popupId = useId();
 
   const theme = useAppSelector(selectTheme);
+  const { openModal: openModelDefaults } = useModelDefaultsModal();
   const isOpen = getPopupState(popupId).isOpen;
 
   const handleToggle = useCallback(() => {
@@ -37,6 +40,11 @@ const TrainingMenuComponent = () => {
       });
     }
   }, [isOpen, closePopup, openPopup, popupId]);
+
+  const handleOpenModelDefaults = useCallback(() => {
+    closePopup(popupId);
+    openModelDefaults();
+  }, [closePopup, popupId, openModelDefaults]);
 
   const handleBackToProjects = useCallback(() => {
     closePopup(popupId);
@@ -76,6 +84,17 @@ const TrainingMenuComponent = () => {
         className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
       >
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <button
+            type="button"
+            onClick={handleOpenModelDefaults}
+            className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            <span className="h-5 w-5">
+              <FolderCogIcon className="h-5 w-5" />
+            </span>
+            Model Defaults…
+          </button>
+
           <MenuThemeSwitcher theme={theme} setTheme={handleSetTheme} />
 
           <button

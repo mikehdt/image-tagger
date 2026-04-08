@@ -7,6 +7,8 @@ import {
   getVisibleFields,
 } from '@/app/services/training/field-registry';
 
+import { ModelDefaultsModal } from '../model-defaults-modal/model-defaults-modal';
+import { useModelDefaultsModal } from '../model-defaults-modal/use-model-defaults-modal';
 import { DatasetSection } from '../sections/dataset-section';
 import { LearningSection } from '../sections/learning-section';
 import { LoraShapeSection } from '../sections/lora-shape-section';
@@ -33,12 +35,14 @@ const TrainingConfigFormComponent = ({
     state,
     currentModel,
     defaults,
+    appModelDefaults,
     datasetStats,
     calculatedSteps,
     calculatedEpochs,
     sectionHasChanges,
     setField,
     setModel,
+    setModelPath,
     resetSection,
     addDataset,
     removeDataset,
@@ -46,7 +50,13 @@ const TrainingConfigFormComponent = ({
     addSamplePrompt,
     removeSamplePrompt,
     setSamplePrompt,
+    setAppModelDefaults,
   } = useTrainingConfigForm();
+
+  const {
+    isOpen: isDefaultsModalOpen,
+    closeModal: closeDefaultsModal,
+  } = useModelDefaultsModal();
 
   const visibleFields = useMemo(() => {
     const fields = getVisibleFields(viewMode, state.modelId);
@@ -90,6 +100,7 @@ const TrainingConfigFormComponent = ({
 
     onStartTraining?.({
       modelId: state.modelId,
+      modelPaths: state.modelPaths,
       provider: currentModel.provider,
       outputName: state.outputName,
       datasets: state.datasets,
@@ -136,10 +147,20 @@ const TrainingConfigFormComponent = ({
     <div className="mx-auto max-w-2xl space-y-3">
       <WhatToTrainSection
         modelId={state.modelId}
+        modelPaths={state.modelPaths}
+        appModelDefaults={appModelDefaults}
         onModelChange={setModel}
+        onModelPathChange={setModelPath}
         currentModel={currentModel}
         visibleFields={visibleFields}
+        viewMode={viewMode}
         hiddenChangesCount={hiddenChanges.whatToTrain}
+      />
+
+      <ModelDefaultsModal
+        isOpen={isDefaultsModalOpen}
+        onClose={closeDefaultsModal}
+        onSaved={setAppModelDefaults}
       />
 
       <DatasetSection

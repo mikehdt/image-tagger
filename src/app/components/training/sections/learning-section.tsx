@@ -8,8 +8,9 @@ import {
 } from '@/app/services/training/models';
 import type { TrainingViewMode } from '@/app/store/preferences';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { SchedulerSparkline } from '../scheduler-sparkline';
+import { SectionResetButton } from './section-reset-button';
 import type {
   DurationMode,
   FormState,
@@ -194,9 +195,24 @@ const LearningSectionComponent = ({
   return (
     <CollapsibleSection
       title="Learning"
-      hasChanges={hasChanges}
-      onReset={() => onReset('learning')}
-      hiddenChangesCount={hiddenChangesCount}
+      headerExtra={
+        <>
+          {hasChanges && (
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+          )}
+          {hiddenChangesCount ? (
+            <span className="text-xs text-amber-500/70">
+              {hiddenChangesCount} hidden{' '}
+              {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+            </span>
+          ) : undefined}
+        </>
+      }
+      headerActions={(expanded) =>
+        hasChanges && expanded ? (
+          <SectionResetButton onClick={() => onReset('learning')} />
+        ) : undefined
+      }
     >
       <div className="space-y-3">
         {/* Duration */}

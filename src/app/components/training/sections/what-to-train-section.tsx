@@ -1,27 +1,47 @@
-import { memo, useMemo } from 'react';
+import { FolderOpenIcon } from 'lucide-react';
+import { memo, useCallback, useMemo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
+  type ExpertiseTier,
+  isTierAtLeast,
+} from '@/app/services/training/field-registry';
+import {
   getModelsByArchitecture,
+  type ModelComponentType,
   type ModelDefinition,
 } from '@/app/services/training/models';
 
-import { CollapsibleSection } from '../collapsible-section';
-import type { FormState } from '../training-config-form/use-training-config-form';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import type {
+  AppModelDefaults,
+  FormState,
+  ModelPaths,
+} from '../training-config-form/use-training-config-form';
+
+const MODEL_FILE_FILTER = 'safetensors,ckpt,bin,pt,pth';
 
 type WhatToTrainSectionProps = {
   modelId: string;
+  modelPaths: ModelPaths;
+  appModelDefaults: AppModelDefaults;
   onModelChange: (modelId: string) => void;
+  onModelPathChange: (component: ModelComponentType, path: string) => void;
   currentModel: ModelDefinition;
   visibleFields: Set<string>;
+  viewMode: ExpertiseTier;
   hiddenChangesCount?: number;
 };
 
 const WhatToTrainSectionComponent = ({
   modelId,
+  modelPaths,
+  appModelDefaults,
   onModelChange,
+  onModelPathChange,
   currentModel,
   visibleFields,
+  viewMode,
   hiddenChangesCount,
 }: WhatToTrainSectionProps) => {
   const modelGroups = useMemo(() => {
@@ -42,8 +62,62 @@ const WhatToTrainSectionComponent = ({
     }));
   }, []);
 
+  const archDefaults = appModelDefaults[currentModel.architecture];
+
+  // Component tier logic:
+  //   checkpoint → always simple (user commonly changes this)
+  //   other required → simple if no app default, intermediate if pre-filled
+  //   optional → always intermediate
+  const visibleComponents = useMemo(
+    () =>
+      currentModel.components.filter((c) => {
+        if (c.type === 'checkpoint') return true;
+        if (!c.required) return isTierAtLeast(viewMode, 'intermediate');
+        const hasAppDefault = !!archDefaults?.[c.type];
+        return isTierAtLeast(viewMode, hasAppDefault ? 'intermediate' : 'simple');
+      }),
+    [currentModel.components, viewMode, archDefaults],
+  );
+
+  const handlePathChange = useCallback(
+    (component: ModelComponentType) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        onModelPathChange(component, e.target.value);
+      },
+    [onModelPathChange],
+  );
+
+  const handleBrowse = useCallback(
+    async (component: ModelComponentType, label: string) => {
+      try {
+        const params = new URLSearchParams({
+          title: `Select ${label}`,
+          filter: MODEL_FILE_FILTER,
+        });
+        const res = await fetch(`/api/filesystem/browse?${params}`);
+        const data = await res.json();
+        if (data.path) {
+          onModelPathChange(component, data.path);
+        }
+      } catch {
+        // Dialog failed to open — user can still type the path manually
+      }
+    },
+    [onModelPathChange],
+  );
+
   return (
-    <CollapsibleSection title="Model" hiddenChangesCount={hiddenChangesCount}>
+    <CollapsibleSection
+      title="Model"
+      headerExtra={
+        hiddenChangesCount ? (
+          <span className="text-xs text-amber-500/70">
+            {hiddenChangesCount} hidden{' '}
+            {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+          </span>
+        ) : undefined
+      }
+    >
       <div className="space-y-3">
         {visibleFields.has('modelId' satisfies keyof FormState) && (
           <div>
@@ -73,6 +147,43 @@ const WhatToTrainSectionComponent = ({
             )}
           </div>
         )}
+
+        {/* Model component paths */}
+        {visibleFields.has('modelPaths' satisfies keyof FormState) &&
+          visibleComponents.map((component) => (
+            <div key={component.type}>
+              <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
+                {component.label}
+                {!component.required && (
+                  <span className="font-normal text-slate-400">(optional)</span>
+                )}
+              </label>
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  value={modelPaths[component.type] ?? ''}
+                  onChange={handlePathChange(component.type)}
+                  placeholder={`Path to ${component.label.toLowerCase()}…`}
+                  className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleBrowse(component.type, component.label)
+                  }
+                  className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
+                  title="Browse…"
+                >
+                  <FolderOpenIcon className="h-4 w-4" />
+                </button>
+              </div>
+              {component.hint && (
+                <p className="mt-0.5 text-xs text-slate-400">
+                  {component.hint}
+                </p>
+              )}
+            </div>
+          ))}
 
         {/* Backend — single-item Dropdown renders as static label */}
         <div>

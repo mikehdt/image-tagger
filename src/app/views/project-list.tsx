@@ -200,7 +200,7 @@ export const ProjectList = () => {
               <span className="mr-2 flex items-center justify-center rounded-full border border-amber-300 bg-amber-200 p-2.5 text-amber-700 inset-shadow-sm inset-shadow-amber-50 dark:border-amber-500 dark:bg-amber-700 dark:text-amber-200 dark:inset-shadow-amber-900">
                 <StarIcon className="h-5 w-5" />
               </span>
-              Featured Projects
+              Favourite Projects
             </h2>
             <div className="flex flex-wrap gap-3">
               {featuredProjects.map((project) => (

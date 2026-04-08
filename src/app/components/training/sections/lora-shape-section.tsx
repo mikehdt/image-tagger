@@ -2,7 +2,8 @@ import { memo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SectionResetButton } from './section-reset-button';
 import type {
   FormState,
   SectionName,
@@ -47,9 +48,24 @@ const LoraShapeSectionComponent = ({
   return (
     <CollapsibleSection
       title="LoRA Shape"
-      hasChanges={hasChanges}
-      onReset={() => onReset('loraShape')}
-      hiddenChangesCount={hiddenChangesCount}
+      headerExtra={
+        <>
+          {hasChanges && (
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+          )}
+          {hiddenChangesCount ? (
+            <span className="text-xs text-amber-500/70">
+              {hiddenChangesCount} hidden{' '}
+              {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+            </span>
+          ) : undefined}
+        </>
+      }
+      headerActions={(expanded) =>
+        hasChanges && expanded ? (
+          <SectionResetButton onClick={() => onReset('loraShape')} />
+        ) : undefined
+      }
     >
       <div className="space-y-3">
         {visibleFields.has('networkType' satisfies keyof FormState) && (

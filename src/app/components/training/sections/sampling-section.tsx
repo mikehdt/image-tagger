@@ -1,7 +1,8 @@
 import { PlusIcon, XIcon } from 'lucide-react';
 import { memo } from 'react';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SectionResetButton } from './section-reset-button';
 import type {
   FormState,
   SectionName,
@@ -67,8 +68,17 @@ const SamplingSectionComponent = ({
   return (
     <CollapsibleSection
       title="Sampling"
-      onReset={() => onReset('sampling')}
-      hiddenChangesCount={hiddenChangesCount}
+      headerExtra={
+        hiddenChangesCount ? (
+          <span className="text-xs text-amber-500/70">
+            {hiddenChangesCount} hidden{' '}
+            {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+          </span>
+        ) : undefined
+      }
+      headerActions={
+        <SectionResetButton onClick={() => onReset('sampling')} />
+      }
     >
       <div className="space-y-3">
         {/* Enable Sampling */}

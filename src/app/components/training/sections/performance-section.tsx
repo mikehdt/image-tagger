@@ -6,7 +6,8 @@ import {
   generateBucketList,
 } from '@/app/utils/image-utils';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SectionResetButton } from './section-reset-button';
 import type {
   DatasetSource,
   FormState,
@@ -101,9 +102,24 @@ const PerformanceSectionComponent = ({
   return (
     <CollapsibleSection
       title="Performance"
-      hasChanges={hasChanges}
-      onReset={() => onReset('performance')}
-      hiddenChangesCount={hiddenChangesCount}
+      headerExtra={
+        <>
+          {hasChanges && (
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+          )}
+          {hiddenChangesCount ? (
+            <span className="text-xs text-amber-500/70">
+              {hiddenChangesCount} hidden{' '}
+              {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+            </span>
+          ) : undefined}
+        </>
+      }
+      headerActions={(expanded) =>
+        hasChanges && expanded ? (
+          <SectionResetButton onClick={() => onReset('performance')} />
+        ) : undefined
+      }
     >
       <div className="space-y-3">
         {/* Mixed Precision */}

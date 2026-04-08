@@ -39,6 +39,7 @@ export type FieldMeta = {
 export const FIELD_REGISTRY: Record<string, FieldMeta> = {
   // What to Train
   modelId: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
+  modelPaths: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
   outputName: { tier: 'simple', group: 'saving', defaultKey: null },
   datasets: { tier: 'simple', group: 'whatToTrain', defaultKey: null },
 

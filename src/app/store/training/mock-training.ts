@@ -28,6 +28,7 @@ export function startMockTraining(
           projectPath: '',
           provider: (config.provider as 'ai-toolkit' | 'kohya') ?? 'ai-toolkit',
           baseModel: (config.modelId as string) ?? 'flux-dev',
+          modelPaths: (config.modelPaths as Record<string, string>) ?? {},
           outputPath: '',
           outputName,
           datasets: [],

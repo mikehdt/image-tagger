@@ -2,7 +2,8 @@ import { memo } from 'react';
 
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
-import { CollapsibleSection } from '../collapsible-section';
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SectionResetButton } from './section-reset-button';
 import type {
   FormState,
   SectionName,
@@ -59,8 +60,17 @@ const SavingSectionComponent = ({
   return (
     <CollapsibleSection
       title="Saving"
-      onReset={() => onReset('saving')}
-      hiddenChangesCount={hiddenChangesCount}
+      headerExtra={
+        hiddenChangesCount ? (
+          <span className="text-xs text-amber-500/70">
+            {hiddenChangesCount} hidden{' '}
+            {hiddenChangesCount === 1 ? 'setting' : 'settings'} customised
+          </span>
+        ) : undefined
+      }
+      headerActions={
+        <SectionResetButton onClick={() => onReset('saving')} />
+      }
     >
       <div className="space-y-3">
         {/* Output Name */}

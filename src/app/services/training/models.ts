@@ -6,6 +6,20 @@
 
 export type ModelArchitecture = 'flux' | 'sdxl' | 'zimage' | 'wan' | 'ltx';
 
+export type ModelComponentType =
+  | 'checkpoint'
+  | 'vae'
+  | 't5'
+  | 'clip_l'
+  | 'ae';
+
+export type ModelComponent = {
+  type: ModelComponentType;
+  label: string;
+  required: boolean;
+  hint?: string;
+};
+
 export type ModelDefinition = {
   id: string;
   name: string;
@@ -13,6 +27,8 @@ export type ModelDefinition = {
   description: string;
   provider: 'ai-toolkit' | 'kohya';
   defaults: TrainingDefaults;
+  /** Model components that need local file paths (checkpoint, VAE, text encoders, etc.) */
+  components: ModelComponent[];
   /** Optional training tips displayed below the model description */
   tips?: string[];
   /** Resolution steps the user can toggle on/off for this model */
@@ -57,6 +73,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'flux',
     description: 'Latest generation, improved quality and coherence',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Transformer', required: true },
+      { type: 't5', label: 'T5-XXL Text Encoder', required: true },
+      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true },
+      { type: 'ae', label: 'Autoencoder (AE)', required: true },
+    ],
     tips: [
       'Constant scheduler with 1e-4 LR works well for most LoRAs',
       'Multi-resolution training (512/768/1024) improves flexibility',
@@ -98,6 +120,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'flux',
     description: 'Best for photorealistic styles and characters',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Transformer', required: true },
+      { type: 't5', label: 'T5-XXL Text Encoder', required: true },
+      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true },
+      { type: 'ae', label: 'Autoencoder (AE)', required: true },
+    ],
     tips: [
       'Constant scheduler with 1e-4 LR is reliable for most use cases',
       'Rank 16 is a good starting point; increase for complex subjects',
@@ -139,6 +167,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'flux',
     description: 'Fast generation, fewer steps needed',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Transformer', required: true },
+      { type: 't5', label: 'T5-XXL Text Encoder', required: true },
+      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true },
+      { type: 'ae', label: 'Autoencoder (AE)', required: true },
+    ],
     tips: [
       'Needs fewer training steps than Flux.1 Dev',
       'Uses unconditioned generation (guidance scale 1.0)',
@@ -180,6 +214,15 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'sdxl',
     description: 'Mature ecosystem, wide compatibility',
     provider: 'kohya',
+    components: [
+      { type: 'checkpoint', label: 'Checkpoint', required: true },
+      {
+        type: 'vae',
+        label: 'VAE',
+        required: false,
+        hint: 'Only needed if the checkpoint doesn\u2019t include one',
+      },
+    ],
     tips: [
       'Cosine scheduler recommended for fine-tuning',
       'Lower alpha (8) helps prevent overfitting',
@@ -220,6 +263,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'zimage',
     description: 'Fast, high-quality image generation',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Transformer', required: true },
+      { type: 't5', label: 'T5-XXL Text Encoder', required: true },
+      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true },
+      { type: 'ae', label: 'Autoencoder (AE)', required: true },
+    ],
     tips: ['Fewer sample steps needed (8) due to turbo architecture'],
     availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
@@ -258,6 +307,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'wan',
     description: 'Video/image generation, last open-weights release',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Model Weights', required: true },
+    ],
     tips: [
       'Higher rank (32) and learning rate (2e-4) suit this larger model',
       'Supports image-only training via single-frame clips',
@@ -299,6 +351,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'ltx',
     description: 'Actively evolving open video model',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Model Weights', required: true },
+    ],
     tips: [
       'Higher rank (32) recommended for video model capacity',
       'Supports image-only training via single-frame clips',
@@ -340,6 +395,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     architecture: 'ltx',
     description: 'Latest LTX with improved motion and quality',
     provider: 'ai-toolkit',
+    components: [
+      { type: 'checkpoint', label: 'Model Weights', required: true },
+    ],
     tips: [
       'Higher rank (32) recommended for video model capacity',
       'Supports image-only training via single-frame clips',

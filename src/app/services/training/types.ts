@@ -1,3 +1,5 @@
+import type { ModelComponentType } from './models';
+
 // --- Provider & Backend ---
 
 export type TrainingProvider = 'ai-toolkit' | 'kohya';
@@ -63,10 +65,13 @@ export type TrainingDataset = {
 
 // --- Job Configuration ---
 
+export type ModelPaths = Partial<Record<ModelComponentType, string>>;
+
 export type TrainingJobConfig = {
   projectPath: string;
   provider: TrainingProvider;
   baseModel: string;
+  modelPaths: ModelPaths;
   outputPath: string;
   outputName: string;
   datasets: TrainingDataset[];

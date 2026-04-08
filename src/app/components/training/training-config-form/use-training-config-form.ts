@@ -1,8 +1,10 @@
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import {
   getModelById,
   MODEL_DEFINITIONS,
+  type ModelArchitecture,
+  type ModelComponentType,
   type ModelDefinition,
   type TrainingDefaults,
 } from '@/app/services/training/models';
@@ -31,9 +33,16 @@ export type DatasetFolder = {
 
 export type DurationMode = 'epochs' | 'steps';
 
+export type ModelPaths = Partial<Record<ModelComponentType, string>>;
+
+export type AppModelDefaults = Partial<
+  Record<ModelArchitecture, Partial<Record<ModelComponentType, string>>>
+>;
+
 export type FormState = {
   // What to Train
   modelId: string;
+  modelPaths: ModelPaths;
   outputName: string;
   datasets: DatasetSource[];
 
@@ -90,6 +99,8 @@ type FormAction =
       value: FormState[keyof FormState];
     }
   | { type: 'SET_MODEL'; modelId: string }
+  | { type: 'SET_MODEL_PATH'; component: ModelComponentType; path: string }
+  | { type: 'APPLY_APP_DEFAULTS'; paths: ModelPaths }
   | { type: 'RESET_SECTION'; section: SectionName }
   | { type: 'RESET_ALL' }
   | { type: 'ADD_SAMPLE_PROMPT' }
@@ -128,6 +139,7 @@ function defaultsToFormState(
 ): FormState {
   return {
     modelId,
+    modelPaths: {},
     outputName: '',
     datasets: [],
     durationMode: 'epochs',
@@ -191,9 +203,28 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
     }
 
+    case 'SET_MODEL_PATH':
+      return {
+        ...state,
+        modelPaths: { ...state.modelPaths, [action.component]: action.path },
+      };
+
+    case 'APPLY_APP_DEFAULTS': {
+      // Fill in paths that are empty, preserving user edits
+      const merged = { ...state.modelPaths };
+      for (const [key, value] of Object.entries(action.paths)) {
+        if (value && !merged[key as ModelComponentType]) {
+          merged[key as ModelComponentType] = value;
+        }
+      }
+      return { ...state, modelPaths: merged };
+    }
+
     case 'RESET_SECTION': {
       const defaults = getDefaults(state.modelId);
       switch (action.section) {
+        case 'whatToTrain':
+          return { ...state, modelPaths: {} };
         case 'learning':
           return {
             ...state,
@@ -338,6 +369,27 @@ export function useTrainingConfigForm() {
 
   const defaults = useMemo(() => getDefaults(state.modelId), [state.modelId]);
 
+  // App-level model defaults (paths per architecture)
+  const [appModelDefaults, setAppModelDefaults] = useState<AppModelDefaults>(
+    {},
+  );
+
+  useEffect(() => {
+    fetch('/api/config/model-defaults')
+      .then((r) => r.json())
+      .then(setAppModelDefaults)
+      .catch(() => {});
+  }, []);
+
+  // Apply app defaults when model changes or defaults are first loaded
+  useEffect(() => {
+    if (!currentModel) return;
+    const archDefaults = appModelDefaults[currentModel.architecture];
+    if (archDefaults && Object.keys(archDefaults).length > 0) {
+      dispatch({ type: 'APPLY_APP_DEFAULTS', paths: archDefaults });
+    }
+  }, [state.modelId, appModelDefaults, currentModel]);
+
   // Calculate effective dataset stats (folders with 0 repeats are excluded)
   const datasetStats = useMemo(() => {
     let totalImages = 0;
@@ -430,6 +482,13 @@ export function useTrainingConfigForm() {
     dispatch({ type: 'SET_MODEL', modelId });
   }, []);
 
+  const setModelPath = useCallback(
+    (component: ModelComponentType, path: string) => {
+      dispatch({ type: 'SET_MODEL_PATH', component, path });
+    },
+    [],
+  );
+
   const resetSection = useCallback((section: SectionName) => {
     dispatch({ type: 'RESET_SECTION', section });
   }, []);
@@ -492,12 +551,14 @@ export function useTrainingConfigForm() {
     state,
     currentModel: currentModel as ModelDefinition,
     defaults,
+    appModelDefaults,
     datasetStats,
     calculatedSteps,
     calculatedEpochs,
     sectionHasChanges,
     setField,
     setModel,
+    setModelPath,
     resetSection,
     resetAll,
     addDataset,
@@ -506,5 +567,6 @@ export function useTrainingConfigForm() {
     addSamplePrompt,
     removeSamplePrompt,
     setSamplePrompt,
+    setAppModelDefaults,
   };
 }

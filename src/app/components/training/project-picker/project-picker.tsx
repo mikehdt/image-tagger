@@ -160,7 +160,7 @@ const ProjectPickerComponent = ({
                 <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
                   <StarIcon className="h-3 w-3 fill-current text-amber-500" />
                   <span className="text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
-                    Featured
+                    Favourite
                   </span>
                 </div>
                 {featured.map(renderProject)}
