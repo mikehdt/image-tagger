@@ -32,7 +32,10 @@ function getComponentsByArchitecture(): {
   label: string;
   components: ModelComponent[];
 }[] {
-  const archMap = new Map<ModelArchitecture, Map<ModelComponentType, ModelComponent>>();
+  const archMap = new Map<
+    ModelArchitecture,
+    Map<ModelComponentType, ModelComponent>
+  >();
 
   for (const model of MODEL_DEFINITIONS) {
     if (!archMap.has(model.architecture)) {
@@ -83,7 +86,11 @@ export function ModelDefaultsModal({
   );
 
   const handleBrowse = useCallback(
-    async (arch: ModelArchitecture, comp: ModelComponentType, label: string) => {
+    async (
+      arch: ModelArchitecture,
+      comp: ModelComponentType,
+      label: string,
+    ) => {
       try {
         const params = new URLSearchParams({
           title: `Select ${label}`,
@@ -133,53 +140,55 @@ export function ModelDefaultsModal({
         </div>
 
         <div className="flex max-h-[60vh] flex-col gap-5 overflow-y-auto pr-1">
-          {ARCHITECTURE_COMPONENTS.map(({ architecture, label, components }) => (
-            <div key={architecture}>
-              <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                {label}
-              </h3>
-              <div className="space-y-2">
-                {components.map((comp) => (
-                  <div key={comp.type}>
-                    <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
-                      {comp.label}
-                      {!comp.required && (
-                        <span className="font-normal text-slate-400">
-                          (optional)
-                        </span>
+          {ARCHITECTURE_COMPONENTS.map(
+            ({ architecture, label, components }) => (
+              <div key={architecture}>
+                <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {label}
+                </h3>
+                <div className="space-y-2">
+                  {components.map((comp) => (
+                    <div key={comp.type}>
+                      <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
+                        {comp.label}
+                        {!comp.required && (
+                          <span className="font-normal text-slate-400">
+                            (optional)
+                          </span>
+                        )}
+                      </label>
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          value={draft[architecture]?.[comp.type] ?? ''}
+                          onChange={(e) =>
+                            setPath(architecture, comp.type, e.target.value)
+                          }
+                          placeholder={`Path to ${comp.label.toLowerCase()}…`}
+                          className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleBrowse(architecture, comp.type, comp.label)
+                          }
+                          className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
+                          title="Browse…"
+                        >
+                          <FolderOpenIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {comp.hint && (
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          {comp.hint}
+                        </p>
                       )}
-                    </label>
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        value={draft[architecture]?.[comp.type] ?? ''}
-                        onChange={(e) =>
-                          setPath(architecture, comp.type, e.target.value)
-                        }
-                        placeholder={`Path to ${comp.label.toLowerCase()}…`}
-                        className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleBrowse(architecture, comp.type, comp.label)
-                        }
-                        className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
-                        title="Browse…"
-                      >
-                        <FolderOpenIcon className="h-4 w-4" />
-                      </button>
                     </div>
-                    {comp.hint && (
-                      <p className="mt-0.5 text-xs text-slate-400">
-                        {comp.hint}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
 
         <div className="flex justify-end gap-2 border-t border-(--border-subtle) pt-3">

@@ -1,12 +1,11 @@
-import { PlayIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 
-import { Button } from '@/app/components/shared/button';
 import {
   FIELD_REGISTRY,
   getVisibleFields,
 } from '@/app/services/training/field-registry';
 
+import { TrainingBottomShelf } from '../bottom-shelf/training-bottom-shelf';
 import { ModelDefaultsModal } from '../model-defaults-modal/model-defaults-modal';
 import { useModelDefaultsModal } from '../model-defaults-modal/use-model-defaults-modal';
 import { DatasetSection } from '../sections/dataset-section';
@@ -55,10 +54,8 @@ const TrainingConfigFormComponent = ({
     setAppModelDefaults,
   } = useTrainingConfigForm();
 
-  const {
-    isOpen: isDefaultsModalOpen,
-    closeModal: closeDefaultsModal,
-  } = useModelDefaultsModal();
+  const { isOpen: isDefaultsModalOpen, closeModal: closeDefaultsModal } =
+    useModelDefaultsModal();
 
   const visibleFields = useMemo(() => {
     const fields = getVisibleFields(viewMode, state.modelId);
@@ -148,146 +145,138 @@ const TrainingConfigFormComponent = ({
     state.outputName.trim() !== '' && datasetStats.totalImages > 0;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-3">
-      <WhatToTrainSection
-        modelId={state.modelId}
-        modelPaths={state.modelPaths}
-        appModelDefaults={appModelDefaults}
-        onModelChange={setModel}
-        onModelPathChange={setModelPath}
-        currentModel={currentModel}
-        visibleFields={visibleFields}
-        viewMode={viewMode}
-        hiddenChangesCount={hiddenChanges.whatToTrain}
-      />
+    <>
+      <div className="mx-auto max-w-200 space-y-3">
+        <WhatToTrainSection
+          modelId={state.modelId}
+          modelPaths={state.modelPaths}
+          appModelDefaults={appModelDefaults}
+          onModelChange={setModel}
+          onModelPathChange={setModelPath}
+          currentModel={currentModel}
+          visibleFields={visibleFields}
+          viewMode={viewMode}
+          hiddenChangesCount={hiddenChanges.whatToTrain}
+        />
 
-      <ModelDefaultsModal
-        isOpen={isDefaultsModalOpen}
-        onClose={closeDefaultsModal}
-        onSaved={setAppModelDefaults}
-      />
+        <DatasetSection
+          datasets={state.datasets}
+          extraFolders={state.extraFolders}
+          totalImages={datasetStats.totalImages}
+          totalEffective={datasetStats.totalEffective}
+          captionDropoutRate={state.captionDropoutRate}
+          captionShuffling={state.captionShuffling}
+          flipAugment={state.flipAugment}
+          flipVAugment={state.flipVAugment}
+          hasChanges={sectionHasChanges.dataset}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.dataset}
+          onAddDataset={addDataset}
+          onRemoveDataset={removeDataset}
+          onSetFolderRepeats={setFolderRepeats}
+          onAddExtraFolder={addExtraFolder}
+          onRemoveExtraFolder={removeExtraFolder}
+          onFieldChange={setField}
+          onReset={resetSection}
+        />
 
-      <DatasetSection
-        datasets={state.datasets}
-        extraFolders={state.extraFolders}
-        totalImages={datasetStats.totalImages}
-        totalEffective={datasetStats.totalEffective}
-        captionDropoutRate={state.captionDropoutRate}
-        captionShuffling={state.captionShuffling}
-        flipAugment={state.flipAugment}
-        flipVAugment={state.flipVAugment}
-        hasChanges={sectionHasChanges.dataset}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.dataset}
-        onAddDataset={addDataset}
-        onRemoveDataset={removeDataset}
-        onSetFolderRepeats={setFolderRepeats}
-        onAddExtraFolder={addExtraFolder}
-        onRemoveExtraFolder={removeExtraFolder}
-        onFieldChange={setField}
-        onReset={resetSection}
-      />
+        <LearningSection
+          durationMode={state.durationMode}
+          epochs={state.epochs}
+          steps={state.steps}
+          learningRate={state.learningRate}
+          optimizer={state.optimizer}
+          scheduler={state.scheduler}
+          warmupSteps={state.warmupSteps}
+          numRestarts={state.numRestarts}
+          weightDecay={state.weightDecay}
+          calculatedSteps={calculatedSteps}
+          calculatedEpochs={calculatedEpochs}
+          totalEffective={datasetStats.totalEffective}
+          batchSize={state.batchSize}
+          hasChanges={sectionHasChanges.learning}
+          defaults={defaults}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.learning}
+          viewMode={viewMode}
+          onFieldChange={setField}
+          onReset={resetSection}
+        />
 
-      <LearningSection
-        durationMode={state.durationMode}
-        epochs={state.epochs}
-        steps={state.steps}
-        learningRate={state.learningRate}
-        optimizer={state.optimizer}
-        scheduler={state.scheduler}
-        warmupSteps={state.warmupSteps}
-        numRestarts={state.numRestarts}
-        weightDecay={state.weightDecay}
-        calculatedSteps={calculatedSteps}
-        calculatedEpochs={calculatedEpochs}
-        totalEffective={datasetStats.totalEffective}
-        batchSize={state.batchSize}
-        hasChanges={sectionHasChanges.learning}
-        defaults={defaults}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.learning}
-        viewMode={viewMode}
-        onFieldChange={setField}
-        onReset={resetSection}
-      />
+        <LoraShapeSection
+          networkType={state.networkType}
+          networkDim={state.networkDim}
+          networkAlpha={state.networkAlpha}
+          hasChanges={sectionHasChanges.loraShape}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.loraShape}
+          onFieldChange={setField}
+          onReset={resetSection}
+        />
 
-      <LoraShapeSection
-        networkType={state.networkType}
-        networkDim={state.networkDim}
-        networkAlpha={state.networkAlpha}
-        hasChanges={sectionHasChanges.loraShape}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.loraShape}
-        onFieldChange={setField}
-        onReset={resetSection}
-      />
+        <PerformanceSection
+          batchSize={state.batchSize}
+          resolution={state.resolution}
+          availableResolutions={currentModel.availableResolutions}
+          provider={currentModel.provider}
+          datasets={state.datasets}
+          mixedPrecision={state.mixedPrecision}
+          gradientAccumulationSteps={state.gradientAccumulationSteps}
+          gradientCheckpointing={state.gradientCheckpointing}
+          cacheLatents={state.cacheLatents}
+          hasChanges={sectionHasChanges.performance}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.performance}
+          onFieldChange={setField}
+          onReset={resetSection}
+        />
 
-      <PerformanceSection
-        batchSize={state.batchSize}
-        resolution={state.resolution}
-        availableResolutions={currentModel.availableResolutions}
-        provider={currentModel.provider}
-        datasets={state.datasets}
-        mixedPrecision={state.mixedPrecision}
-        gradientAccumulationSteps={state.gradientAccumulationSteps}
-        gradientCheckpointing={state.gradientCheckpointing}
-        cacheLatents={state.cacheLatents}
-        hasChanges={sectionHasChanges.performance}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.performance}
-        onFieldChange={setField}
-        onReset={resetSection}
-      />
+        <SamplingSection
+          samplingEnabled={state.samplingEnabled}
+          samplePrompts={state.samplePrompts}
+          sampleMode={state.sampleMode}
+          sampleEveryEpochs={state.sampleEveryEpochs}
+          sampleEverySteps={state.sampleEverySteps}
+          sampleSteps={state.sampleSteps}
+          seed={state.seed}
+          guidanceScale={state.guidanceScale}
+          noiseScheduler={state.noiseScheduler}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.sampling}
+          onFieldChange={setField}
+          onAddPrompt={addSamplePrompt}
+          onRemovePrompt={removeSamplePrompt}
+          onSetPrompt={setSamplePrompt}
+          onReset={resetSection}
+        />
 
-      <SamplingSection
-        samplingEnabled={state.samplingEnabled}
-        samplePrompts={state.samplePrompts}
-        sampleMode={state.sampleMode}
-        sampleEveryEpochs={state.sampleEveryEpochs}
-        sampleEverySteps={state.sampleEverySteps}
-        sampleSteps={state.sampleSteps}
-        seed={state.seed}
-        guidanceScale={state.guidanceScale}
-        noiseScheduler={state.noiseScheduler}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.sampling}
-        onFieldChange={setField}
-        onAddPrompt={addSamplePrompt}
-        onRemovePrompt={removeSamplePrompt}
-        onSetPrompt={setSamplePrompt}
-        onReset={resetSection}
-      />
+        <SavingSection
+          outputName={state.outputName}
+          saveEnabled={state.saveEnabled}
+          saveMode={state.saveMode}
+          saveEveryEpochs={state.saveEveryEpochs}
+          saveEverySteps={state.saveEverySteps}
+          saveFormat={state.saveFormat}
+          visibleFields={visibleFields}
+          hiddenChangesCount={hiddenChanges.saving}
+          onFieldChange={setField}
+          onOutputNameChange={(name) => setField('outputName', name)}
+          onReset={resetSection}
+        />
 
-      <SavingSection
-        outputName={state.outputName}
-        saveEnabled={state.saveEnabled}
-        saveMode={state.saveMode}
-        saveEveryEpochs={state.saveEveryEpochs}
-        saveEverySteps={state.saveEverySteps}
-        saveFormat={state.saveFormat}
-        visibleFields={visibleFields}
-        hiddenChangesCount={hiddenChanges.saving}
-        onFieldChange={setField}
-        onOutputNameChange={(name) => setField('outputName', name)}
-        onReset={resetSection}
-      />
-
-      {/* Start */}
-      <div className="pt-2">
-        <Button size="mediumWide" onClick={handleStart} disabled={!canStart}>
-          <PlayIcon className="mr-2 h-4 w-4" />
-          Start Training
-        </Button>
-
-        {!canStart && (
-          <p className="mt-2 text-xs text-slate-400">
-            {!state.outputName.trim()
-              ? 'Enter an output name to continue'
-              : 'Add at least one dataset source to continue'}
-          </p>
-        )}
+        <ModelDefaultsModal
+          isOpen={isDefaultsModalOpen}
+          onClose={closeDefaultsModal}
+          onSaved={setAppModelDefaults}
+        />
       </div>
-    </div>
+
+      <TrainingBottomShelf
+        canStart={canStart}
+        hasOutputName={state.outputName.trim() !== ''}
+        onStart={handleStart}
+      />
+    </>
   );
 };
 

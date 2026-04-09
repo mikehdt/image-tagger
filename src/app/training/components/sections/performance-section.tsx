@@ -241,7 +241,6 @@ const PerformanceSectionComponent = ({
             </span>
           </label>
         )}
-
       </div>
     </CollapsibleSection>
   );

@@ -74,7 +74,10 @@ const WhatToTrainSectionComponent = ({
         if (c.type === 'checkpoint') return true;
         if (!c.required) return isTierAtLeast(viewMode, 'intermediate');
         const hasAppDefault = !!archDefaults?.[c.type];
-        return isTierAtLeast(viewMode, hasAppDefault ? 'intermediate' : 'simple');
+        return isTierAtLeast(
+          viewMode,
+          hasAppDefault ? 'intermediate' : 'simple',
+        );
       }),
     [currentModel.components, viewMode, archDefaults],
   );
@@ -168,9 +171,7 @@ const WhatToTrainSectionComponent = ({
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    handleBrowse(component.type, component.label)
-                  }
+                  onClick={() => handleBrowse(component.type, component.label)}
                   className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
                   title="Browse…"
                 >

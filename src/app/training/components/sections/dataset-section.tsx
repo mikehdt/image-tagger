@@ -125,9 +125,8 @@ const DatasetSectionComponent = ({
             </p>
             <p className="mt-1 text-xs text-slate-400">
               Add a tagging project
-              {visibleFields.has(
-                'extraFolders' satisfies keyof FormState,
-              ) && ' or folder of images'}{' '}
+              {visibleFields.has('extraFolders' satisfies keyof FormState) &&
+                ' or folder of images'}{' '}
               to begin
             </p>
             <div className="mt-3 flex items-center justify-center gap-2">
@@ -138,9 +137,7 @@ const DatasetSectionComponent = ({
                 <PlusIcon className="mr-1 h-3.5 w-3.5" />
                 Add Project
               </ProjectPicker>
-              {visibleFields.has(
-                'extraFolders' satisfies keyof FormState,
-              ) && (
+              {visibleFields.has('extraFolders' satisfies keyof FormState) && (
                 <button
                   type="button"
                   onClick={handleBrowseFolder}
@@ -269,9 +266,7 @@ const DatasetSectionComponent = ({
                 Add Project
               </ProjectPicker>
 
-              {visibleFields.has(
-                'extraFolders' satisfies keyof FormState,
-              ) && (
+              {visibleFields.has('extraFolders' satisfies keyof FormState) && (
                 <button
                   type="button"
                   onClick={handleBrowseFolder}
@@ -293,10 +288,7 @@ const DatasetSectionComponent = ({
                 Extra Folders
               </label>
               {extraFolders.map((folder, i) => (
-                <div
-                  key={folder}
-                  className="flex items-center gap-1.5 text-xs"
-                >
+                <div key={folder} className="flex items-center gap-1.5 text-xs">
                   <FolderIcon className="h-3 w-3 shrink-0 text-slate-400" />
                   <span
                     className="min-w-0 flex-1 truncate text-slate-500"
@@ -370,9 +362,7 @@ const DatasetSectionComponent = ({
             <input
               type="checkbox"
               checked={flipVAugment}
-              onChange={(e) =>
-                onFieldChange('flipVAugment', e.target.checked)
-              }
+              onChange={(e) => onFieldChange('flipVAugment', e.target.checked)}
               className="accent-sky-500"
             />
             <span className="text-xs font-medium text-(--foreground)/70">
@@ -385,9 +375,7 @@ const DatasetSectionComponent = ({
         )}
 
         {/* Caption Dropout Rate */}
-        {visibleFields.has(
-          'captionDropoutRate' satisfies keyof FormState,
-        ) && (
+        {visibleFields.has('captionDropoutRate' satisfies keyof FormState) && (
           <div>
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Caption Dropout Rate

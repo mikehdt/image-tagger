@@ -43,7 +43,7 @@ export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const mainPadding = isTagging
     ? 'pt-24 pb-16'
     : isTraining
-      ? 'pt-24 pb-4'
+      ? 'pt-24 pb-16'
       : '';
 
   return (

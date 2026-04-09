@@ -1,6 +1,9 @@
 import { XIcon } from 'lucide-react';
 
-import { CategoryInfo, getCategoryAnchorId } from '@/app/tagging/utils/category-utils';
+import {
+  CategoryInfo,
+  getCategoryAnchorId,
+} from '@/app/tagging/utils/category-utils';
 
 interface CategoryListProps {
   categoriesWithPageInfo: CategoryInfo[];

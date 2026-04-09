@@ -2,7 +2,10 @@ import fs from 'fs';
 import { NextResponse } from 'next/server';
 import path from 'path';
 
-import type { ModelArchitecture, ModelComponentType } from '@/app/services/training/models';
+import type {
+  ModelArchitecture,
+  ModelComponentType,
+} from '@/app/services/training/models';
 
 export type AppModelDefaults = Partial<
   Record<ModelArchitecture, Partial<Record<ModelComponentType, string>>>

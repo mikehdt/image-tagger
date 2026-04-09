@@ -132,7 +132,14 @@ export function useAutoTagger({
         },
       );
     }
-  }, [isOpen, projectInfo.projectFolderName, settingsLoaded, models, readyModels, dispatch]);
+  }, [
+    isOpen,
+    projectInfo.projectFolderName,
+    settingsLoaded,
+    models,
+    readyModels,
+    dispatch,
+  ]);
 
   // Model dropdown items
   const modelItems: DropdownItem<string>[] = useMemo(

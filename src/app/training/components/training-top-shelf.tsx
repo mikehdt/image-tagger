@@ -15,7 +15,11 @@ import { selectTheme, setTheme } from '@/app/store/preferences';
 import { type ThemeMode } from '@/app/utils/use-theme';
 
 import { useModelDefaultsModal } from './model-defaults-modal/use-model-defaults-modal';
-import { ShelfInfoRow, ShelfToolbarRow, TopShelfFrame } from '@/app/components/shelf';
+import {
+  ShelfInfoRow,
+  ShelfToolbarRow,
+  TopShelfFrame,
+} from '@/app/components/shelf';
 import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 import { TrainingToolbar } from './training-toolbar';
 

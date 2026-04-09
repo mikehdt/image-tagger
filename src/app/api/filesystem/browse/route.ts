@@ -31,10 +31,7 @@ export async function GET(request: Request) {
   }
 }
 
-function openFileDialog(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
+function openFileDialog(title: string, filter: string): Promise<BrowseResult> {
   switch (process.platform) {
     case 'win32':
       return openWindows(title, filter);
@@ -47,10 +44,7 @@ function openFileDialog(
 
 // --- Windows: PowerShell OpenFileDialog ---
 
-function openWindows(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
+function openWindows(title: string, filter: string): Promise<BrowseResult> {
   const filterString = buildWindowsFilter(filter);
   // -Sta is required for WinForms dialogs
   const script = [
@@ -88,10 +82,7 @@ function escapePS(s: string): string {
 
 // --- macOS: osascript AppleScript ---
 
-function openMacOS(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
+function openMacOS(title: string, filter: string): Promise<BrowseResult> {
   const typeClause = filter
     ? ` of type {${filter
         .split(',')
@@ -130,26 +121,21 @@ function escapeAS(s: string): string {
 
 // --- Linux: zenity, with kdialog fallback ---
 
-function openLinux(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
-  return openZenity(title, filter).catch(() =>
-    openKDialog(title, filter),
-  );
+function openLinux(title: string, filter: string): Promise<BrowseResult> {
+  return openZenity(title, filter).catch(() => openKDialog(title, filter));
 }
 
-function openZenity(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
+function openZenity(title: string, filter: string): Promise<BrowseResult> {
   const args = ['--file-selection', `--title=${title}`];
   if (filter) {
     const pattern = filter
       .split(',')
       .map((e) => `*.${e.trim()}`)
       .join(' ');
-    args.push(`--file-filter=Model files | ${pattern}`, '--file-filter=All files | *');
+    args.push(
+      `--file-filter=Model files | ${pattern}`,
+      '--file-filter=All files | *',
+    );
   }
 
   return new Promise((resolve, reject) => {
@@ -165,10 +151,7 @@ function openZenity(
   });
 }
 
-function openKDialog(
-  title: string,
-  filter: string,
-): Promise<BrowseResult> {
+function openKDialog(title: string, filter: string): Promise<BrowseResult> {
   const filterArg = filter
     ? filter
         .split(',')

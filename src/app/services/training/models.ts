@@ -6,12 +6,7 @@
 
 export type ModelArchitecture = 'flux' | 'sdxl' | 'zimage' | 'wan' | 'ltx';
 
-export type ModelComponentType =
-  | 'checkpoint'
-  | 'vae'
-  | 't5'
-  | 'clip_l'
-  | 'ae';
+export type ModelComponentType = 'checkpoint' | 'vae' | 't5' | 'clip_l' | 'ae';
 
 export type ModelComponent = {
   type: ModelComponentType;
