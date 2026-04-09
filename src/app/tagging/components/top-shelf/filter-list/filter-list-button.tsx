@@ -1,9 +1,9 @@
 import { ListTodoIcon } from 'lucide-react';
 import { memo, useCallback, useId, useRef } from 'react';
 
+import { Button } from '@/app/components/shared/button';
 import { Popup, usePopup } from '@/app/components/shared/popup';
 
-import { Button } from '@/app/components/shared/button';
 import { FilterProvider } from './filter-context';
 import { FilterPanel } from './filter-panel';
 

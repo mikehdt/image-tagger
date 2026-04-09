@@ -2,6 +2,8 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import Image from 'next/image';
 import { memo, MouseEvent, useCallback, useState } from 'react';
 
+import { Button } from '@/app/components/shared/button';
+import { Checkbox } from '@/app/components/shared/checkbox';
 import { ImageDimensions, IoState, KohyaBucket } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
@@ -13,8 +15,6 @@ import { handleAssetClick, selectAssetIsSelected } from '@/app/store/selection';
 import { composeDimensions, getAspectRatio } from '@/app/utils/helpers';
 import { getImageUrl } from '@/app/utils/image-utils';
 
-import { Button } from '@/app/components/shared/button';
-import { Checkbox } from '@/app/components/shared/checkbox';
 import { CaptionManager } from '../tagging/caption-manager';
 import { TaggingManager } from '../tagging/tagging-manager';
 import { AssetMetadata } from './asset-metadata';

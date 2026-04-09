@@ -2,11 +2,12 @@ import { PlusIcon, XIcon } from 'lucide-react';
 import { memo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
-import { SectionResetButton } from './section-reset-button';
+
 import type {
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
+import { SectionResetButton } from './section-reset-button';
 
 type SamplingSectionProps = {
   samplingEnabled: boolean;

@@ -10,14 +10,15 @@ import Image from 'next/image';
 import { memo, useCallback, useMemo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+
 import { ProjectPicker } from '../project-picker/project-picker';
-import { SectionResetButton } from './section-reset-button';
 import type {
   DatasetFolder,
   DatasetSource,
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
+import { SectionResetButton } from './section-reset-button';
 
 type DatasetSectionProps = {
   datasets: DatasetSource[];

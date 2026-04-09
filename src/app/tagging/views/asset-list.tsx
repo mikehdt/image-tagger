@@ -3,7 +3,6 @@
 import { BoxSelectIcon } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Asset } from '@/app/tagging/components/asset/asset';
 import {
   type ImageAsset,
   selectFilteredAssets,
@@ -19,6 +18,7 @@ import {
   selectShiftHoverPreview,
   setShiftHoverAssetId,
 } from '@/app/store/selection';
+import { Asset } from '@/app/tagging/components/asset/asset';
 import {
   getCategoryAnchorId,
   getSortCategory,

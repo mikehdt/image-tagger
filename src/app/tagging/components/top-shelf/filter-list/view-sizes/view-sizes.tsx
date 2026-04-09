@@ -1,8 +1,8 @@
 import { XIcon } from 'lucide-react';
 import { ReactNode } from 'react';
 
-import { decomposeDimensions } from '@/app/utils/helpers';
 import { highlightText } from '@/app/tagging/utils/text-highlight';
+import { decomposeDimensions } from '@/app/utils/helpers';
 
 import { SortType } from '../types';
 import { useSizesView } from './use-sizes-view';

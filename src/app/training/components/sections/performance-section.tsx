@@ -1,18 +1,18 @@
 import { memo, useMemo } from 'react';
 
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   calculateKohyaBucket,
   generateBucketList,
 } from '@/app/utils/image-utils';
 
-import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
-import { SectionResetButton } from './section-reset-button';
 import type {
   DatasetSource,
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
+import { SectionResetButton } from './section-reset-button';
 
 type PerformanceSectionProps = {
   /** Read-only, for effective batch size display in gradient accumulation */

@@ -1,6 +1,9 @@
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
+import { Button } from '@/app/components/shared/button';
+import { useToast } from '@/app/components/shared/toast';
+import { BottomShelfFrame } from '@/app/components/shelf';
 import {
   IoState,
   selectFilteredAssetsCount,
@@ -16,9 +19,6 @@ import {
 
 import { PaginationControls } from '../pagination/controls';
 import { Pagination } from '../pagination/pagination';
-import { Button } from '@/app/components/shared/button';
-import { useToast } from '@/app/components/shared/toast';
-import { BottomShelfFrame } from '@/app/components/shelf';
 import { IoActions } from './io-actions';
 import { LoadingStatus } from './loading-status';
 

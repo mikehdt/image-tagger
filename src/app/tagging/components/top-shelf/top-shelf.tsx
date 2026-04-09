@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 
-import { resetFilterModeIfNeeded } from '@/app/store/filters';
-import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectSelectedAssetsCount } from '@/app/store/selection';
-
 import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import {
   ShelfInfoRow,
   ShelfToolbarRow,
   TopShelfFrame,
 } from '@/app/components/shelf';
+import { resetFilterModeIfNeeded } from '@/app/store/filters';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectSelectedAssetsCount } from '@/app/store/selection';
+
 import { AssetSelectionControls } from './asset-controls/asset-selection-controls';
 import { CategoryNavigation } from './category-navigation/category-navigation';
 import { FilterListButton } from './filter-list/filter-list-button';

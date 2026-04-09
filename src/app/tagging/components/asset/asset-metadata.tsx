@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
+import { Button } from '@/app/components/shared/button';
+import { useToast } from '@/app/components/shared/toast';
 import type { RootState } from '@/app/store';
 import {
   IoState,
@@ -23,11 +25,8 @@ import {
 } from '@/app/store/filters';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { selectProjectFolderName } from '@/app/store/project';
-import { parseSubfolder } from '@/app/utils/subfolder-utils';
 import { highlightPatterns } from '@/app/tagging/utils/text-highlight';
-
-import { Button } from '@/app/components/shared/button';
-import { useToast } from '@/app/components/shared/toast';
+import { parseSubfolder } from '@/app/utils/subfolder-utils';
 
 // Individual selectors for metadata - avoids creating new object references
 const selectFilenamePatterns = (state: RootState) =>

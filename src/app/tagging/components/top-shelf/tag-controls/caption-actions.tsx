@@ -1,8 +1,9 @@
 import { SparklesIcon, SwatchBookIcon } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { AutoTaggerModal } from '@/app/tagging/components/auto-tagger';
 import { Button } from '@/app/components/shared/button';
+import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
+import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { selectFilteredAssets } from '@/app/store/assets';
 import {
   selectHasReadyModel,
@@ -15,9 +16,8 @@ import {
   selectAssetsWithActiveFiltersCount,
   selectSelectedAssetsData,
 } from '@/app/store/selection/combinedSelectors';
+import { AutoTaggerModal } from '@/app/tagging/components/auto-tagger';
 
-import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
-import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { TriggerPhrasesButton } from './trigger-phrases-button';
 
 /** Auto Tagger button — first-class in caption mode */

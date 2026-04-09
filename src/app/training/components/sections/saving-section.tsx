@@ -1,13 +1,13 @@
 import { memo } from 'react';
 
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
-import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
-import { SectionResetButton } from './section-reset-button';
 import type {
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
+import { SectionResetButton } from './section-reset-button';
 
 type SavingSectionProps = {
   outputName: string;

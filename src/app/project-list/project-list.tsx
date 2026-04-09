@@ -15,9 +15,9 @@ import {
 } from '@/app/components/project-list/project-item';
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
-import { Popup, usePopup } from '@/app/components/shared/popup';
 import { MenuEditModeSwitcher } from '@/app/components/shared/menu-edit-mode-switcher';
 import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
+import { Popup, usePopup } from '@/app/components/shared/popup';
 import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {

@@ -9,18 +9,18 @@ import {
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useRef } from 'react';
 
+import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 import { Popup, usePopup } from '@/app/components/shared/popup';
-import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { selectTheme, setTheme } from '@/app/store/preferences';
-import { type ThemeMode } from '@/app/utils/use-theme';
-
-import { useModelDefaultsModal } from './model-defaults-modal/use-model-defaults-modal';
 import {
   ShelfInfoRow,
   ShelfToolbarRow,
   TopShelfFrame,
 } from '@/app/components/shelf';
-import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
+import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectTheme, setTheme } from '@/app/store/preferences';
+import { type ThemeMode } from '@/app/utils/use-theme';
+
+import { useModelDefaultsModal } from './model-defaults-modal/use-model-defaults-modal';
 import { TrainingToolbar } from './training-toolbar';
 
 const TrainingMenuComponent = () => {

@@ -3,12 +3,13 @@
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
-import { selectFilteredAssetsCount } from '../store/assets';
-import { selectPaginationSize } from '../store/filters';
-import { useAppSelector } from '../store/hooks';
 import { TaggingBottomShelf } from '@/app/tagging/components/bottom-shelf/bottom-shelf';
 import { TaggingTopShelf } from '@/app/tagging/components/top-shelf/top-shelf';
 import { TrainingTopShelf } from '@/app/training/components/training-top-shelf';
+
+import { selectFilteredAssetsCount } from '../store/assets';
+import { selectPaginationSize } from '../store/filters';
+import { useAppSelector } from '../store/hooks';
 
 export const StableLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();

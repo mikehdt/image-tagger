@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   OPTIMIZER_OPTIONS,
@@ -8,14 +9,13 @@ import {
 } from '@/app/services/training/models';
 import type { TrainingViewMode } from '@/app/store/preferences';
 
-import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { SchedulerSparkline } from '../scheduler-sparkline';
-import { SectionResetButton } from './section-reset-button';
 import type {
   DurationMode,
   FormState,
   SectionName,
 } from '../training-config-form/use-training-config-form';
+import { SectionResetButton } from './section-reset-button';
 
 /** Common LR presets mapped to human-readable labels */
 const LR_PRESETS = [

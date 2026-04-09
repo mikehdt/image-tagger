@@ -1,6 +1,7 @@
 import { FolderOpenIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 
+import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   type ExpertiseTier,
@@ -12,7 +13,6 @@ import {
   type ModelDefinition,
 } from '@/app/services/training/models';
 
-import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import type {
   AppModelDefaults,
   FormState,

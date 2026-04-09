@@ -1,11 +1,11 @@
 import { SwatchBookIcon } from 'lucide-react';
 import { memo } from 'react';
 
+import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
+import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectCaptionMode } from '@/app/store/project';
 
-import { ResponsiveToolbarGroup } from '@/app/components/shared/responsive-toolbar-group';
-import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { AddTagsButton } from './add-tags-button';
 import { CaptionActions } from './caption-actions';
 import { DeleteToggleButton } from './delete-toggle-button';

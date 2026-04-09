@@ -1,4 +1,4 @@
-import { HashIcon, TextIcon, WholeWordIcon } from 'lucide-react';
+import { HashIcon, TextIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
 import type { CaptionMode } from '@/app/store/project/types';

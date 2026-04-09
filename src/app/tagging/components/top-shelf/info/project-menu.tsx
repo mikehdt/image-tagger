@@ -9,6 +9,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useId, useRef, useState } from 'react';
 
+import { MenuEditModeSwitcher } from '@/app/components/shared/menu-edit-mode-switcher';
+import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 import { Popup, usePopup } from '@/app/components/shared/popup';
 import { IoState, loadAllAssets, selectIoState } from '@/app/store/assets';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
@@ -32,8 +34,6 @@ import { updateProject } from '@/app/utils/project-actions';
 
 import { BucketCropModal } from '../asset-controls/bucket-crop-modal';
 import { MenuCaptionModeSwitcher } from './menu-caption-mode-switcher';
-import { MenuEditModeSwitcher } from '@/app/components/shared/menu-edit-mode-switcher';
-import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 
 type MenuItemProps = {
   icon: React.ReactNode;

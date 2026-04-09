@@ -11,6 +11,7 @@ import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Modal } from '@/app/components/shared/modal';
 import { ScopingCheckboxes } from '@/app/components/shared/scoping-checkboxes';
+
 import { useMoveToFolderModal } from './use-move-to-folder-modal';
 
 type MoveToFolderModalProps = {

@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { AutoTaggerModal } from '@/app/tagging/components/auto-tagger';
 import { MenuButton, MenuItem } from '@/app/components/shared/menu-button';
 import { gatherTags } from '@/app/store/assets';
 import { selectFilteredAssets } from '@/app/store/assets';
@@ -24,6 +23,7 @@ import {
   selectEffectiveScopeAssetIds,
   selectSelectedAssetsData,
 } from '@/app/store/selection/combinedSelectors';
+import { AutoTaggerModal } from '@/app/tagging/components/auto-tagger';
 
 import { CopyTagsModal } from './copy-tags-modal';
 import { TriggerPhrasesModal } from './trigger-phrases-button';

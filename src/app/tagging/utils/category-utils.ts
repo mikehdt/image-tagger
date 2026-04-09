@@ -1,5 +1,4 @@
 import { type ImageAsset, SortDirection, SortType } from '@/app/store/assets';
-
 import { parseSubfolder } from '@/app/utils/subfolder-utils';
 
 // Constants for sort category names

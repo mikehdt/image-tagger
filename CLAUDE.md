@@ -7,8 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm dev` - Run development server with Turbopack
 - `pnpm build` - Build for production
 - `pnpm lint` - Run Next.js linting
-- `pnpm format:check` - Check code formatting with Prettier
-- `pnpm format:write` - Format code with Prettier
+- `pnpm format` - Format code with Prettier + ESLint --fix
 - `pnpm knip` - Find unused dependencies and code
 
 Package manager: pnpm (specified in packageManager field)

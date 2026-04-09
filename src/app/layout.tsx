@@ -3,14 +3,14 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
-import { AutoTaggerSetupModal } from './tagging/components/auto-tagger';
 import { ModalProvider } from './components/shared/modal';
 import { PopupProvider } from './components/shared/popup';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
-import { JobPanel } from './training/components/job-panel/job-panel';
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
+import { AutoTaggerSetupModal } from './tagging/components/auto-tagger';
+import { JobPanel } from './training/components/job-panel/job-panel';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

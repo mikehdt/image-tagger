@@ -17,11 +17,11 @@ import {
   setProjectInfo,
   setTriggerPhrases,
 } from '../store/project';
-import { getProjectInfo } from '../utils/project-actions';
-import { useTheme } from '../utils/use-theme';
 import { Error } from '../tagging/views/error';
 import { InitialLoad } from '../tagging/views/initial-load';
 import { NoContent } from '../tagging/views/no-content';
+import { getProjectInfo } from '../utils/project-actions';
+import { useTheme } from '../utils/use-theme';
 
 /**
  * Extract the project slug from a tagging URL like /tagging/my-project/1
