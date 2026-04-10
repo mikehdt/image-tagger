@@ -1,0 +1,134 @@
+/**
+ * Model manager Redux slice.
+ *
+ * Tracks model inventory (what's installed, where) separately from
+ * active download operations (which live in the jobs slice).
+ */
+
+import {
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
+
+import type { ModelStatus } from '@/app/services/model-manager/types';
+
+import type { RootState } from '../index';
+import type { ModelEntry, ModelManagerState } from './types';
+
+const initialState: ModelManagerState = {
+  models: {},
+  modelsFolder: null,
+  isModalOpen: false,
+  modalInitialTab: undefined,
+};
+
+const modelManagerSlice = createSlice({
+  name: 'modelManager',
+  initialState,
+  reducers: {
+    // --- Model status ---
+
+    /** Set the status and optional path for a single model. */
+    setModelStatus: (
+      state,
+      action: PayloadAction<{
+        modelId: string;
+        status: ModelStatus;
+        localPath?: string | null;
+        sizeBytes?: number;
+      }>,
+    ) => {
+      const { modelId, status, localPath, sizeBytes } = action.payload;
+      const existing = state.models[modelId];
+      state.models[modelId] = {
+        modelId,
+        status,
+        localPath: localPath ?? existing?.localPath ?? null,
+        sizeBytes: sizeBytes ?? existing?.sizeBytes ?? 0,
+      };
+    },
+
+    /** Bulk-update model statuses (e.g. after scanning disk). */
+    setModelStatuses: (state, action: PayloadAction<ModelEntry[]>) => {
+      for (const entry of action.payload) {
+        state.models[entry.modelId] = entry;
+      }
+    },
+
+    // --- Storage config ---
+
+    setModelsFolder: (state, action: PayloadAction<string>) => {
+      state.modelsFolder = action.payload;
+    },
+
+    // --- Modal UI ---
+
+    openModelManagerModal: (
+      state,
+      action: PayloadAction<'auto-tagger' | 'training' | undefined>,
+    ) => {
+      state.isModalOpen = true;
+      state.modalInitialTab = action.payload;
+    },
+
+    closeModelManagerModal: (state) => {
+      state.isModalOpen = false;
+    },
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Exports
+// ---------------------------------------------------------------------------
+
+export const modelManagerReducer = modelManagerSlice.reducer;
+
+export const {
+  setModelStatus,
+  setModelStatuses,
+  setModelsFolder,
+  openModelManagerModal,
+  closeModelManagerModal,
+} = modelManagerSlice.actions;
+
+// ---------------------------------------------------------------------------
+// Selectors
+// ---------------------------------------------------------------------------
+
+const selectModelManager = (state: RootState) => state.modelManager;
+
+export const selectModelsFolder = createSelector(
+  selectModelManager,
+  (s) => s.modelsFolder,
+);
+
+export const selectIsModelManagerModalOpen = createSelector(
+  selectModelManager,
+  (s) => s.isModalOpen,
+);
+
+export const selectModelManagerInitialTab = createSelector(
+  selectModelManager,
+  (s) => s.modalInitialTab,
+);
+
+/** All model entries as a status map (modelId → { status, localPath }). */
+export const selectAllModelStatuses = createSelector(
+  selectModelManager,
+  (s) => s.models,
+);
+
+/** Get the status entry for a specific model. */
+export const selectModelEntry = (modelId: string) =>
+  createSelector(selectModelManager, (s) => s.models[modelId] ?? null);
+
+/** Check if a shared component is ready (by sharedId → modelId mapping). */
+export const selectModelStatusById = (modelId: string) =>
+  createSelector(
+    selectModelManager,
+    (s) => s.models[modelId]?.status ?? ('not_installed' as ModelStatus),
+  );
+
+// Re-export types
+export type { ModelEntry, ModelManagerState };

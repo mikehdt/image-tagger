@@ -9,7 +9,14 @@ export type ModelInfo = {
   description?: string;
   isDefault?: boolean;
   totalSize: number;
-  status: 'not_installed' | 'downloading' | 'ready' | 'error' | 'checking';
+  vramEstimate?: number;
+  status:
+    | 'not_installed'
+    | 'downloading'
+    | 'ready'
+    | 'partial'
+    | 'error'
+    | 'checking';
 };
 
 export type ProviderInfo = {
@@ -45,9 +52,6 @@ export type AutoTaggerState = {
 
   // Download state (null if not downloading)
   downloadProgress: DownloadProgress | null;
-
-  // Whether the setup modal is open
-  isSetupModalOpen: boolean;
 
   // Error message if something went wrong
   error: string | null;

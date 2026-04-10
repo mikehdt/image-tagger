@@ -6,7 +6,13 @@
 
 export type ModelArchitecture = 'flux' | 'sdxl' | 'zimage' | 'wan' | 'ltx';
 
-export type ModelComponentType = 'checkpoint' | 'vae' | 't5' | 'clip_l' | 'ae';
+export type ModelComponentType =
+  | 'checkpoint'
+  | 'vae'
+  | 't5'
+  | 'clip_l'
+  | 'ae'
+  | 'qwen';
 
 export type ModelComponent = {
   type: ModelComponentType;
@@ -65,19 +71,24 @@ export type TrainingDefaults = {
 export const MODEL_DEFINITIONS: ModelDefinition[] = [
   {
     id: 'flux2',
-    name: 'Flux.2',
+    name: 'Flux.2 Klein 9B',
     architecture: 'flux',
-    description: 'Latest generation, improved quality and coherence',
+    description: 'Latest generation, practical for home GPUs (~18 GB fp16)',
     provider: 'ai-toolkit',
     components: [
       { type: 'checkpoint', label: 'Transformer', required: true },
-      { type: 't5', label: 'T5-XXL Text Encoder', required: true },
-      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true },
-      { type: 'ae', label: 'Autoencoder (AE)', required: true },
+      { type: 'qwen', label: 'Qwen3 8B Text Encoder', required: true },
+      {
+        type: 'ae',
+        label: 'VAE / Autoencoder',
+        required: true,
+        hint: 'Flux.2 uses a different AE from Flux.1',
+      },
     ],
     tips: [
       'Constant scheduler with 1e-4 LR works well for most LoRAs',
       'Multi-resolution training (512/768/1024) improves flexibility',
+      'Uses Qwen3 text encoder instead of T5-XXL + CLIP-L',
     ],
     availableResolutions: [256, 512, 768, 1024, 1536, 2048],
     hiddenFields: ['noiseScheduler'],
@@ -225,6 +236,108 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     tips: [
       'Cosine scheduler recommended for fine-tuning',
       'Lower alpha (8) helps prevent overfitting',
+    ],
+    availableResolutions: [768, 1024, 1280, 1536, 1920],
+    defaults: {
+      steps: 3000,
+      epochs: 20,
+      learningRate: 1e-4,
+      optimizer: 'adamw8bit',
+      scheduler: 'cosine',
+      warmupSteps: 0,
+      numRestarts: 3,
+      batchSize: 1,
+      networkDim: 16,
+      networkAlpha: 8,
+      resolution: [1024],
+      mixedPrecision: 'bf16',
+      gradientAccumulationSteps: 1,
+      gradientCheckpointing: true,
+      cacheLatents: true,
+      weightDecay: 0,
+      captionDropoutRate: 0,
+      captionShuffling: false,
+      flipAugment: false,
+      flipVAugment: false,
+      seed: -1,
+      saveFormat: 'fp16',
+      saveEvery: 1,
+      sampleEvery: 500,
+      noiseScheduler: 'ddpm',
+      guidanceScale: 7,
+      sampleSteps: 25,
+    },
+  },
+  {
+    id: 'illustrious-xl',
+    name: 'Illustrious XL v2.0',
+    architecture: 'sdxl',
+    description: 'Illustration-focused SDXL base model',
+    provider: 'kohya',
+    components: [
+      { type: 'checkpoint', label: 'Checkpoint', required: true },
+      {
+        type: 'vae',
+        label: 'VAE',
+        required: false,
+        hint: 'Only needed if the checkpoint doesn\u2019t include one',
+      },
+    ],
+    tips: [
+      'Cosine scheduler recommended for fine-tuning',
+      'Lower alpha (8) helps prevent overfitting',
+      'Strong at anime and illustrative styles',
+    ],
+    availableResolutions: [768, 1024, 1280, 1536, 1920],
+    defaults: {
+      steps: 3000,
+      epochs: 20,
+      learningRate: 1e-4,
+      optimizer: 'adamw8bit',
+      scheduler: 'cosine',
+      warmupSteps: 0,
+      numRestarts: 3,
+      batchSize: 1,
+      networkDim: 16,
+      networkAlpha: 8,
+      resolution: [1024],
+      mixedPrecision: 'bf16',
+      gradientAccumulationSteps: 1,
+      gradientCheckpointing: true,
+      cacheLatents: true,
+      weightDecay: 0,
+      captionDropoutRate: 0,
+      captionShuffling: false,
+      flipAugment: false,
+      flipVAugment: false,
+      seed: -1,
+      saveFormat: 'fp16',
+      saveEvery: 1,
+      sampleEvery: 500,
+      noiseScheduler: 'ddpm',
+      guidanceScale: 7,
+      sampleSteps: 25,
+    },
+  },
+  {
+    id: 'noob-ai-xl',
+    name: 'NoobAI XL 1.1',
+    architecture: 'sdxl',
+    description: 'Anime/illustration SDXL, non-vpred variant',
+    provider: 'kohya',
+    components: [
+      { type: 'checkpoint', label: 'Checkpoint', required: true },
+      {
+        type: 'vae',
+        label: 'VAE',
+        required: false,
+        hint: 'Only needed if the checkpoint doesn\u2019t include one',
+      },
+    ],
+    tips: [
+      'Cosine scheduler recommended for fine-tuning',
+      'Lower alpha (8) helps prevent overfitting',
+      'Good for anime and character training',
     ],
     availableResolutions: [768, 1024, 1280, 1536, 1920],
     defaults: {

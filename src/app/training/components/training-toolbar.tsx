@@ -9,14 +9,14 @@ import { SegmentedControl } from '@/app/components/shared/segmented-control/segm
 import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
+  selectActiveTrainingJob,
+  selectPanelOpen,
+  togglePanel,
+} from '@/app/store/jobs';
+import {
   setTrainingViewMode,
   type TrainingViewMode,
 } from '@/app/store/preferences';
-import {
-  selectActiveJobStatus,
-  selectPanelOpen,
-  togglePanel,
-} from '@/app/store/training';
 
 import { useTrainingViewMode } from './use-training-view-mode';
 
@@ -40,14 +40,12 @@ const TrainingToolbarComponent = () => {
     getSnapshot,
     getServerSnapshot,
   );
-  const jobStatus = useAppSelector(selectActiveJobStatus);
+  const activeTrainingJob = useAppSelector(selectActiveTrainingJob);
   const panelOpen = useAppSelector(selectPanelOpen);
 
   // Defer Redux-dependent state until after hydration
-  const hasActiveJob = Boolean(isClient && jobStatus !== null);
-  const isRunning = Boolean(
-    isClient && (jobStatus === 'training' || jobStatus === 'preparing'),
-  );
+  const hasActiveJob = Boolean(isClient && activeTrainingJob !== null);
+  const isRunning = Boolean(isClient && activeTrainingJob !== null);
 
   const handleViewModeChange = useCallback(
     (mode: TrainingViewMode) => {

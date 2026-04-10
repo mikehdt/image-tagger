@@ -6,13 +6,11 @@ import { memo, useMemo } from 'react';
 import { SCHEDULER_OPTIONS } from '@/app/services/training/models';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
-  clearJob,
   closePanel,
-  selectActiveJobConfig,
-  selectActiveJobProgress,
-  selectActiveJobStatus,
+  removeJob,
+  selectActiveTrainingJob,
   selectPanelOpen,
-} from '@/app/store/training';
+} from '@/app/store/jobs';
 import { cancelMockTraining } from '@/app/store/training/mock-training';
 
 import { SchedulerSparkline } from '../scheduler-sparkline';
@@ -30,9 +28,11 @@ function formatDuration(ms: number): string {
 const JobPanelComponent = () => {
   const dispatch = useAppDispatch();
   const panelOpen = useAppSelector(selectPanelOpen);
-  const status = useAppSelector(selectActiveJobStatus);
-  const config = useAppSelector(selectActiveJobConfig);
-  const progress = useAppSelector(selectActiveJobProgress);
+  const job = useAppSelector(selectActiveTrainingJob);
+
+  const status = job?.status ?? null;
+  const config = job?.config ?? null;
+  const progress = job?.progress ?? null;
 
   const schedulerCurve = useMemo(() => {
     const schedulerName = config?.hyperparameters?.scheduler;
@@ -42,9 +42,9 @@ const JobPanelComponent = () => {
     );
   }, [config]);
 
-  if (!panelOpen || !status) return null;
+  if (!panelOpen || !job) return null;
 
-  const isRunning = status === 'training' || status === 'preparing';
+  const isRunning = status === 'running' || status === 'preparing';
   const isCompleted = status === 'completed';
   const isFailed = status === 'failed';
   const pct =
@@ -59,11 +59,11 @@ const JobPanelComponent = () => {
 
   const handleDismiss = () => {
     dispatch(closePanel());
-    if (!isRunning) dispatch(clearJob());
+    if (!isRunning) dispatch(removeJob(job.id));
   };
 
   const handleCancel = () => {
-    dispatch(cancelMockTraining());
+    dispatch(cancelMockTraining(job.id));
   };
 
   return (

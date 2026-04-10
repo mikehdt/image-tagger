@@ -135,7 +135,8 @@ export const selectTagCoExistence = (
 
 /**
  * Selector to get assets that match any active filtering (filters or visibility scopes).
- * When visibility narrows the view, returns exactly what the user sees.
+ * When visibility scopes are active (tagless, selected, modified), returns the
+ * filtered view regardless of whether it narrows the result set.
  * When only explicit filter selections are active (without visibility modes),
  * returns assets matching any of the selections (union/OR logic).
  */
@@ -170,13 +171,14 @@ export const selectAssetsWithActiveFilters = createSelector(
       return [];
     }
 
-    // If the view is narrowed by visibility, use exactly what the user sees
-    if (filteredAssets.length < allImages.length) {
+    // When visibility scopes are active (tagless, selected, modified),
+    // return the filtered view — even when all assets happen to match
+    if (hasActiveVisibility) {
       return filteredAssets;
     }
 
-    // Visibility didn't narrow the view, but explicit filter selections exist —
-    // compute a union match so scoped actions know which assets are targeted
+    // Only explicit filter selections (tags, sizes, etc.) — compute a union
+    // match so scoped actions know which assets are targeted
     if (hasActiveFilters) {
       const tagSet = new Set(filterTags);
       const extSet = new Set(filterExtensions);

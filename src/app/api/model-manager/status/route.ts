@@ -1,0 +1,71 @@
+/**
+ * API Route: GET /api/model-manager/status
+ *
+ * Returns the installation status of all downloadable models.
+ * Checks disk for file existence.
+ */
+
+import fs from 'fs';
+import path from 'path';
+
+import { getAllModels } from '@/app/services/auto-tagger';
+import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
+import { ALL_TRAINING_MODELS } from '@/app/services/model-manager/registries/training-models';
+import { checkModelFiles } from '@/app/services/model-manager/status-checker';
+
+function getModelsFolder(): string {
+  try {
+    const configPath = path.join(process.cwd(), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      if (config.modelsFolder) return config.modelsFolder;
+    }
+  } catch {
+    // Fall through to default
+  }
+  return path.join(process.cwd(), 'public', 'models');
+}
+
+export async function GET() {
+  try {
+    const modelsFolder = getModelsFolder();
+    const statuses: Record<
+      string,
+      { status: string; localPath: string | null }
+    > = {};
+
+    // Check auto-tagger models
+    for (const model of getAllModels()) {
+      statuses[model.id] = {
+        status: checkModelStatus(model),
+        localPath: null, // auto-tagger paths are computed internally
+      };
+    }
+
+    // Check training models
+    for (const model of ALL_TRAINING_MODELS) {
+      let modelDir: string;
+      if (model.sharedId) {
+        modelDir = path.join(modelsFolder, 'shared');
+      } else if (model.architecture) {
+        modelDir = path.join(modelsFolder, model.architecture);
+      } else {
+        modelDir = path.join(modelsFolder, 'other');
+      }
+
+      const status = checkModelFiles(modelDir, model.files);
+      statuses[model.id] = {
+        status,
+        localPath: status === 'ready' ? modelDir : null,
+      };
+    }
+
+    return Response.json({ statuses, modelsFolder });
+  } catch (error) {
+    console.error('Status check error:', error);
+    return Response.json(
+      { error: 'Failed to check model status' },
+      { status: 500 },
+    );
+  }
+}

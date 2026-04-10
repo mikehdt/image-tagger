@@ -7,7 +7,10 @@ import {
 import { assetsReducer } from './assets';
 import { autoTaggerReducer } from './auto-tagger';
 import { filtersReducer } from './filters';
+import { jobsReducer } from './jobs';
 import { filterManagerMiddleware } from './middleware/filter-manager';
+import { jobPersistenceMiddleware } from './middleware/job-persistence';
+import { modelManagerReducer } from './model-manager';
 import { preferencesReducer } from './preferences';
 import { projectReducer } from './project';
 import { selectionReducer } from './selection';
@@ -21,6 +24,8 @@ export const makeStore = () => {
       assets: assetsReducer,
       autoTagger: autoTaggerReducer,
       filters: filtersReducer,
+      jobs: jobsReducer,
+      modelManager: modelManagerReducer,
       preferences: preferencesReducer,
       project: projectReducer,
       selection: selectionReducer,
@@ -28,7 +33,9 @@ export const makeStore = () => {
       training: trainingReducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(filterManagerMiddleware.middleware),
+      getDefaultMiddleware()
+        .concat(filterManagerMiddleware.middleware)
+        .concat(jobPersistenceMiddleware.middleware),
   });
 };
 

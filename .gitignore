@@ -43,8 +43,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# onnx models
+# downloaded models
 .auto-tagger/models
+public/models
 
 # training sidecar
 .training/

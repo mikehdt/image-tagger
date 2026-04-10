@@ -7,6 +7,7 @@ interface AppConfig {
   batchSize?: number;
   projectsFolder?: string;
   infoFolder?: string;
+  modelsFolder?: string;
 }
 
 export async function GET() {

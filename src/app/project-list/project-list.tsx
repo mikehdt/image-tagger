@@ -1,10 +1,10 @@
 'use client';
 
 import {
+  BoxesIcon,
   FolderClosedIcon,
   FolderXIcon,
   SettingsIcon,
-  SparklesIcon,
   StarIcon,
 } from 'lucide-react';
 import { useCallback, useId, useMemo, useRef } from 'react';
@@ -18,8 +18,8 @@ import { Checkbox } from '@/app/components/shared/checkbox';
 import { MenuEditModeSwitcher } from '@/app/components/shared/menu-edit-mode-switcher';
 import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 import { Popup, usePopup } from '@/app/components/shared/popup';
-import { openSetupModal } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { openModelManagerModal } from '@/app/store/model-manager';
 import {
   selectTagEditMode,
   selectTheme,
@@ -80,9 +80,9 @@ export const ProjectList = () => {
     [dispatch],
   );
 
-  const handleOpenAutoTaggerSetup = useCallback(() => {
+  const handleOpenModelManager = useCallback(() => {
     closePopup(settingsPopupId);
-    dispatch(openSetupModal());
+    dispatch(openModelManagerModal(undefined));
   }, [dispatch, closePopup, settingsPopupId]);
 
   const handleToggleSettings = useCallback(() => {
@@ -277,13 +277,13 @@ export const ProjectList = () => {
               />
               <button
                 type="button"
-                onClick={handleOpenAutoTaggerSetup}
+                onClick={handleOpenModelManager}
                 className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 <span className="h-5 w-5">
-                  <SparklesIcon className="h-5 w-5" />
+                  <BoxesIcon className="h-5 w-5" />
                 </span>
-                Auto-Tagger Models
+                Model Manager
               </button>
             </div>
           </Popup>

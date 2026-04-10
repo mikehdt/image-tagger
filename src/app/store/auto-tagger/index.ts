@@ -19,7 +19,6 @@ const initialState: AutoTaggerState = {
   models: [],
   selectedModelId: null,
   downloadProgress: null,
-  isSetupModalOpen: false,
   error: null,
 };
 
@@ -134,14 +133,6 @@ const autoTaggerSlice = createSlice({
       state.downloadProgress = null;
     },
 
-    // Open/close setup modal
-    openSetupModal: (state) => {
-      state.isSetupModalOpen = true;
-    },
-    closeSetupModal: (state) => {
-      state.isSetupModalOpen = false;
-    },
-
     // Set error
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
@@ -159,7 +150,6 @@ const autoTaggerSlice = createSlice({
     selectModels: (state) => state.models,
     selectSelectedModelId: (state) => state.selectedModelId,
     selectDownloadProgress: (state) => state.downloadProgress,
-    selectIsSetupModalOpen: (state) => state.isSetupModalOpen,
     selectError: (state) => state.error,
     selectIsDownloading: (state) => state.downloadProgress !== null,
   },
@@ -176,8 +166,6 @@ export const {
   updateDownloadProgress,
   downloadComplete,
   downloadFailed,
-  openSetupModal,
-  closeSetupModal,
 } = autoTaggerSlice.actions;
 
 // Export basic selectors from slice
@@ -187,7 +175,6 @@ export const {
   selectModels,
   selectSelectedModelId,
   selectDownloadProgress,
-  selectIsSetupModalOpen,
   selectIsDownloading,
 } = autoTaggerSlice.selectors;
 

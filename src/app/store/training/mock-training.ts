@@ -4,7 +4,7 @@
  */
 
 import type { AppDispatch } from '../index';
-import { clearJob, openPanel, setActiveJob, updateProgress } from './index';
+import { addJob, openPanel, removeJob, updateTrainingProgress } from '../jobs';
 
 let mockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -21,9 +21,14 @@ export function startMockTraining(
     const baseLr = (config.learningRate as number) || 1e-4;
 
     dispatch(
-      setActiveJob({
-        jobId,
-        status: 'training',
+      addJob({
+        id: jobId,
+        type: 'training',
+        status: 'running',
+        createdAt: Date.now(),
+        startedAt: Date.now(),
+        completedAt: null,
+        error: null,
         config: {
           projectPath: '',
           provider: (config.provider as 'ai-toolkit' | 'kohya') ?? 'ai-toolkit',
@@ -50,6 +55,7 @@ export function startMockTraining(
           },
           samplePrompts: [],
         },
+        progress: null,
       }),
     );
 
@@ -68,24 +74,27 @@ export function startMockTraining(
       const lr = baseLr * (1 - progress * 0.3); // gentle decay for visual interest
 
       dispatch(
-        updateProgress({
-          jobId,
-          status: step >= totalSteps ? 'completed' : 'training',
-          startedAt,
-          completedAt: step >= totalSteps ? Date.now() : null,
-          currentStep: step,
-          totalSteps,
-          currentEpoch: Math.floor(progress * 20) + 1,
-          totalEpochs: 20,
-          loss: parseFloat(loss.toFixed(4)),
-          learningRate: parseFloat(lr.toPrecision(3)),
-          etaSeconds:
-            step < totalSteps
-              ? Math.round(((totalSteps - step) / (totalSteps / 50)) * 0.2)
-              : 0,
-          sampleImagePaths: [],
-          logLines: [],
-          error: null,
+        updateTrainingProgress({
+          id: jobId,
+          progress: {
+            jobId,
+            status: step >= totalSteps ? 'completed' : 'training',
+            startedAt,
+            completedAt: step >= totalSteps ? Date.now() : null,
+            currentStep: step,
+            totalSteps,
+            currentEpoch: Math.floor(progress * 20) + 1,
+            totalEpochs: 20,
+            loss: parseFloat(loss.toFixed(4)),
+            learningRate: parseFloat(lr.toPrecision(3)),
+            etaSeconds:
+              step < totalSteps
+                ? Math.round(((totalSteps - step) / (totalSteps / 50)) * 0.2)
+                : 0,
+            sampleImagePaths: [],
+            logLines: [],
+            error: null,
+          },
         }),
       );
 
@@ -97,12 +106,16 @@ export function startMockTraining(
   };
 }
 
-export function cancelMockTraining(): (dispatch: AppDispatch) => void {
+export function cancelMockTraining(
+  jobId?: string,
+): (dispatch: AppDispatch) => void {
   return (dispatch) => {
     if (mockInterval) {
       clearInterval(mockInterval);
       mockInterval = null;
     }
-    dispatch(clearJob());
+    if (jobId) {
+      dispatch(removeJob(jobId));
+    }
   };
 }

@@ -3,14 +3,14 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
+import { ActivityPanel } from './components/shared/activity-panel/activity-panel';
 import { ModalProvider } from './components/shared/modal';
+import { ModelManagerModal } from './components/shared/model-manager-modal/model-manager-modal';
 import { PopupProvider } from './components/shared/popup';
 import { ToastContainer } from './components/shared/toast';
 import { StableLayout } from './components/stable-layout';
 import { AppProvider } from './providers/AppProvider';
 import { StoreProvider } from './providers/StoreProvider';
-import { AutoTaggerSetupModal } from './tagging/components/auto-tagger';
-import { JobPanel } from './training/components/job-panel/job-panel';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -65,8 +65,8 @@ export default function Root({
                 <StableLayout>{children}</StableLayout>
               </PopupProvider>
               <ToastContainer />
-              <AutoTaggerSetupModal />
-              <JobPanel />
+              <ModelManagerModal />
+              <ActivityPanel />
             </ModalProvider>
           </AppProvider>
         </StoreProvider>

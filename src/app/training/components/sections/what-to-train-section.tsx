@@ -1,4 +1,4 @@
-import { FolderOpenIcon } from 'lucide-react';
+import { DownloadIcon, FolderOpenIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
@@ -12,6 +12,8 @@ import {
   type ModelComponentType,
   type ModelDefinition,
 } from '@/app/services/training/models';
+import { useAppDispatch } from '@/app/store/hooks';
+import { openModelManagerModal } from '@/app/store/model-manager';
 
 import type {
   AppModelDefaults,
@@ -44,6 +46,12 @@ const WhatToTrainSectionComponent = ({
   viewMode,
   hiddenChangesCount,
 }: WhatToTrainSectionProps) => {
+  const dispatch = useAppDispatch();
+
+  const handleOpenModelManager = useCallback(() => {
+    dispatch(openModelManagerModal('training'));
+  }, [dispatch]);
+
   const modelGroups = useMemo(() => {
     return getModelsByArchitecture().map((group) => ({
       groupLabel: group.label,
@@ -176,6 +184,14 @@ const WhatToTrainSectionComponent = ({
                   title="Browse…"
                 >
                   <FolderOpenIcon className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenModelManager}
+                  className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-indigo-500/60 hover:bg-(--surface-hover) hover:text-indigo-500"
+                  title="Download from Model Manager…"
+                >
+                  <DownloadIcon className="h-4 w-4" />
                 </button>
               </div>
               {component.hint && (
