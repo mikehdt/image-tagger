@@ -6,10 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/app/components/shared/button';
 import { Modal } from '@/app/components/shared/modal';
 import {
-  ARCHITECTURE_LABELS,
-  MODEL_DEFINITIONS,
-  type ModelArchitecture,
-  type ModelComponent,
+  getModelsByArchitecture,
   type ModelComponentType,
 } from '@/app/services/training/models';
 
@@ -23,40 +20,8 @@ type ModelDefaultsModalProps = {
   onSaved: (defaults: AppModelDefaults) => void;
 };
 
-/**
- * Get the unique component set for each architecture, deduplicating
- * across models within the same architecture.
- */
-function getComponentsByArchitecture(): {
-  architecture: ModelArchitecture;
-  label: string;
-  components: ModelComponent[];
-}[] {
-  const archMap = new Map<
-    ModelArchitecture,
-    Map<ModelComponentType, ModelComponent>
-  >();
-
-  for (const model of MODEL_DEFINITIONS) {
-    if (!archMap.has(model.architecture)) {
-      archMap.set(model.architecture, new Map());
-    }
-    const compMap = archMap.get(model.architecture)!;
-    for (const comp of model.components) {
-      if (!compMap.has(comp.type)) {
-        compMap.set(comp.type, comp);
-      }
-    }
-  }
-
-  return Array.from(archMap.entries()).map(([arch, compMap]) => ({
-    architecture: arch,
-    label: ARCHITECTURE_LABELS[arch],
-    components: Array.from(compMap.values()),
-  }));
-}
-
-const ARCHITECTURE_COMPONENTS = getComponentsByArchitecture();
+/** Models grouped by architecture, for display in the defaults modal. */
+const MODEL_GROUPS = getModelsByArchitecture();
 
 export function ModelDefaultsModal({
   isOpen,
@@ -76,21 +41,17 @@ export function ModelDefaultsModal({
   }, [isOpen]);
 
   const setPath = useCallback(
-    (arch: ModelArchitecture, comp: ModelComponentType, value: string) => {
+    (modelId: string, comp: ModelComponentType, value: string) => {
       setDraft((prev) => ({
         ...prev,
-        [arch]: { ...prev[arch], [comp]: value },
+        [modelId]: { ...prev[modelId], [comp]: value },
       }));
     },
     [],
   );
 
   const handleBrowse = useCallback(
-    async (
-      arch: ModelArchitecture,
-      comp: ModelComponentType,
-      label: string,
-    ) => {
+    async (modelId: string, comp: ModelComponentType, label: string) => {
       try {
         const params = new URLSearchParams({
           title: `Select ${label}`,
@@ -99,7 +60,7 @@ export function ModelDefaultsModal({
         const res = await fetch(`/api/filesystem/browse?${params}`);
         const data = await res.json();
         if (data.path) {
-          setPath(arch, comp, data.path);
+          setPath(modelId, comp, data.path);
         }
       } catch {
         // Dialog failed — user can type manually
@@ -140,55 +101,64 @@ export function ModelDefaultsModal({
         </div>
 
         <div className="flex max-h-[60vh] flex-col gap-5 overflow-y-auto pr-1">
-          {ARCHITECTURE_COMPONENTS.map(
-            ({ architecture, label, components }) => (
-              <div key={architecture}>
-                <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {label}
-                </h3>
-                <div className="space-y-2">
-                  {components.map((comp) => (
-                    <div key={comp.type}>
-                      <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
-                        {comp.label}
-                        {!comp.required && (
-                          <span className="font-normal text-slate-400">
-                            (optional)
-                          </span>
-                        )}
-                      </label>
-                      <div className="flex gap-1.5">
-                        <input
-                          type="text"
-                          value={draft[architecture]?.[comp.type] ?? ''}
-                          onChange={(e) =>
-                            setPath(architecture, comp.type, e.target.value)
-                          }
-                          placeholder={`Path to ${comp.label.toLowerCase()}…`}
-                          className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleBrowse(architecture, comp.type, comp.label)
-                          }
-                          className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
-                          title="Browse…"
-                        >
-                          <FolderOpenIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                      {comp.hint && (
-                        <p className="mt-0.5 text-xs text-slate-400">
-                          {comp.hint}
-                        </p>
-                      )}
+          {MODEL_GROUPS.map(({ architecture, label, models }) => (
+            <div key={architecture}>
+              <h3 className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                {label}
+              </h3>
+              <div className="space-y-4">
+                {models.map((model) => (
+                  <div key={model.id}>
+                    {models.length > 1 && (
+                      <p className="mb-1.5 text-xs text-slate-400">
+                        {model.name}
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      {model.components.map((comp) => (
+                        <div key={comp.type}>
+                          <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
+                            {comp.label}
+                            {!comp.required && (
+                              <span className="font-normal text-slate-400">
+                                (optional)
+                              </span>
+                            )}
+                          </label>
+                          <div className="flex gap-1.5">
+                            <input
+                              type="text"
+                              value={draft[model.id]?.[comp.type] ?? ''}
+                              onChange={(e) =>
+                                setPath(model.id, comp.type, e.target.value)
+                              }
+                              placeholder={`Path to ${comp.label.toLowerCase()}…`}
+                              className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleBrowse(model.id, comp.type, comp.label)
+                              }
+                              className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
+                              title="Browse…"
+                            >
+                              <FolderOpenIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                          {comp.hint && (
+                            <p className="mt-0.5 text-xs text-slate-400">
+                              {comp.hint}
+                            </p>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
 
         <div className="flex justify-end gap-2 border-t border-(--border-subtle) pt-3">

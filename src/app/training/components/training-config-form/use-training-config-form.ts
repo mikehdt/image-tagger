@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import {
   getModelById,
   MODEL_DEFINITIONS,
-  type ModelArchitecture,
   type ModelComponentType,
   type ModelDefinition,
   type TrainingDefaults,
@@ -35,9 +34,8 @@ export type DurationMode = 'epochs' | 'steps';
 
 export type ModelPaths = Partial<Record<ModelComponentType, string>>;
 
-export type AppModelDefaults = Partial<
-  Record<ModelArchitecture, Partial<Record<ModelComponentType, string>>>
->;
+/** Model defaults keyed by model ID (e.g. 'sdxl', 'noob-ai-xl'). */
+export type AppModelDefaults = Record<string, Partial<Record<ModelComponentType, string>>>;
 
 export type FormState = {
   // What to Train
@@ -410,9 +408,9 @@ export function useTrainingConfigForm() {
   // Apply app defaults when model changes or defaults are first loaded
   useEffect(() => {
     if (!currentModel) return;
-    const archDefaults = appModelDefaults[currentModel.architecture];
-    if (archDefaults && Object.keys(archDefaults).length > 0) {
-      dispatch({ type: 'APPLY_APP_DEFAULTS', paths: archDefaults });
+    const modelDefaults = appModelDefaults[state.modelId];
+    if (modelDefaults && Object.keys(modelDefaults).length > 0) {
+      dispatch({ type: 'APPLY_APP_DEFAULTS', paths: modelDefaults });
     }
   }, [state.modelId, appModelDefaults, currentModel]);
 

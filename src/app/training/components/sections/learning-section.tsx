@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
+import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import {
   OPTIMIZER_OPTIONS,
   SCHEDULER_OPTIONS,
@@ -222,30 +223,15 @@ const LearningSectionComponent = ({
               <label className="text-xs font-medium text-(--foreground)/70">
                 Duration
               </label>
-              <div className="flex rounded border border-(--border-subtle) text-xs">
-                <button
-                  type="button"
-                  onClick={() => onFieldChange('durationMode', 'epochs')}
-                  className={`cursor-pointer px-2 py-0.5 ${
-                    durationMode === 'epochs'
-                      ? 'bg-sky-500 text-white dark:bg-sky-700'
-                      : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  Epochs
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onFieldChange('durationMode', 'steps')}
-                  className={`cursor-pointer px-2 py-0.5 ${
-                    durationMode === 'steps'
-                      ? 'bg-sky-500 text-white dark:bg-sky-700'
-                      : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  Steps
-                </button>
-              </div>
+              <SegmentedControl
+                options={[
+                  { value: 'epochs', label: 'Epochs' },
+                  { value: 'steps', label: 'Steps' },
+                ]}
+                value={durationMode}
+                onChange={(val) => onFieldChange('durationMode', val)}
+                size="sm"
+              />
             </div>
 
             <input

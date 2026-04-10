@@ -2,13 +2,12 @@ import fs from 'fs';
 import { NextResponse } from 'next/server';
 import path from 'path';
 
-import type {
-  ModelArchitecture,
-  ModelComponentType,
-} from '@/app/services/training/models';
+import type { ModelComponentType } from '@/app/services/training/models';
 
-export type AppModelDefaults = Partial<
-  Record<ModelArchitecture, Partial<Record<ModelComponentType, string>>>
+/** Model defaults keyed by model ID (e.g. 'sdxl', 'noob-ai-xl'). */
+export type AppModelDefaults = Record<
+  string,
+  Partial<Record<ModelComponentType, string>>
 >;
 
 function getConfigPath() {
@@ -40,10 +39,9 @@ export async function POST(request: Request) {
     const config = readConfig();
     const existing = (config.modelDefaults ?? {}) as AppModelDefaults;
 
-    // Merge per-architecture: incoming values overwrite, empty strings remove
-    for (const [arch, components] of Object.entries(incoming)) {
-      const archKey = arch as ModelArchitecture;
-      const merged = { ...existing[archKey] };
+    // Merge per-model: incoming values overwrite, empty strings remove
+    for (const [modelId, components] of Object.entries(incoming)) {
+      const merged = { ...existing[modelId] };
       for (const [comp, value] of Object.entries(components ?? {})) {
         if (value) {
           merged[comp as ModelComponentType] = value;
@@ -51,11 +49,11 @@ export async function POST(request: Request) {
           delete merged[comp as ModelComponentType];
         }
       }
-      // Remove architecture entry if empty
+      // Remove model entry if empty
       if (Object.keys(merged).length > 0) {
-        existing[archKey] = merged;
+        existing[modelId] = merged;
       } else {
-        delete existing[archKey];
+        delete existing[modelId];
       }
     }
 

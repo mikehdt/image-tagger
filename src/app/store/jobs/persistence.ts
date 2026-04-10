@@ -1,6 +1,7 @@
 /**
- * Persistence for download jobs across page refreshes.
+ * Persistence for download jobs across browser sessions.
  *
+ * Uses localStorage so jobs survive closing the browser overnight.
  * All download jobs (including completed) are persisted so the
  * activity panel shows history until the user explicitly clears it.
  * Training jobs are not persisted here — the sidecar survives
@@ -12,7 +13,7 @@ import type { DownloadJob, Job } from './types';
 const STORAGE_KEY = 'img-tagger:download-jobs';
 
 /**
- * Save current download jobs to sessionStorage.
+ * Save current download jobs to localStorage.
  * Called by middleware whenever the jobs state changes.
  */
 export function persistDownloadJobs(jobs: Record<string, Job>): void {
@@ -22,23 +23,23 @@ export function persistDownloadJobs(jobs: Record<string, Job>): void {
     );
 
     if (downloadJobs.length === 0) {
-      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
     } else {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(downloadJobs));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(downloadJobs));
     }
   } catch {
-    // sessionStorage may be unavailable (SSR, private browsing)
+    // localStorage may be unavailable (SSR, private browsing)
   }
 }
 
 /**
- * Load persisted download jobs from sessionStorage.
+ * Load persisted download jobs from localStorage.
  * Any job that was 'running' is marked as 'interrupted' since
- * the SSE stream was lost on refresh.
+ * the SSE stream was lost when the page closed.
  */
 export function loadPersistedDownloads(): DownloadJob[] {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
 
     const jobs: DownloadJob[] = JSON.parse(raw);

@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 
+import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
@@ -206,40 +207,34 @@ const PerformanceSectionComponent = ({
         {visibleFields.has(
           'gradientCheckpointing' satisfies keyof FormState,
         ) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={gradientCheckpointing}
-              onChange={(e) =>
-                onFieldChange('gradientCheckpointing', e.target.checked)
+          <div className="flex items-center gap-2">
+            <Checkbox
+              isSelected={gradientCheckpointing}
+              onChange={() =>
+                onFieldChange('gradientCheckpointing', !gradientCheckpointing)
               }
-              className="accent-sky-500"
+              label="Gradient Checkpointing"
+              size="small"
             />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Gradient Checkpointing
-            </span>
             <span className="text-xs text-slate-400">
               Reduces VRAM at cost of speed
             </span>
-          </label>
+          </div>
         )}
 
         {/* Cache Latents */}
         {visibleFields.has('cacheLatents' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={cacheLatents}
-              onChange={(e) => onFieldChange('cacheLatents', e.target.checked)}
-              className="accent-sky-500"
+          <div className="flex items-center gap-2">
+            <Checkbox
+              isSelected={cacheLatents}
+              onChange={() => onFieldChange('cacheLatents', !cacheLatents)}
+              label="Cache Latents"
+              size="small"
             />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Cache Latents
-            </span>
             <span className="text-xs text-slate-400">
               Caches VAE outputs for faster training
             </span>
-          </label>
+          </div>
         )}
       </div>
     </CollapsibleSection>

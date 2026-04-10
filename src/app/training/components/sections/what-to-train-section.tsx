@@ -70,7 +70,7 @@ const WhatToTrainSectionComponent = ({
     }));
   }, []);
 
-  const archDefaults = appModelDefaults[currentModel.architecture];
+  const modelDefaults = appModelDefaults[currentModel.id];
 
   // Component tier logic:
   //   checkpoint → always simple (user commonly changes this)
@@ -81,13 +81,13 @@ const WhatToTrainSectionComponent = ({
       currentModel.components.filter((c) => {
         if (c.type === 'checkpoint') return true;
         if (!c.required) return isTierAtLeast(viewMode, 'intermediate');
-        const hasAppDefault = !!archDefaults?.[c.type];
+        const hasAppDefault = !!modelDefaults?.[c.type];
         return isTierAtLeast(
           viewMode,
           hasAppDefault ? 'intermediate' : 'simple',
         );
       }),
-    [currentModel.components, viewMode, archDefaults],
+    [currentModel.components, viewMode, modelDefaults],
   );
 
   const handlePathChange = useCallback(

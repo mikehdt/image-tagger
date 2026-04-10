@@ -211,7 +211,7 @@ export const {
 const selectJobs = (state: RootState) => state.jobs;
 
 export const selectAllJobs = createSelector(selectJobs, (s) =>
-  Object.values(s.jobs).sort((a, b) => b.createdAt - a.createdAt),
+  Object.values(s.jobs).sort((a, b) => a.createdAt - b.createdAt),
 );
 
 export const selectActiveJobs = createSelector(selectAllJobs, (jobs) =>

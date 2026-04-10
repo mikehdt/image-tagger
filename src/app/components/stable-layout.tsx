@@ -3,7 +3,7 @@
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 
-import { TaggingBottomShelf } from '@/app/tagging/components/bottom-shelf/bottom-shelf';
+import { TaggingBottomShelf } from '@/app/tagging/components/bottom-shelf/tagging-bottom-shelf';
 import { TaggingTopShelf } from '@/app/tagging/components/top-shelf/top-shelf';
 import { TrainingTopShelf } from '@/app/training/components/training-top-shelf';
 

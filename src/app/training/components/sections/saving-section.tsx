@@ -1,6 +1,8 @@
 import { memo } from 'react';
 
+import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
 import type {
@@ -115,17 +117,12 @@ const SavingSectionComponent = ({
         {(visibleFields.has('saveEveryEpochs' satisfies keyof FormState) ||
           visibleFields.has('saveEverySteps' satisfies keyof FormState)) && (
           <>
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                checked={saveEnabled}
-                onChange={(e) => onFieldChange('saveEnabled', e.target.checked)}
-                className="accent-sky-500"
-              />
-              <span className="text-xs font-medium text-(--foreground)/70">
-                Save checkpoints during training
-              </span>
-            </label>
+            <Checkbox
+              isSelected={saveEnabled}
+              onChange={() => onFieldChange('saveEnabled', !saveEnabled)}
+              label="Save checkpoints during training"
+              size="small"
+            />
 
             {saveEnabled && (
               <div>
@@ -133,30 +130,15 @@ const SavingSectionComponent = ({
                   <label className="text-xs font-medium text-(--foreground)/70">
                     Save Every
                   </label>
-                  <div className="flex rounded border border-(--border-subtle) text-xs">
-                    <button
-                      type="button"
-                      onClick={() => onFieldChange('saveMode', 'epochs')}
-                      className={`cursor-pointer px-2 py-0.5 ${
-                        saveMode === 'epochs'
-                          ? 'bg-sky-500 text-white dark:bg-sky-700'
-                          : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      Epochs
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onFieldChange('saveMode', 'steps')}
-                      className={`cursor-pointer px-2 py-0.5 ${
-                        saveMode === 'steps'
-                          ? 'bg-sky-500 text-white dark:bg-sky-700'
-                          : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      Steps
-                    </button>
-                  </div>
+                  <SegmentedControl
+                    options={[
+                      { value: 'epochs', label: 'Epochs' },
+                      { value: 'steps', label: 'Steps' },
+                    ]}
+                    value={saveMode}
+                    onChange={(val) => onFieldChange('saveMode', val)}
+                    size="sm"
+                  />
                 </div>
 
                 <input

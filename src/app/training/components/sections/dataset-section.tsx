@@ -9,6 +9,7 @@ import {
 import Image from 'next/image';
 import { memo, useCallback, useMemo } from 'react';
 
+import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 
 import { ProjectPicker } from '../project-picker/project-picker';
@@ -321,58 +322,49 @@ const DatasetSectionComponent = ({
 
         {/* Caption Shuffling */}
         {visibleFields.has('captionShuffling' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={captionShuffling}
-              onChange={(e) =>
-                onFieldChange('captionShuffling', e.target.checked)
+          <div className="flex items-center gap-2">
+            <Checkbox
+              isSelected={captionShuffling}
+              onChange={() =>
+                onFieldChange('captionShuffling', !captionShuffling)
               }
-              className="accent-sky-500"
+              label="Caption Shuffling"
+              size="small"
             />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Caption Shuffling
-            </span>
             <span className="text-xs text-slate-400">
               Randomise tag order during training
             </span>
-          </label>
+          </div>
         )}
 
         {/* Flip H Augment */}
         {visibleFields.has('flipAugment' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={flipAugment}
-              onChange={(e) => onFieldChange('flipAugment', e.target.checked)}
-              className="accent-sky-500"
+          <div className="flex items-center gap-2">
+            <Checkbox
+              isSelected={flipAugment}
+              onChange={() => onFieldChange('flipAugment', !flipAugment)}
+              label="Flip Horizontal"
+              size="small"
             />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Flip Horizontal
-            </span>
             <span className="text-xs text-slate-400">
               Randomly flip images horizontally
             </span>
-          </label>
+          </div>
         )}
 
         {/* Flip V Augment */}
         {visibleFields.has('flipVAugment' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={flipVAugment}
-              onChange={(e) => onFieldChange('flipVAugment', e.target.checked)}
-              className="accent-sky-500"
+          <div className="flex items-center gap-2">
+            <Checkbox
+              isSelected={flipVAugment}
+              onChange={() => onFieldChange('flipVAugment', !flipVAugment)}
+              label="Flip Vertical"
+              size="small"
             />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Flip Vertical
-            </span>
             <span className="text-xs text-slate-400">
               Randomly flip images vertically (unusual)
             </span>
-          </label>
+          </div>
         )}
 
         {/* Caption Dropout Rate */}

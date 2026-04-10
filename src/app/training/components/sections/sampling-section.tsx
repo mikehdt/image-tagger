@@ -1,7 +1,9 @@
 import { PlusIcon, XIcon } from 'lucide-react';
 import { memo } from 'react';
 
+import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 
 import type {
   FormState,
@@ -86,19 +88,12 @@ const SamplingSectionComponent = ({
       <div className="space-y-3">
         {/* Enable Sampling */}
         {visibleFields.has('samplingEnabled' satisfies keyof FormState) && (
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={samplingEnabled}
-              onChange={(e) =>
-                onFieldChange('samplingEnabled', e.target.checked)
-              }
-              className="accent-sky-500"
-            />
-            <span className="text-xs font-medium text-(--foreground)/70">
-              Generate sample images during training
-            </span>
-          </label>
+          <Checkbox
+            isSelected={samplingEnabled}
+            onChange={() => onFieldChange('samplingEnabled', !samplingEnabled)}
+            label="Generate sample images during training"
+            size="small"
+          />
         )}
 
         {samplingEnabled && (
@@ -155,30 +150,15 @@ const SamplingSectionComponent = ({
                   <label className="text-xs font-medium text-(--foreground)/70">
                     Generate Samples Every
                   </label>
-                  <div className="flex rounded border border-(--border-subtle) text-xs">
-                    <button
-                      type="button"
-                      onClick={() => onFieldChange('sampleMode', 'epochs')}
-                      className={`cursor-pointer px-2 py-0.5 ${
-                        sampleMode === 'epochs'
-                          ? 'bg-sky-500 text-white dark:bg-sky-700'
-                          : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      Epochs
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onFieldChange('sampleMode', 'steps')}
-                      className={`cursor-pointer px-2 py-0.5 ${
-                        sampleMode === 'steps'
-                          ? 'bg-sky-500 text-white dark:bg-sky-700'
-                          : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      Steps
-                    </button>
-                  </div>
+                  <SegmentedControl
+                    options={[
+                      { value: 'epochs', label: 'Epochs' },
+                      { value: 'steps', label: 'Steps' },
+                    ]}
+                    value={sampleMode}
+                    onChange={(val) => onFieldChange('sampleMode', val)}
+                    size="sm"
+                  />
                 </div>
                 <input
                   type="number"

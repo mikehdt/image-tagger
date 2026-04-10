@@ -1,52 +1,26 @@
-'use client';
-
-import { ChevronDownIcon, XIcon } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { XIcon } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { SCHEDULER_OPTIONS } from '@/app/services/training/models';
-import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import {
-  closePanel,
-  removeJob,
-  selectActiveTrainingJob,
-  selectPanelOpen,
-} from '@/app/store/jobs';
+import { useAppDispatch } from '@/app/store/hooks';
+import { removeJob, type TrainingJob } from '@/app/store/jobs';
 import { cancelMockTraining } from '@/app/store/training/mock-training';
 
-import { SchedulerSparkline } from '../scheduler-sparkline';
+import { SchedulerSparkline } from '../../../training/components/scheduler-sparkline';
+import { ActionButton } from './action-button';
+import { formatDuration } from './helpers';
 
-function formatDuration(ms: number): string {
-  const totalSeconds = Math.round(ms / 1000);
-  if (totalSeconds < 60) return `${totalSeconds}s`;
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  if (minutes < 60) return `${minutes}m ${seconds}s`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ${minutes % 60}m`;
-}
-
-const JobPanelComponent = () => {
+export function TrainingJobCard({ job }: { job: TrainingJob }) {
   const dispatch = useAppDispatch();
-  const panelOpen = useAppSelector(selectPanelOpen);
-  const job = useAppSelector(selectActiveTrainingJob);
 
-  const status = job?.status ?? null;
-  const config = job?.config ?? null;
-  const progress = job?.progress ?? null;
+  const isRunning = job.status === 'running' || job.status === 'preparing';
+  const isCompleted = job.status === 'completed';
+  const isFailed = job.status === 'failed';
+  const isDone = !isRunning;
 
-  const schedulerCurve = useMemo(() => {
-    const schedulerName = config?.hyperparameters?.scheduler;
-    if (!schedulerName) return null;
-    return (
-      SCHEDULER_OPTIONS.find((s) => s.value === schedulerName)?.curve ?? null
-    );
-  }, [config]);
+  const progress = job.progress;
+  const config = job.config;
 
-  if (!panelOpen || !job) return null;
-
-  const isRunning = status === 'running' || status === 'preparing';
-  const isCompleted = status === 'completed';
-  const isFailed = status === 'failed';
   const pct =
     progress && progress.totalSteps > 0
       ? Math.round((progress.currentStep / progress.totalSteps) * 100)
@@ -57,19 +31,18 @@ const JobPanelComponent = () => {
       ? progress.completedAt - progress.startedAt
       : null;
 
-  const handleDismiss = () => {
-    dispatch(closePanel());
-    if (!isRunning) dispatch(removeJob(job.id));
-  };
-
-  const handleCancel = () => {
-    dispatch(cancelMockTraining(job.id));
-  };
+  const schedulerCurve = useMemo(() => {
+    const schedulerName = config?.hyperparameters?.scheduler;
+    if (!schedulerName) return null;
+    return (
+      SCHEDULER_OPTIONS.find((s) => s.value === schedulerName)?.curve ?? null
+    );
+  }, [config]);
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 w-80 rounded-lg border border-(--border-subtle) bg-(--surface) shadow-lg shadow-black/20">
+    <div className="border-b border-(--border-subtle) inset-shadow-sm inset-shadow-slate-100 last:border-b-0 dark:inset-shadow-slate-900">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-(--border-subtle) px-3 py-2">
+      <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
           <span
             className={`h-2 w-2 rounded-full ${
@@ -86,23 +59,11 @@ const JobPanelComponent = () => {
             {config?.outputName || 'Training'}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          className="cursor-pointer rounded p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          title={isRunning ? 'Minimise' : 'Dismiss'}
-        >
-          {isRunning ? (
-            <ChevronDownIcon className="h-3.5 w-3.5" />
-          ) : (
-            <XIcon className="h-3.5 w-3.5" />
-          )}
-        </button>
       </div>
 
       {/* Scheduler curve */}
-      {schedulerCurve && (
-        <div className="border-b border-(--border-subtle) px-3 py-2">
+      {schedulerCurve && isRunning && (
+        <div className="border-t border-dashed border-(--border-subtle) px-3 py-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-400 uppercase">
               LR Schedule
@@ -125,8 +86,7 @@ const JobPanelComponent = () => {
       )}
 
       {/* Progress */}
-      <div className="px-3 py-2.5">
-        {/* Bar */}
+      <div className="px-3 pb-2.5">
         <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
@@ -140,7 +100,6 @@ const JobPanelComponent = () => {
           />
         </div>
 
-        {/* Stats */}
         <div className="flex items-baseline justify-between text-xs tabular-nums">
           <span className="text-slate-500">
             {progress
@@ -150,7 +109,6 @@ const JobPanelComponent = () => {
           <span className="font-medium text-(--foreground)">{pct}%</span>
         </div>
 
-        {/* Metrics */}
         {progress && progress.loss !== null && (
           <div className="mt-1.5 flex gap-4 text-xs text-slate-400">
             <span>
@@ -170,7 +128,6 @@ const JobPanelComponent = () => {
           </div>
         )}
 
-        {/* Completed summary */}
         {isCompleted && (
           <p className="mt-1.5 text-xs text-green-600 dark:text-green-400">
             Complete{elapsed != null ? ` in ${formatDuration(elapsed)}` : ''}
@@ -181,20 +138,31 @@ const JobPanelComponent = () => {
         )}
       </div>
 
-      {/* Cancel — own row, separated */}
-      {isRunning && (
-        <div className="border-t border-(--border-subtle) px-3 py-2">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="cursor-pointer text-xs text-slate-400 hover:text-red-500"
+      {/* Actions */}
+      <div className="flex items-center gap-1 border-t border-dashed border-(--border-subtle) px-3 py-1.5">
+        {isRunning && (
+          <ActionButton
+            onClick={() => dispatch(cancelMockTraining(job.id))}
+            title="Cancel training"
+            variant="danger"
           >
-            Cancel training
-          </button>
-        </div>
-      )}
+            <XIcon className="h-2.5 w-2.5" />
+            Cancel
+          </ActionButton>
+        )}
+        {isDone && (
+          <>
+            <div className="mr-auto" />
+            <ActionButton
+              onClick={() => dispatch(removeJob(job.id))}
+              title="Clear from list"
+            >
+              <XIcon className="h-2.5 w-2.5" />
+              Clear
+            </ActionButton>
+          </>
+        )}
+      </div>
     </div>
   );
-};
-
-export const JobPanel = memo(JobPanelComponent);
+}
