@@ -11,6 +11,8 @@ import {
   setModelsAndProviders,
 } from '@/app/store/auto-tagger';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { selectActiveTaggingJob } from '@/app/store/jobs';
+import { selectProjectFolderName } from '@/app/store/project';
 import { selectSelectedAssetsCount } from '@/app/store/selection';
 import {
   selectAssetsWithActiveFiltersCount,
@@ -23,7 +25,16 @@ import { TriggerPhrasesButton } from './trigger-phrases-button';
 /** Auto Tagger button — first-class in caption mode */
 const AutoTaggerButton = () => {
   const dispatch = useAppDispatch();
-  const [isTaggerModalOpen, setIsTaggerModalOpen] = useState(false);
+
+  const projectFolderName = useAppSelector(selectProjectFolderName);
+  const activeTaggingJob = useAppSelector(
+    selectActiveTaggingJob(projectFolderName ?? ''),
+  );
+
+  // Auto-open on mount if there's an active tagging job (e.g. user returned to project)
+  const [isTaggerModalOpen, setIsTaggerModalOpen] = useState(
+    () => activeTaggingJob !== null,
+  );
 
   const selectedAssetsData = useAppSelector(selectSelectedAssetsData);
   const filteredAssets = useAppSelector(selectFilteredAssets);

@@ -4,6 +4,7 @@ import { ActivityIcon, ChevronDownIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useRef } from 'react';
 
+import { useIsAnyModalOpen } from '@/app/components/shared/modal';
 import { abortTagging } from '@/app/services/auto-tagger/tagging-controllers';
 import { abortDownload } from '@/app/services/model-manager/download-controllers';
 import { startModelDownload } from '@/app/services/model-manager/start-download';
@@ -35,6 +36,7 @@ import { TrainingJobCard } from './training-job-card';
 const ActivityPanelComponent = () => {
   const dispatch = useAppDispatch();
   const pathname = usePathname();
+  const isAnyModalOpen = useIsAnyModalOpen();
   const panelOpen = useAppSelector(selectPanelOpen);
   const hasJobs = useAppSelector(selectHasJobs);
   const activeJobs = useAppSelector(selectActiveJobs);
@@ -129,7 +131,7 @@ const ActivityPanelComponent = () => {
     dispatch(clearCompletedJobs());
   }, [dispatch]);
 
-  if (!hasJobs) return null;
+  if (!hasJobs || isAnyModalOpen) return null;
 
   const activeCount = activeJobs.length;
   const hasActive = activeCount > 0;

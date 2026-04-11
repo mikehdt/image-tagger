@@ -1,2 +1,2 @@
 export { Modal } from './modal';
-export { ModalProvider } from './modal-provider';
+export { ModalProvider, useIsAnyModalOpen } from './modal-provider';

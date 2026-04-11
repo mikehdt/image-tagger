@@ -1,18 +1,34 @@
 'use client';
 
-import { createContext, useContext, useRef } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 
 type ModalContextType = {
   portalRef: React.RefObject<HTMLDivElement | null>;
+  /** Register that a modal has opened. Returns an unregister function. */
+  registerOpen: () => () => void;
+  /** Number of currently open modals. */
+  openCount: number;
 };
 
 const ModalContext = createContext<ModalContextType | null>(null);
 
 export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const portalRef = useRef<HTMLDivElement>(null);
+  const [openCount, setOpenCount] = useState(0);
+
+  const registerOpen = useCallback(() => {
+    setOpenCount((c) => c + 1);
+    return () => setOpenCount((c) => Math.max(0, c - 1));
+  }, []);
 
   return (
-    <ModalContext.Provider value={{ portalRef }}>
+    <ModalContext.Provider value={{ portalRef, registerOpen, openCount }}>
       {children}
       {/* This div serves as the portal container for all modals */}
       <div id="modal-portal-container" ref={portalRef} />
@@ -45,4 +61,29 @@ export const useModalPortal = (): HTMLElement | null => {
 
   // For SSR - return null until client-side rendering takes over
   return null;
+};
+
+/** Hook to register a modal as open. Call in an effect keyed on isOpen. */
+export const useModalRegister = (): ((isOpen: boolean) => void) => {
+  const context = useContext(ModalContext);
+  const unregisterRef = useRef<(() => void) | null>(null);
+
+  return useCallback(
+    (isOpen: boolean) => {
+      if (!context) return;
+      if (isOpen && !unregisterRef.current) {
+        unregisterRef.current = context.registerOpen();
+      } else if (!isOpen && unregisterRef.current) {
+        unregisterRef.current();
+        unregisterRef.current = null;
+      }
+    },
+    [context],
+  );
+};
+
+/** Whether any modal is currently open. */
+export const useIsAnyModalOpen = (): boolean => {
+  const context = useContext(ModalContext);
+  return (context?.openCount ?? 0) > 0;
 };

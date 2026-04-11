@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useModalPortal } from './modal-provider';
+import { useModalPortal, useModalRegister } from './modal-provider';
 
 type ModalProps = {
   isOpen: boolean;
@@ -114,6 +114,12 @@ export const Modal = ({
       cancelAnimationFrame(rafId);
     };
   }, [isOpen, ANIMATION_DURATION]);
+
+  // Track this modal in the global open-modal count
+  const registerModal = useModalRegister();
+  useEffect(() => {
+    registerModal(isOpen);
+  }, [isOpen, registerModal]);
 
   useEffect(() => {
     // Add event listener for ESC key

@@ -204,12 +204,14 @@ export function useAutoTagger({
   }, [isTagging, onClose]);
 
   const handleCancel = useCallback(() => {
-    const jobId = currentJobIdRef.current;
+    // Use the local ref if this instance started the job, otherwise
+    // fall back to the active job from Redux (e.g. modal auto-opened on return)
+    const jobId = currentJobIdRef.current ?? activeTaggingJob?.id;
     if (jobId) {
       abortTagging(jobId);
       dispatch(cancelTagging(jobId));
     }
-  }, [dispatch]);
+  }, [activeTaggingJob?.id, dispatch]);
 
   /**
    * Flush pending results from localStorage → Redux, then deselect tagged assets.
