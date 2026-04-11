@@ -7,6 +7,7 @@ import { removeJob, type TrainingJob } from '@/app/store/jobs';
 import { cancelMockTraining } from '@/app/store/training/mock-training';
 
 import { SchedulerSparkline } from '../../../training/components/scheduler-sparkline';
+import { ProgressBar } from '../progress-bar/progress-bar';
 import { ActionButton } from './action-button';
 import { formatDuration } from './helpers';
 
@@ -30,6 +31,9 @@ export function TrainingJobCard({ job }: { job: TrainingJob }) {
     progress?.completedAt != null && progress.startedAt != null
       ? progress.completedAt - progress.startedAt
       : null;
+
+  const checkpointPositions = progress?.checkpointSteps ?? [];
+  const savedCount = checkpointPositions.length;
 
   const schedulerCurve = useMemo(() => {
     const schedulerName = config?.hyperparameters?.scheduler;
@@ -87,18 +91,14 @@ export function TrainingJobCard({ job }: { job: TrainingJob }) {
 
       {/* Progress */}
       <div className="px-3 pb-2.5">
-        <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${
-              isCompleted
-                ? 'bg-green-500'
-                : isFailed
-                  ? 'bg-red-500'
-                  : 'bg-sky-500'
-            }`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
+        <ProgressBar
+          value={progress?.currentStep ?? 0}
+          max={progress?.totalSteps ?? 1}
+          color={isCompleted ? 'green' : isFailed ? 'red' : 'sky'}
+          indeterminate={!progress}
+          marks={checkpointPositions}
+          className="mb-2"
+        />
 
         <div className="flex items-baseline justify-between text-xs tabular-nums">
           <span className="text-slate-500">
@@ -110,7 +110,7 @@ export function TrainingJobCard({ job }: { job: TrainingJob }) {
         </div>
 
         {progress && progress.loss !== null && (
-          <div className="mt-1.5 flex gap-4 text-xs text-slate-400">
+          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-400">
             <span>
               Loss{' '}
               <span className="font-medium text-(--foreground)">
@@ -125,12 +125,19 @@ export function TrainingJobCard({ job }: { job: TrainingJob }) {
                 </span>
               </span>
             )}
+            {savedCount > 0 && (
+              <span>
+                {savedCount} checkpoint{savedCount !== 1 ? 's' : ''} saved
+              </span>
+            )}
           </div>
         )}
 
         {isCompleted && (
           <p className="mt-1.5 text-xs text-green-600 dark:text-green-400">
             Complete{elapsed != null ? ` in ${formatDuration(elapsed)}` : ''}
+            {savedCount > 0 &&
+              ` · ${savedCount} checkpoint${savedCount !== 1 ? 's' : ''}`}
           </p>
         )}
         {isFailed && progress?.error && (

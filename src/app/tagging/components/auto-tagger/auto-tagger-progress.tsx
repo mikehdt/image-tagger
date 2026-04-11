@@ -1,4 +1,5 @@
 import { Button } from '@/app/components/shared/button';
+import { ProgressBar } from '@/app/components/shared/progress-bar/progress-bar';
 
 import type { TaggingProgress } from './types';
 
@@ -11,10 +12,6 @@ export function AutoTaggerProgress({
   progress,
   onCancel,
 }: AutoTaggerProgressProps) {
-  const progressPercent = progress
-    ? Math.round((progress.current / progress.total) * 100)
-    : 0;
-
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -22,12 +19,12 @@ export function AutoTaggerProgress({
       </p>
 
       <div className="flex flex-col gap-2">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-linear-to-t from-slate-200 to-slate-300 inset-shadow-xs inset-shadow-slate-400">
-          <div
-            className="h-full bg-linear-to-t from-indigo-600 to-indigo-500 inset-shadow-xs inset-shadow-indigo-300 transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+        <ProgressBar
+          value={progress?.current ?? 0}
+          max={progress?.total ?? 1}
+          color="indigo"
+          indeterminate={!progress}
+        />
         <p className="truncate text-xs text-slate-500">
           {progress?.currentFileId || 'Processing...'}
         </p>

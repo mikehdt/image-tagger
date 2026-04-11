@@ -3,6 +3,7 @@ import { memo } from 'react';
 
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 
 import type {
@@ -107,12 +108,12 @@ const SamplingSectionComponent = ({
                 <div className="space-y-1.5">
                   {samplePrompts.map((prompt, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <input
+                      <Input
                         type="text"
                         value={prompt}
                         onChange={(e) => onSetPrompt(i, e.target.value)}
                         placeholder="e.g. a woman with red hair, sitting at a cafe"
-                        className="flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                        className="flex-1"
                       />
                       {samplePrompts.length > 1 && (
                         <button
@@ -160,7 +161,7 @@ const SamplingSectionComponent = ({
                     size="sm"
                   />
                 </div>
-                <input
+                <Input
                   type="number"
                   min={1}
                   value={activeValue}
@@ -168,7 +169,7 @@ const SamplingSectionComponent = ({
                     const val = parseInt(e.target.value, 10);
                     if (val > 0) onFieldChange(activeField, val);
                   }}
-                  className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                  className="w-32"
                 />
               </div>
             )}
@@ -179,7 +180,7 @@ const SamplingSectionComponent = ({
                 <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
                   Sample Steps
                 </label>
-                <input
+                <Input
                   type="number"
                   min={1}
                   max={100}
@@ -188,7 +189,7 @@ const SamplingSectionComponent = ({
                     const val = parseInt(e.target.value, 10);
                     if (val > 0) onFieldChange('sampleSteps', val);
                   }}
-                  className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                  className="w-20"
                 />
                 <p className="mt-1 text-xs text-slate-400">
                   Inference steps when generating sample images
@@ -202,7 +203,7 @@ const SamplingSectionComponent = ({
                 <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
                   Guidance Scale
                 </label>
-                <input
+                <Input
                   type="text"
                   value={guidanceScale}
                   onChange={(e) => {
@@ -210,7 +211,7 @@ const SamplingSectionComponent = ({
                     if (!isNaN(val) && val >= 0)
                       onFieldChange('guidanceScale', val);
                   }}
-                  className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                  className="w-20 tabular-nums"
                 />
                 <p className="mt-1 text-xs text-slate-400">
                   Classifier-free guidance strength for sampling
@@ -224,13 +225,13 @@ const SamplingSectionComponent = ({
                 <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
                   Noise Scheduler
                 </label>
-                <input
+                <Input
                   type="text"
                   value={noiseScheduler}
                   onChange={(e) =>
                     onFieldChange('noiseScheduler', e.target.value)
                   }
-                  className="w-40 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) focus:border-sky-500 focus:outline-none"
+                  className="w-40"
                 />
               </div>
             )}
@@ -243,7 +244,7 @@ const SamplingSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Seed
             </label>
-            <input
+            <Input
               type="number"
               min={-1}
               value={seed}
@@ -251,7 +252,7 @@ const SamplingSectionComponent = ({
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val) && val >= -1) onFieldChange('seed', val);
               }}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-32"
             />
             <p className="mt-1 text-xs text-slate-400">
               -1 for random, or a fixed number for reproducibility

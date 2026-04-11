@@ -33,6 +33,7 @@ export type TrainingProgress = {
   learningRate: number | null;
   etaSeconds: number | null;
   sampleImagePaths: string[];
+  checkpointSteps: number[];
   logLines: string[];
   error: string | null;
 };

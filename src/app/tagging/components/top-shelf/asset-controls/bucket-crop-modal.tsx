@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Dropdown } from '@/app/components/shared/dropdown';
 import { FormTitle } from '@/app/components/shared/form-title/form-title';
+import { Input } from '@/app/components/shared/input/input';
 import { Modal } from '@/app/components/shared/modal';
 import { calculateKohyaBucket, KOHYA_CONFIGS } from '@/app/utils/image-utils';
 
@@ -414,14 +415,14 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 />
               )
             ) : (
-              <input
+              <Input
                 id="width-input"
                 type="number"
                 value={inputWidth}
                 onChange={handleWidthChange}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-slate-600"
-                min="1"
-                max="4096"
+                className="w-full"
+                min={1}
+                max={4096}
               />
             )}
           </div>
@@ -465,14 +466,14 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 />
               )
             ) : (
-              <input
+              <Input
                 id="height-input"
                 type="number"
                 value={inputHeight}
                 onChange={handleHeightChange}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-slate-600"
-                min="1"
-                max="4096"
+                className="w-full"
+                min={1}
+                max={4096}
               />
             )}
           </div>

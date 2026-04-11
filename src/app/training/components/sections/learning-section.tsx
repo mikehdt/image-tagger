@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import {
@@ -234,7 +235,7 @@ const LearningSectionComponent = ({
               />
             </div>
 
-            <input
+            <Input
               type="number"
               min={1}
               value={durationMode === 'epochs' ? epochs : steps}
@@ -247,7 +248,7 @@ const LearningSectionComponent = ({
                   );
                 }
               }}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-32"
             />
 
             {totalEffective > 0 && (
@@ -272,7 +273,7 @@ const LearningSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Batch Size
             </label>
-            <input
+            <Input
               type="number"
               min={1}
               max={8}
@@ -281,7 +282,7 @@ const LearningSectionComponent = ({
                 const val = parseInt(e.target.value, 10);
                 if (val > 0) onFieldChange('batchSize', val);
               }}
-              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-20"
             />
             {batchSize > 1 && (
               <p className="mt-1 text-xs text-amber-500">
@@ -322,7 +323,7 @@ const LearningSectionComponent = ({
               </div>
             ) : (
               /* Intermediate+: direct number input */
-              <input
+              <Input
                 type="text"
                 value={learningRate}
                 onChange={(e) => {
@@ -332,7 +333,7 @@ const LearningSectionComponent = ({
                   }
                 }}
                 placeholder={String(defaults.learningRate)}
-                className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                className="w-32 tabular-nums"
               />
             )}
           </div>
@@ -434,7 +435,7 @@ const LearningSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Warmup Steps
             </label>
-            <input
+            <Input
               type="number"
               min={0}
               value={warmupSteps}
@@ -443,7 +444,7 @@ const LearningSectionComponent = ({
                 if (val >= 0) onFieldChange('warmupSteps', val);
               }}
               placeholder={String(defaults.warmupSteps)}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-32"
             />
           </div>
         )}
@@ -454,7 +455,7 @@ const LearningSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Restarts
             </label>
-            <input
+            <Input
               type="number"
               min={1}
               value={numRestarts}
@@ -463,7 +464,7 @@ const LearningSectionComponent = ({
                 if (val >= 1) onFieldChange('numRestarts', val);
               }}
               placeholder={String(defaults.numRestarts)}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-32"
             />
             <p className="mt-1 text-xs text-slate-400">
               Number of cosine cycles during training
@@ -477,7 +478,7 @@ const LearningSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Weight Decay
             </label>
-            <input
+            <Input
               type="text"
               value={weightDecay}
               onChange={(e) => {
@@ -485,7 +486,7 @@ const LearningSectionComponent = ({
                 if (!isNaN(val) && val >= 0) onFieldChange('weightDecay', val);
               }}
               placeholder={String(defaults.weightDecay)}
-              className="w-32 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-32 tabular-nums"
             />
             <p className="mt-1 text-xs text-slate-400">
               L2 regularisation to prevent overfitting (0 = disabled)

@@ -11,6 +11,7 @@ import { memo, useCallback, useMemo } from 'react';
 
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
 
 import { ProjectPicker } from '../project-picker/project-picker';
 import type {
@@ -24,8 +25,6 @@ import { SectionResetButton } from './section-reset-button';
 type DatasetSectionProps = {
   datasets: DatasetSource[];
   extraFolders: string[];
-  totalImages: number;
-  totalEffective: number;
   captionDropoutRate: number;
   captionShuffling: boolean;
   flipAugment: boolean;
@@ -59,8 +58,6 @@ type DatasetSectionProps = {
 const DatasetSectionComponent = ({
   datasets,
   extraFolders,
-  totalImages,
-  totalEffective,
   captionDropoutRate,
   captionShuffling,
   flipAugment,
@@ -230,7 +227,7 @@ const DatasetSectionComponent = ({
                         {!isDisabled && (
                           <div className="flex items-center gap-1.5">
                             <span className="text-slate-400">&times;</span>
-                            <input
+                            <Input
                               type="number"
                               min={1}
                               max={100}
@@ -245,7 +242,8 @@ const DatasetSectionComponent = ({
                                   );
                                 }
                               }}
-                              className="w-14 rounded border border-(--border-subtle) bg-(--surface) px-1.5 py-0.5 text-center text-xs text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                              size="sm"
+                              className="w-14 text-center"
                             />
                             <span className="text-slate-400">repeats</span>
                           </div>
@@ -311,15 +309,6 @@ const DatasetSectionComponent = ({
             </div>
           )}
 
-        {totalImages > 0 && (
-          <div className="border-t border-(--border-subtle) pt-2 text-xs text-slate-500">
-            <span className="font-medium tabular-nums">{totalImages}</span>{' '}
-            images,{' '}
-            <span className="font-medium tabular-nums">{totalEffective}</span>{' '}
-            effective (with repeats)
-          </div>
-        )}
-
         {/* Caption Shuffling */}
         {visibleFields.has('captionShuffling' satisfies keyof FormState) && (
           <div className="flex items-center gap-2">
@@ -373,7 +362,7 @@ const DatasetSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Caption Dropout Rate
             </label>
-            <input
+            <Input
               type="text"
               value={captionDropoutRate}
               onChange={(e) => {
@@ -382,7 +371,7 @@ const DatasetSectionComponent = ({
                   onFieldChange('captionDropoutRate', val);
                 }
               }}
-              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-20 tabular-nums"
             />
             <p className="mt-1 text-xs text-slate-400">
               Probability of dropping captions during training (0 = disabled)

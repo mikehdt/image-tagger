@@ -1,7 +1,10 @@
 import { DownloadIcon, FolderOpenIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 
+import { Button } from '@/app/components/shared/button';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
+import { InputTray } from '@/app/components/shared/input-tray/input-tray';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   type ExpertiseTier,
@@ -169,31 +172,31 @@ const WhatToTrainSectionComponent = ({
                   <span className="font-normal text-slate-400">(optional)</span>
                 )}
               </label>
-              <div className="flex gap-1.5">
-                <input
+              <InputTray size="md">
+                <Input
                   type="text"
                   value={modelPaths[component.type] ?? ''}
                   onChange={handlePathChange(component.type)}
                   placeholder={`Path to ${component.label.toLowerCase()}…`}
-                  className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                  className="min-w-0 flex-1"
                 />
-                <button
-                  type="button"
+                <Button
                   onClick={() => handleBrowse(component.type, component.label)}
-                  className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
+                  variant="ghost"
+                  size="smallSquare"
                   title="Browse…"
                 >
-                  <FolderOpenIcon className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
+                  <FolderOpenIcon />
+                </Button>
+                <Button
                   onClick={handleOpenModelManager}
-                  className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-indigo-500/60 hover:bg-(--surface-hover) hover:text-indigo-500"
+                  variant="ghost"
+                  size="smallSquare"
                   title="Download from Model Manager…"
                 >
-                  <DownloadIcon className="h-4 w-4" />
-                </button>
-              </div>
+                  <DownloadIcon />
+                </Button>
+              </InputTray>
               {component.hint && (
                 <p className="mt-0.5 text-xs text-slate-400">
                   {component.hint}

@@ -19,6 +19,27 @@ export function startMockTraining(
     const totalSteps = (config.steps as number) || 500;
     const outputName = (config.outputName as string) || 'mock-lora';
     const baseLr = (config.learningRate as number) || 1e-4;
+    const epochs = (config.epochs as number) ?? 20;
+
+    // Determine checkpoint step positions from save config
+    const saveEnabled = (config.saveEnabled as boolean) ?? false;
+    const saveMode = (config.saveMode as string) ?? 'epochs';
+    const saveEveryEpochs = (config.saveEveryEpochs as number) ?? 1;
+    const saveEverySteps = (config.saveEverySteps as number) ?? 100;
+    const stepsPerEpoch = epochs > 0 ? Math.ceil(totalSteps / epochs) : totalSteps;
+
+    const checkpointPositions: number[] = [];
+    if (saveEnabled) {
+      if (saveMode === 'epochs' && saveEveryEpochs > 0) {
+        for (let e = saveEveryEpochs; e <= epochs; e += saveEveryEpochs) {
+          checkpointPositions.push(Math.min(e * stepsPerEpoch, totalSteps));
+        }
+      } else if (saveMode === 'steps' && saveEverySteps > 0) {
+        for (let s = saveEverySteps; s <= totalSteps; s += saveEverySteps) {
+          checkpointPositions.push(s);
+        }
+      }
+    }
 
     dispatch(
       addJob({
@@ -47,7 +68,7 @@ export function startMockTraining(
             optimizer: (config.optimizer as string) ?? 'adamw8bit',
             scheduler: (config.scheduler as string) ?? 'constant',
             warmupSteps: (config.warmupSteps as number) ?? 0,
-            saveEveryNEpochs: 1,
+            saveEveryNEpochs: saveEveryEpochs,
             sampleEveryNSteps: 250,
             gradientAccumulationSteps: 1,
             mixedPrecision: 'bf16',
@@ -92,6 +113,7 @@ export function startMockTraining(
                 ? Math.round(((totalSteps - step) / (totalSteps / 50)) * 0.2)
                 : 0,
             sampleImagePaths: [],
+            checkpointSteps: checkpointPositions.filter((s) => s <= step),
             logLines: [],
             error: null,
           },

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import { InputTray } from '@/app/components/shared/input-tray/input-tray';
 import {
   selectHasSubfolderAssets,
   selectSortDirection,
@@ -144,7 +145,7 @@ export const AssetSortControls = () => {
     (sortType === SortType.FOLDER && !hasSubfolderAssets);
 
   return (
-    <div className="flex items-center rounded-sm bg-slate-200 inset-shadow-xs inset-shadow-slate-300 dark:bg-slate-800/30 dark:inset-shadow-slate-900">
+    <InputTray>
       <Dropdown
         items={sortTypeItems}
         selectedValue={sortType}
@@ -169,6 +170,6 @@ export const AssetSortControls = () => {
           {getSortDirectionLabel(sortType, sortDirection)}
         </span>
       </Button>
-    </div>
+    </InputTray>
   );
 };

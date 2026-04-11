@@ -3,6 +3,7 @@
 import { BoxIcon } from 'lucide-react';
 import Image from 'next/image';
 
+import { ProgressBar } from '@/app/components/shared/progress-bar/progress-bar';
 import { selectLoadProgress } from '@/app/store/assets';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectProjectName, selectProjectThumbnail } from '@/app/store/project';
@@ -51,18 +52,18 @@ export const InitialLoad = () => {
 
       {loadProgress ? (
         <div className="mt-4 w-full">
-          <div className="relative h-5 w-full overflow-hidden rounded-full bg-linear-to-t from-slate-200 to-slate-300 inset-shadow-xs inset-shadow-slate-400">
-            <div
-              className="flex h-5 items-center justify-end rounded-full bg-linear-to-t from-teal-600 to-teal-500 inset-shadow-xs inset-shadow-teal-300 transition-all duration-300 ease-out"
-              style={{ width: `${progressPercentage}%` }}
-            >
-              {progressPercentage >= 10 && (
-                <span className="pr-2 text-xs font-medium text-white tabular-nums">
-                  {progressPercentage}%
-                </span>
-              )}
-            </div>
-          </div>
+          <ProgressBar
+            value={loadProgress.completed}
+            max={loadProgress.total}
+            size="lg"
+            color="teal"
+          >
+            {progressPercentage >= 10 && (
+              <span className="pr-2 text-xs font-medium text-white tabular-nums">
+                {progressPercentage}%
+              </span>
+            )}
+          </ProgressBar>
           <div className="mt-4 flex items-center justify-center text-xs font-medium text-slate-500 tabular-nums">
             {loadProgress.total > 0 ? (
               <p>

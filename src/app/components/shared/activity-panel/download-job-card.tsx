@@ -3,6 +3,7 @@ import { DownloadIcon, RefreshCwIcon, Trash2Icon, XIcon } from 'lucide-react';
 import { useAppDispatch } from '@/app/store/hooks';
 import { type DownloadJob, removeJob } from '@/app/store/jobs';
 
+import { ProgressBar } from '../progress-bar/progress-bar';
 import { ActionButton } from './action-button';
 import { formatBytes } from './helpers';
 
@@ -26,13 +27,6 @@ export function DownloadJobCard({
   const isCancelled = job.status === 'cancelled';
   const canRetry = isFailed || isInterrupted || isCancelled;
   const isDone = !isRunning;
-
-  const pct =
-    job.progress && job.progress.totalBytes > 0
-      ? Math.round(
-          (job.progress.bytesDownloaded / job.progress.totalBytes) * 100,
-        )
-      : 0;
 
   const iconColour = isRunning
     ? 'text-indigo-500'
@@ -65,18 +59,14 @@ export function DownloadJobCard({
       {/* Progress bar */}
       {(isRunning || isCompleted || canRetry) && (
         <div className="mt-2">
-          <div className="mb-1 h-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                isCompleted
-                  ? 'bg-green-500'
-                  : canRetry
-                    ? 'bg-amber-500'
-                    : 'bg-indigo-500'
-              }`}
-              style={{ width: `${isCompleted ? 100 : pct}%` }}
-            />
-          </div>
+          <ProgressBar
+            value={isCompleted ? 1 : (job.progress?.bytesDownloaded ?? 0)}
+            max={isCompleted ? 1 : (job.progress?.totalBytes ?? 1)}
+            size="xs"
+            color={isCompleted ? 'green' : canRetry ? 'amber' : 'indigo'}
+            indeterminate={isRunning && !job.progress}
+            className="mb-1"
+          />
           <div className="flex justify-between text-[10px] text-slate-500 tabular-nums">
             <span>{statusLabel}</span>
             <span>

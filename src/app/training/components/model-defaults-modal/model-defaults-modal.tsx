@@ -4,6 +4,8 @@ import { FolderOpenIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
+import { Input } from '@/app/components/shared/input/input';
+import { InputTray } from '@/app/components/shared/input-tray/input-tray';
 import { Modal } from '@/app/components/shared/modal';
 import {
   getModelsByArchitecture,
@@ -125,27 +127,27 @@ export function ModelDefaultsModal({
                               </span>
                             )}
                           </label>
-                          <div className="flex gap-1.5">
-                            <input
+                          <InputTray size="md">
+                            <Input
                               type="text"
                               value={draft[model.id]?.[comp.type] ?? ''}
                               onChange={(e) =>
                                 setPath(model.id, comp.type, e.target.value)
                               }
                               placeholder={`Path to ${comp.label.toLowerCase()}…`}
-                              className="min-w-0 flex-1 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
+                              className="min-w-0 flex-1"
                             />
-                            <button
-                              type="button"
+                            <Button
                               onClick={() =>
                                 handleBrowse(model.id, comp.type, comp.label)
                               }
-                              className="flex shrink-0 items-center rounded border border-(--border-subtle) bg-(--surface) px-2.5 text-(--foreground)/60 hover:bg-(--surface-hover) hover:text-(--foreground)"
+                              variant="ghost"
+                              size="smallSquare"
                               title="Browse…"
                             >
-                              <FolderOpenIcon className="h-4 w-4" />
-                            </button>
-                          </div>
+                              <FolderOpenIcon />
+                            </Button>
+                          </InputTray>
                           {comp.hint && (
                             <p className="mt-0.5 text-xs text-slate-400">
                               {comp.hint}

@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   calculateKohyaBucket,
@@ -180,7 +181,7 @@ const PerformanceSectionComponent = ({
             <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
               Gradient Accumulation Steps
             </label>
-            <input
+            <Input
               type="number"
               min={1}
               max={16}
@@ -189,7 +190,7 @@ const PerformanceSectionComponent = ({
                 const val = parseInt(e.target.value, 10);
                 if (val > 0) onFieldChange('gradientAccumulationSteps', val);
               }}
-              className="w-20 rounded border border-(--border-subtle) bg-(--surface) px-3 py-1.5 text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+              className="w-20"
             />
             {gradientAccumulationSteps > 1 && (
               <p className="mt-1 text-xs text-slate-400">

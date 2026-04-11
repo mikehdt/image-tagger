@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
+import { InputTray } from '@/app/components/shared/input-tray/input-tray';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   selectTagSortDirection,
@@ -74,7 +75,7 @@ export const TagSortControls = () => {
   const showDirectionToggle = tagSortType !== TagSortType.SORTABLE;
 
   return (
-    <div className="flex items-center rounded-sm bg-slate-200 inset-shadow-xs inset-shadow-slate-300 dark:bg-slate-800/30 dark:inset-shadow-slate-900">
+    <InputTray>
       <Dropdown
         items={tagSortTypeItems}
         selectedValue={tagSortType}
@@ -100,6 +101,6 @@ export const TagSortControls = () => {
           </span>
         </Button>
       )}
-    </div>
+    </InputTray>
   );
 };

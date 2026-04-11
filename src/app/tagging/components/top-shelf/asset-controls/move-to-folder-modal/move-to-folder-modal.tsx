@@ -10,6 +10,7 @@ import {
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { Modal } from '@/app/components/shared/modal';
+import { ProgressBar } from '@/app/components/shared/progress-bar/progress-bar';
 import { ScopingCheckboxes } from '@/app/components/shared/scoping-checkboxes';
 
 import { useMoveToFolderModal } from './use-move-to-folder-modal';
@@ -345,9 +346,7 @@ export const MoveToFolderModal = ({
 
         {/* Progress bar */}
         {isMoving && (
-          <div className="w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-            <div className="h-1.5 w-full animate-pulse rounded-full bg-sky-500" />
-          </div>
+          <ProgressBar value={0} max={1} size="sm" color="sky" indeterminate />
         )}
 
         {/* Action buttons */}

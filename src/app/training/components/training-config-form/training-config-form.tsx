@@ -15,6 +15,7 @@ import { PerformanceSection } from '../sections/performance-section';
 import { SamplingSection } from '../sections/sampling-section';
 import { SavingSection } from '../sections/saving-section';
 import { WhatToTrainSection } from '../sections/what-to-train-section';
+import { TrainingSummary } from '../training-summary';
 import { useTrainingViewMode } from '../use-training-view-mode';
 import {
   type SectionName,
@@ -146,129 +147,158 @@ const TrainingConfigFormComponent = ({
 
   return (
     <>
-      <div className="mx-auto max-w-200 space-y-3">
-        <WhatToTrainSection
-          modelId={state.modelId}
-          modelPaths={state.modelPaths}
-          appModelDefaults={appModelDefaults}
-          onModelChange={setModel}
-          onModelPathChange={setModelPath}
-          currentModel={currentModel}
-          visibleFields={visibleFields}
-          viewMode={viewMode}
-          hiddenChangesCount={hiddenChanges.whatToTrain}
-        />
+      <div className="mx-auto flex max-w-300 flex-col gap-4 lg:flex-row lg:items-start">
+        {/* Settings column */}
+        <div className="max-w-200 min-w-0 flex-1 space-y-3">
+          <WhatToTrainSection
+            modelId={state.modelId}
+            modelPaths={state.modelPaths}
+            appModelDefaults={appModelDefaults}
+            onModelChange={setModel}
+            onModelPathChange={setModelPath}
+            currentModel={currentModel}
+            visibleFields={visibleFields}
+            viewMode={viewMode}
+            hiddenChangesCount={hiddenChanges.whatToTrain}
+          />
 
-        <DatasetSection
-          datasets={state.datasets}
-          extraFolders={state.extraFolders}
-          totalImages={datasetStats.totalImages}
-          totalEffective={datasetStats.totalEffective}
-          captionDropoutRate={state.captionDropoutRate}
-          captionShuffling={state.captionShuffling}
-          flipAugment={state.flipAugment}
-          flipVAugment={state.flipVAugment}
-          hasChanges={sectionHasChanges.dataset}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.dataset}
-          onAddDataset={addDataset}
-          onRemoveDataset={removeDataset}
-          onSetFolderRepeats={setFolderRepeats}
-          onAddExtraFolder={addExtraFolder}
-          onRemoveExtraFolder={removeExtraFolder}
-          onFieldChange={setField}
-          onReset={resetSection}
-        />
+          <DatasetSection
+            datasets={state.datasets}
+            extraFolders={state.extraFolders}
+            captionDropoutRate={state.captionDropoutRate}
+            captionShuffling={state.captionShuffling}
+            flipAugment={state.flipAugment}
+            flipVAugment={state.flipVAugment}
+            hasChanges={sectionHasChanges.dataset}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.dataset}
+            onAddDataset={addDataset}
+            onRemoveDataset={removeDataset}
+            onSetFolderRepeats={setFolderRepeats}
+            onAddExtraFolder={addExtraFolder}
+            onRemoveExtraFolder={removeExtraFolder}
+            onFieldChange={setField}
+            onReset={resetSection}
+          />
 
-        <LearningSection
-          durationMode={state.durationMode}
-          epochs={state.epochs}
-          steps={state.steps}
-          learningRate={state.learningRate}
-          optimizer={state.optimizer}
-          scheduler={state.scheduler}
-          warmupSteps={state.warmupSteps}
-          numRestarts={state.numRestarts}
-          weightDecay={state.weightDecay}
-          calculatedSteps={calculatedSteps}
-          calculatedEpochs={calculatedEpochs}
-          totalEffective={datasetStats.totalEffective}
-          batchSize={state.batchSize}
-          hasChanges={sectionHasChanges.learning}
-          defaults={defaults}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.learning}
-          viewMode={viewMode}
-          onFieldChange={setField}
-          onReset={resetSection}
-        />
+          <LearningSection
+            durationMode={state.durationMode}
+            epochs={state.epochs}
+            steps={state.steps}
+            learningRate={state.learningRate}
+            optimizer={state.optimizer}
+            scheduler={state.scheduler}
+            warmupSteps={state.warmupSteps}
+            numRestarts={state.numRestarts}
+            weightDecay={state.weightDecay}
+            calculatedSteps={calculatedSteps}
+            calculatedEpochs={calculatedEpochs}
+            totalEffective={datasetStats.totalEffective}
+            batchSize={state.batchSize}
+            hasChanges={sectionHasChanges.learning}
+            defaults={defaults}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.learning}
+            viewMode={viewMode}
+            onFieldChange={setField}
+            onReset={resetSection}
+          />
 
-        <LoraShapeSection
-          networkType={state.networkType}
-          networkDim={state.networkDim}
-          networkAlpha={state.networkAlpha}
-          hasChanges={sectionHasChanges.loraShape}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.loraShape}
-          onFieldChange={setField}
-          onReset={resetSection}
-        />
+          <LoraShapeSection
+            networkType={state.networkType}
+            networkDim={state.networkDim}
+            networkAlpha={state.networkAlpha}
+            hasChanges={sectionHasChanges.loraShape}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.loraShape}
+            onFieldChange={setField}
+            onReset={resetSection}
+          />
 
-        <PerformanceSection
-          batchSize={state.batchSize}
-          resolution={state.resolution}
-          availableResolutions={currentModel.availableResolutions}
-          provider={currentModel.provider}
-          datasets={state.datasets}
-          mixedPrecision={state.mixedPrecision}
-          gradientAccumulationSteps={state.gradientAccumulationSteps}
-          gradientCheckpointing={state.gradientCheckpointing}
-          cacheLatents={state.cacheLatents}
-          hasChanges={sectionHasChanges.performance}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.performance}
-          onFieldChange={setField}
-          onReset={resetSection}
-        />
+          <PerformanceSection
+            batchSize={state.batchSize}
+            resolution={state.resolution}
+            availableResolutions={currentModel.availableResolutions}
+            provider={currentModel.provider}
+            datasets={state.datasets}
+            mixedPrecision={state.mixedPrecision}
+            gradientAccumulationSteps={state.gradientAccumulationSteps}
+            gradientCheckpointing={state.gradientCheckpointing}
+            cacheLatents={state.cacheLatents}
+            hasChanges={sectionHasChanges.performance}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.performance}
+            onFieldChange={setField}
+            onReset={resetSection}
+          />
 
-        <SamplingSection
-          samplingEnabled={state.samplingEnabled}
-          samplePrompts={state.samplePrompts}
-          sampleMode={state.sampleMode}
-          sampleEveryEpochs={state.sampleEveryEpochs}
-          sampleEverySteps={state.sampleEverySteps}
-          sampleSteps={state.sampleSteps}
-          seed={state.seed}
-          guidanceScale={state.guidanceScale}
-          noiseScheduler={state.noiseScheduler}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.sampling}
-          onFieldChange={setField}
-          onAddPrompt={addSamplePrompt}
-          onRemovePrompt={removeSamplePrompt}
-          onSetPrompt={setSamplePrompt}
-          onReset={resetSection}
-        />
+          <SamplingSection
+            samplingEnabled={state.samplingEnabled}
+            samplePrompts={state.samplePrompts}
+            sampleMode={state.sampleMode}
+            sampleEveryEpochs={state.sampleEveryEpochs}
+            sampleEverySteps={state.sampleEverySteps}
+            sampleSteps={state.sampleSteps}
+            seed={state.seed}
+            guidanceScale={state.guidanceScale}
+            noiseScheduler={state.noiseScheduler}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.sampling}
+            onFieldChange={setField}
+            onAddPrompt={addSamplePrompt}
+            onRemovePrompt={removeSamplePrompt}
+            onSetPrompt={setSamplePrompt}
+            onReset={resetSection}
+          />
 
-        <SavingSection
-          outputName={state.outputName}
-          saveEnabled={state.saveEnabled}
-          saveMode={state.saveMode}
-          saveEveryEpochs={state.saveEveryEpochs}
-          saveEverySteps={state.saveEverySteps}
-          saveFormat={state.saveFormat}
-          visibleFields={visibleFields}
-          hiddenChangesCount={hiddenChanges.saving}
-          onFieldChange={setField}
-          onOutputNameChange={(name) => setField('outputName', name)}
-          onReset={resetSection}
-        />
+          <SavingSection
+            outputName={state.outputName}
+            saveEnabled={state.saveEnabled}
+            saveMode={state.saveMode}
+            saveEveryEpochs={state.saveEveryEpochs}
+            saveEverySteps={state.saveEverySteps}
+            saveFormat={state.saveFormat}
+            visibleFields={visibleFields}
+            hiddenChangesCount={hiddenChanges.saving}
+            onFieldChange={setField}
+            onOutputNameChange={(name) => setField('outputName', name)}
+            onReset={resetSection}
+          />
 
-        <ModelDefaultsModal
-          isOpen={isDefaultsModalOpen}
-          onClose={closeDefaultsModal}
-          onSaved={setAppModelDefaults}
-        />
+          <ModelDefaultsModal
+            isOpen={isDefaultsModalOpen}
+            onClose={closeDefaultsModal}
+            onSaved={setAppModelDefaults}
+          />
+        </div>
+
+        {/* Summary column */}
+        <div className="w-full shrink-0 lg:sticky lg:top-24 lg:w-56">
+          <TrainingSummary
+            outputName={state.outputName}
+            currentModel={currentModel}
+            totalImages={datasetStats.totalImages}
+            totalEffective={datasetStats.totalEffective}
+            durationMode={state.durationMode}
+            epochs={state.epochs}
+            steps={state.steps}
+            calculatedSteps={calculatedSteps}
+            calculatedEpochs={calculatedEpochs}
+            batchSize={state.batchSize}
+            learningRate={state.learningRate}
+            optimizer={state.optimizer}
+            scheduler={state.scheduler}
+            networkType={state.networkType}
+            networkDim={state.networkDim}
+            networkAlpha={state.networkAlpha}
+            resolution={state.resolution}
+            saveEnabled={state.saveEnabled}
+            saveMode={state.saveMode}
+            saveEveryEpochs={state.saveEveryEpochs}
+            saveEverySteps={state.saveEverySteps}
+            saveFormat={state.saveFormat}
+          />
+        </div>
       </div>
 
       <TrainingBottomShelf

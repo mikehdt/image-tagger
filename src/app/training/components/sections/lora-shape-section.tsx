@@ -1,6 +1,7 @@
 import { memo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Input } from '@/app/components/shared/input/input';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 
 import type {
@@ -102,7 +103,7 @@ const LoraShapeSectionComponent = ({
                   }
                   className="flex-1"
                 />
-                <input
+                <Input
                   type="number"
                   min={1}
                   max={128}
@@ -111,7 +112,7 @@ const LoraShapeSectionComponent = ({
                     const val = parseInt(e.target.value, 10);
                     if (val > 0 && val <= 128) onFieldChange('networkDim', val);
                   }}
-                  className="w-16 rounded border border-(--border-subtle) bg-(--surface) px-2 py-1 text-center text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                  className="w-16 text-center"
                 />
               </div>
             </div>
@@ -134,7 +135,7 @@ const LoraShapeSectionComponent = ({
                   }
                   className="flex-1"
                 />
-                <input
+                <Input
                   type="number"
                   min={1}
                   max={128}
@@ -144,7 +145,7 @@ const LoraShapeSectionComponent = ({
                     if (val > 0 && val <= 128)
                       onFieldChange('networkAlpha', val);
                   }}
-                  className="w-16 rounded border border-(--border-subtle) bg-(--surface) px-2 py-1 text-center text-sm text-(--foreground) tabular-nums focus:border-sky-500 focus:outline-none"
+                  className="w-16 text-center"
                 />
               </div>
             </div>

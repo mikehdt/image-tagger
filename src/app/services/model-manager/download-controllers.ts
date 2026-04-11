@@ -9,9 +9,7 @@
 const controllers = new Map<string, AbortController>();
 
 /** Register a controller for a download job. */
-export function registerDownloadController(
-  jobId: string,
-): AbortController {
+export function registerDownloadController(jobId: string): AbortController {
   // Abort any existing controller for this job
   controllers.get(jobId)?.abort();
 
