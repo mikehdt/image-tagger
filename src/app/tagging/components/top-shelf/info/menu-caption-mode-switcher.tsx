@@ -1,12 +1,11 @@
 import { HashIcon, TextIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
-import type { CaptionMode } from '@/app/store/project/types';
-
 import {
   SegmentedControl,
   type SegmentOption,
 } from '@/app/components/shared/segmented-control/segmented-control';
+import type { CaptionMode } from '@/app/store/project/types';
 
 const options: SegmentOption<CaptionMode>[] = [
   { value: 'tags', icon: <HashIcon />, label: 'Tags' },

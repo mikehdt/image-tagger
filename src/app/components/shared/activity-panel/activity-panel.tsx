@@ -141,7 +141,7 @@ const ActivityPanelComponent = () => {
       <button
         type="button"
         onClick={handleOpen}
-        className={`fixed right-4 ${bottomClass} z-50 flex cursor-pointer items-center justify-center rounded-full border border-(--border-subtle) bg-(--surface) p-2.5 shadow-lg shadow-black/20 transition-colors hover:bg-(--surface-hover)`}
+        className={`fixed right-4 ${bottomClass} z-50 flex cursor-pointer items-center justify-center rounded-full border border-(--border-subtle) bg-(--surface) p-2.5 shadow-lg shadow-slate-800/20 transition-colors hover:bg-(--surface-hover)`}
         title="Show activity"
       >
         <ActivityIcon
@@ -159,7 +159,7 @@ const ActivityPanelComponent = () => {
   // Expanded: full panel
   return (
     <div
-      className={`fixed right-4 ${bottomClass} z-50 w-80 rounded-lg border border-(--border-subtle) bg-(--surface) shadow-lg shadow-black/20`}
+      className={`fixed right-4 ${bottomClass} z-50 w-80 rounded-lg border border-(--border-subtle) bg-(--surface) shadow-lg shadow-slate-800/20`}
     >
       {/* Panel header */}
       <div className="flex items-center justify-between border-b border-(--border-subtle) px-3 py-2">

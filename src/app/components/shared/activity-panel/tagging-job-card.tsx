@@ -1,7 +1,7 @@
 import { ScanSearchIcon, XIcon } from 'lucide-react';
 
 import { useAppDispatch } from '@/app/store/hooks';
-import { removeJob,type TaggingJob } from '@/app/store/jobs';
+import { removeJob, type TaggingJob } from '@/app/store/jobs';
 
 import { ProgressBar } from '../progress-bar/progress-bar';
 import { ActionButton } from './action-button';

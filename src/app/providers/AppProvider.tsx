@@ -10,7 +10,9 @@ import {
   selectImageCount,
   selectIoState,
 } from '../store/assets';
+import { flushPendingTagResults } from '../store/assets/flush-pending-tags';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectActiveTaggingJob } from '../store/jobs';
 import {
   selectProjectFolderName,
   setCaptionMode,
@@ -140,6 +142,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [imageCount, ioState, hasCompletedInitialLoad]);
+
+  // Flush any pending auto-tagger results that accumulated while the user was away.
+  // Runs once when assets finish loading — but only if tagging isn't still in progress,
+  // since the completion handler will flush when the job finishes.
+  const activeTaggingJob = useAppSelector(
+    selectActiveTaggingJob(projectFolderName ?? ''),
+  );
+  useEffect(() => {
+    if (
+      ioState === IoState.COMPLETE &&
+      projectFolderName &&
+      imageCount > 0 &&
+      !activeTaggingJob
+    ) {
+      dispatch(flushPendingTagResults(projectFolderName));
+    }
+  }, [ioState, projectFolderName, imageCount, activeTaggingJob, dispatch]);
 
   // On non-tagging routes (project list, training), just show children
   if (!isTagging) {

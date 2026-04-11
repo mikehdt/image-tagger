@@ -33,7 +33,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
         }
       >
         <BookmarkMinusIcon />
-        <span className="ml-1 max-lg:hidden">Cancel All</span>
+        <span className="max-lg:hidden">Cancel All</span>
       </Button>
 
       <Button
@@ -49,7 +49,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
         }
       >
         <BookmarkCheckIcon />
-        <span className="ml-1 max-lg:hidden">Save All</span>
+        <span className="max-lg:hidden">Save All</span>
       </Button>
     </>
   );

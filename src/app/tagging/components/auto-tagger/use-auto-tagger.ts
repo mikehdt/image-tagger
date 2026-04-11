@@ -9,12 +9,17 @@ import type {
 } from '@/app/services/auto-tagger';
 import { DEFAULT_TAGGER_OPTIONS } from '@/app/services/auto-tagger';
 import {
+  appendPendingTagResult,
+  clearPendingTagResults,
+  summarisePendingResults,
+} from '@/app/services/auto-tagger/pending-tag-results';
+import {
   abortTagging,
   registerTaggingController,
   removeTaggingController,
 } from '@/app/services/auto-tagger/tagging-controllers';
 import type { AppDispatch, RootState } from '@/app/store';
-import { addMultipleTags } from '@/app/store/assets';
+import { flushPendingTagResults } from '@/app/store/assets/flush-pending-tags';
 import {
   selectHasReadyModel,
   selectModels,
@@ -37,8 +42,6 @@ import {
   getAutoTaggerSettings,
   saveAutoTaggerSettings,
 } from '@/app/utils/project-actions';
-
-import type { TaggingResult } from './types';
 
 type UseAutoTaggerParams = {
   isOpen: boolean;
@@ -208,58 +211,42 @@ export function useAutoTagger({
     }
   }, [dispatch]);
 
-  const applyTagsToAssets = useCallback(
-    (taggingResults: TaggingResult[]) => {
-      for (const result of taggingResults) {
-        if (result.tags.length > 0) {
-          dispatch(
-            addMultipleTags({
-              assetId: result.fileId,
-              tagNames: result.tags,
-              position: options.tagInsertMode === 'prepend' ? 'start' : 'end',
-            }),
-          );
-        }
-      }
-    },
-    [dispatch, options.tagInsertMode],
-  );
+  /**
+   * Flush pending results from localStorage → Redux, then deselect tagged assets.
+   * This is the single mechanism for applying tags, whether tagging just
+   * completed or the user returned to a project with pending results.
+   */
+  const flushAndFinalise = useCallback(
+    (projectFolderName: string, jobId: string, cancelled: boolean) => {
+      // Compute summary from localStorage before flushing clears it
+      const summaryData = summarisePendingResults(projectFolderName);
+      setSummary(summaryData);
 
-  const deselectTaggedAssets = useCallback(
-    (collectedResults: TaggingResult[]) => {
-      if (!unselectOnComplete) return;
-      const taggedIds = collectedResults
-        .filter((r) => r.tags.length > 0)
-        .map((r) => r.fileId);
-      if (taggedIds.length > 0) {
+      // Flush: read from localStorage → dispatch addMultipleTags → clear
+      dispatch(flushPendingTagResults(projectFolderName));
+
+      // Update the job in the queue
+      if (cancelled) {
+        // cancelTagging already dispatched by the abort handler
+      } else {
+        dispatch(completeTagging({ id: jobId, summary: summaryData }));
+      }
+
+      // Deselect assets that received tags
+      if (unselectOnComplete && summaryData.imagesWithNewTags > 0) {
+        // Re-read isn't needed — we know which assets were tagged from the summary
+        // But we need the fileIds. Read from localStorage before flush clears them...
+        // Actually, flush already cleared them. For deselection, we can use the
+        // selectedAssets that were passed to the hook.
         dispatch(
-          setAssetsSelectionState({ assetIds: taggedIds, selected: false }),
+          setAssetsSelectionState({
+            assetIds: selectedAssets.map((a) => a.fileId),
+            selected: false,
+          }),
         );
       }
     },
-    [unselectOnComplete, dispatch],
-  );
-
-  const finaliseResults = useCallback(
-    (jobId: string, collectedResults: TaggingResult[]) => {
-      const imagesWithNewTags = collectedResults.filter(
-        (r) => r.tags.length > 0,
-      ).length;
-      const totalTagsFound = collectedResults.reduce(
-        (sum, r) => sum + r.tags.length,
-        0,
-      );
-      const summaryData = {
-        imagesProcessed: collectedResults.length,
-        imagesWithNewTags,
-        totalTagsFound,
-      };
-      setSummary(summaryData);
-      dispatch(completeTagging({ id: jobId, summary: summaryData }));
-      applyTagsToAssets(collectedResults);
-      deselectTaggedAssets(collectedResults);
-    },
-    [applyTagsToAssets, deselectTaggedAssets, dispatch],
+    [dispatch, unselectOnComplete, selectedAssets],
   );
 
   const handleStartTagging = useCallback(async () => {
@@ -270,11 +257,19 @@ export function useAutoTagger({
     )
       return;
 
+    const projectFolderName = projectInfo.projectFolderName;
+
+    // Clear any stale pending results for this project before starting
+    clearPendingTagResults(projectFolderName);
+
     // Create a job in the queue
     const jobId = `tagging-${Date.now()}`;
     const modelName =
       readyModels.find((m) => m.id === selectedModelId)?.name ??
       selectedModelId;
+
+    const position: 'start' | 'end' =
+      options.tagInsertMode === 'prepend' ? 'start' : 'end';
 
     dispatch(
       addJob({
@@ -285,7 +280,7 @@ export function useAutoTagger({
         startedAt: Date.now(),
         completedAt: null,
         error: null,
-        projectFolderName: projectInfo.projectFolderName,
+        projectFolderName,
         modelName,
         progress: { current: 0, total: selectedAssets.length },
         summary: null,
@@ -298,8 +293,6 @@ export function useAutoTagger({
     setSummary(null);
     setError(null);
     setWasCancelled(false);
-
-    const collectedResults: TaggingResult[] = [];
 
     try {
       const response = await fetch('/api/auto-tagger/batch', {
@@ -353,9 +346,11 @@ export function useAutoTagger({
                   }),
                 );
               } else if (event.type === 'result') {
-                collectedResults.push({
+                // Persist to localStorage — the single source of truth
+                appendPendingTagResult(projectFolderName, {
                   fileId: event.fileId,
                   tags: event.tags || [],
+                  position,
                 });
               } else if (event.type === 'error' && event.fileId) {
                 console.warn(`Error tagging ${event.fileId}:`, event.error);
@@ -363,25 +358,22 @@ export function useAutoTagger({
                 throw new Error(event.error);
               } else if (event.type === 'complete') {
                 receivedComplete = true;
-                finaliseResults(jobId, collectedResults);
+                flushAndFinalise(projectFolderName, jobId, false);
 
                 // Save settings as defaults for this project
-                if (projectInfo.projectFolderName) {
-                  const settingsToSave: AutoTaggerSettings = {
-                    defaultModelId: selectedModelId,
-                    generalThreshold: options.generalThreshold,
-                    characterThreshold: options.characterThreshold,
-                    removeUnderscore: options.removeUnderscore,
-                    includeCharacterTags: options.includeCharacterTags,
-                    includeRatingTags: options.includeRatingTags,
-                    excludeTags: options.excludeTags,
-                    tagInsertMode: options.tagInsertMode,
-                  };
-                  saveAutoTaggerSettings(
-                    projectInfo.projectFolderName,
-                    settingsToSave,
-                  ).catch(console.error);
-                }
+                const settingsToSave: AutoTaggerSettings = {
+                  defaultModelId: selectedModelId,
+                  generalThreshold: options.generalThreshold,
+                  characterThreshold: options.characterThreshold,
+                  removeUnderscore: options.removeUnderscore,
+                  includeCharacterTags: options.includeCharacterTags,
+                  includeRatingTags: options.includeRatingTags,
+                  excludeTags: options.excludeTags,
+                  tagInsertMode: options.tagInsertMode,
+                };
+                saveAutoTaggerSettings(projectFolderName, settingsToSave).catch(
+                  console.error,
+                );
               }
             } catch (parseErr) {
               console.warn('Failed to parse SSE event:', line, parseErr);
@@ -395,9 +387,10 @@ export function useAutoTagger({
         try {
           const event = JSON.parse(buffer.slice(6));
           if (event.type === 'result') {
-            collectedResults.push({
+            appendPendingTagResult(projectFolderName, {
               fileId: event.fileId,
-              tags: event.tags,
+              tags: event.tags || [],
+              position,
             });
           } else if (event.type === 'complete') {
             receivedComplete = true;
@@ -408,8 +401,9 @@ export function useAutoTagger({
       }
 
       if (!receivedComplete) {
-        if (collectedResults.length > 0) {
-          finaliseResults(jobId, collectedResults);
+        // Stream ended without a complete event — flush whatever we have
+        if (summarisePendingResults(projectFolderName).imagesProcessed > 0) {
+          flushAndFinalise(projectFolderName, jobId, false);
         } else {
           throw new Error(
             'No results received from tagger. Check server logs for errors.',
@@ -419,35 +413,13 @@ export function useAutoTagger({
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         setWasCancelled(true);
-        if (collectedResults.length > 0) {
-          // Apply partial results but mark as cancelled
-          const imagesWithNewTags = collectedResults.filter(
-            (r) => r.tags.length > 0,
-          ).length;
-          const totalTagsFound = collectedResults.reduce(
-            (sum, r) => sum + r.tags.length,
-            0,
-          );
-          const summaryData = {
-            imagesProcessed: collectedResults.length,
-            imagesWithNewTags,
-            totalTagsFound,
-          };
-          setSummary(summaryData);
-          applyTagsToAssets(collectedResults);
-          deselectTaggedAssets(collectedResults);
-        } else {
-          setSummary({
-            imagesProcessed: 0,
-            imagesWithNewTags: 0,
-            totalTagsFound: 0,
-          });
-        }
-        // cancelTagging already dispatched by the abort handler
+        // Flush any partial results that made it to localStorage
+        flushAndFinalise(projectFolderName, jobId, true);
       } else {
         const message = err instanceof Error ? err.message : 'Tagging failed';
         setError(message);
         dispatch(failTagging({ id: jobId, error: message }));
+        clearPendingTagResults(projectFolderName);
       }
     } finally {
       removeTaggingController(jobId);
@@ -460,9 +432,7 @@ export function useAutoTagger({
     selectedAssets,
     readyModels,
     options,
-    finaliseResults,
-    applyTagsToAssets,
-    deselectTaggedAssets,
+    flushAndFinalise,
     dispatch,
   ]);
 

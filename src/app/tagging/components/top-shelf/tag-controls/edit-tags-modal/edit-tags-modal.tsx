@@ -212,7 +212,7 @@ export const EditTagsModal = ({
               size="md"
               width="xl"
             >
-              <BookmarkIcon className="mr-1 h-4 w-4" />
+              <BookmarkIcon />
               Save Changes
             </Button>
           </div>

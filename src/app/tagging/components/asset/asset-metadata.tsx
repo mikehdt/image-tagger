@@ -251,7 +251,7 @@ const AssetMetadataComponent = ({
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}
           >
-            <BookmarkIcon className="mr-1 h-4 w-4" />
+            <BookmarkIcon />
             Save
           </Button>
         </span>
