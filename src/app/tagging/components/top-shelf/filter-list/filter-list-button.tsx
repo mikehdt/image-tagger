@@ -45,7 +45,7 @@ const FilterListButtonComponent = () => {
       <Button
         ref={buttonRef}
         variant="toggle"
-        size="large"
+        size="lg"
         isPressed={isOpen}
         onClick={handleToggle}
         title="Show filters"

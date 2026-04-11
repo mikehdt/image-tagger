@@ -22,7 +22,7 @@ type ProjectPickerProps = {
   ) => void;
   excludeFolders: string[];
   children: React.ReactNode;
-  buttonSize?: 'small' | 'medium';
+  buttonSize?: 'sm' | 'md';
   buttonVariant?: 'default' | 'ghost';
 };
 
@@ -30,7 +30,7 @@ const ProjectPickerComponent = ({
   onSelect,
   excludeFolders,
   children,
-  buttonSize = 'medium',
+  buttonSize = 'md',
   buttonVariant = 'default',
 }: ProjectPickerProps) => {
   const {
@@ -149,7 +149,7 @@ const ProjectPickerComponent = ({
                   isSelected={showHidden}
                   onChange={() => setShowHidden(!showHidden)}
                   label="Show hidden"
-                  size="small"
+                  size="sm"
                 />
               </div>
             )}

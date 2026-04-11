@@ -173,7 +173,7 @@ const AssetMetadataComponent = ({
         <Button
           type="button"
           color="sky"
-          size="smallWide"
+          size="sm" width="md"
           isPressed={dimensionsActive}
           onClick={handleToggleSize}
           title="Image dimensions"
@@ -185,7 +185,7 @@ const AssetMetadataComponent = ({
         <Button
           type="button"
           color="slate"
-          size="smallWide"
+          size="sm" width="md"
           isPressed={bucketActive}
           onClick={handleToggleBucket}
           title="Bucket dimensions"
@@ -197,7 +197,7 @@ const AssetMetadataComponent = ({
         <Button
           type="button"
           color="stone"
-          size="smallWide"
+          size="sm" width="md"
           isPressed={extensionActive}
           onClick={handleToggleExtension}
         >
@@ -208,7 +208,7 @@ const AssetMetadataComponent = ({
           <Button
             type="button"
             color="indigo"
-            size="smallWide"
+            size="sm" width="md"
             isPressed={subfolderActive}
             onClick={handleToggleSubfolder}
             title={`Repeat folder: ${subfolder}`}
@@ -232,7 +232,7 @@ const AssetMetadataComponent = ({
         <span className="flex shrink-0 gap-2 pl-2">
           <Button
             color="stone"
-            size="medium"
+            size="md"
             onClick={handleCancelAction}
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}
@@ -242,7 +242,7 @@ const AssetMetadataComponent = ({
 
           <Button
             color="teal"
-            size="medium"
+            size="md"
             onClick={handleSaveAction}
             disabled={isTagEditing || isSaving}
             title={isTagEditing ? 'Finish tag operation first' : ''}

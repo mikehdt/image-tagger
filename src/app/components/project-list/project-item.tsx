@@ -121,7 +121,7 @@ const ProjectItemComponent = ({
   return (
     <Button
       onClick={() => actions.onSelect(project.path)}
-      size="large"
+      size="lg"
       color={isEditing ? actions.editColor : project.color || 'slate'}
       inert={isEditing}
       className={`group w-full justify-start p-4 text-left transition-opacity duration-200 ${actions.showHidden && project.hidden && !isEditing && !isDisabled ? 'opacity-50' : ''} ${isDisabled ? 'pointer-events-none opacity-35' : ''}`}
@@ -186,7 +186,7 @@ const ProjectItemComponent = ({
                   onChange={() => actions.onHiddenChange(!actions.editHidden)}
                   ariaLabel="Hide project from list"
                   label="Hide"
-                  size="small"
+                  size="sm"
                 />
               </div>
             </div>

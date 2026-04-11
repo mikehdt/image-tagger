@@ -215,7 +215,7 @@ const PerformanceSectionComponent = ({
                 onFieldChange('gradientCheckpointing', !gradientCheckpointing)
               }
               label="Gradient Checkpointing"
-              size="small"
+              size="sm"
             />
             <span className="text-xs text-slate-400">
               Reduces VRAM at cost of speed
@@ -230,7 +230,7 @@ const PerformanceSectionComponent = ({
               isSelected={cacheLatents}
               onChange={() => onFieldChange('cacheLatents', !cacheLatents)}
               label="Cache Latents"
-              size="small"
+              size="sm"
             />
             <span className="text-xs text-slate-400">
               Caches VAE outputs for faster training

@@ -167,7 +167,7 @@ export const AddTagsModal = ({
               type="button"
               onClick={onClose}
               color="slate"
-              size="mediumWide"
+              size="md" width="xl"
             >
               Cancel
             </Button>
@@ -177,7 +177,7 @@ export const AddTagsModal = ({
               disabled={isFormInvalid}
               neutralDisabled
               color="amber"
-              size="mediumWide"
+              size="md" width="xl"
             >
               <BookmarkIcon className="mr-1 h-4 w-4" />
               Add New Tags

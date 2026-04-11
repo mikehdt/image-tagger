@@ -24,7 +24,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
     <>
       <Button
         type="button"
-        size="medium"
+        size="md"
         ghostDisabled
         onClick={cancelAllChanges}
         disabled={!hasModifiedAssets || ioInProgress}
@@ -38,7 +38,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
 
       <Button
         type="button"
-        size="medium"
+        size="md"
         color="teal"
         ghostDisabled
         neutralDisabled

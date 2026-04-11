@@ -237,7 +237,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
               ]}
               value={tagSortOption}
               onChange={setTagSortOption}
-              size="small"
+              size="sm"
             />
           </div>
           {hasNoCopyableTags ? (
@@ -299,7 +299,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
             type="button"
             onClick={onClose}
             color="slate"
-            size="mediumWide"
+            size="md" width="xl"
           >
             Cancel
           </Button>
@@ -310,7 +310,7 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
             disabled={!isFormValid}
             neutralDisabled
             color="teal"
-            size="mediumWide"
+            size="md" width="xl"
           >
             <CopyIcon className="mr-1 h-4 w-4" />
             Copy Tags

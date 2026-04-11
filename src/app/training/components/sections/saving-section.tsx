@@ -122,7 +122,7 @@ const SavingSectionComponent = ({
               isSelected={saveEnabled}
               onChange={() => onFieldChange('saveEnabled', !saveEnabled)}
               label="Save checkpoints during training"
-              size="small"
+              size="sm"
             />
 
             {saveEnabled && (

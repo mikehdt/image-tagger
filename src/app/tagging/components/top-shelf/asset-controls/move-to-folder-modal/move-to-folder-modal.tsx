@@ -355,7 +355,7 @@ export const MoveToFolderModal = ({
             type="button"
             onClick={onClose}
             color="slate"
-            size="mediumWide"
+            size="md" width="xl"
             disabled={isMoving}
           >
             Cancel
@@ -367,7 +367,7 @@ export const MoveToFolderModal = ({
             disabled={!isFormValid || isMoving}
             neutralDisabled
             color="sky"
-            size="mediumWide"
+            size="md" width="xl"
           >
             <FolderInputIcon className="mr-1 h-4 w-4" />
             {isMoving ? 'Moving...' : 'Move'}

@@ -3,20 +3,22 @@ import { memo, useCallback, useMemo } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
+import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import { Input } from '@/app/components/shared/input/input';
 import { InputTray } from '@/app/components/shared/input-tray/input-tray';
-import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import {
   type ExpertiseTier,
   isTierAtLeast,
 } from '@/app/services/training/field-registry';
+import { getTrainingDownloadable } from '@/app/services/model-manager/registries/training-models';
+import { startModelDownload } from '@/app/services/model-manager/start-download';
 import {
   getModelsByArchitecture,
   type ModelComponentType,
   type ModelDefinition,
 } from '@/app/services/training/models';
 import { useAppDispatch } from '@/app/store/hooks';
-import { openModelManagerModal } from '@/app/store/model-manager';
+import { openPanel } from '@/app/store/jobs';
 
 import type {
   AppModelDefaults,
@@ -51,9 +53,19 @@ const WhatToTrainSectionComponent = ({
 }: WhatToTrainSectionProps) => {
   const dispatch = useAppDispatch();
 
-  const handleOpenModelManager = useCallback(() => {
-    dispatch(openModelManagerModal('training'));
-  }, [dispatch]);
+  const handleDownload = useCallback(
+    (downloadId: string) => {
+      const model = getTrainingDownloadable(downloadId);
+      if (!model) return;
+      dispatch(openPanel());
+      startModelDownload({
+        modelId: model.id,
+        modelName: model.name,
+        dispatch,
+      });
+    },
+    [dispatch],
+  );
 
   const modelGroups = useMemo(() => {
     return getModelsByArchitecture().map((group) => ({
@@ -183,19 +195,23 @@ const WhatToTrainSectionComponent = ({
                 <Button
                   onClick={() => handleBrowse(component.type, component.label)}
                   variant="ghost"
-                  size="smallSquare"
+                  size="sm"
                   title="Browse…"
                 >
                   <FolderOpenIcon />
                 </Button>
-                <Button
-                  onClick={handleOpenModelManager}
-                  variant="ghost"
-                  size="smallSquare"
-                  title="Download from Model Manager…"
-                >
-                  <DownloadIcon />
-                </Button>
+                {component.downloadId &&
+                  !modelPaths[component.type]?.trim() && (
+                    <Button
+                      onClick={() => handleDownload(component.downloadId!)}
+                      variant="ghost"
+                      size="sm"
+                      color="indigo"
+                      title={`Download ${component.label}…`}
+                    >
+                      <DownloadIcon />
+                    </Button>
+                  )}
               </InputTray>
               {component.hint && (
                 <p className="mt-0.5 text-xs text-slate-400">

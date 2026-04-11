@@ -77,6 +77,7 @@ export const TagSortControls = () => {
   return (
     <InputTray>
       <Dropdown
+        size="toolbar"
         items={tagSortTypeItems}
         selectedValue={tagSortType}
         onChange={handleSortTypeChange}
@@ -87,7 +88,7 @@ export const TagSortControls = () => {
           type="button"
           onClick={handleToggleSortDirection}
           variant="ghost"
-          size="medium"
+          size="md"
           title={`Sort ${tagSortDirection === TagSortDirection.ASC ? 'ascending' : 'descending'}`}
         >
           {tagSortDirection === TagSortDirection.ASC ? (

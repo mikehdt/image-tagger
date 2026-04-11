@@ -382,7 +382,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 isSelected={widthPriority}
                 onChange={handleWidthPriorityChange}
                 label="Priority"
-                size="small"
+                size="sm"
               />
             </div>
             {heightPriority ? (
@@ -399,7 +399,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 <Dropdown
                   openUpward
                   fullWidth
-                  size="large"
+                  size="lg"
                   items={validWidthsForHeight.map((width) => ({
                     value: width,
                     label: isWidthRounded
@@ -433,7 +433,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 isSelected={heightPriority}
                 onChange={handleHeightPriorityChange}
                 label="Priority"
-                size="small"
+                size="sm"
               />
             </div>
             {widthPriority ? (
@@ -450,7 +450,7 @@ export const BucketCropModal = ({ isOpen, onClose }: BucketCropModalProps) => {
                 <Dropdown
                   openUpward
                   fullWidth
-                  size="large"
+                  size="lg"
                   items={validHeightsForWidth.map((height) => ({
                     value: height,
                     label: isHeightRounded

@@ -29,7 +29,7 @@ export const TrainingBottomShelf = ({
 
       <div className="ml-2 flex items-center">
         <Button
-          size="medium"
+          size="md"
           onClick={onStart}
           disabled={!canStart}
           color={canStart ? 'teal' : 'slate'}

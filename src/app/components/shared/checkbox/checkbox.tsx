@@ -13,17 +13,17 @@ interface CheckboxProps {
   disabled?: boolean;
   ariaLabel?: string;
   label?: string; // Optional label to display next to the checkbox
-  size?: 'small' | 'medium'; // Size of the checkbox
+  size?: 'sm' | 'md'; // Size of the checkbox
   previewState?: PreviewState; // For shift-hover preview
 }
 
 const sizeClasses = {
-  small: {
+  sm: {
     checkbox: 'h-4 w-4',
     label: 'text-xs',
     gap: 'gap-1.5',
   },
-  medium: {
+  md: {
     checkbox: 'h-5 w-5',
     label: 'text-sm',
     gap: 'gap-2',
@@ -41,7 +41,7 @@ export const Checkbox = ({
   disabled = false,
   ariaLabel,
   label,
-  size = 'medium',
+  size = 'md',
   previewState,
 }: CheckboxProps) => {
   const onClick = useCallback(

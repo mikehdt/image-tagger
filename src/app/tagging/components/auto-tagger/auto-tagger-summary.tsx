@@ -45,7 +45,7 @@ export function AutoTaggerSummary({
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={onClose} color="indigo" size="medium">
+        <Button onClick={onClose} color="indigo" size="md">
           Done
         </Button>
       </div>

@@ -116,7 +116,7 @@ function ResponsiveToolbarGroupInternal({
         <Button
           ref={buttonRef}
           variant="toggle"
-          size="medium"
+          size="md"
           onClick={handleButtonClick}
           onKeyDown={handleButtonKeyDown}
           isPressed={isPopoverOpen}

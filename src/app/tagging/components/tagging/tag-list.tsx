@@ -532,7 +532,7 @@ const TagListComponent = ({
           <Button
             onClick={handleCopyTags}
             variant="ghost"
-            size="smallSquare"
+            size="xs"
             color={copyInfo.isPartialCopy ? 'teal' : 'slate'}
             title={
               copyInfo.isPartialCopy

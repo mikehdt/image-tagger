@@ -101,7 +101,7 @@ const CategoryNavigationComponent = ({
         ref={buttonRef}
         onClick={handleToggle}
         variant="toggle"
-        size="large"
+        size="lg"
         title="Jump to category"
         isPressed={isOpen}
         disabled={categoriesWithPageInfo.length <= 1}

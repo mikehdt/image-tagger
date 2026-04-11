@@ -19,13 +19,13 @@ export const ButtonPlayground = () => {
           Ghost buttons (slate):
         </p>
         <div className="flex items-center gap-2 rounded bg-(--surface-elevated) p-2">
-          <Button variant="ghost" color="slate" size="medium">
+          <Button variant="ghost" color="slate" size="md">
             Normal
           </Button>
-          <Button variant="ghost" color="slate" size="medium" disabled>
+          <Button variant="ghost" color="slate" size="md" disabled>
             Disabled
           </Button>
-          <Button variant="ghost" color="slate" size="medium" isPressed>
+          <Button variant="ghost" color="slate" size="md" isPressed>
             Pressed
           </Button>
         </div>
@@ -37,13 +37,13 @@ export const ButtonPlayground = () => {
           Default buttons (slate):
         </p>
         <div className="flex items-center gap-2 rounded bg-(--surface-elevated) p-2">
-          <Button variant="default" color="slate" size="medium">
+          <Button variant="default" color="slate" size="md">
             Normal
           </Button>
-          <Button variant="default" color="slate" size="medium" disabled>
+          <Button variant="default" color="slate" size="md" disabled>
             Disabled
           </Button>
-          <Button variant="default" color="slate" size="medium" isPressed>
+          <Button variant="default" color="slate" size="md" isPressed>
             Pressed
           </Button>
         </div>
@@ -55,13 +55,13 @@ export const ButtonPlayground = () => {
           Toggle buttons (slate):
         </p>
         <div className="flex items-center gap-2 rounded bg-(--surface-elevated) p-2">
-          <Button variant="toggle" color="slate" size="medium">
+          <Button variant="toggle" color="slate" size="md">
             Unpressed
           </Button>
-          <Button variant="toggle" color="slate" size="medium" isPressed>
+          <Button variant="toggle" color="slate" size="md" isPressed>
             Pressed
           </Button>
-          <Button variant="toggle" color="slate" size="medium" disabled>
+          <Button variant="toggle" color="slate" size="md" disabled>
             Disabled
           </Button>
         </div>

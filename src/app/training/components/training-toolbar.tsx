@@ -67,7 +67,7 @@ const TrainingToolbarComponent = () => {
       <ToolbarDivider />
 
       <Button
-        size="small"
+        size="sm"
         variant="ghost"
         onClick={() => console.log('Save (placeholder)')}
       >
@@ -75,14 +75,14 @@ const TrainingToolbarComponent = () => {
         Save
       </Button>
       <Button
-        size="small"
+        size="sm"
         variant="ghost"
         onClick={() => console.log('Save As (placeholder)')}
       >
         Save As
       </Button>
       <Button
-        size="small"
+        size="sm"
         variant="ghost"
         onClick={() => console.log('Rename (placeholder)')}
       >
@@ -94,7 +94,7 @@ const TrainingToolbarComponent = () => {
 
       {/* Right: queue button + view mode toggle */}
       <Button
-        size="small"
+        size="sm"
         variant="ghost"
         disabled={!hasActiveJob}
         isPressed={panelOpen}

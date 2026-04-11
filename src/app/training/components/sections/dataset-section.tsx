@@ -259,7 +259,7 @@ const DatasetSectionComponent = ({
               <ProjectPicker
                 onSelect={onAddDataset}
                 excludeFolders={excludeFolders}
-                buttonSize="small"
+                buttonSize="sm"
                 buttonVariant="ghost"
               >
                 <PlusIcon className="mr-1 h-3 w-3" />
@@ -318,7 +318,7 @@ const DatasetSectionComponent = ({
                 onFieldChange('captionShuffling', !captionShuffling)
               }
               label="Caption Shuffling"
-              size="small"
+              size="sm"
             />
             <span className="text-xs text-slate-400">
               Randomise tag order during training
@@ -333,7 +333,7 @@ const DatasetSectionComponent = ({
               isSelected={flipAugment}
               onChange={() => onFieldChange('flipAugment', !flipAugment)}
               label="Flip Horizontal"
-              size="small"
+              size="sm"
             />
             <span className="text-xs text-slate-400">
               Randomly flip images horizontally
@@ -348,7 +348,7 @@ const DatasetSectionComponent = ({
               isSelected={flipVAugment}
               onChange={() => onFieldChange('flipVAugment', !flipVAugment)}
               label="Flip Vertical"
-              size="small"
+              size="sm"
             />
             <span className="text-xs text-slate-400">
               Randomly flip images vertically (unusual)

@@ -21,14 +21,8 @@ type ButtonColor =
   | 'sky'
   | 'indigo'
   | 'stone';
-type ButtonSize =
-  | 'minimum'
-  | 'small'
-  | 'smallSquare'
-  | 'smallWide'
-  | 'medium'
-  | 'mediumWide'
-  | 'large';
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
+type ButtonWidth = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 type ButtonVariant = 'default' | 'toggle' | 'deep-toggle' | 'ghost';
 
 interface ButtonProps {
@@ -46,6 +40,7 @@ interface ButtonProps {
   // Styling props
   color?: ButtonColor;
   size?: ButtonSize;
+  width?: ButtonWidth;
   variant?: ButtonVariant;
 
   // Toggle state (only used with toggle variants)
@@ -60,13 +55,18 @@ interface ButtonProps {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  minimum: '',
-  small: 'px-1 py-0.5 [&_svg]:h-4',
-  smallSquare: 'px-0.5 [&_svg]:h-4',
-  smallWide: 'px-2 py-0.5 [&_svg]:h-4',
-  medium: 'px-2 py-1 [&_svg]:h-5',
-  mediumWide: 'px-4 py-1 [&_svg]:h-5',
-  large: 'px-3 py-2 [&_svg]:h-5',
+  xs: '[&_svg]:h-4',
+  sm: 'py-0.5 [&_svg]:h-4',
+  md: 'py-1 [&_svg]:h-5',
+  lg: 'py-2 [&_svg]:h-5',
+};
+
+const widthStyles: Record<ButtonWidth, string> = {
+  xs: 'px-0.5',
+  sm: 'px-1',
+  md: 'px-2',
+  lg: 'px-3',
+  xl: 'px-4',
 };
 
 const colorStyles: Record<
@@ -211,7 +211,8 @@ export const Button = ({
   className = '',
   title,
   color = 'slate',
-  size = 'medium',
+  size = 'md',
+  width: widthProp,
   variant = 'default',
   isPressed = false,
   ghostDisabled = false,
@@ -243,8 +244,9 @@ export const Button = ({
       'shadow-md inset-shadow-sm shadow-white dark:shadow-slate-900 border-slate-300 dark:border-slate-600',
   };
 
-  // Size-specific styles
-  const sizeClasses = sizeStyles[size];
+  // Size and width styles
+  const width = widthProp ?? size;
+  const sizeClasses = `${sizeStyles[size]} ${widthStyles[width]}`;
 
   // Color and state-specific styles - fallback to slate if invalid color provided
   const colorConfig = colorStyles[color] || colorStyles.slate;

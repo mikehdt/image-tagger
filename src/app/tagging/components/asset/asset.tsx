@@ -177,7 +177,7 @@ const AssetComponent = ({
 
         {wouldCrop ? (
           <Button
-            size="minimum"
+            size="xs"
             variant="ghost"
             color={isSelected ? 'indigo' : 'slate'}
             isPressed={showCropVisualization}

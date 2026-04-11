@@ -86,7 +86,7 @@ export const AddTagsButton = () => {
         disabled={!canAddTags}
         variant="ghost"
         color="slate"
-        size="medium"
+        size="md"
         title={
           selectedAssetsCount > 0 && hasActiveScope
             ? `Add tags to selected assets or assets with active filters`

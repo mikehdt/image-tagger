@@ -142,7 +142,7 @@ export function ModelDefaultsModal({
                                 handleBrowse(model.id, comp.type, comp.label)
                               }
                               variant="ghost"
-                              size="smallSquare"
+                              size="xs"
                               title="Browse…"
                             >
                               <FolderOpenIcon />
@@ -164,13 +164,13 @@ export function ModelDefaultsModal({
         </div>
 
         <div className="flex justify-end gap-2 border-t border-(--border-subtle) pt-3">
-          <Button onClick={onClose} color="slate" size="medium">
+          <Button onClick={onClose} color="slate" size="md">
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             color="indigo"
-            size="medium"
+            size="md"
             disabled={saving}
           >
             {saving ? 'Saving…' : 'Save Defaults'}

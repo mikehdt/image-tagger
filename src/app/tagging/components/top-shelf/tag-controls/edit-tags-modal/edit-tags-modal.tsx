@@ -194,7 +194,7 @@ export const EditTagsModal = ({
               type="button"
               onClick={onClose}
               color="slate"
-              size="mediumWide"
+              size="md" width="xl"
             >
               Cancel
             </Button>
@@ -208,7 +208,7 @@ export const EditTagsModal = ({
               }
               neutralDisabled
               color="indigo"
-              size="mediumWide"
+              size="md" width="xl"
             >
               <BookmarkIcon className="mr-1 h-4 w-4" />
               Save Changes

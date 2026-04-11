@@ -150,11 +150,11 @@ export const TriggerPhrasesModal = ({
       </div>
 
       <div className="mt-4 flex justify-end gap-2">
-        <Button size="medium" onClick={onClose}>
+        <Button size="md" onClick={onClose}>
           Cancel
         </Button>
         <Button
-          size="medium"
+          size="md"
           color="teal"
           onClick={handleSave}
           disabled={!hasChanges}

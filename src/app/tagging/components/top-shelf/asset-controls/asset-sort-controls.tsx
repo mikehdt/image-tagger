@@ -147,6 +147,7 @@ export const AssetSortControls = () => {
   return (
     <InputTray>
       <Dropdown
+        size="toolbar"
         items={sortTypeItems}
         selectedValue={sortType}
         onChange={handleSortTypeChange}
@@ -157,7 +158,7 @@ export const AssetSortControls = () => {
         type="button"
         onClick={handleToggleSortDirection}
         variant="ghost"
-        size="medium"
+        size="md"
         title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
       >
         {sortDirection === SortDirection.ASC ? (

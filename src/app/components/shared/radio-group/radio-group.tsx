@@ -11,7 +11,7 @@ type RadioGroupProps<T extends string> = {
   onChange: (value: T) => void;
   name: string;
   layout?: 'inline' | 'list';
-  size?: 'small' | 'medium';
+  size?: 'sm' | 'md';
   disabled?: boolean;
   className?: string;
 };
@@ -26,7 +26,7 @@ export function RadioGroup<T extends string>({
   onChange,
   name,
   layout = 'inline',
-  size = 'medium',
+  size = 'md',
   disabled = false,
   className = '',
 }: RadioGroupProps<T>) {
@@ -43,13 +43,13 @@ export function RadioGroup<T extends string>({
 
   // Size-specific styling
   const sizeClasses = {
-    small: {
+    sm: {
       radio: 'h-4 w-4',
       dot: 'h-1.5 w-1.5',
       label: 'text-xs',
       gap: 'gap-1.5',
     },
-    medium: {
+    md: {
       radio: 'h-5 w-5',
       dot: 'h-2 w-2',
       label: 'text-sm',

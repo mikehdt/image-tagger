@@ -33,11 +33,11 @@ export const NoContent = ({ onReload }: NoContentProps) => {
       </h1>
 
       <div className="mt-4 flex w-full justify-center gap-3">
-        <Button onClick={doReload} size="mediumWide">
+        <Button onClick={doReload} size="md" width="xl">
           Refresh
         </Button>
 
-        <Button onClick={handleBackToProjects} size="mediumWide">
+        <Button onClick={handleBackToProjects} size="md" width="xl">
           Back to Project List
         </Button>
       </div>

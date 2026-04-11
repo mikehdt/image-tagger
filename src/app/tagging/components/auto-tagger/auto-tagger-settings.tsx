@@ -172,13 +172,13 @@ export function AutoTaggerSettings({
 
       {/* Actions */}
       <div className="flex justify-end gap-2 pt-2">
-        <Button onClick={onClose} color="slate" size="medium">
+        <Button onClick={onClose} color="slate" size="md">
           Cancel
         </Button>
         <Button
           onClick={onStartTagging}
           color="indigo"
-          size="medium"
+          size="md"
           disabled={!selectedModelId || selectedAssetsCount === 0}
         >
           Start Tagging

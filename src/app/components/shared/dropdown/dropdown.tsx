@@ -67,7 +67,7 @@ function flattenEntries<T>(
 /**
  * Size options for the dropdown
  */
-type DropdownSize = 'small' | 'medium' | 'large';
+type DropdownSize = 'sm' | 'md' | 'lg' | 'toolbar';
 
 /**
  * Props for the Dropdown component
@@ -97,9 +97,10 @@ interface DropdownProps<T> {
  * Size styles for dropdown buttons
  */
 const sizeStyles: Record<DropdownSize, string> = {
-  small: 'px-2 py-1',
-  medium: 'px-2 py-1',
-  large: 'px-4 py-2.5',
+  sm: 'px-2 py-1',
+  toolbar: 'px-2 py-1',
+  md: 'px-2 py-1.5',
+  lg: 'px-4 py-2.5',
 };
 
 /** Minimum width for the popup menu (matches Tailwind min-w-40 = 10rem) */
@@ -123,7 +124,7 @@ function DropdownInternal<T>({
   disabledItemClassName = '',
   alignRight = false,
   openUpward = false,
-  size = 'medium',
+  size = 'md',
   fullWidth = false,
 }: DropdownProps<T>) {
   const buttonRef = useRef<HTMLButtonElement>(null);

@@ -34,7 +34,7 @@ export function AutoTaggerProgress({
         <p className="text-xs text-slate-500">
           Tags from completed images will still be applied.
         </p>
-        <Button onClick={onCancel} color="slate" size="medium">
+        <Button onClick={onCancel} color="slate" size="md">
           Cancel
         </Button>
       </div>

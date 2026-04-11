@@ -157,7 +157,7 @@ export const ProjectList = () => {
         </h1>
         <p className="mt-4 w-full text-rose-500 dark:text-rose-400">{error}</p>
         <p className="mt-4 flex w-full justify-center">
-          <Button onClick={loadProjects} size="mediumWide">
+          <Button onClick={loadProjects} size="md" width="xl">
             Refresh
           </Button>
         </p>
@@ -177,7 +177,7 @@ export const ProjectList = () => {
           No project folders were found in the configured projects directory
         </p>
         <p className="mt-4 flex w-full justify-center">
-          <Button onClick={loadProjects} size="mediumWide">
+          <Button onClick={loadProjects} size="md" width="xl">
             Refresh
           </Button>
         </p>
@@ -244,7 +244,7 @@ export const ProjectList = () => {
           isSelected={showHidden}
           onChange={() => setShowHidden(!showHidden)}
           label="Show hidden projects"
-          size="small"
+          size="sm"
         />
 
         <div className="relative">
@@ -290,7 +290,7 @@ export const ProjectList = () => {
         </div>
       </div>
 
-      <Button onClick={loadProjects} size="mediumWide">
+      <Button onClick={loadProjects} size="md" width="xl">
         Refresh Project List
       </Button>
 

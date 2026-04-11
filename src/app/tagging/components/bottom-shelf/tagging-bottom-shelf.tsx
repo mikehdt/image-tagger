@@ -94,7 +94,7 @@ export const TaggingBottomShelf = ({
         <Button
           variant="ghost"
           color="slate"
-          size="small"
+          size="sm"
           onClick={handleToggleCropVisualization}
           isPressed={showCropVisualization}
           title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualisation`}

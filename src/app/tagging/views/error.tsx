@@ -35,12 +35,12 @@ export const Error = ({ onReload }: ErrorProps) => {
       </h1>
 
       <div className="mt-4 flex w-full justify-center gap-3">
-        <Button onClick={handleRetry} size="mediumWide">
+        <Button onClick={handleRetry} size="md" width="xl">
           Retry
         </Button>
         <Button
           onClick={handleBackToProjects}
-          size="mediumWide"
+          size="md" width="xl"
           variant="ghost"
         >
           Back to Projects

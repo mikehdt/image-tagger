@@ -93,7 +93,7 @@ const SamplingSectionComponent = ({
             isSelected={samplingEnabled}
             onChange={() => onFieldChange('samplingEnabled', !samplingEnabled)}
             label="Generate sample images during training"
-            size="small"
+            size="sm"
           />
         )}
 
