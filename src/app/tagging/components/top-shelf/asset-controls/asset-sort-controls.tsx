@@ -162,9 +162,9 @@ export const AssetSortControls = () => {
         title={`Sort ${sortDirection === SortDirection.ASC ? 'ascending' : 'descending'}`}
       >
         {sortDirection === SortDirection.ASC ? (
-          <ArrowUpIcon className="h-4 w-4" />
+          <ArrowUpIcon />
         ) : (
-          <ArrowDownIcon className="h-4 w-4" />
+          <ArrowDownIcon />
         )}
 
         <span className="ml-1 max-2xl:hidden">

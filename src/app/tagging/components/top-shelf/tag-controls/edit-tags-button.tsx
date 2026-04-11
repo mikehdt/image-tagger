@@ -29,8 +29,8 @@ export const EditTagsButton = () => {
         disabled={!filterTags.length}
         title="Edit selected tags"
       >
-        <PencilIcon className="h-4 w-4" />
-        <span className="ml-2 max-xl:hidden">Edit</span>
+        <PencilIcon />
+        <span className="max-xl:hidden">Edit</span>
       </Button>
 
       <EditTagsModal

@@ -31,7 +31,7 @@ export const ClearFiltersButton = () => {
       size="md"
       title="Clear all filters"
     >
-      <FunnelXIcon className="h-4 w-4" />
+      <FunnelXIcon />
     </Button>
   );
 };

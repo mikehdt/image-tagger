@@ -173,33 +173,33 @@ const AssetMetadataComponent = ({
         <Button
           type="button"
           color="sky"
-          size="sm"
+          size="xs"
           width="md"
           isPressed={dimensionsActive}
           onClick={handleToggleSize}
           title="Image dimensions"
         >
-          <ImageIcon className="mr-1 h-4 w-4" />
+          <ImageIcon />
           {dimensions.width}&times;{dimensions.height}
         </Button>
 
         <Button
           type="button"
           color="slate"
-          size="sm"
+          size="xs"
           width="md"
           isPressed={bucketActive}
           onClick={handleToggleBucket}
           title="Bucket dimensions"
         >
-          <ArchiveIcon className="mr-1 h-4 w-4" />
+          <ArchiveIcon />
           {bucket.width}&times;{bucket.height}
         </Button>
 
         <Button
           type="button"
           color="stone"
-          size="sm"
+          size="xs"
           width="md"
           isPressed={extensionActive}
           onClick={handleToggleExtension}
@@ -217,7 +217,7 @@ const AssetMetadataComponent = ({
             onClick={handleToggleSubfolder}
             title={`Repeat folder: ${subfolder}`}
           >
-            <FolderOpenIcon className="mr-1 h-4 w-4" />
+            <FolderOpenIcon />
             {subfolderDisplay}
           </Button>
         )}

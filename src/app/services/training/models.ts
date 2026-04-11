@@ -94,7 +94,7 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
         type: 'ae',
         label: 'VAE / Autoencoder',
         required: true,
-        hint: 'Flux.2 uses a different AE from Flux.1',
+        hint: 'Note: Flux.2 uses a different AE from Flux.1',
         downloadId: 'shared-flux2-vae',
       },
     ],

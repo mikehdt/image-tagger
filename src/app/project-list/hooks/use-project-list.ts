@@ -24,6 +24,7 @@ export const useProjectList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
+  const [projectsFolder, setProjectsFolder] = useState('');
   const { showErrorToast } = useToast();
 
   const editActions = useEditProject(setProjects, { onError: showErrorToast });
@@ -32,6 +33,13 @@ export const useProjectList = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Fetch current config to get projectsFolder
+      const configRes = await fetch('/api/config');
+      if (configRes.ok) {
+        const config = await configRes.json();
+        setProjectsFolder(config.projectsFolder ?? '');
+      }
 
       // Call server action to get project list (always include hidden, but not private)
       const projectData = await getProjectList();
@@ -42,6 +50,32 @@ export const useProjectList = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleSaveProjectsFolder = useCallback(
+    async (folder: string): Promise<{ error?: string }> => {
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectsFolder: folder }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          return { error: data.error || 'Failed to save' };
+        }
+
+        setProjectsFolder(folder);
+        // Reload projects from the new folder
+        loadProjects();
+        return {};
+      } catch {
+        return { error: 'Failed to save projects folder' };
+      }
+    },
+    [loadProjects],
+  );
 
   useEffect(() => {
     // Clear all old project data when returning to project selection
@@ -104,6 +138,8 @@ export const useProjectList = () => {
     regularProjects,
     showHidden,
     setShowHidden,
+    projectsFolder,
+    handleSaveProjectsFolder,
     handleProjectSelect,
     loadProjects,
     ...editActions,

@@ -6,18 +6,18 @@ import type { CaptionMode } from '@/app/store/project/types';
 const options: { mode: CaptionMode; icon: React.ReactNode; label: string }[] = [
   {
     mode: 'tags',
-    icon: <HashIcon className="h-4 w-4" />,
+    icon: <HashIcon />,
     label: 'Tags',
   },
   // Sentences mode hidden until split logic is reworked
   // {
   //   mode: 'sentences',
-  //   icon: <WholeWordIcon className="h-4 w-4" />,
+  //   icon: <WholeWordIcon  />,
   //   label: 'Sentences',
   // },
   {
     mode: 'caption',
-    icon: <TextIcon className="h-4 w-4" />,
+    icon: <TextIcon />,
     label: 'Caption',
   },
 ];

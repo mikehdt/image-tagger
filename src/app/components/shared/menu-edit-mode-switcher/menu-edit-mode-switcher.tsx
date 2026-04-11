@@ -6,12 +6,12 @@ import { TagEditMode } from '@/app/store/preferences';
 const options: { mode: TagEditMode; icon: React.ReactNode; label: string }[] = [
   {
     mode: TagEditMode.BUTTON,
-    icon: <PencilIcon className="h-4 w-4" />,
+    icon: <PencilIcon />,
     label: 'Button',
   },
   {
     mode: TagEditMode.DOUBLE_CLICK,
-    icon: <MousePointerClickIcon className="h-4 w-4" />,
+    icon: <MousePointerClickIcon />,
     label: 'Double Click',
   },
 ];

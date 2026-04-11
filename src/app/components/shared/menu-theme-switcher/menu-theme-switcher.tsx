@@ -4,9 +4,9 @@ import { memo, useCallback } from 'react';
 import { ThemeMode } from '@/app/utils/use-theme';
 
 const options: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-  { mode: 'light', icon: <SunIcon className="h-4 w-4" />, label: 'Light' },
-  { mode: 'dark', icon: <MoonIcon className="h-4 w-4" />, label: 'Dark' },
-  { mode: 'auto', icon: <MonitorIcon className="h-4 w-4" />, label: 'Auto' },
+  { mode: 'light', icon: <SunIcon />, label: 'Light' },
+  { mode: 'dark', icon: <MoonIcon />, label: 'Dark' },
+  { mode: 'auto', icon: <MonitorIcon />, label: 'Auto' },
 ];
 
 type MenuThemeSwitcherProps = {

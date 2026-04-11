@@ -92,9 +92,9 @@ export const TagSortControls = () => {
           title={`Sort ${tagSortDirection === TagSortDirection.ASC ? 'ascending' : 'descending'}`}
         >
           {tagSortDirection === TagSortDirection.ASC ? (
-            <ArrowUpIcon className="h-4 w-4" />
+            <ArrowUpIcon />
           ) : (
-            <ArrowDownIcon className="h-4 w-4" />
+            <ArrowDownIcon />
           )}
 
           <span className="ml-1 max-2xl:hidden">

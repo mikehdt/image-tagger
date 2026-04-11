@@ -113,25 +113,25 @@ export const TagActionsMenu = () => {
   const overflowMenuItems: MenuItem[] = [
     {
       label: 'Copy Tags',
-      icon: <CopyIcon className="h-4 w-4" />,
+      icon: <CopyIcon />,
       onClick: openCopyTagsModal,
       disabled: selectedAssetsCount < 2,
     },
     {
       label: 'Gather Tags',
-      icon: <ArrowUpFromLineIcon className="h-4 w-4" />,
+      icon: <ArrowUpFromLineIcon />,
       onClick: handleGatherTags,
       disabled: filterTags.length < 2,
     },
     {
       label: 'Auto Tagger',
-      icon: <SparklesIcon className="h-4 w-4" />,
+      icon: <SparklesIcon />,
       onClick: openTaggerModal,
       disabled: !hasReadyModel || !hasAssetsForTagger,
     },
     {
       label: 'Trigger Phrases',
-      icon: <HighlighterIcon className="h-4 w-4" />,
+      icon: <HighlighterIcon />,
       onClick: openTriggersModal,
     },
   ];
@@ -139,7 +139,7 @@ export const TagActionsMenu = () => {
   return (
     <>
       <MenuButton
-        icon={<ChevronsDownIcon className="h-4 w-4" />}
+        icon={<ChevronsDownIcon />}
         items={overflowMenuItems}
         position="bottom-right"
         title="More tag actions"

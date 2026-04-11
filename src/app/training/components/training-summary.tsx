@@ -6,6 +6,7 @@ import {
 import { memo, useMemo } from 'react';
 
 import {
+  type ModelComponentType,
   type ModelDefinition,
   OPTIMIZER_OPTIONS,
   SCHEDULER_OPTIONS,
@@ -14,6 +15,7 @@ import {
 type TrainingSummaryProps = {
   outputName: string;
   currentModel: ModelDefinition;
+  modelPaths: Partial<Record<ModelComponentType, string>>;
   totalImages: number;
   totalEffective: number;
   durationMode: 'epochs' | 'steps';
@@ -91,6 +93,7 @@ const SummaryRow = ({
 const TrainingSummaryComponent = ({
   outputName,
   currentModel,
+  modelPaths,
   totalImages,
   totalEffective,
   durationMode,
@@ -114,6 +117,12 @@ const TrainingSummaryComponent = ({
 }: TrainingSummaryProps) => {
   const hasOutputName = outputName.trim() !== '';
   const hasDataset = totalImages > 0;
+
+  const requiredComponents = currentModel.components.filter((c) => c.required);
+  const missingComponents = requiredComponents.filter(
+    (c) => !modelPaths[c.type]?.trim(),
+  );
+  const hasAllComponents = missingComponents.length === 0;
 
   const effectiveSteps = durationMode === 'epochs' ? calculatedSteps : steps;
   const effectiveEpochs = durationMode === 'steps' ? calculatedEpochs : epochs;
@@ -221,11 +230,27 @@ const TrainingSummaryComponent = ({
             }
           />
 
+          {requiredComponents.length > 1 && (
+            <ReadinessItem
+              label="Model components"
+              isReady={hasAllComponents}
+              detail={
+                hasAllComponents
+                  ? undefined
+                  : missingComponents.map((c) => c.label).join(', ')
+              }
+            />
+          )}
+
           <hr className="my-3 text-slate-300 dark:text-slate-600" />
 
           <ReadinessItem
-            label={hasOutputName && hasDataset ? 'Ready to train' : 'Not ready'}
-            isReady={hasOutputName && hasDataset}
+            label={
+              hasOutputName && hasDataset && hasAllComponents
+                ? 'Ready to train'
+                : 'Not ready'
+            }
+            isReady={hasOutputName && hasDataset && hasAllComponents}
             isSummary
           />
         </div>

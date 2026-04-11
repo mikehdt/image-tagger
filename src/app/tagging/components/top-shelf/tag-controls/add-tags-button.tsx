@@ -97,8 +97,8 @@ export const AddTagsButton = () => {
                 : 'Select assets or apply filters to add new tags'
         }
       >
-        <TagIcon className="h-4 w-4" />
-        <span className="ml-2 max-xl:hidden">Add</span>
+        <TagIcon />
+        <span className="max-xl:hidden">Add</span>
       </Button>
 
       <AddTagsModal

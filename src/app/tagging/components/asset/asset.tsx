@@ -184,11 +184,7 @@ const AssetComponent = ({
             onClick={onToggleLocalCropVisualization}
             title={`${showCropVisualization ? 'Hide' : 'Show'} crop visualization for this asset`}
           >
-            {showCropVisualization ? (
-              <EyeOffIcon className="h-4 w-4" />
-            ) : (
-              <EyeIcon className="h-4 w-4" />
-            )}
+            {showCropVisualization ? <EyeOffIcon /> : <EyeIcon />}
           </Button>
         ) : (
           <span title="Image shape and crop shape are identical">

@@ -55,18 +55,18 @@ interface ButtonProps {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: 'py-0.5 [&_svg]:h-4',
-  sm: 'py-1 [&_svg]:h-4',
-  md: 'py-1.5 [&_svg]:h-4',
-  lg: 'py-2 [&_svg]:h-5',
+  xs: 'py-0.5 [&_svg]:h-4 text-xs',
+  sm: 'py-1 [&_svg]:h-4 text-sm',
+  md: 'py-1 [&_svg]:h-4 [&_svg]:my-0.5',
+  lg: 'py-2 [&_svg]:h-4',
 };
 
 const widthStyles: Record<ButtonWidth, string> = {
   xs: 'px-0.5 [&_svg]:w-4',
   sm: 'px-1 [&_svg]:w-4',
-  md: 'px-1.5 [&_svg]:w-4',
-  lg: 'px-3 [&_svg]:w-5',
-  xl: 'px-6 [&_svg]:w-5',
+  md: 'px-2 [&_svg]:w-4',
+  lg: 'px-3 [&_svg]:w-4',
+  xl: 'px-4 [&_svg]:w-5',
 };
 
 const colorStyles: Record<
@@ -231,7 +231,7 @@ export const Button = ({
   };
 
   const baseStyle = {
-    common: `flex justify-center items-center rounded-sm hover:transition-colors transition-colors border ${disabled ? 'cursor-not-allowed' : inert ? 'cursor-default' : 'cursor-pointer'}`,
+    common: `flex gap-x-1.5 justify-center items-center rounded-sm hover:transition-colors transition-colors border ${disabled ? 'cursor-not-allowed' : inert ? 'cursor-default' : 'cursor-pointer'}`,
     normal: 'inset-shadow-xs inset-shadow-white dark:inset-shadow-white/10',
     disabled: 'opacity-60',
     ghost:

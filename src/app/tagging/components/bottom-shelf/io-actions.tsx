@@ -32,7 +32,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
           hasModifiedAssets ? 'Cancel all tag changes' : 'No changes to cancel'
         }
       >
-        <BookmarkMinusIcon className="h-4 w-4" />
+        <BookmarkMinusIcon />
         <span className="ml-1 max-lg:hidden">Cancel All</span>
       </Button>
 
@@ -48,7 +48,7 @@ export const IoActions = ({ ioInProgress }: { ioInProgress: boolean }) => {
           hasModifiedAssets ? 'Save all tag changes' : 'No changes to save'
         }
       >
-        <BookmarkCheckIcon className="h-4 w-4" />
+        <BookmarkCheckIcon />
         <span className="ml-1 max-lg:hidden">Save All</span>
       </Button>
     </>

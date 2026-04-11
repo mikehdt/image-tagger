@@ -106,7 +106,7 @@ const CategoryNavigationComponent = ({
         isPressed={isOpen}
         disabled={categoriesWithPageInfo.length <= 1}
       >
-        <ListOrderedIcon className="h-4 w-4" />
+        <ListOrderedIcon className="my-0.5" />
       </Button>
 
       <Popup

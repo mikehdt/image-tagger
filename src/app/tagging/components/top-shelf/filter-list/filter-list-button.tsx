@@ -50,7 +50,7 @@ const FilterListButtonComponent = () => {
         onClick={handleToggle}
         title="Show filters"
       >
-        <ListTodoIcon className="h-4 w-4" />
+        <ListTodoIcon className="my-0.5" />
       </Button>
 
       <Popup

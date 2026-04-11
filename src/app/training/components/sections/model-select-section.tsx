@@ -1,11 +1,12 @@
 import { DownloadIcon, FolderOpenIcon } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/app/components/shared/button';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import { Input } from '@/app/components/shared/input/input';
 import { InputTray } from '@/app/components/shared/input-tray/input-tray';
+import { ToolbarDivider } from '@/app/components/shared/toolbar-divider';
 import { getTrainingDownloadable } from '@/app/services/model-manager/registries/training-models';
 import { startModelDownload } from '@/app/services/model-manager/start-download';
 import {
@@ -52,19 +53,25 @@ const ModelSelectSectionComponent = ({
   hiddenChangesCount,
 }: ModelSelectSectionProps) => {
   const dispatch = useAppDispatch();
+  const [variantSelections, setVariantSelections] = useState<
+    Record<string, string>
+  >({});
 
   const handleDownload = useCallback(
     (downloadId: string) => {
       const model = getTrainingDownloadable(downloadId);
       if (!model) return;
       dispatch(openPanel());
+      const variantId =
+        variantSelections[downloadId] ?? model.variants?.[0]?.id;
       startModelDownload({
         modelId: model.id,
         modelName: model.name,
+        variantId,
         dispatch,
       });
     },
-    [dispatch],
+    [dispatch, variantSelections],
   );
 
   const modelGroups = useMemo(() => {
@@ -146,7 +153,7 @@ const ModelSelectSectionComponent = ({
       <div className="space-y-3">
         {visibleFields.has('modelId' satisfies keyof FormState) && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-(--foreground)/70">
+            <label className="mb-1 block text-xs font-medium text-(--foreground)">
               Base Model
             </label>
 
@@ -206,19 +213,57 @@ const ModelSelectSectionComponent = ({
                 >
                   <FolderOpenIcon />
                 </Button>
+
+                <div className="mx-1">
+                  <ToolbarDivider />
+                </div>
+
                 {component.downloadId &&
-                  !modelPaths[component.type]?.trim() && (
-                    <Button
-                      onClick={() => handleDownload(component.downloadId!)}
-                      variant="ghost"
-                      size="md"
-                      color="indigo"
-                      title={`Download ${component.label}…`}
-                    >
-                      <DownloadIcon />
-                    </Button>
-                  )}
+                  !modelPaths[component.type]?.trim() &&
+                  (() => {
+                    const dl = getTrainingDownloadable(component.downloadId!);
+                    const variants = dl?.variants;
+                    const selectedVariant =
+                      variantSelections[component.downloadId!] ??
+                      variants?.[0]?.id;
+                    return (
+                      <>
+                        {variants && variants.length > 1 && (
+                          <Dropdown
+                            items={variants.map((v) => ({
+                              value: v.id,
+                              label: v.label,
+                            }))}
+                            selectedValue={selectedVariant ?? ''}
+                            onChange={(id) =>
+                              setVariantSelections((prev) => ({
+                                ...prev,
+                                [component.downloadId!]: id,
+                              }))
+                            }
+                            selectedValueRenderer={(item) => (
+                              <span className="text-xs">
+                                {item.value.toUpperCase()}
+                              </span>
+                            )}
+                            size="sm"
+                            aria-label={`${component.label} precision`}
+                          />
+                        )}
+                        <Button
+                          onClick={() => handleDownload(component.downloadId!)}
+                          variant="ghost"
+                          size="md"
+                          color="indigo"
+                          title={`Download ${component.label}…`}
+                        >
+                          <DownloadIcon />
+                        </Button>
+                      </>
+                    );
+                  })()}
               </InputTray>
+
               {component.hint && (
                 <p className="mt-0.5 text-xs text-slate-400">
                   {component.hint}

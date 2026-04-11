@@ -40,7 +40,7 @@ export const ClearSelectionButton = () => {
       size="md"
       title="Clear selection"
     >
-      <SquareXIcon className="h-4 w-4" />
+      <SquareXIcon />
     </Button>
   );
 };

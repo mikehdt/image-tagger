@@ -56,8 +56,8 @@ export const MoveToFolderButton = () => {
                   : 'Select assets or apply filters first'
         }
       >
-        <FolderOutputIcon className="h-4 w-4" />
-        <span className="ml-2 max-xl:hidden">Move</span>
+        <FolderOutputIcon />
+        <span className="max-xl:hidden">Move</span>
       </Button>
 
       <MoveToFolderModal isOpen={isModalOpen} onClose={closeModal} />

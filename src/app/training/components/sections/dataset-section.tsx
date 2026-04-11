@@ -221,7 +221,7 @@ const DatasetSectionComponent = ({
                             )}
                           </Button>
                           <span className="flex items-center">
-                            <FolderOpenIcon className="mr-2 h-4 w-4 text-slate-400 dark:text-slate-600" />{' '}
+                            <FolderOpenIcon className="text-slate-400 dark:text-slate-600" />{' '}
                             {folder.name}
                           </span>
                         </div>
@@ -229,7 +229,9 @@ const DatasetSectionComponent = ({
                         {!isDisabled && (
                           <div className="flex items-center gap-1.5">
                             <span className="text-slate-400 tabular-nums">
-                              {folder.imageCount} images
+                              {folder.imageCount === 1
+                                ? `${folder.imageCount} image`
+                                : `${folder.imageCount} images`}
                             </span>
                             <span className="text-slate-400">&times;</span>
                             <Input
@@ -250,7 +252,7 @@ const DatasetSectionComponent = ({
                               size="sm"
                               className="w-14 text-center"
                             />
-                            <span className="text-slate-400">repeats</span>
+                            <span className="text-slate-400">repeat</span>
                           </div>
                         )}
                       </div>

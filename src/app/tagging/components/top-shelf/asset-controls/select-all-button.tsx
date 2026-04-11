@@ -51,8 +51,8 @@ export const SelectAllButton = () => {
             : 'Add all filtered assets to selection'
       }
     >
-      <Grid2x2PlusIcon className="h-4 w-4" />
-      <span className="ml-2 max-xl:hidden">
+      <Grid2x2PlusIcon />
+      <span className="max-xl:hidden">
         {isShowingAllAssets ? 'Select All' : 'Select Filtered'}
       </span>
     </Button>

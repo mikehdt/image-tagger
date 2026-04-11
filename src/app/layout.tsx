@@ -63,9 +63,9 @@ export default function Root({
             <ModalProvider>
               <PopupProvider>
                 <StableLayout>{children}</StableLayout>
+                <ModelManagerModal />
               </PopupProvider>
               <ToastContainer />
-              <ModelManagerModal />
               <ActivityPanel />
             </ModalProvider>
           </AppProvider>

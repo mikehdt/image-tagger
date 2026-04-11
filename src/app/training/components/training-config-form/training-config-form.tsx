@@ -142,8 +142,14 @@ const TrainingConfigFormComponent = ({
     });
   }, [state, currentModel, calculatedSteps, onStartTraining]);
 
+  const hasAllRequiredComponents = currentModel.components
+    .filter((c) => c.required)
+    .every((c) => state.modelPaths[c.type]?.trim());
+
   const canStart =
-    state.outputName.trim() !== '' && datasetStats.totalImages > 0;
+    state.outputName.trim() !== '' &&
+    datasetStats.totalImages > 0 &&
+    hasAllRequiredComponents;
 
   return (
     <>
@@ -277,6 +283,7 @@ const TrainingConfigFormComponent = ({
           <TrainingSummary
             outputName={state.outputName}
             currentModel={currentModel}
+            modelPaths={state.modelPaths}
             totalImages={datasetStats.totalImages}
             totalEffective={datasetStats.totalEffective}
             durationMode={state.durationMode}

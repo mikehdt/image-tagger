@@ -47,11 +47,11 @@ export const DeleteToggleButton = () => {
       }
     >
       {filterTagsDeleteState.state === 'all' ? (
-        <FilePlusIcon className="h-4 w-4" />
+        <FilePlusIcon />
       ) : filterTagsDeleteState.state === 'mixed' ? (
-        <DocumentMixedIcon className="h-4 w-4" />
+        <DocumentMixedIcon />
       ) : (
-        <FileMinusIcon className="h-4 w-4" />
+        <FileMinusIcon />
       )}
       {filterTags.length > 0 && deleteToggleAffectedCount > 0 && (
         <span className="ml-1 text-xs">{deleteToggleAffectedCount}</span>

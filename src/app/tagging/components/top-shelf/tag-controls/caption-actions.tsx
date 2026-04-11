@@ -88,8 +88,8 @@ const AutoTaggerButton = () => {
               : `Auto-tag ${filteredAssetsCount} filtered`
         }
       >
-        <SparklesIcon className="h-4 w-4" />
-        <span className="ml-2 max-lg:hidden">Auto Tag</span>
+        <SparklesIcon />
+        <span className="max-lg:hidden">Auto Tag</span>
       </Button>
 
       <AutoTaggerModal

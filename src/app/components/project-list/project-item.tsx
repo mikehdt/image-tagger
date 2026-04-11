@@ -209,7 +209,7 @@ const ProjectItemComponent = ({
                   }
                 }}
               >
-                <CheckIcon className="h-4 w-4" />
+                <CheckIcon />
               </div>
               <div
                 onClick={(e) => {
@@ -228,7 +228,7 @@ const ProjectItemComponent = ({
                   }
                 }}
               >
-                <XIcon className="h-4 w-4" />
+                <XIcon className="h-3 w-3" />
               </div>
             </div>
           </div>
@@ -268,7 +268,7 @@ const ProjectItemComponent = ({
                   }
                 }}
               >
-                <PencilIcon className="h-4 w-4" />
+                <PencilIcon />
               </div>
             </div>
           </div>

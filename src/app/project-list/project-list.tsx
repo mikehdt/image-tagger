@@ -3,11 +3,13 @@
 import {
   BoxesIcon,
   FolderClosedIcon,
+  FolderOpenIcon,
   FolderXIcon,
+  PencilIcon,
   SettingsIcon,
   StarIcon,
 } from 'lucide-react';
-import { useCallback, useId, useMemo, useRef } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import {
   ProjectItem,
@@ -15,19 +17,12 @@ import {
 } from '@/app/components/project-list/project-item';
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
-import { MenuEditModeSwitcher } from '@/app/components/shared/menu-edit-mode-switcher';
+import { MenuProjectsFolder } from '@/app/components/shared/menu-projects-folder';
 import { MenuThemeSwitcher } from '@/app/components/shared/menu-theme-switcher';
 import { Popup, usePopup } from '@/app/components/shared/popup';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import { openModelManagerModal } from '@/app/store/model-manager';
-import {
-  selectTagEditMode,
-  selectTheme,
-  setTagEditMode,
-  setTheme,
-  TagEditMode,
-  type ThemeMode,
-} from '@/app/store/preferences';
+import { selectTheme, setTheme, type ThemeMode } from '@/app/store/preferences';
 
 import { useProjectList } from './hooks/use-project-list';
 
@@ -45,6 +40,8 @@ export const ProjectList = () => {
     regularProjects,
     showHidden,
     setShowHidden,
+    projectsFolder,
+    handleSaveProjectsFolder,
     handleProjectSelect,
     loadProjects,
     editingProject,
@@ -63,19 +60,11 @@ export const ProjectList = () => {
   } = useProjectList();
 
   const theme = useAppSelector(selectTheme);
-  const tagEditMode = useAppSelector(selectTagEditMode);
   const isSettingsOpen = getPopupState(settingsPopupId).isOpen;
 
   const handleSetTheme = useCallback(
     (mode: ThemeMode) => {
       dispatch(setTheme(mode));
-    },
-    [dispatch],
-  );
-
-  const handleSetTagEditMode = useCallback(
-    (mode: TagEditMode) => {
-      dispatch(setTagEditMode(mode));
     },
     [dispatch],
   );
@@ -156,6 +145,10 @@ export const ProjectList = () => {
           Error loading projects
         </h1>
         <p className="mt-4 w-full text-rose-500 dark:text-rose-400">{error}</p>
+        <ProjectsFolderInline
+          folder={projectsFolder}
+          onSave={handleSaveProjectsFolder}
+        />
         <p className="mt-4 flex w-full justify-center">
           <Button onClick={loadProjects} size="md" width="xl">
             Refresh
@@ -176,6 +169,10 @@ export const ProjectList = () => {
         <p className="mt-4 w-full text-slate-600 dark:text-slate-400">
           No project folders were found in the configured projects directory
         </p>
+        <ProjectsFolderInline
+          folder={projectsFolder}
+          onSave={handleSaveProjectsFolder}
+        />
         <p className="mt-4 flex w-full justify-center">
           <Button onClick={loadProjects} size="md" width="xl">
             Refresh
@@ -186,7 +183,7 @@ export const ProjectList = () => {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-col items-center px-4">
+    <div className="mx-auto flex w-full max-w-120 min-w-80 flex-col items-center px-4 pt-16 pb-24">
       <FolderClosedIcon className="mb-6 h-24 w-24 text-slate-500 dark:text-slate-400" />
 
       <h1 className="mb-8 text-2xl text-slate-700 dark:text-slate-200">
@@ -248,33 +245,26 @@ export const ProjectList = () => {
         />
 
         <div className="relative">
-          <button
+          <Button
             ref={settingsButtonRef}
-            type="button"
             onClick={handleToggleSettings}
-            className={`flex cursor-pointer items-center gap-1.5 text-xs transition-colors ${
-              isSettingsOpen
-                ? 'text-slate-700 dark:text-slate-200'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
             title="Settings"
+            size="sm"
+            width="lg"
+            variant="ghost"
           >
-            <SettingsIcon className="h-4 w-4" />
-            <span>Settings</span>
-          </button>
+            <SettingsIcon />
+            Settings
+          </Button>
 
           <Popup
             id={settingsPopupId}
-            position="top-right"
             triggerRef={settingsButtonRef}
             className="min-w-48 rounded-md border border-slate-200 bg-white shadow-lg shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
           >
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
               <MenuThemeSwitcher theme={theme} setTheme={handleSetTheme} />
-              <MenuEditModeSwitcher
-                editMode={tagEditMode}
-                setEditMode={handleSetTagEditMode}
-              />
+
               <button
                 type="button"
                 onClick={handleOpenModelManager}
@@ -285,6 +275,11 @@ export const ProjectList = () => {
                 </span>
                 Model Manager
               </button>
+
+              <MenuProjectsFolder
+                folder={projectsFolder}
+                onSave={handleSaveProjectsFolder}
+              />
             </div>
           </Popup>
         </div>
@@ -297,6 +292,65 @@ export const ProjectList = () => {
       <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
         Note: project folders with no images are not shown
       </p>
+    </div>
+  );
+};
+
+// Inline folder picker for empty/error states
+type ProjectsFolderInlineProps = {
+  folder: string;
+  onSave: (folder: string) => Promise<{ error?: string }>;
+};
+
+const ProjectsFolderInline = ({
+  folder,
+  onSave,
+}: ProjectsFolderInlineProps) => {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleBrowse = useCallback(async () => {
+    setError(null);
+    try {
+      const params = new URLSearchParams({
+        title: 'Select projects folder',
+        mode: 'folder',
+      });
+      const res = await fetch(`/api/filesystem/browse?${params}`);
+      const data = await res.json();
+
+      if (data.cancelled || !data.path) return;
+
+      setSaving(true);
+      const result = await onSave(data.path);
+      setSaving(false);
+
+      if (result.error) {
+        setError(result.error);
+      }
+    } catch {
+      setSaving(false);
+      setError('Failed to open folder picker');
+    }
+  }, [onSave]);
+
+  return (
+    <div className="mt-4 w-full">
+      <button
+        type="button"
+        onClick={handleBrowse}
+        disabled={saving}
+        className="mx-auto flex cursor-pointer items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-slate-700 disabled:opacity-50 dark:text-slate-400 dark:hover:text-slate-200"
+      >
+        <FolderOpenIcon />
+        <span className="max-w-64 truncate">
+          {saving ? 'Saving\u2026' : folder || 'No folder configured'}
+        </span>
+        <PencilIcon className="h-3 w-3" />
+      </button>
+      {error && (
+        <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">{error}</p>
+      )}
     </div>
   );
 };

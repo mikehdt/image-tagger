@@ -144,7 +144,7 @@ export const TriggerPhrasesModal = ({
             }`}
             title="Add phrase"
           >
-            <PlusIcon className="h-4 w-4" />
+            <PlusIcon />
           </button>
         </div>
       </div>
@@ -177,9 +177,9 @@ const TriggerPhrasesButtonComponent = () => {
         onClick={() => setIsModalOpen(true)}
         title="Edit trigger phrases"
       >
-        <HighlighterIcon className="h-4 w-4" />
+        <HighlighterIcon />
 
-        <span className="ml-2 flex items-center">
+        <span className="flex items-center">
           <span className="mr-2 text-nowrap max-lg:hidden">Triggers</span>
 
           {triggerPhrases.length > 0 && (

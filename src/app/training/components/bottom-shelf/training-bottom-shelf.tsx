@@ -29,12 +29,12 @@ export const TrainingBottomShelf = ({
         >
           {isTraining ? (
             <>
-              <ListPlusIcon className="mr-2 h-4 w-4" />
+              <ListPlusIcon />
               Add to Queue
             </>
           ) : (
             <>
-              <PlayIcon className="mr-2 h-4 w-4" />
+              <PlayIcon />
               Start Training
             </>
           )}
