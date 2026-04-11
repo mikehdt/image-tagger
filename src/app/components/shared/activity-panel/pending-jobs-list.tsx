@@ -1,4 +1,9 @@
-import { ChevronRightIcon, DownloadIcon, XIcon } from 'lucide-react';
+import {
+  ChevronRightIcon,
+  DownloadIcon,
+  ScanSearchIcon,
+  XIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { useAppDispatch } from '@/app/store/hooks';
@@ -29,10 +34,14 @@ export function PendingJobsList({ jobs }: { jobs: Job[] }) {
             const name =
               job.type === 'download'
                 ? job.modelName
-                : job.config?.outputName || 'Training';
+                : job.type === 'tagging'
+                  ? job.modelName
+                  : job.config?.outputName || 'Training';
             const icon =
               job.type === 'download' ? (
                 <DownloadIcon className="h-3 w-3 text-slate-400" />
+              ) : job.type === 'tagging' ? (
+                <ScanSearchIcon className="h-3 w-3 text-slate-400" />
               ) : (
                 <span className="h-2 w-2 rounded-full bg-slate-300" />
               );

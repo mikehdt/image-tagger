@@ -20,6 +20,9 @@ import type {
   JobsState,
   JobStatus,
   JobType,
+  TaggingJob,
+  TaggingProgress,
+  TaggingSummary,
   TrainingJob,
 } from './types';
 
@@ -137,6 +140,52 @@ const jobsSlice = createSlice({
       job.completedAt = Date.now();
     },
 
+    // --- Tagging-specific progress ---
+
+    updateTaggingProgress: (
+      state,
+      action: PayloadAction<{ id: string; progress: TaggingProgress }>,
+    ) => {
+      const job = state.jobs[action.payload.id];
+      if (!job || job.type !== 'tagging') return;
+
+      job.progress = action.payload.progress;
+      job.status = 'running';
+      job.startedAt ??= Date.now();
+    },
+
+    completeTagging: (
+      state,
+      action: PayloadAction<{ id: string; summary: TaggingSummary }>,
+    ) => {
+      const job = state.jobs[action.payload.id];
+      if (!job || job.type !== 'tagging') return;
+
+      job.summary = action.payload.summary;
+      job.status = 'completed';
+      job.completedAt = Date.now();
+    },
+
+    failTagging: (
+      state,
+      action: PayloadAction<{ id: string; error: string }>,
+    ) => {
+      const job = state.jobs[action.payload.id];
+      if (!job || job.type !== 'tagging') return;
+
+      job.status = 'failed';
+      job.error = action.payload.error;
+      job.completedAt = Date.now();
+    },
+
+    cancelTagging: (state, action: PayloadAction<string>) => {
+      const job = state.jobs[action.payload];
+      if (!job || job.type !== 'tagging') return;
+
+      job.status = 'cancelled';
+      job.completedAt = Date.now();
+    },
+
     // --- Restore (for persistence across refreshes) ---
 
     restoreJobs: (state, action: PayloadAction<Job[]>) => {
@@ -196,6 +245,10 @@ export const {
   updateDownloadProgress,
   completeDownload,
   failDownload,
+  updateTaggingProgress,
+  completeTagging,
+  failTagging,
+  cancelTagging,
   restoreJobs,
   removeJob,
   clearCompletedJobs,
@@ -265,6 +318,38 @@ export const selectIsTraining = createSelector(
   (job) => job !== null,
 );
 
+/** The active tagging job for a specific project (at most one per project). */
+export const selectActiveTaggingJob = (projectFolderName: string) =>
+  createSelector(selectAllJobs, (jobs): TaggingJob | null => {
+    const found = jobs.find(
+      (j): j is TaggingJob =>
+        j.type === 'tagging' &&
+        j.projectFolderName === projectFolderName &&
+        (j.status === 'running' || j.status === 'preparing'),
+    );
+    return found ?? null;
+  });
+
+/** Any active tagging job across all projects. */
+export const selectAnyActiveTaggingJob = createSelector(
+  selectAllJobs,
+  (jobs): TaggingJob | null => {
+    const found = jobs.find(
+      (j): j is TaggingJob =>
+        j.type === 'tagging' &&
+        (j.status === 'running' || j.status === 'preparing'),
+    );
+    return found ?? null;
+  },
+);
+
+/** Whether the GPU is busy (training or tagging active — blocks other GPU work). */
+export const selectIsGpuBusy = createSelector(
+  selectActiveTrainingJob,
+  selectAnyActiveTaggingJob,
+  (training, tagging) => training !== null || tagging !== null,
+);
+
 /** Whether the activity panel is open. */
 export const selectPanelOpen = createSelector(selectJobs, (s) => s.panelOpen);
 
@@ -275,4 +360,14 @@ export const selectHasJobs = createSelector(
 );
 
 // Re-export types
-export type { DownloadJob, Job, JobsState, JobStatus, JobType, TrainingJob };
+export type {
+  DownloadJob,
+  Job,
+  JobsState,
+  JobStatus,
+  JobType,
+  TaggingJob,
+  TaggingProgress,
+  TaggingSummary,
+  TrainingJob,
+};

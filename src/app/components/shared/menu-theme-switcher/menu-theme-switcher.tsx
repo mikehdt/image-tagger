@@ -1,12 +1,17 @@
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { memo, useCallback } from 'react';
 
-import { ThemeMode } from '@/app/utils/use-theme';
+import type { ThemeMode } from '@/app/store/preferences';
 
-const options: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-  { mode: 'light', icon: <SunIcon />, label: 'Light' },
-  { mode: 'dark', icon: <MoonIcon />, label: 'Dark' },
-  { mode: 'auto', icon: <MonitorIcon />, label: 'Auto' },
+import {
+  SegmentedControl,
+  type SegmentOption,
+} from '../segmented-control/segmented-control';
+
+const options: SegmentOption<ThemeMode>[] = [
+  { value: 'light', icon: <SunIcon />, label: 'Light' },
+  { value: 'dark', icon: <MoonIcon />, label: 'Dark' },
+  { value: 'auto', icon: <MonitorIcon />, label: 'Auto' },
 ];
 
 type MenuThemeSwitcherProps = {
@@ -18,35 +23,24 @@ const MenuThemeSwitcherComponent = ({
   theme,
   setTheme,
 }: MenuThemeSwitcherProps) => {
-  const handleClick = useCallback(
-    (mode: ThemeMode) => (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setTheme(mode);
-    },
-    [setTheme],
+  const stopPropagation = useCallback(
+    (e: React.MouseEvent) => e.stopPropagation(),
+    [],
   );
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2">
+    <div
+      className="flex items-center gap-2 px-3 py-2"
+      onClick={stopPropagation}
+    >
       <span className="text-sm text-slate-700 dark:text-slate-300">Theme</span>
-      <div className="ml-auto flex gap-0.5 rounded-md bg-slate-100 p-0.5 dark:bg-slate-700">
-        {options.map(({ mode, icon, label }) => (
-          <button
-            key={mode}
-            type="button"
-            onClick={handleClick(mode)}
-            title={label}
-            className={`flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1 text-xs transition-colors ${
-              theme === mode
-                ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-500 dark:text-slate-100'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            {icon}
-            {label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        options={options}
+        value={theme}
+        onChange={setTheme}
+        size="sm"
+        className="ml-auto"
+      />
     </div>
   );
 };

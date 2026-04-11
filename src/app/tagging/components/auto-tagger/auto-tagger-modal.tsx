@@ -1,5 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useCallback } from 'react';
+
 import { Modal } from '@/app/components/shared/modal';
 
 import { AutoTaggerProgress } from './auto-tagger-progress';
@@ -18,6 +21,8 @@ export function AutoTaggerModal({
   onClose,
   selectedAssets,
 }: AutoTaggerModalProps) {
+  const router = useRouter();
+
   const {
     options,
     unselectOnComplete,
@@ -37,6 +42,11 @@ export function AutoTaggerModal({
     handleCancel,
     handleStartTagging,
   } = useAutoTagger({ isOpen, onClose, selectedAssets });
+
+  const handleLeave = useCallback(() => {
+    onClose();
+    router.push('/');
+  }, [onClose, router]);
 
   return (
     <Modal
@@ -59,7 +69,11 @@ export function AutoTaggerModal({
             </p>
           </div>
         ) : isTagging ? (
-          <AutoTaggerProgress progress={progress} onCancel={handleCancel} />
+          <AutoTaggerProgress
+            progress={progress}
+            onCancel={handleCancel}
+            onLeave={handleLeave}
+          />
         ) : summary ? (
           <AutoTaggerSummary
             summary={summary}

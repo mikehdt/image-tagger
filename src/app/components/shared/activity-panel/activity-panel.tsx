@@ -4,10 +4,12 @@ import { ActivityIcon, ChevronDownIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useRef } from 'react';
 
+import { abortTagging } from '@/app/services/auto-tagger/tagging-controllers';
 import { abortDownload } from '@/app/services/model-manager/download-controllers';
 import { startModelDownload } from '@/app/services/model-manager/start-download';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
+  cancelTagging,
   clearCompletedJobs,
   closePanel,
   type DownloadJob,
@@ -19,6 +21,7 @@ import {
   selectHasJobs,
   selectPanelOpen,
   selectPendingJobs,
+  type TaggingJob,
   updateJobStatus,
 } from '@/app/store/jobs';
 import { loadPersistedDownloads } from '@/app/store/jobs/persistence';
@@ -26,6 +29,7 @@ import { setModelStatus } from '@/app/store/model-manager';
 
 import { DownloadJobCard } from './download-job-card';
 import { PendingJobsList } from './pending-jobs-list';
+import { TaggingJobCard } from './tagging-job-card';
 import { TrainingJobCard } from './training-job-card';
 
 const ActivityPanelComponent = () => {
@@ -113,6 +117,14 @@ const ActivityPanelComponent = () => {
     [dispatch],
   );
 
+  const handleCancelTagging = useCallback(
+    (job: TaggingJob) => {
+      abortTagging(job.id);
+      dispatch(cancelTagging(job.id));
+    },
+    [dispatch],
+  );
+
   const handleClearAll = useCallback(() => {
     dispatch(clearCompletedJobs());
   }, [dispatch]);
@@ -178,6 +190,12 @@ const ActivityPanelComponent = () => {
         {activeJobs.map((job) =>
           job.type === 'training' ? (
             <TrainingJobCard key={job.id} job={job} />
+          ) : job.type === 'tagging' ? (
+            <TaggingJobCard
+              key={job.id}
+              job={job}
+              onCancel={handleCancelTagging}
+            />
           ) : (
             <DownloadJobCard
               key={job.id}
@@ -193,6 +211,8 @@ const ActivityPanelComponent = () => {
         {completedJobs.map((job) =>
           job.type === 'training' ? (
             <TrainingJobCard key={job.id} job={job} />
+          ) : job.type === 'tagging' ? (
+            <TaggingJobCard key={job.id} job={job} />
           ) : (
             <DownloadJobCard
               key={job.id}

@@ -27,7 +27,7 @@ export type JobStatus =
 // Job type discriminator
 // ---------------------------------------------------------------------------
 
-export type JobType = 'training' | 'download';
+export type JobType = 'training' | 'download' | 'tagging';
 
 // ---------------------------------------------------------------------------
 // Per-type job shapes
@@ -61,7 +61,28 @@ export type DownloadJob = JobBase & {
   } | null;
 };
 
-export type Job = TrainingJob | DownloadJob;
+export type TaggingProgress = {
+  current: number;
+  total: number;
+  currentFileId?: string;
+};
+
+export type TaggingSummary = {
+  imagesProcessed: number;
+  imagesWithNewTags: number;
+  totalTagsFound: number;
+};
+
+export type TaggingJob = JobBase & {
+  type: 'tagging';
+  /** Project folder name (slug from URL) */
+  projectFolderName: string;
+  modelName: string;
+  progress: TaggingProgress | null;
+  summary: TaggingSummary | null;
+};
+
+export type Job = TrainingJob | DownloadJob | TaggingJob;
 
 // ---------------------------------------------------------------------------
 // Slice state

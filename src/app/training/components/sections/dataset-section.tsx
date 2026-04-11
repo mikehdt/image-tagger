@@ -269,19 +269,20 @@ const DatasetSectionComponent = ({
                 buttonSize="sm"
                 buttonVariant="ghost"
               >
-                <PlusIcon className="mr-1 h-3 w-3" />
+                <PlusIcon />
                 Add Project
               </ProjectPicker>
 
               {visibleFields.has('extraFolders' satisfies keyof FormState) && (
-                <button
-                  type="button"
+                <Button
                   onClick={handleBrowseFolder}
-                  className="flex cursor-pointer items-center gap-1 rounded border border-(--border-subtle) bg-(--surface) px-2 py-1 text-xs text-(--foreground)/70 transition-colors hover:bg-(--surface-hover) hover:text-(--foreground)"
+                  variant="ghost"
+                  size="sm"
+                  width="md"
                 >
                   <FolderOpenIcon className="h-3 w-3" />
                   Add Folder
-                </button>
+                </Button>
               )}
             </div>
           </>
@@ -303,14 +304,12 @@ const DatasetSectionComponent = ({
                   >
                     {folder}
                   </span>
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => onRemoveExtraFolder(i)}
-                    className="cursor-pointer rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
                     title="Remove folder"
                   >
-                    <XIcon className="h-3 w-3" />
-                  </button>
+                    <XIcon />
+                  </Button>
                 </div>
               ))}
             </div>

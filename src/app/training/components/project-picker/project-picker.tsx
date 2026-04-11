@@ -122,6 +122,7 @@ const ProjectPickerComponent = ({
         size={buttonSize}
         variant={buttonVariant}
         onClick={open}
+        width="lg"
       >
         {children}
       </Button>

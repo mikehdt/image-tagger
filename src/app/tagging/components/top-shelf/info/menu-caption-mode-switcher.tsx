@@ -3,23 +3,16 @@ import { memo, useCallback } from 'react';
 
 import type { CaptionMode } from '@/app/store/project/types';
 
-const options: { mode: CaptionMode; icon: React.ReactNode; label: string }[] = [
-  {
-    mode: 'tags',
-    icon: <HashIcon />,
-    label: 'Tags',
-  },
+import {
+  SegmentedControl,
+  type SegmentOption,
+} from '@/app/components/shared/segmented-control/segmented-control';
+
+const options: SegmentOption<CaptionMode>[] = [
+  { value: 'tags', icon: <HashIcon />, label: 'Tags' },
   // Sentences mode hidden until split logic is reworked
-  // {
-  //   mode: 'sentences',
-  //   icon: <WholeWordIcon  />,
-  //   label: 'Sentences',
-  // },
-  {
-    mode: 'caption',
-    icon: <TextIcon />,
-    label: 'Caption',
-  },
+  // { value: 'sentences', icon: <WholeWordIcon />, label: 'Sentences' },
+  { value: 'caption', icon: <TextIcon />, label: 'Caption' },
 ];
 
 type MenuCaptionModeSwitcherProps = {
@@ -31,37 +24,26 @@ const MenuCaptionModeSwitcherComponent = ({
   captionMode,
   setCaptionMode,
 }: MenuCaptionModeSwitcherProps) => {
-  const handleClick = useCallback(
-    (mode: CaptionMode) => (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setCaptionMode(mode);
-    },
-    [setCaptionMode],
+  const stopPropagation = useCallback(
+    (e: React.MouseEvent) => e.stopPropagation(),
+    [],
   );
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2">
+    <div
+      className="flex items-center gap-2 px-3 py-2"
+      onClick={stopPropagation}
+    >
       <span className="text-sm text-slate-700 dark:text-slate-300">
         Tagging
       </span>
-      <div className="ml-auto flex gap-0.5 rounded-md bg-slate-100 p-0.5 dark:bg-slate-700">
-        {options.map(({ mode, icon, label }) => (
-          <button
-            key={mode}
-            type="button"
-            onClick={handleClick(mode)}
-            title={label}
-            className={`flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1 text-xs transition-colors ${
-              captionMode === mode
-                ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-500 dark:text-slate-100'
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-            }`}
-          >
-            {icon}
-            {label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        options={options}
+        value={captionMode}
+        onChange={setCaptionMode}
+        size="sm"
+        className="ml-auto"
+      />
     </div>
   );
 };

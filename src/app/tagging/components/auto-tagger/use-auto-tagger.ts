@@ -8,6 +8,11 @@ import type {
   TagInsertMode,
 } from '@/app/services/auto-tagger';
 import { DEFAULT_TAGGER_OPTIONS } from '@/app/services/auto-tagger';
+import {
+  abortTagging,
+  registerTaggingController,
+  removeTaggingController,
+} from '@/app/services/auto-tagger/tagging-controllers';
 import type { AppDispatch, RootState } from '@/app/store';
 import { addMultipleTags } from '@/app/store/assets';
 import {
@@ -18,6 +23,14 @@ import {
   setModelsAndProviders,
   setSelectedModel,
 } from '@/app/store/auto-tagger';
+import {
+  addJob,
+  cancelTagging,
+  completeTagging,
+  failTagging,
+  selectActiveTaggingJob,
+  updateTaggingProgress,
+} from '@/app/store/jobs';
 import { selectProjectInfo } from '@/app/store/project';
 import { setAssetsSelectionState } from '@/app/store/selection';
 import {
@@ -25,7 +38,7 @@ import {
   saveAutoTaggerSettings,
 } from '@/app/utils/project-actions';
 
-import type { TaggingProgress, TaggingResult, TaggingSummary } from './types';
+import type { TaggingResult } from './types';
 
 type UseAutoTaggerParams = {
   isOpen: boolean;
@@ -54,20 +67,34 @@ export function useAutoTagger({
     selectProjectInfo(state),
   );
 
-  // Local options state
+  // Active tagging job for this project (from the jobs slice)
+  const activeTaggingJob = useSelector(
+    selectActiveTaggingJob(projectInfo.projectFolderName ?? ''),
+  );
+
+  // Derived state from the job
+  const isTagging = activeTaggingJob !== null;
+  const progress = activeTaggingJob?.progress ?? null;
+
+  // Local settings state (not part of the job)
   const [options, setOptions] = useState<TaggerOptions>({
     ...DEFAULT_TAGGER_OPTIONS,
   });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [unselectOnComplete, setUnselectOnComplete] = useState(true);
 
-  // Tagging state
-  const [isTagging, setIsTagging] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const [progress, setProgress] = useState<TaggingProgress | null>(null);
-  const [summary, setSummary] = useState<TaggingSummary | null>(null);
+  // Summary and error are set locally after the job completes,
+  // since they drive the modal's summary view
+  const [summary, setSummary] = useState<{
+    imagesProcessed: number;
+    imagesWithNewTags: number;
+    totalTagsFound: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [wasCancelled, setWasCancelled] = useState(false);
+
+  // Track the current job ID so we can cancel it
+  const currentJobIdRef = useRef<string | null>(null);
 
   // Fetch models callback
   const fetchModels = useCallback(async () => {
@@ -89,7 +116,6 @@ export function useAutoTagger({
   }, [isOpen, models.length, fetchModels]);
 
   // Load saved settings when modal opens (after models are available)
-  // Use projectFolderName for config file operations (not projectName which is the display title)
   useEffect(() => {
     if (
       isOpen &&
@@ -120,7 +146,6 @@ export function useAutoTagger({
                   : prev.tagInsertMode,
             }));
 
-            // Try to restore the previously used model, but only if it's still available
             if (
               savedSettings.defaultModelId &&
               readyModels.some((m) => m.id === savedSettings.defaultModelId)
@@ -168,7 +193,6 @@ export function useAutoTagger({
   const handleClose = useCallback(() => {
     if (!isTagging) {
       onClose();
-      setProgress(null);
       setSummary(null);
       setError(null);
       setWasCancelled(false);
@@ -177,8 +201,12 @@ export function useAutoTagger({
   }, [isTagging, onClose]);
 
   const handleCancel = useCallback(() => {
-    abortControllerRef.current?.abort();
-  }, []);
+    const jobId = currentJobIdRef.current;
+    if (jobId) {
+      abortTagging(jobId);
+      dispatch(cancelTagging(jobId));
+    }
+  }, [dispatch]);
 
   const applyTagsToAssets = useCallback(
     (taggingResults: TaggingResult[]) => {
@@ -213,7 +241,7 @@ export function useAutoTagger({
   );
 
   const finaliseResults = useCallback(
-    (collectedResults: TaggingResult[]) => {
+    (jobId: string, collectedResults: TaggingResult[]) => {
       const imagesWithNewTags = collectedResults.filter(
         (r) => r.tags.length > 0,
       ).length;
@@ -221,25 +249,52 @@ export function useAutoTagger({
         (sum, r) => sum + r.tags.length,
         0,
       );
-      setSummary({
+      const summaryData = {
         imagesProcessed: collectedResults.length,
         imagesWithNewTags,
         totalTagsFound,
-      });
+      };
+      setSummary(summaryData);
+      dispatch(completeTagging({ id: jobId, summary: summaryData }));
       applyTagsToAssets(collectedResults);
       deselectTaggedAssets(collectedResults);
     },
-    [applyTagsToAssets, deselectTaggedAssets],
+    [applyTagsToAssets, deselectTaggedAssets, dispatch],
   );
 
   const handleStartTagging = useCallback(async () => {
-    if (!selectedModelId || !projectInfo.projectPath) return;
+    if (
+      !selectedModelId ||
+      !projectInfo.projectPath ||
+      !projectInfo.projectFolderName
+    )
+      return;
 
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    // Create a job in the queue
+    const jobId = `tagging-${Date.now()}`;
+    const modelName =
+      readyModels.find((m) => m.id === selectedModelId)?.name ??
+      selectedModelId;
 
-    setIsTagging(true);
-    setProgress({ current: 0, total: selectedAssets.length });
+    dispatch(
+      addJob({
+        id: jobId,
+        type: 'tagging',
+        status: 'preparing',
+        createdAt: Date.now(),
+        startedAt: Date.now(),
+        completedAt: null,
+        error: null,
+        projectFolderName: projectInfo.projectFolderName,
+        modelName,
+        progress: { current: 0, total: selectedAssets.length },
+        summary: null,
+      }),
+    );
+
+    currentJobIdRef.current = jobId;
+    const abortController = registerTaggingController(jobId);
+
     setSummary(null);
     setError(null);
     setWasCancelled(false);
@@ -287,11 +342,16 @@ export function useAutoTagger({
               const event = JSON.parse(line.slice(6));
 
               if (event.type === 'progress') {
-                setProgress({
-                  current: event.current,
-                  total: event.total,
-                  currentFileId: event.fileId,
-                });
+                dispatch(
+                  updateTaggingProgress({
+                    id: jobId,
+                    progress: {
+                      current: event.current,
+                      total: event.total,
+                      currentFileId: event.fileId,
+                    },
+                  }),
+                );
               } else if (event.type === 'result') {
                 collectedResults.push({
                   fileId: event.fileId,
@@ -303,10 +363,9 @@ export function useAutoTagger({
                 throw new Error(event.error);
               } else if (event.type === 'complete') {
                 receivedComplete = true;
-                finaliseResults(collectedResults);
+                finaliseResults(jobId, collectedResults);
 
                 // Save settings as defaults for this project
-                // Use projectFolderName for config file operations
                 if (projectInfo.projectFolderName) {
                   const settingsToSave: AutoTaggerSettings = {
                     defaultModelId: selectedModelId,
@@ -350,7 +409,7 @@ export function useAutoTagger({
 
       if (!receivedComplete) {
         if (collectedResults.length > 0) {
-          finaliseResults(collectedResults);
+          finaliseResults(jobId, collectedResults);
         } else {
           throw new Error(
             'No results received from tagger. Check server logs for errors.',
@@ -361,7 +420,22 @@ export function useAutoTagger({
       if (err instanceof DOMException && err.name === 'AbortError') {
         setWasCancelled(true);
         if (collectedResults.length > 0) {
-          finaliseResults(collectedResults);
+          // Apply partial results but mark as cancelled
+          const imagesWithNewTags = collectedResults.filter(
+            (r) => r.tags.length > 0,
+          ).length;
+          const totalTagsFound = collectedResults.reduce(
+            (sum, r) => sum + r.tags.length,
+            0,
+          );
+          const summaryData = {
+            imagesProcessed: collectedResults.length,
+            imagesWithNewTags,
+            totalTagsFound,
+          };
+          setSummary(summaryData);
+          applyTagsToAssets(collectedResults);
+          deselectTaggedAssets(collectedResults);
         } else {
           setSummary({
             imagesProcessed: 0,
@@ -369,21 +443,27 @@ export function useAutoTagger({
             totalTagsFound: 0,
           });
         }
+        // cancelTagging already dispatched by the abort handler
       } else {
-        setError(err instanceof Error ? err.message : 'Tagging failed');
+        const message = err instanceof Error ? err.message : 'Tagging failed';
+        setError(message);
+        dispatch(failTagging({ id: jobId, error: message }));
       }
     } finally {
-      setIsTagging(false);
-      setProgress(null);
-      abortControllerRef.current = null;
+      removeTaggingController(jobId);
+      currentJobIdRef.current = null;
     }
   }, [
     selectedModelId,
     projectInfo.projectPath,
     projectInfo.projectFolderName,
     selectedAssets,
+    readyModels,
     options,
     finaliseResults,
+    applyTagsToAssets,
+    deselectTaggedAssets,
+    dispatch,
   ]);
 
   return {
