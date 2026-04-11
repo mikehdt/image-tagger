@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo } from 'react';
 
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
-import { Input } from '@/app/components/shared/input/input';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
+import { Input } from '@/app/components/shared/input/input';
 import { SegmentedControl } from '@/app/components/shared/segmented-control/segmented-control';
 import {
   OPTIMIZER_OPTIONS,

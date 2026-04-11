@@ -2,8 +2,8 @@ import { memo, useMemo } from 'react';
 
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
-import { Input } from '@/app/components/shared/input/input';
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
+import { Input } from '@/app/components/shared/input/input';
 import {
   calculateKohyaBucket,
   generateBucketList,

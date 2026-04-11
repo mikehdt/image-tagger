@@ -55,18 +55,18 @@ interface ButtonProps {
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: '[&_svg]:h-4',
-  sm: 'py-0.5 [&_svg]:h-4',
-  md: 'py-1 [&_svg]:h-5',
+  xs: 'py-0.5 [&_svg]:h-4',
+  sm: 'py-1 [&_svg]:h-4',
+  md: 'py-1.5 [&_svg]:h-4',
   lg: 'py-2 [&_svg]:h-5',
 };
 
 const widthStyles: Record<ButtonWidth, string> = {
-  xs: 'px-0.5',
-  sm: 'px-1',
-  md: 'px-2',
-  lg: 'px-3',
-  xl: 'px-4',
+  xs: 'px-0.5 [&_svg]:w-4',
+  sm: 'px-1 [&_svg]:w-4',
+  md: 'px-1.5 [&_svg]:w-4',
+  lg: 'px-3 [&_svg]:w-5',
+  xl: 'px-6 [&_svg]:w-5',
 };
 
 const colorStyles: Record<

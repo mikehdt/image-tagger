@@ -380,7 +380,7 @@ function DropdownInternal<T>({
         <div
           ref={listboxRef}
           id={listboxId}
-          className="divide-y divide-slate-100 dark:divide-slate-800"
+          className="min-w-50 divide-y divide-slate-100 dark:divide-slate-800"
           role="listbox"
           aria-label={ariaLabel}
           aria-activedescendant={activeDescendant}

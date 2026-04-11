@@ -40,27 +40,38 @@ const ReadinessItem = ({
   label,
   isReady,
   detail,
+  isSummary,
 }: {
   label: string;
   isReady: boolean;
   detail?: string;
-}) => (
-  <div className="flex items-start gap-1.5">
-    {isReady ? (
-      <CheckCircle2Icon className="mt-px h-3.5 w-3.5 shrink-0 text-emerald-500" />
-    ) : (
-      <CircleDashedIcon className="mt-px h-3.5 w-3.5 shrink-0 text-slate-400" />
-    )}
-    <div className="min-w-0">
-      <span
-        className={`text-xs ${isReady ? 'text-(--foreground)/70' : 'text-slate-400'}`}
-      >
-        {label}
-      </span>
-      {detail && <span className="ml-1 text-xs text-slate-400">{detail}</span>}
+  isSummary?: boolean;
+}) => {
+  const NotReadyIcon = isSummary ? CircleDotIcon : CircleDashedIcon;
+  const notReadyColour = isSummary ? 'text-amber-500' : 'text-slate-400';
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {isReady ? (
+        <CheckCircle2Icon className="mt-px h-3.5 w-3.5 shrink-0 text-emerald-500" />
+      ) : (
+        <NotReadyIcon
+          className={`mt-px h-3.5 w-3.5 shrink-0 ${notReadyColour}`}
+        />
+      )}
+      <div className="min-w-0">
+        <span
+          className={`text-xs ${isSummary ? 'font-medium' : ''} ${isReady ? 'text-(--foreground)/70' : isSummary ? 'text-(--foreground)/70' : 'text-slate-400'}`}
+        >
+          {label}
+        </span>
+        {detail && (
+          <span className="ml-1 text-xs text-slate-400">{detail}</span>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SummaryRow = ({
   label,
@@ -114,9 +125,7 @@ const TrainingSummaryComponent = ({
         ? Math.floor(effectiveEpochs / saveEveryEpochs)
         : 0;
     }
-    return saveEverySteps > 0
-      ? Math.floor(effectiveSteps / saveEverySteps)
-      : 0;
+    return saveEverySteps > 0 ? Math.floor(effectiveSteps / saveEverySteps) : 0;
   }, [
     saveEnabled,
     hasDataset,
@@ -142,37 +151,9 @@ const TrainingSummaryComponent = ({
   }, [scheduler]);
 
   return (
-    <div className="space-y-3">
-      {/* Readiness */}
-      <div className="rounded border border-(--border-subtle) bg-(--surface)/30 p-3">
-        <div className="mb-2 flex items-center gap-1.5">
-          <CircleDotIcon
-            className={`h-3.5 w-3.5 ${hasOutputName && hasDataset ? 'text-emerald-500' : 'text-amber-500'}`}
-          />
-          <span className="text-xs font-medium text-(--foreground)/70">
-            {hasOutputName && hasDataset ? 'Ready to train' : 'Not ready'}
-          </span>
-        </div>
-        <div className="space-y-1">
-          <ReadinessItem
-            label="Output name"
-            isReady={hasOutputName}
-            detail={hasOutputName ? outputName : undefined}
-          />
-          <ReadinessItem
-            label="Dataset"
-            isReady={hasDataset}
-            detail={
-              hasDataset
-                ? `${totalImages} image${totalImages !== 1 ? 's' : ''}`
-                : undefined
-            }
-          />
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-y-4">
       {/* Training overview */}
-      <div className="rounded border border-(--border-subtle) bg-(--surface)/30 p-3">
+      <div className="rounded-lg border border-slate-200 bg-(--surface)/30 p-3 dark:border-slate-700">
         <span className="mb-2 block text-xs font-medium text-(--foreground)/70">
           Overview
         </span>
@@ -205,7 +186,7 @@ const TrainingSummaryComponent = ({
       </div>
 
       {/* LoRA & optimiser */}
-      <div className="rounded border border-(--border-subtle) bg-(--surface)/30 p-3">
+      <div className="rounded-lg border border-slate-200 bg-(--surface)/30 p-3 dark:border-slate-700">
         <span className="mb-2 block text-xs font-medium text-(--foreground)/70">
           Network & Optimiser
         </span>
@@ -218,6 +199,35 @@ const TrainingSummaryComponent = ({
           <SummaryRow label="Optimiser">{optimizerLabel}</SummaryRow>
           <SummaryRow label="Scheduler">{schedulerLabel}</SummaryRow>
           <SummaryRow label="Save format">{saveFormat}</SummaryRow>
+        </div>
+      </div>
+
+      {/* Readiness */}
+      <div className="rounded-lg border border-slate-200 bg-(--surface)/30 p-3 dark:border-slate-700">
+        <div className="space-y-1">
+          <ReadinessItem
+            label="Output name"
+            isReady={hasOutputName}
+            detail={hasOutputName ? outputName : undefined}
+          />
+
+          <ReadinessItem
+            label="Dataset"
+            isReady={hasDataset}
+            detail={
+              hasDataset
+                ? `${totalImages} image${totalImages !== 1 ? 's' : ''}`
+                : undefined
+            }
+          />
+
+          <hr className="my-3 text-slate-300 dark:text-slate-600" />
+
+          <ReadinessItem
+            label={hasOutputName && hasDataset ? 'Ready to train' : 'Not ready'}
+            isReady={hasOutputName && hasDataset}
+            isSummary
+          />
         </div>
       </div>
     </div>

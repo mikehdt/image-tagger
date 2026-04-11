@@ -299,7 +299,8 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
             type="button"
             onClick={onClose}
             color="slate"
-            size="md" width="xl"
+            size="md"
+            width="xl"
           >
             Cancel
           </Button>
@@ -310,7 +311,8 @@ export const CopyTagsModal = ({ isOpen, onClose }: CopyTagsModalProps) => {
             disabled={!isFormValid}
             neutralDisabled
             color="teal"
-            size="md" width="xl"
+            size="md"
+            width="xl"
           >
             <CopyIcon className="mr-1 h-4 w-4" />
             Copy Tags

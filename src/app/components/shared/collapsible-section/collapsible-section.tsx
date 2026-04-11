@@ -41,10 +41,10 @@ const CollapsibleSectionComponent = ({
             handleToggle();
           }
         }}
-        className="inset-shadow-color-(--surface-elevated) flex w-full cursor-pointer items-center justify-between bg-(--unselected-bg) px-4 py-3 text-left inset-shadow-sm"
+        className="flex w-full cursor-pointer items-center justify-between bg-(--surface) px-4 py-2 text-sm inset-shadow-sm inset-shadow-white dark:inset-shadow-slate-700"
       >
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-(--foreground)">{title}</h3>
+          <h3 className="text-md font-medium text-(--foreground)">{title}</h3>
           {headerExtra}
         </div>
 

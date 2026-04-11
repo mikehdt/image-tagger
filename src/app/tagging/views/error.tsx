@@ -40,7 +40,8 @@ export const Error = ({ onReload }: ErrorProps) => {
         </Button>
         <Button
           onClick={handleBackToProjects}
-          size="md" width="xl"
+          size="md"
+          width="xl"
           variant="ghost"
         >
           Back to Projects

@@ -9,6 +9,7 @@ import {
 import Image from 'next/image';
 import { memo, useCallback, useMemo } from 'react';
 
+import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
 import { CollapsibleSection } from '@/app/components/shared/collapsible-section';
 import { Input } from '@/app/components/shared/input/input';
@@ -186,7 +187,7 @@ const DatasetSectionComponent = ({
                   </button>
                 </div>
 
-                <div className="space-y-1">
+                <div className="divide-y divide-slate-400 dark:divide-slate-600">
                   {ds.folders.map((folder) => {
                     const effectiveRepeats =
                       folder.overrideRepeats ?? folder.detectedRepeats;
@@ -194,11 +195,10 @@ const DatasetSectionComponent = ({
                     return (
                       <div
                         key={folder.name}
-                        className={`flex items-center justify-between text-xs ${isDisabled ? 'opacity-40' : ''}`}
+                        className={`flex items-center justify-between border-dotted py-1.5 text-sm ${isDisabled ? 'opacity-40' : ''}`}
                       >
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <button
-                            type="button"
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Button
                             onClick={() =>
                               onSetFolderRepeats(
                                 dsIndex,
@@ -206,7 +206,8 @@ const DatasetSectionComponent = ({
                                 isDisabled ? null : 0,
                               )
                             }
-                            className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                            variant="toggle"
+                            size="sm"
                             title={
                               isDisabled
                                 ? 'Include in training'
@@ -218,14 +219,18 @@ const DatasetSectionComponent = ({
                             ) : (
                               <EyeIcon className="h-3 w-3" />
                             )}
-                          </button>
-                          <span>{folder.name}</span>
-                          <span className="text-slate-400">
-                            ({folder.imageCount} images)
+                          </Button>
+                          <span className="flex items-center">
+                            <FolderOpenIcon className="mr-2 h-4 w-4 text-slate-400 dark:text-slate-600" />{' '}
+                            {folder.name}
                           </span>
                         </div>
+
                         {!isDisabled && (
                           <div className="flex items-center gap-1.5">
+                            <span className="text-slate-400 tabular-nums">
+                              {folder.imageCount} images
+                            </span>
                             <span className="text-slate-400">&times;</span>
                             <Input
                               type="number"

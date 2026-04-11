@@ -9,8 +9,8 @@ type InputTrayProps = {
 };
 
 const sizeClasses: Record<InputTraySize, string> = {
-  sm: '',
-  md: 'p-0.5',
+  sm: 'rounded-sm',
+  md: 'p-0.5 rounded-md',
 };
 
 export function InputTray({
@@ -20,7 +20,7 @@ export function InputTray({
 }: InputTrayProps) {
   return (
     <div
-      className={`flex items-center rounded-sm bg-slate-200 inset-shadow-xs inset-shadow-slate-300 dark:bg-slate-800/30 dark:inset-shadow-slate-900 ${sizeClasses[size]} ${className}`}
+      className={`flex items-center bg-slate-200 inset-shadow-xs inset-shadow-slate-300 dark:bg-slate-800/30 dark:inset-shadow-slate-900 ${sizeClasses[size]} ${className}`}
     >
       {children}
     </div>

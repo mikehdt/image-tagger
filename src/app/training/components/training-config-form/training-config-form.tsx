@@ -11,10 +11,10 @@ import { useModelDefaultsModal } from '../model-defaults-modal/use-model-default
 import { DatasetSection } from '../sections/dataset-section';
 import { LearningSection } from '../sections/learning-section';
 import { LoraShapeSection } from '../sections/lora-shape-section';
+import { ModelSelectSection } from '../sections/model-select-section';
 import { PerformanceSection } from '../sections/performance-section';
 import { SamplingSection } from '../sections/sampling-section';
 import { SavingSection } from '../sections/saving-section';
-import { WhatToTrainSection } from '../sections/what-to-train-section';
 import { TrainingSummary } from '../training-summary';
 import { useTrainingViewMode } from '../use-training-view-mode';
 import {
@@ -150,7 +150,7 @@ const TrainingConfigFormComponent = ({
       <div className="mx-auto flex max-w-400 flex-col gap-4 lg:flex-row lg:items-start">
         {/* Settings column */}
         <div className="mr-auto max-w-300 min-w-0 flex-1 space-y-3">
-          <WhatToTrainSection
+          <ModelSelectSection
             modelId={state.modelId}
             modelPaths={state.modelPaths}
             appModelDefaults={appModelDefaults}
@@ -301,11 +301,7 @@ const TrainingConfigFormComponent = ({
         </div>
       </div>
 
-      <TrainingBottomShelf
-        canStart={canStart}
-        hasOutputName={state.outputName.trim() !== ''}
-        onStart={handleStart}
-      />
+      <TrainingBottomShelf canStart={canStart} onStart={handleStart} />
     </>
   );
 };

@@ -26,7 +26,8 @@ export function startMockTraining(
     const saveMode = (config.saveMode as string) ?? 'epochs';
     const saveEveryEpochs = (config.saveEveryEpochs as number) ?? 1;
     const saveEverySteps = (config.saveEverySteps as number) ?? 100;
-    const stepsPerEpoch = epochs > 0 ? Math.ceil(totalSteps / epochs) : totalSteps;
+    const stepsPerEpoch =
+      epochs > 0 ? Math.ceil(totalSteps / epochs) : totalSteps;
 
     const checkpointPositions: number[] = [];
     if (saveEnabled) {

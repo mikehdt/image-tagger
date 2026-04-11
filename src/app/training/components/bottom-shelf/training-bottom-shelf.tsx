@@ -7,32 +7,25 @@ import { selectIsTraining } from '@/app/store/jobs';
 
 type TrainingBottomShelfProps = {
   canStart: boolean;
-  hasOutputName: boolean;
   onStart: () => void;
 };
 
 export const TrainingBottomShelf = ({
   canStart,
-  hasOutputName,
   onStart,
 }: TrainingBottomShelfProps) => {
   const isTraining = useAppSelector(selectIsTraining);
 
   return (
     <BottomShelfFrame>
-      <div className="ml-auto flex items-center text-xs text-slate-400">
-        {!canStart &&
-          (!hasOutputName
-            ? 'Enter an output name for the model'
-            : 'Add at least one dataset source')}
-      </div>
-
-      <div className="ml-2 flex items-center">
+      <div className="ml-auto flex items-center text-sm">
         <Button
           size="md"
           onClick={onStart}
+          ghostDisabled
+          neutralDisabled
           disabled={!canStart}
-          color={canStart ? 'teal' : 'slate'}
+          color="teal"
         >
           {isTraining ? (
             <>

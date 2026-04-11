@@ -1,13 +1,7 @@
 import type { ReactNode } from 'react';
 
 type ProgressBarSize = 'xs' | 'sm' | 'md' | 'lg';
-type ProgressBarColor =
-  | 'sky'
-  | 'indigo'
-  | 'teal'
-  | 'green'
-  | 'red'
-  | 'amber';
+type ProgressBarColor = 'sky' | 'indigo' | 'teal' | 'green' | 'red' | 'amber';
 
 type ProgressBarProps = {
   /** Current progress value */
@@ -68,9 +62,7 @@ export function ProgressBar({
         className={`h-full transition-all duration-300 ease-out ${fillColorClasses[color]} ${
           indeterminate ? 'animate-progress-indeterminate' : ''
         } ${children ? 'flex items-center justify-end' : ''}`}
-        style={
-          indeterminate ? { width: '40%' } : { width: `${pct}%` }
-        }
+        style={indeterminate ? { width: '40%' } : { width: `${pct}%` }}
       >
         {children}
       </div>

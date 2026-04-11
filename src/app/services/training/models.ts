@@ -78,8 +78,18 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Latest generation, practical for home GPUs (~18 GB fp16)',
     provider: 'ai-toolkit',
     components: [
-      { type: 'checkpoint', label: 'Transformer', required: true, downloadId: 'dl-flux2-klein-9b' },
-      { type: 'qwen', label: 'Qwen3 8B Text Encoder', required: true, downloadId: 'shared-qwen3-8b' },
+      {
+        type: 'checkpoint',
+        label: 'Transformer',
+        required: true,
+        downloadId: 'dl-flux2-klein-9b',
+      },
+      {
+        type: 'qwen',
+        label: 'Qwen3 8B Text Encoder',
+        required: true,
+        downloadId: 'shared-qwen3-8b',
+      },
       {
         type: 'ae',
         label: 'VAE / Autoencoder',
@@ -132,10 +142,30 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Best for photorealistic styles and characters',
     provider: 'ai-toolkit',
     components: [
-      { type: 'checkpoint', label: 'Transformer', required: true, downloadId: 'dl-flux-dev' },
-      { type: 't5', label: 'T5-XXL Text Encoder', required: true, downloadId: 'shared-t5-xxl' },
-      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true, downloadId: 'shared-clip-l' },
-      { type: 'ae', label: 'Autoencoder (AE)', required: true, downloadId: 'shared-flux-ae' },
+      {
+        type: 'checkpoint',
+        label: 'Transformer',
+        required: true,
+        downloadId: 'dl-flux-dev',
+      },
+      {
+        type: 't5',
+        label: 'T5-XXL Text Encoder',
+        required: true,
+        downloadId: 'shared-t5-xxl',
+      },
+      {
+        type: 'clip_l',
+        label: 'CLIP-L Text Encoder',
+        required: true,
+        downloadId: 'shared-clip-l',
+      },
+      {
+        type: 'ae',
+        label: 'Autoencoder (AE)',
+        required: true,
+        downloadId: 'shared-flux-ae',
+      },
     ],
     tips: [
       'Constant scheduler with 1e-4 LR is reliable for most use cases',
@@ -180,10 +210,30 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Fast generation, fewer steps needed',
     provider: 'ai-toolkit',
     components: [
-      { type: 'checkpoint', label: 'Transformer', required: true, downloadId: 'dl-flux-schnell' },
-      { type: 't5', label: 'T5-XXL Text Encoder', required: true, downloadId: 'shared-t5-xxl' },
-      { type: 'clip_l', label: 'CLIP-L Text Encoder', required: true, downloadId: 'shared-clip-l' },
-      { type: 'ae', label: 'Autoencoder (AE)', required: true, downloadId: 'shared-flux-ae' },
+      {
+        type: 'checkpoint',
+        label: 'Transformer',
+        required: true,
+        downloadId: 'dl-flux-schnell',
+      },
+      {
+        type: 't5',
+        label: 'T5-XXL Text Encoder',
+        required: true,
+        downloadId: 'shared-t5-xxl',
+      },
+      {
+        type: 'clip_l',
+        label: 'CLIP-L Text Encoder',
+        required: true,
+        downloadId: 'shared-clip-l',
+      },
+      {
+        type: 'ae',
+        label: 'Autoencoder (AE)',
+        required: true,
+        downloadId: 'shared-flux-ae',
+      },
     ],
     tips: [
       'Needs fewer training steps than Flux.1 Dev',
@@ -228,7 +278,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Mature ecosystem, wide compatibility',
     provider: 'kohya',
     components: [
-      { type: 'checkpoint', label: 'Checkpoint', required: true, downloadId: 'dl-sdxl-base' },
+      {
+        type: 'checkpoint',
+        label: 'Checkpoint',
+        required: true,
+        downloadId: 'dl-sdxl-base',
+      },
       {
         type: 'vae',
         label: 'VAE',
@@ -279,7 +334,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Illustration-focused SDXL base model',
     provider: 'kohya',
     components: [
-      { type: 'checkpoint', label: 'Checkpoint', required: true, downloadId: 'dl-illustrious-xl' },
+      {
+        type: 'checkpoint',
+        label: 'Checkpoint',
+        required: true,
+        downloadId: 'dl-illustrious-xl',
+      },
       {
         type: 'vae',
         label: 'VAE',
@@ -331,7 +391,12 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     description: 'Anime/illustration SDXL, non-vpred variant',
     provider: 'kohya',
     components: [
-      { type: 'checkpoint', label: 'Checkpoint', required: true, downloadId: 'dl-noob-xl' },
+      {
+        type: 'checkpoint',
+        label: 'Checkpoint',
+        required: true,
+        downloadId: 'dl-noob-xl',
+      },
       {
         type: 'vae',
         label: 'VAE',

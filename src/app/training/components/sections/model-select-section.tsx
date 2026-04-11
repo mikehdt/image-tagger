@@ -6,12 +6,12 @@ import { CollapsibleSection } from '@/app/components/shared/collapsible-section'
 import { Dropdown, type DropdownItem } from '@/app/components/shared/dropdown';
 import { Input } from '@/app/components/shared/input/input';
 import { InputTray } from '@/app/components/shared/input-tray/input-tray';
+import { getTrainingDownloadable } from '@/app/services/model-manager/registries/training-models';
+import { startModelDownload } from '@/app/services/model-manager/start-download';
 import {
   type ExpertiseTier,
   isTierAtLeast,
 } from '@/app/services/training/field-registry';
-import { getTrainingDownloadable } from '@/app/services/model-manager/registries/training-models';
-import { startModelDownload } from '@/app/services/model-manager/start-download';
 import {
   getModelsByArchitecture,
   type ModelComponentType,
@@ -28,7 +28,7 @@ import type {
 
 const MODEL_FILE_FILTER = 'safetensors,ckpt,bin,pt,pth';
 
-type WhatToTrainSectionProps = {
+type ModelSelectSectionProps = {
   modelId: string;
   modelPaths: ModelPaths;
   appModelDefaults: AppModelDefaults;
@@ -40,7 +40,7 @@ type WhatToTrainSectionProps = {
   hiddenChangesCount?: number;
 };
 
-const WhatToTrainSectionComponent = ({
+const ModelSelectSectionComponent = ({
   modelId,
   modelPaths,
   appModelDefaults,
@@ -50,7 +50,7 @@ const WhatToTrainSectionComponent = ({
   visibleFields,
   viewMode,
   hiddenChangesCount,
-}: WhatToTrainSectionProps) => {
+}: ModelSelectSectionProps) => {
   const dispatch = useAppDispatch();
 
   const handleDownload = useCallback(
@@ -77,7 +77,6 @@ const WhatToTrainSectionComponent = ({
             label: (
               <div className="flex flex-col">
                 <span>{m.name}</span>
-                <span className="text-xs text-slate-400">{m.description}</span>
               </div>
             ),
           }) satisfies DropdownItem<string>,
@@ -147,30 +146,37 @@ const WhatToTrainSectionComponent = ({
       <div className="space-y-3">
         {visibleFields.has('modelId' satisfies keyof FormState) && (
           <div>
-            <label className="mb-1 block text-xs font-medium text-(--foreground)/70">
+            <label className="mb-1 block text-sm font-medium text-(--foreground)/70">
               Base Model
             </label>
-            <Dropdown
-              items={modelGroups}
-              selectedValue={modelId}
-              onChange={onModelChange}
-              selectedValueRenderer={() => (
-                <span className="text-sm">{currentModel.name}</span>
+
+            <div className="flex">
+              <div className="w-1/2">
+                <Dropdown
+                  items={modelGroups}
+                  selectedValue={modelId}
+                  onChange={onModelChange}
+                  selectedValueRenderer={() => (
+                    <span className="text-sm">{currentModel.name}</span>
+                  )}
+                  aria-label="Select base model"
+                />
+
+                <p className="mt-2 text-xs text-slate-400">
+                  {currentModel.description}
+                </p>
+              </div>
+
+              {currentModel.tips && currentModel.tips.length > 0 && (
+                <ul className="w-1/2 list-disc space-y-1">
+                  {currentModel.tips.map((tip) => (
+                    <li key={tip} className="text-xs text-slate-400/80">
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
               )}
-              aria-label="Select base model"
-            />
-            <p className="mt-1 text-xs text-slate-400">
-              {currentModel.description}
-            </p>
-            {currentModel.tips && currentModel.tips.length > 0 && (
-              <ul className="mt-1.5 space-y-0.5">
-                {currentModel.tips.map((tip) => (
-                  <li key={tip} className="text-xs text-slate-400/80">
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            )}
+            </div>
           </div>
         )}
 
@@ -178,7 +184,7 @@ const WhatToTrainSectionComponent = ({
         {visibleFields.has('modelPaths' satisfies keyof FormState) &&
           visibleComponents.map((component) => (
             <div key={component.type}>
-              <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium text-(--foreground)/70">
+              <label className="mb-1 flex items-baseline gap-1.5 text-xs font-medium">
                 {component.label}
                 {!component.required && (
                   <span className="font-normal text-slate-400">(optional)</span>
@@ -195,7 +201,7 @@ const WhatToTrainSectionComponent = ({
                 <Button
                   onClick={() => handleBrowse(component.type, component.label)}
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   title="Browse…"
                 >
                   <FolderOpenIcon />
@@ -205,7 +211,7 @@ const WhatToTrainSectionComponent = ({
                     <Button
                       onClick={() => handleDownload(component.downloadId!)}
                       variant="ghost"
-                      size="sm"
+                      size="md"
                       color="indigo"
                       title={`Download ${component.label}…`}
                     >
@@ -246,4 +252,4 @@ const WhatToTrainSectionComponent = ({
   );
 };
 
-export const WhatToTrainSection = memo(WhatToTrainSectionComponent);
+export const ModelSelectSection = memo(ModelSelectSectionComponent);

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write src/ && eslint --fix .",
+    "format": "prettier --write src/ && eslint --fix src/",
     "knip": "knip",
     "generate-favicon": "node favicon-generator.js"
   },
