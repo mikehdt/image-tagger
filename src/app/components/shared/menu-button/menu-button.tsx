@@ -156,7 +156,7 @@ export const MenuButton = ({
         position={position}
         triggerRef={buttonRef}
         onPositioned={handlePositioned}
-        className="min-w-44 rounded-md border border-slate-200 bg-white py-1 shadow-md shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50"
+        className="min-w-44 rounded-md border border-slate-200 bg-white py-1 shadow-md shadow-slate-600/50 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-950/50 [&_svg]:w-4"
       >
         <div role="menu">
           {items.map((item, index) => (
@@ -176,7 +176,7 @@ export const MenuButton = ({
               role="menuitem"
               aria-disabled={item.disabled || undefined}
             >
-              {item.icon && <span className="w-4 shrink-0">{item.icon}</span>}
+              {item.icon}
               <span>{item.label}</span>
             </div>
           ))}

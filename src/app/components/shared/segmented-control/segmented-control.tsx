@@ -8,12 +8,16 @@ export type SegmentOption<T extends string> = {
 
 type SegmentedControlSize = 'sm' | 'md' | 'xl';
 
+type SegmentedControlTone = 'default' | 'surface';
+
 type SegmentedControlProps<T extends string> = {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
   disabled?: boolean;
   size?: SegmentedControlSize;
+  /** Shadow tone. 'default' is subtler for page backgrounds; 'surface' is brighter for menus/cards. */
+  tone?: SegmentedControlTone;
   className?: string;
 };
 
@@ -22,17 +26,24 @@ const sizeClasses: Record<
   { container: string; button: string }
 > = {
   sm: {
-    container: 'text-xs',
+    container: 'text-xs shadow-xs',
     button: 'px-2 [&_svg]:w-4',
   },
   md: {
-    container: 'w-full text-sm',
+    container: 'w-full text-sm shadow-sm',
     button: 'px-2 py-1 [&_svg]:w-4',
   },
   xl: {
-    container: 'w-full text-sm font-medium',
+    container: 'w-full text-sm font-medium shadow-md',
     button: 'px-3 py-1.5 [&_svg]:w-4',
   },
+};
+
+const toneClasses: Record<SegmentedControlTone, string> = {
+  default:
+    'shadow-white inset-shadow-xs inset-shadow-slate-300 dark:shadow-slate-900 dark:inset-shadow-slate-800',
+  surface:
+    'shadow-white inset-shadow-xs inset-shadow-slate-300 dark:shadow-slate-600 dark:inset-shadow-slate-800',
 };
 
 export function SegmentedControl<T extends string>({
@@ -41,13 +52,14 @@ export function SegmentedControl<T extends string>({
   onChange,
   disabled = false,
   size = 'md',
+  tone = 'default',
   className = '',
 }: SegmentedControlProps<T>) {
   const sizes = sizeClasses[size];
 
   return (
     <div
-      className={`flex items-center rounded-sm bg-slate-100 shadow-md inset-shadow-xs shadow-white inset-shadow-slate-300 dark:border dark:border-slate-600 dark:bg-slate-700 dark:shadow-slate-600/50 dark:inset-shadow-slate-800 ${sizes.container} ${disabled ? 'pointer-events-none opacity-40' : ''} ${className}`}
+      className={`flex items-center rounded-sm bg-slate-100 dark:border dark:border-slate-600 dark:bg-slate-700 ${toneClasses[tone]} ${sizes.container} ${disabled ? 'pointer-events-none opacity-40' : ''} ${className}`}
     >
       {options.map((option, index) => {
         const isSelected = value === option.value;
