@@ -114,10 +114,10 @@ const ActivityPanelComponent = () => {
   // Expanded: full panel
   return (
     <div
-      className={`fixed right-4 ${bottomClass} z-50 w-80 rounded-lg border border-(--border-subtle) bg-(--surface) shadow-lg shadow-slate-800/20`}
+      className={`fixed right-4 ${bottomClass} z-50 w-80 overflow-hidden rounded-lg border border-slate-300 bg-(--surface) shadow-lg shadow-slate-800/20 dark:border-slate-600`}
     >
       {/* Panel header */}
-      <div className="flex items-center justify-between border-b border-(--border-subtle) px-3 py-2">
+      <div className="flex items-center justify-between border-b border-(--border-subtle) bg-slate-200 px-3 py-2 inset-shadow-sm inset-shadow-white dark:bg-slate-700 dark:inset-shadow-slate-600">
         <span className="text-sm text-(--foreground)">
           Activity
           {hasActive && (

@@ -63,6 +63,10 @@ export const SHARED_COMPONENTS: DownloadableModel[] = [
     componentType: 'ae',
     sharedId: 'flux-ae',
     description: 'Shared autoencoder for Flux.1 models (~320 MB)',
+    requiresLicense: {
+      url: 'https://huggingface.co/black-forest-labs/FLUX.1-dev',
+      name: 'FLUX.1 [dev] Non-Commercial',
+    },
   },
 
   // --- Flux.2 text encoder + VAE ---
@@ -153,6 +157,10 @@ export const TRAINING_CHECKPOINTS: DownloadableModel[] = [
     componentType: 'checkpoint',
     dependencies: FLUX2_DEPS,
     description: 'Latest generation, practical for home GPUs',
+    requiresLicense: {
+      url: 'https://huggingface.co/black-forest-labs/FLUX.2-klein-9B',
+      name: 'FLUX.2 Klein Non-Commercial',
+    },
     variants: [
       {
         id: 'bf16',
@@ -182,7 +190,11 @@ export const TRAINING_CHECKPOINTS: DownloadableModel[] = [
     architecture: 'flux',
     componentType: 'checkpoint',
     dependencies: FLUX1_DEPS,
-    description: 'Best for photorealistic styles (gated repo)',
+    description: 'Best for photorealistic styles',
+    requiresLicense: {
+      url: 'https://huggingface.co/black-forest-labs/FLUX.1-dev',
+      name: 'FLUX.1 [dev] Non-Commercial',
+    },
     variants: [
       {
         id: 'bf16',
@@ -208,7 +220,11 @@ export const TRAINING_CHECKPOINTS: DownloadableModel[] = [
     architecture: 'flux',
     componentType: 'checkpoint',
     dependencies: FLUX1_DEPS,
-    description: 'Fast generation, fewer steps (gated repo)',
+    description: 'Fast generation, fewer steps',
+    requiresLicense: {
+      url: 'https://huggingface.co/black-forest-labs/FLUX.1-schnell',
+      name: 'Apache 2.0 (gated)',
+    },
     variants: [
       {
         id: 'bf16',

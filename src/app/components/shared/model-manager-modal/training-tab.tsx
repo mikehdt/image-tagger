@@ -1,5 +1,6 @@
 'use client';
 
+import { ExternalLinkIcon, InfoIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import type {
@@ -83,6 +84,29 @@ export function TrainingTab({
         Download base models and shared components for training.
       </p>
 
+      {/* Model groups by architecture */}
+      {groups.map((group) => (
+        <div key={group.architecture}>
+          <div className="mb-2 rounded-md bg-slate-50 p-3 dark:bg-slate-900">
+            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              {group.label}
+            </h3>
+          </div>
+          <div className="flex flex-col gap-2">
+            {group.checkpoints.map((cp) => (
+              <DownloadableModelRow
+                key={cp.id}
+                model={cp}
+                status={getModelStatus(statuses, cp.id)}
+                onDownload={(variant) => onDownload(cp, variant)}
+                dependencies={cp.dependencies}
+                sharedStatuses={statuses}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
       {/* Shared components section */}
       {usedSharedComponents.length > 0 && (
         <div>
@@ -92,6 +116,7 @@ export function TrainingTab({
             </h3>
             <p className="mt-1 text-xs text-slate-500">
               Shared across multiple models. Download once, use everywhere.
+              Components not yet needed are faded out.
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -117,29 +142,6 @@ export function TrainingTab({
           </div>
         </div>
       )}
-
-      {/* Model groups by architecture */}
-      {groups.map((group) => (
-        <div key={group.architecture}>
-          <div className="mb-2 rounded-md bg-slate-50 p-3 dark:bg-slate-900">
-            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              {group.label}
-            </h3>
-          </div>
-          <div className="flex flex-col gap-2">
-            {group.checkpoints.map((cp) => (
-              <DownloadableModelRow
-                key={cp.id}
-                model={cp}
-                status={getModelStatus(statuses, cp.id)}
-                onDownload={(variant) => onDownload(cp, variant)}
-                dependencies={cp.dependencies}
-                sharedStatuses={statuses}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
@@ -221,17 +223,41 @@ function DownloadableModelRow({
                 Incomplete
               </span>
             )}
+            {model.requiresLicense && !isReady && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                Gated
+              </span>
+            )}
           </div>
           {model.description && (
             <p className="mt-1 text-sm text-slate-500">{model.description}</p>
           )}
+          {model.requiresLicense && !isReady && (
+            <div className="mt-1 flex w-full gap-2 text-amber-700 dark:text-amber-400">
+              <InfoIcon className="-mt-0.5 inline h-5 w-5" />
+              <p className="text-xs">
+                Requires accepting the{' '}
+                {model.requiresLicense.name ?? 'repository'} license to
+                download.{' '}
+                <a
+                  href={model.requiresLicense.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-0.5 underline hover:text-amber-800 dark:hover:text-amber-300"
+                >
+                  Accept on HuggingFace
+                  <ExternalLinkIcon className="h-3 w-3" />
+                </a>
+              </p>
+            </div>
+          )}
           {dependencies && dependencies.length > 0 && (
             <p className="mt-1 text-xs text-slate-400">
-              Requires: {dependencies.join(', ')}
+              Also requires: {dependencies.join(', ')}
               {missingDeps.length > 0 && (
                 <span className="text-amber-500">
                   {' '}
-                  ({missingDeps.length} missing)
+                  ({missingDeps.length} not yet downloaded)
                 </span>
               )}
             </p>

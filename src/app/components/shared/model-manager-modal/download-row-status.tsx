@@ -75,13 +75,13 @@ export function DownloadRowStatus({
         </p>
       )}
 
-      <div className="flex items-center justify-end gap-1.5">
+      <div className="flex items-center justify-end gap-2">
         {isRunning && (
           <Button
             onClick={() => onCancel(job)}
             color="rose"
             variant="ghost"
-            size="sm"
+            size="xs"
             width="sm"
           >
             <XIcon className="mr-1" />
@@ -91,15 +91,6 @@ export function DownloadRowStatus({
         {canResume && (
           <>
             <Button
-              onClick={() => onRetry(job)}
-              color="indigo"
-              size="sm"
-              width="sm"
-            >
-              <RefreshCwIcon className="mr-1" />
-              Resume
-            </Button>
-            <Button
               onClick={() => onDelete(job)}
               color="rose"
               variant="ghost"
@@ -108,6 +99,16 @@ export function DownloadRowStatus({
             >
               <Trash2Icon className="mr-1" />
               Delete
+            </Button>
+
+            <Button
+              onClick={() => onRetry(job)}
+              color="indigo"
+              size="sm"
+              width="sm"
+            >
+              <RefreshCwIcon className="mr-1" />
+              Resume
             </Button>
           </>
         )}
@@ -128,8 +129,8 @@ export function DownloadRowButton({
   label?: string;
 }) {
   return (
-    <Button onClick={onClick} color="indigo" size="sm" width="sm">
-      <DownloadIcon className="mr-2" />
+    <Button onClick={onClick} color="indigo" size="sm" width="md">
+      <DownloadIcon />
       {label}
     </Button>
   );

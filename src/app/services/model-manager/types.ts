@@ -58,6 +58,19 @@ export type DownloadableModel = {
   isDefault?: boolean;
 
   /**
+   * Marks the model as living in a gated HuggingFace repo where the user
+   * must click "Agree and access repository" before any download will
+   * succeed. The UI shows a banner linking to `url` so the user can
+   * accept it before kicking off the download.
+   */
+  requiresLicense?: {
+    /** URL the user should visit to accept the license (usually the HF repo page). */
+    url: string;
+    /** Optional human-readable name (e.g. "Black Forest Labs Non-Commercial"). */
+    name?: string;
+  };
+
+  /**
    * Alternative quantisation/precision variants.
    * The main `files` array is the default (usually fp16/bf16).
    * Each variant overrides `files` and optionally `repoId`.
