@@ -69,6 +69,28 @@ class CaptionBatchManager:
         def cancel_check() -> bool:
             return state.cancel_requested
 
+        # Model loading happens inside the provider's executor thread.
+        # The provider calls on_load_progress(message, current, total) from
+        # that thread — we schedule the async broadcast back onto the main
+        # event loop with run_coroutine_threadsafe.
+        main_loop = asyncio.get_running_loop()
+
+        def on_load_progress(message: str, current: int, total: int) -> None:
+            coro = self._broadcast(
+                CaptionBatchProgress(
+                    batch_id=state.batch_id,
+                    current=current,
+                    total=total,
+                    status="loading",
+                    message=message,
+                )
+            )
+            try:
+                asyncio.run_coroutine_threadsafe(coro, main_loop)
+            except Exception:
+                # Best-effort — never break model loading over a broadcast failure.
+                pass
+
         async def broadcast_cancelled() -> None:
             state.status = "cancelled"
             await self._broadcast(
@@ -94,6 +116,7 @@ class CaptionBatchManager:
                         max_tokens=request.max_tokens,
                         temperature=request.temperature,
                         cancel_check=cancel_check,
+                        on_load_progress=on_load_progress,
                     )
                     state.current = i + 1
                     state.results.append(

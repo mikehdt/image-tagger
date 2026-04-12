@@ -55,7 +55,7 @@ type BatchTagRequest = {
 };
 
 type BatchProgressEvent = {
-  type: 'progress' | 'result' | 'complete' | 'error';
+  type: 'progress' | 'result' | 'complete' | 'error' | 'loading';
   current?: number;
   total?: number;
   fileId?: string;
@@ -64,6 +64,8 @@ type BatchProgressEvent = {
   /** VLM captioner result — natural-language caption for the image */
   caption?: string;
   error?: string;
+  /** Free-form status text for `loading` events (e.g. "Loading checkpoint shards") */
+  message?: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -294,6 +296,19 @@ export async function POST(request: NextRequest) {
 
       try {
         for await (const event of generator) {
+          // Loading progress from the sidecar — forwarded as-is so the UI
+          // can show "Loading checkpoint shards 1/2" during the first-use
+          // model load. No completion-count bump; loading is a side-channel.
+          if ('loading' in event) {
+            sendEvent({
+              type: 'loading',
+              message: event.message,
+              current: event.current,
+              total: event.total,
+            });
+            continue;
+          }
+
           const asset = assets[completed];
           if ('error' in event) {
             sendEvent({

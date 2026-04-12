@@ -387,7 +387,24 @@ export function useAutoTagger({
             try {
               const event = JSON.parse(line.slice(6));
 
-              if (event.type === 'progress') {
+              if (event.type === 'loading') {
+                // Model-loading sub-state — show a spinner with the shard
+                // progress while the sidecar reads weights into GPU/RAM.
+                dispatch(
+                  updateTaggingProgress({
+                    id: jobId,
+                    progress: {
+                      current: 0,
+                      total: selectedAssets.length,
+                      loading: {
+                        message: event.message ?? 'Loading model',
+                        current: event.current ?? 0,
+                        total: event.total ?? 0,
+                      },
+                    },
+                  }),
+                );
+              } else if (event.type === 'progress') {
                 dispatch(
                   updateTaggingProgress({
                     id: jobId,
@@ -395,6 +412,8 @@ export function useAutoTagger({
                       current: event.current,
                       total: event.total,
                       currentFileId: event.fileId,
+                      // `loading` intentionally omitted — the first real
+                      // progress event clears the loading overlay.
                     },
                   }),
                 );

@@ -116,15 +116,26 @@ class CaptionBatchRequest(BaseModel):
 
 
 class CaptionBatchProgress(BaseModel):
-    """Progress update for a batch caption run. Broadcast via /ws/caption."""
+    """
+    Progress update for a batch caption run. Broadcast via /ws/caption.
+
+    Status meanings:
+    - 'loading':   model is being loaded onto GPU/CPU. `current`/`total` reflect
+                   loading-step progress (e.g. safetensors shards), not image count.
+                   `message` describes what's happening.
+    - 'running':   actively processing images. `current`/`total` are image counts.
+    - 'completed' / 'failed' / 'cancelled': terminal states.
+    """
 
     batch_id: str
     current: int
     total: int
     image_path: Optional[str] = None
     caption: Optional[str] = None
-    status: str = "running"  # running, completed, failed, cancelled
+    status: str = "running"  # loading, running, completed, failed, cancelled
     error: Optional[str] = None
+    # Free-form status text, used for loading messages like "Loading checkpoint shards"
+    message: Optional[str] = None
 
 
 class CaptionBatchResponse(BaseModel):

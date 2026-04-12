@@ -15,6 +15,21 @@ type CaptionResult = {
   caption: string;
 };
 
+/** Model loading status yielded while the sidecar loads weights. */
+type LoadingStatus = {
+  loading: true;
+  message: string;
+  current: number;
+  total: number;
+};
+
+type BatchStatus =
+  | 'loading'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
 /** Shape as sent by the Python sidecar (snake_case fields from Pydantic). */
 type RawBatchProgressEvent = {
   channel?: string;
@@ -23,8 +38,9 @@ type RawBatchProgressEvent = {
   total: number;
   image_path?: string | null;
   caption?: string | null;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: BatchStatus;
   error?: string | null;
+  message?: string | null;
 };
 
 /** Normalized shape used by the rest of the Node code (camelCase). */
@@ -34,8 +50,9 @@ type BatchProgressEvent = {
   total: number;
   imagePath?: string;
   caption?: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: BatchStatus;
   error?: string;
+  message?: string;
 };
 
 function normalizeEvent(raw: RawBatchProgressEvent): BatchProgressEvent {
@@ -47,6 +64,7 @@ function normalizeEvent(raw: RawBatchProgressEvent): BatchProgressEvent {
     caption: raw.caption ?? undefined,
     status: raw.status,
     error: raw.error ?? undefined,
+    message: raw.message ?? undefined,
   };
 }
 
@@ -126,7 +144,9 @@ export async function* captionBatchViaSidecar(
   imagePaths: string[],
   options: VlmOptions,
   batchId: string,
-): AsyncGenerator<CaptionResult | { error: string; imagePath?: string }> {
+): AsyncGenerator<
+  CaptionResult | { error: string; imagePath?: string } | LoadingStatus
+> {
   const sidecar = await ensureSidecar();
   if (sidecar.status !== 'ready') {
     throw new Error(`Sidecar not ready: ${sidecar.error ?? 'unknown error'}`);
@@ -258,6 +278,18 @@ export async function* captionBatchViaSidecar(
         hasCaption: !!event.caption,
         hasError: !!event.error,
       });
+
+      // Loading progress — yield a discriminated shape the route can
+      // forward as an SSE `loading` event without confusing with results.
+      if (event.status === 'loading') {
+        yield {
+          loading: true,
+          message: event.message ?? 'Loading model',
+          current: event.current,
+          total: event.total,
+        };
+        continue;
+      }
 
       // Per-image errors
       if (event.error && event.status === 'running') {

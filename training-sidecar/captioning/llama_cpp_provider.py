@@ -29,7 +29,12 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from captioning.provider import CancelCheck, CaptionCancelled, CaptioningProvider
+from captioning.provider import (
+    CancelCheck,
+    CaptionCancelled,
+    CaptioningProvider,
+    LoadProgressCallback,
+)
 
 
 class LlamaCppCaptioningProvider(CaptioningProvider):
@@ -178,16 +183,20 @@ class LlamaCppCaptioningProvider(CaptioningProvider):
         max_tokens: int = 512,
         temperature: float = 0.7,
         cancel_check: Optional[CancelCheck] = None,
+        on_load_progress: Optional[LoadProgressCallback] = None,
     ) -> str:
         async with self._lock:
-            # Load on first call or when model changes
-            if (
-                self._llm is None
-                or self._loaded_model_path != model_path
-            ):
+            # Load on first call or when model changes. llama-cpp doesn't
+            # expose per-step loading progress, so we just emit one rough
+            # status update around the blocking call.
+            if self._llm is None or self._loaded_model_path != model_path:
+                if on_load_progress is not None:
+                    on_load_progress("Loading GGUF into RAM", 0, 0)
                 await asyncio.get_event_loop().run_in_executor(
                     None, self._load_model, model_path
                 )
+                if on_load_progress is not None:
+                    on_load_progress("Model loaded", 1, 1)
 
             # Run inference in a thread so we don't block the event loop.
             # This lets WebSocket progress broadcasts flow during generation.

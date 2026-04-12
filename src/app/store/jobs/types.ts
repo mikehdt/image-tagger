@@ -69,6 +69,17 @@ export type TaggingProgress = {
   current: number;
   total: number;
   currentFileId?: string;
+  /**
+   * Model-loading sub-state. Present only while the backend is still
+   * loading weights (VLM sidecar, first call after selecting a model).
+   * When set, the UI shows a "Loading model..." panel instead of the
+   * image-counter progress bar.
+   */
+  loading?: {
+    message: string;
+    current: number;
+    total: number;
+  };
 };
 
 export type TaggingSummary = {

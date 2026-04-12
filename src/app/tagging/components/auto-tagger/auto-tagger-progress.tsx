@@ -19,23 +19,48 @@ export function AutoTaggerProgress({
   const total = progress?.total ?? 0;
   const currentlyOn = total > 0 ? Math.min(completed + 1, total) : 0;
 
+  const loading = progress?.loading;
+  const isLoading = loading !== undefined;
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-slate-600 dark:text-slate-400">
-        Tagging image {currentlyOn} of {total}...
-      </p>
-
-      <div className="flex flex-col gap-2">
-        <ProgressBar
-          value={completed}
-          max={total || 1}
-          color="indigo"
-          indeterminate={!progress}
-        />
-        <p className="truncate text-xs text-slate-500">
-          {progress?.currentFileId || 'Processing...'}
-        </p>
-      </div>
+      {isLoading ? (
+        <>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Loading model...
+          </p>
+          <div className="flex flex-col gap-2">
+            <ProgressBar
+              value={loading.current}
+              max={loading.total || 1}
+              color="indigo"
+              indeterminate={loading.total === 0}
+            />
+            <p className="truncate text-xs text-slate-500">
+              {loading.message}
+              {loading.total > 0 &&
+                ` (${loading.current}/${loading.total})`}
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Tagging image {currentlyOn} of {total}...
+          </p>
+          <div className="flex flex-col gap-2">
+            <ProgressBar
+              value={completed}
+              max={total || 1}
+              color="indigo"
+              indeterminate={!progress}
+            />
+            <p className="truncate text-xs text-slate-500">
+              {progress?.currentFileId || 'Processing...'}
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500">

@@ -13,6 +13,12 @@ Loading strategy: fp16, device_map="cuda", no quantization. We explicitly
 avoid bitsandbytes here — if a low-VRAM variant is needed it gets its own
 model entry in the registry rather than a runtime toggle.
 
+Loading progress surfacing: transformers emits a `Loading checkpoint shards`
+tqdm bar while reading safetensors. We monkey-patch the tqdm used by
+`transformers.utils.logging` during the load so each step invokes our
+on_load_progress callback — giving the UI real per-shard updates instead of
+a silent 15-30s spinner.
+
 Known behaviour:
 - First call blocks ~10-30s for model load. Subsequent calls reuse the cached
   instance as long as the same model_path keeps coming in.
@@ -24,11 +30,94 @@ Known behaviour:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import threading
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
-from captioning.provider import CancelCheck, CaptionCancelled, CaptioningProvider
+from captioning.provider import (
+    CancelCheck,
+    CaptionCancelled,
+    CaptioningProvider,
+    LoadProgressCallback,
+)
+
+
+@contextlib.contextmanager
+def _broadcast_tqdm(
+    on_load_progress: Optional[LoadProgressCallback],
+) -> Iterator[None]:
+    """
+    Replace the tqdm class that transformers uses during model loading so
+    each progress step fires our callback. The underlying tqdm is only
+    ever called from a handful of places inside `from_pretrained`; the
+    one we care about is the `Loading checkpoint shards` bar in
+    `modeling_utils._load_state_dict_into_meta_model`.
+
+    We patch two modules:
+    - `transformers.utils.logging`: re-exports tqdm as `tqdm_lib.tqdm`
+    - `huggingface_hub.utils.tqdm`: where transformers imports its tqdm from
+
+    If transformers changes where it sources tqdm in a future release, the
+    bar silently stops updating but loading still works — acceptable
+    degradation.
+    """
+    if on_load_progress is None:
+        yield
+        return
+
+    # Import lazily so the patching logic only touches transformers at
+    # load time — avoids importing half the library when captioning is mocked.
+    try:
+        import huggingface_hub.utils.tqdm as hf_tqdm_mod
+        import transformers.utils.logging as tlog
+    except ImportError:
+        yield
+        return
+
+    original_tqdm = hf_tqdm_mod.tqdm
+
+    class BroadcastTqdm(original_tqdm):  # type: ignore[misc,valid-type]
+        """Subclass that forwards each update() tick to our callback."""
+
+        def update(self, n: int = 1) -> bool | None:  # type: ignore[override]
+            result = super().update(n)
+            try:
+                desc = str(self.desc) if self.desc else "Loading model"
+                current = int(self.n or 0)
+                total = int(self.total or 0)
+                on_load_progress(desc, current, total)
+            except Exception:
+                # Never let a broken callback blow up the model load.
+                pass
+            return result
+
+        def close(self) -> None:  # type: ignore[override]
+            # Flush a final 100% tick so the UI doesn't stick at the
+            # last intermediate value when total is known.
+            try:
+                if self.total:
+                    desc = str(self.desc) if self.desc else "Loading model"
+                    on_load_progress(desc, int(self.total), int(self.total))
+            except Exception:
+                pass
+            super().close()
+
+    hf_tqdm_mod.tqdm = BroadcastTqdm  # type: ignore[assignment]
+    # transformers.utils.logging re-exports the hub tqdm as `tqdm_lib.tqdm`
+    # at import time — we also need to swap it there.
+    original_tlog_tqdm = getattr(tlog, "tqdm_lib", None)
+    if original_tlog_tqdm is not None:
+        original_inner = getattr(original_tlog_tqdm, "tqdm", None)
+        if original_inner is not None:
+            original_tlog_tqdm.tqdm = BroadcastTqdm  # type: ignore[attr-defined]
+
+    try:
+        yield
+    finally:
+        hf_tqdm_mod.tqdm = original_tqdm  # type: ignore[assignment]
+        if original_tlog_tqdm is not None and original_inner is not None:
+            original_tlog_tqdm.tqdm = original_inner  # type: ignore[attr-defined]
 
 
 class TransformersCaptioningProvider(CaptioningProvider):
@@ -43,7 +132,11 @@ class TransformersCaptioningProvider(CaptioningProvider):
         # is fine given batches are sequential anyway.
         self._lock = asyncio.Lock()
 
-    def _load_model(self, model_path: str) -> None:
+    def _load_model(
+        self,
+        model_path: str,
+        on_load_progress: Optional[LoadProgressCallback] = None,
+    ) -> None:
         """Load the model and processor. Blocking; runs in an executor."""
         # Imports inside the function so the sidecar boots cleanly even when
         # the gpu extra isn't installed.
@@ -80,6 +173,9 @@ class TransformersCaptioningProvider(CaptioningProvider):
                 "Download the model via the Model Manager first."
             )
 
+        if on_load_progress is not None:
+            on_load_progress("Reading tokenizer and processor", 0, 0)
+
         # Qwen2.5/3-VL ship with AutoProcessor + AutoModelForImageTextToText.
         # trust_remote_code=False is intentional — the HF canonical Qwen VL
         # classes have been upstreamed into transformers.
@@ -87,13 +183,22 @@ class TransformersCaptioningProvider(CaptioningProvider):
             str(model_dir),
             trust_remote_code=False,
         )
-        model = AutoModelForImageTextToText.from_pretrained(
-            str(model_dir),
-            torch_dtype=torch.float16,
-            device_map="cuda",
-            trust_remote_code=False,
-        )
+
+        if on_load_progress is not None:
+            on_load_progress("Loading checkpoint shards", 0, 0)
+
+        # Patch transformers' tqdm so shard loading pings our callback.
+        with _broadcast_tqdm(on_load_progress):
+            model = AutoModelForImageTextToText.from_pretrained(
+                str(model_dir),
+                torch_dtype=torch.float16,
+                device_map="cuda",
+                trust_remote_code=False,
+            )
         model.eval()
+
+        if on_load_progress is not None:
+            on_load_progress("Model ready", 1, 1)
 
         self._model = model
         self._processor = processor
@@ -197,12 +302,13 @@ class TransformersCaptioningProvider(CaptioningProvider):
         max_tokens: int = 512,
         temperature: float = 0.7,
         cancel_check: Optional[CancelCheck] = None,
+        on_load_progress: Optional[LoadProgressCallback] = None,
     ) -> str:
         async with self._lock:
             # Load on first call or when model changes
             if self._model is None or self._loaded_model_path != model_path:
                 await asyncio.get_event_loop().run_in_executor(
-                    None, self._load_model, model_path
+                    None, self._load_model, model_path, on_load_progress
                 )
 
             # Run inference in a thread so the event loop stays free to push
