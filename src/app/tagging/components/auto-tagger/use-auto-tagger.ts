@@ -107,6 +107,12 @@ export function useAutoTagger({
     totalTagsFound: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Per-image errors collected during the batch run, shown in the summary
+  const [imageErrors, setImageErrors] = useState<
+    { fileId: string; error: string }[]
+  >([]);
+  // Use a ref so we can accumulate errors inside the SSE loop without re-rendering
+  const imageErrorsRef = useRef<{ fileId: string; error: string }[]>([]);
   const [wasCancelled, setWasCancelled] = useState(false);
 
   // Track the current job ID so we can cancel it
@@ -250,6 +256,8 @@ export function useAutoTagger({
       // Compute summary from localStorage before flushing clears it
       const summaryData = summarisePendingResults(projectFolderName);
       setSummary(summaryData);
+      // Publish the errors we've accumulated for the summary view
+      setImageErrors([...imageErrorsRef.current]);
 
       // Flush: read from localStorage → dispatch addMultipleTags → clear
       dispatch(flushPendingTagResults(projectFolderName));
@@ -312,7 +320,11 @@ export function useAutoTagger({
         projectFolderName,
         projectName: projectInfo.projectName || projectFolderName,
         modelName,
-        progress: { current: 0, total: selectedAssets.length },
+        progress: {
+          current: 0,
+          total: selectedAssets.length,
+          currentFileId: selectedAssets[0]?.fileId,
+        },
         summary: null,
       }),
     );
@@ -323,6 +335,8 @@ export function useAutoTagger({
     setSummary(null);
     setError(null);
     setWasCancelled(false);
+    setImageErrors([]);
+    imageErrorsRef.current = [];
 
     try {
       const response = await fetch('/api/auto-tagger/batch', {
@@ -394,7 +408,12 @@ export function useAutoTagger({
                   position,
                 });
               } else if (event.type === 'error' && event.fileId) {
+                // Per-image error — collect for the summary
                 console.warn(`Error tagging ${event.fileId}:`, event.error);
+                imageErrorsRef.current.push({
+                  fileId: event.fileId,
+                  error: event.error,
+                });
               } else if (event.type === 'error') {
                 throw new Error(event.error);
               } else if (event.type === 'complete') {
@@ -492,6 +511,7 @@ export function useAutoTagger({
     progress,
     summary,
     error,
+    imageErrors,
     wasCancelled,
     hasReadyModel,
     modelItems,

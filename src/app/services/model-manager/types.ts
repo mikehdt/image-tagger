@@ -100,6 +100,10 @@ export type DownloadProgress = {
   modelId: string;
   status: ModelStatus;
   currentFile?: string;
+  /** 1-based index of the file currently being processed (when multi-file). */
+  fileIndex?: number;
+  /** Total number of files in this download. */
+  totalFiles?: number;
   bytesDownloaded: number;
   totalBytes: number;
   error?: string;

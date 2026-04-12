@@ -21,11 +21,17 @@ export const VLM_MODELS: TaggerModel[] = [
     repoId: 'mradermacher/Qwen3-VL-8B-Instruct-abliterated-v2.0-GGUF',
     description: 'Strong vision model, less restrictive (recommended)',
     isDefault: true,
-    vramEstimate: 6,
+    vramEstimate: 7,
     files: [
+      // Main LLM weights
       {
         name: 'Qwen3-VL-8B-Instruct-abliterated-v2.0.Q6_K.gguf',
-        size: 6_730_000_000,
+        size: 6_725_901_408,
+      },
+      // Vision projector — required for image input via llama-cpp-python
+      {
+        name: 'Qwen3-VL-8B-Instruct-abliterated-v2.0.mmproj-Q8_0.gguf',
+        size: 752_290_272,
       },
     ],
   },

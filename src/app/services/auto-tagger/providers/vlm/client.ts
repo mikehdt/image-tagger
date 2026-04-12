@@ -15,6 +15,19 @@ type CaptionResult = {
   caption: string;
 };
 
+/** Shape as sent by the Python sidecar (snake_case fields from Pydantic). */
+type RawBatchProgressEvent = {
+  channel?: string;
+  batch_id: string;
+  current: number;
+  total: number;
+  image_path?: string | null;
+  caption?: string | null;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  error?: string | null;
+};
+
+/** Normalized shape used by the rest of the Node code (camelCase). */
 type BatchProgressEvent = {
   batchId: string;
   current: number;
@@ -24,6 +37,18 @@ type BatchProgressEvent = {
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   error?: string;
 };
+
+function normalizeEvent(raw: RawBatchProgressEvent): BatchProgressEvent {
+  return {
+    batchId: raw.batch_id,
+    current: raw.current,
+    total: raw.total,
+    imagePath: raw.image_path ?? undefined,
+    caption: raw.caption ?? undefined,
+    status: raw.status,
+    error: raw.error ?? undefined,
+  };
+}
 
 /**
  * Get the absolute path to the GGUF/ONNX model file on disk.
@@ -107,19 +132,23 @@ export async function* captionBatchViaSidecar(
   });
 
   ws.addEventListener('message', (event) => {
+    const raw =
+      typeof event.data === 'string'
+        ? event.data
+        : // Coerce Buffer/ArrayBuffer/Blob to string as a safety net
+          String(event.data);
     try {
-      const data = JSON.parse(event.data as string) as BatchProgressEvent & {
-        channel?: string;
-      };
-      if (data.channel !== 'caption') return;
+      const parsed = JSON.parse(raw) as RawBatchProgressEvent;
+      if (parsed.channel !== 'caption') return;
+      const data = normalizeEvent(parsed);
       if (resolveNext) {
         resolveNext(data);
         resolveNext = null;
       } else {
         progressQueue.push(data);
       }
-    } catch {
-      // Ignore malformed messages
+    } catch (err) {
+      console.warn('[vlm-client] parse error:', err);
     }
   });
 
@@ -200,9 +229,18 @@ export async function* captionBatchViaSidecar(
         }));
 
       if (event === null) {
+        console.log('[vlm-client] consumer got null, exiting loop', {
+          wsError,
+        });
         if (wsError) throw wsError;
         break;
       }
+      console.log('[vlm-client] consumer got event', {
+        status: event.status,
+        imagePath: event.imagePath,
+        hasCaption: !!event.caption,
+        hasError: !!event.error,
+      });
 
       // Per-image errors
       if (event.error && event.status === 'running') {

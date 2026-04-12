@@ -12,7 +12,7 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import Optional
 
-from captioning.provider import get_provider
+from captioning.provider import CaptionCancelled, get_provider
 from models import CaptionBatchProgress, CaptionBatchRequest
 from ws_manager import WebSocketManager
 
@@ -64,18 +64,26 @@ class CaptionBatchManager:
         """Run the batch — one image at a time, broadcasting progress."""
         provider = get_provider()
 
+        # Closure read by the provider during inference so we can abort
+        # mid-image instead of waiting for the next loop iteration.
+        def cancel_check() -> bool:
+            return state.cancel_requested
+
+        async def broadcast_cancelled() -> None:
+            state.status = "cancelled"
+            await self._broadcast(
+                CaptionBatchProgress(
+                    batch_id=state.batch_id,
+                    current=state.current,
+                    total=state.total,
+                    status="cancelled",
+                )
+            )
+
         try:
             for i, image_path in enumerate(request.image_paths):
                 if state.cancel_requested:
-                    state.status = "cancelled"
-                    await self._broadcast(
-                        CaptionBatchProgress(
-                            batch_id=state.batch_id,
-                            current=state.current,
-                            total=state.total,
-                            status="cancelled",
-                        )
-                    )
+                    await broadcast_cancelled()
                     return
 
                 try:
@@ -85,12 +93,12 @@ class CaptionBatchManager:
                         prompt=request.prompt,
                         max_tokens=request.max_tokens,
                         temperature=request.temperature,
+                        cancel_check=cancel_check,
                     )
                     state.current = i + 1
                     state.results.append(
                         {"image_path": image_path, "caption": caption}
                     )
-
                     await self._broadcast(
                         CaptionBatchProgress(
                             batch_id=state.batch_id,
@@ -101,7 +109,14 @@ class CaptionBatchManager:
                             status="running",
                         )
                     )
+                except CaptionCancelled:
+                    # Mid-image cancel — drop the partial caption and exit.
+                    await broadcast_cancelled()
+                    return
                 except Exception as err:
+                    import traceback
+
+                    traceback.print_exc()
                     # Per-image error — broadcast and keep going
                     await self._broadcast(
                         CaptionBatchProgress(
@@ -125,6 +140,9 @@ class CaptionBatchManager:
             )
 
         except Exception as err:
+            import traceback
+
+            traceback.print_exc()
             state.status = "failed"
             await self._broadcast(
                 CaptionBatchProgress(

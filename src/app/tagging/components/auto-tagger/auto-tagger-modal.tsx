@@ -32,6 +32,7 @@ export function AutoTaggerModal({
     progress,
     summary,
     error,
+    imageErrors,
     wasCancelled,
     hasReadyModel,
     modelItems,
@@ -85,6 +86,7 @@ export function AutoTaggerModal({
           <AutoTaggerSummary
             summary={summary}
             wasCancelled={wasCancelled}
+            imageErrors={imageErrors}
             onClose={handleClose}
           />
         ) : isVlm ? (

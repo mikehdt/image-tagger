@@ -44,9 +44,12 @@ export async function* downloadModelFiles(
   fs.mkdirSync(targetDir, { recursive: true });
 
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  const totalFiles = files.length;
   let bytesDownloaded = 0;
 
-  for (const file of files) {
+  for (let fileIdx = 0; fileIdx < files.length; fileIdx++) {
+    const file = files[fileIdx];
+    const fileIndex = fileIdx + 1; // 1-based for display
     const filePath = path.join(targetDir, file.name);
 
     // Inspect any existing file on disk to decide whether to skip,
@@ -68,6 +71,8 @@ export async function* downloadModelFiles(
         modelId,
         status: 'downloading',
         currentFile: file.name,
+        fileIndex,
+        totalFiles,
         bytesDownloaded,
         totalBytes,
       };
@@ -99,6 +104,8 @@ export async function* downloadModelFiles(
       modelId,
       status: 'downloading',
       currentFile: file.name,
+      fileIndex,
+      totalFiles,
       bytesDownloaded,
       totalBytes,
     };
@@ -185,6 +192,8 @@ export async function* downloadModelFiles(
             modelId,
             status: 'downloading',
             currentFile: file.name,
+            fileIndex,
+            totalFiles,
             bytesDownloaded,
             totalBytes,
           };
@@ -243,6 +252,8 @@ export async function* downloadModelFiles(
         modelId,
         status: 'error',
         currentFile: file.name,
+        fileIndex,
+        totalFiles,
         bytesDownloaded,
         totalBytes,
         error: `Failed to download ${file.name}: ${message}`,

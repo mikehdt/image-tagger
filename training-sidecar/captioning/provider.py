@@ -1,18 +1,31 @@
 """
 Captioning provider — runs VLM inference on images.
 
-Currently ships with a mock implementation that returns fake captions
-so the full pipeline (Node → sidecar → localStorage → Redux → UI) can be
-validated before wiring up llama-cpp-python.
+Backends:
+- MockCaptioningProvider: fake captions with simulated latency, for pipeline testing
+- LlamaCppCaptioningProvider: real inference via llama-cpp-python (CPU or Linux CUDA)
 
-Swap MockCaptioningProvider for LlamaCppCaptioningProvider when ready.
+The active provider is chosen by get_provider() based on whether llama-cpp-python
+is importable. If it is, we use it; otherwise we fall back to the mock so the
+sidecar stays functional without the vlm extra installed.
 """
 
 from __future__ import annotations
 
 import asyncio
 import os
+import sys
 from abc import ABC, abstractmethod
+from typing import Callable, Optional
+
+# Type alias for the cooperative cancellation callback. The batch manager
+# passes a closure that reads its own `cancel_requested` flag; the provider
+# polls it during inference and raises CaptionCancelled when it flips true.
+CancelCheck = Callable[[], bool]
+
+
+class CaptionCancelled(Exception):
+    """Raised by a provider when inference is aborted via cancel_check."""
 
 
 class CaptioningProvider(ABC):
@@ -26,6 +39,7 @@ class CaptioningProvider(ABC):
         prompt: str,
         max_tokens: int = 512,
         temperature: float = 0.7,
+        cancel_check: Optional[CancelCheck] = None,
     ) -> str:
         """Return a natural-language caption for the image."""
 
@@ -52,14 +66,18 @@ class MockCaptioningProvider(CaptioningProvider):
         prompt: str,
         max_tokens: int = 512,
         temperature: float = 0.7,
+        cancel_check: Optional[CancelCheck] = None,
     ) -> str:
         # Simulate model loading (first call only)
         if self._loaded_model != model_path:
             await asyncio.sleep(0.5)
             self._loaded_model = model_path
 
-        # Simulate per-image inference latency
-        await asyncio.sleep(0.3)
+        # Simulate per-image inference latency, checking for cancellation
+        for _ in range(3):
+            if cancel_check and cancel_check():
+                raise CaptionCancelled("cancelled during mock inference")
+            await asyncio.sleep(0.1)
 
         filename = os.path.basename(image_path)
         return (
@@ -77,10 +95,29 @@ _provider: CaptioningProvider | None = None
 
 
 def get_provider() -> CaptioningProvider:
-    """Get the current captioning provider (lazily instantiated)."""
+    """
+    Get the current captioning provider (lazily instantiated).
+
+    Uses llama-cpp-python if available, otherwise falls back to the mock
+    provider. This keeps the sidecar functional even without the vlm extra.
+    """
     global _provider
-    if _provider is None:
+    if _provider is not None:
+        return _provider
+
+    try:
+        from captioning.llama_cpp_provider import LlamaCppCaptioningProvider
+
+        _provider = LlamaCppCaptioningProvider()
+        print("[sidecar] Captioning: using LlamaCppCaptioningProvider")
+    except ImportError as err:
+        print(
+            f"[sidecar] Captioning: llama-cpp-python unavailable ({err}), "
+            "falling back to mock provider",
+            file=sys.stderr,
+        )
         _provider = MockCaptioningProvider()
+
     return _provider
 
 

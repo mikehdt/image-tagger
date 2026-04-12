@@ -17,10 +17,20 @@ dependencies = [
 [project.optional-dependencies]
 vlm = [
     # Install with: uv sync --extra vlm
-    # Windows/CUDA wheel: set UV_EXTRA_INDEX_URL=https://abetlen.github.io/llama-cpp-python/whl/cu124
+    # Default: CPU wheels from abetlen's wheel index (cross-platform).
+    # For Windows CUDA, you need to build from source:
+    #   $env:CMAKE_ARGS = "-DGGML_CUDA=on"
+    #   uv pip install --force-reinstall --no-cache-dir llama-cpp-python
     "llama-cpp-python>=0.3.0,<1",
 ]
 
 [tool.uv]
-# Pin to CPython so `uv run` always uses the same interpreter
 package = false
+
+[tool.uv.sources]
+llama-cpp-python = { index = "llama-cpp-cpu" }
+
+[[tool.uv.index]]
+name = "llama-cpp-cpu"
+url = "https://abetlen.github.io/llama-cpp-python/whl/cpu"
+explicit = true

@@ -11,6 +11,8 @@ import {
   addTag,
   deleteTag,
   editTag,
+  resetAllModifiedTags,
+  resetTags,
   selectHasModifiedAssets,
   selectHasTaglessAssets,
 } from '../assets';
@@ -290,9 +292,11 @@ filterManagerMiddleware.startListening({
   },
 });
 
-// Listen to tag operations and update filters/mode accordingly
+// Listen to tag operations and update filters/mode accordingly.
+// resetTags / resetAllModifiedTags are included so that reverting changes
+// clears the "show modified only" scope once no assets are modified.
 filterManagerMiddleware.startListening({
-  matcher: isAnyOf(addTag, deleteTag, editTag),
+  matcher: isAnyOf(addTag, deleteTag, editTag, resetTags, resetAllModifiedTags),
   effect: async (action, listenerApi) => {
     const state = listenerApi.getState() as RootState;
 

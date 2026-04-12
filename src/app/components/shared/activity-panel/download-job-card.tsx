@@ -36,6 +36,13 @@ export function DownloadJobCard({
         ? 'text-amber-500'
         : 'text-slate-400';
 
+  const currentFileLabel = job.progress?.currentFile || 'Preparing...';
+  const multiFile =
+    job.progress?.totalFiles !== undefined && job.progress.totalFiles > 1;
+  const fileCountLabel = multiFile
+    ? `File ${job.progress?.fileIndex ?? 1} of ${job.progress?.totalFiles}`
+    : null;
+
   const statusLabel = isInterrupted
     ? 'Interrupted'
     : isCancelled
@@ -44,7 +51,7 @@ export function DownloadJobCard({
         ? 'Failed'
         : isCompleted
           ? 'Done'
-          : job.progress?.currentFile || 'Preparing...';
+          : currentFileLabel;
 
   return (
     <div className="border-b border-(--border-subtle) px-3 py-2.5 last:border-b-0">
@@ -67,9 +74,12 @@ export function DownloadJobCard({
             indeterminate={isRunning && !job.progress}
             className="mb-1"
           />
+          {isRunning && fileCountLabel && (
+            <p className="text-xs text-slate-400">{fileCountLabel}</p>
+          )}
           <div className="flex justify-between text-xs text-slate-500 tabular-nums">
-            <span>{statusLabel}</span>
-            <span className="text-right">
+            <span className="truncate">{statusLabel}</span>
+            <span className="shrink-0 pl-2 text-right">
               {job.progress
                 ? `${formatBytes(job.progress.bytesDownloaded)} / ${formatBytes(job.progress.totalBytes)}`
                 : ''}

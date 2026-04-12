@@ -295,6 +295,13 @@ def main():
         host=config.host,
         port=config.port,
         log_level="info",
+        # Disable WebSocket ping timeout on localhost. Long-running inference
+        # (several minutes for VLM captioning on CPU) exceeds the default 20s
+        # ping interval / 20s timeout, and uvicorn drops the connection even
+        # though the server is still processing. Localhost IPC doesn't need
+        # liveness checks.
+        ws_ping_interval=None,
+        ws_ping_timeout=None,
     )
 
 

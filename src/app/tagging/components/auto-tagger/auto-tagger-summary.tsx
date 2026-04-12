@@ -1,24 +1,40 @@
 import { Button } from '@/app/components/shared/button';
 import type { TaggingSummary } from '@/app/store/jobs';
 
+type ImageError = { fileId: string; error: string };
+
 type AutoTaggerSummaryProps = {
   summary: TaggingSummary;
   wasCancelled: boolean;
+  imageErrors?: ImageError[];
   onClose: () => void;
 };
 
 export function AutoTaggerSummary({
   summary,
   wasCancelled,
+  imageErrors = [],
   onClose,
 }: AutoTaggerSummaryProps) {
+  const hasErrors = imageErrors.length > 0;
+
   return (
     <div className="flex flex-col gap-4">
       <div
-        className={`rounded-md border p-4 text-sm ${wasCancelled ? 'border-amber-400 bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200' : 'border-teal-400 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-200'}`}
+        className={`rounded-md border p-4 text-sm ${
+          wasCancelled
+            ? 'border-amber-400 bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
+            : hasErrors && summary.imagesWithNewTags === 0
+              ? 'border-rose-400 bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+              : 'border-teal-400 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-200'
+        }`}
       >
         <p className="font-medium">
-          {wasCancelled ? 'Tagging cancelled' : 'Tagging complete!'}
+          {wasCancelled
+            ? 'Tagging cancelled'
+            : hasErrors && summary.imagesWithNewTags === 0
+              ? 'Tagging failed'
+              : 'Tagging complete!'}
         </p>
         <ul className="mt-2 space-y-1">
           <li>
@@ -31,17 +47,43 @@ export function AutoTaggerSummary({
             {summary.imagesWithNewTags} image
             {summary.imagesWithNewTags !== 1 ? 's' : ''}
           </li>
-          {summary.imagesProcessed > summary.imagesWithNewTags && (
-            <li className={wasCancelled ? 'text-amber-600' : 'text-teal-600'}>
-              {summary.imagesProcessed - summary.imagesWithNewTags} image
-              {summary.imagesProcessed - summary.imagesWithNewTags !== 1
-                ? 's'
-                : ''}{' '}
-              had no new tags (threshold not met or already tagged)
-            </li>
-          )}
+          {summary.imagesProcessed > summary.imagesWithNewTags &&
+            imageErrors.length === 0 && (
+              <li className={wasCancelled ? 'text-amber-600' : 'text-teal-600'}>
+                {summary.imagesProcessed - summary.imagesWithNewTags} image
+                {summary.imagesProcessed - summary.imagesWithNewTags !== 1
+                  ? 's'
+                  : ''}{' '}
+                had no new tags (threshold not met or already tagged)
+              </li>
+            )}
         </ul>
       </div>
+
+      {hasErrors && (
+        <div className="rounded-md border border-rose-300 bg-rose-50 p-4 text-sm dark:border-rose-800 dark:bg-rose-950">
+          <p className="font-medium text-rose-700 dark:text-rose-200">
+            {imageErrors.length} error
+            {imageErrors.length !== 1 ? 's' : ''} during batch:
+          </p>
+          <ul className="mt-2 max-h-48 space-y-1.5 overflow-y-auto text-rose-700 dark:text-rose-200">
+            {imageErrors.slice(0, 20).map((err, i) => (
+              <li key={`${err.fileId}-${i}`} className="break-words">
+                <span className="font-mono text-xs opacity-70">
+                  {err.fileId}
+                </span>
+                <br />
+                <span className="text-sm">{err.error}</span>
+              </li>
+            ))}
+            {imageErrors.length > 20 && (
+              <li className="italic opacity-70">
+                …and {imageErrors.length - 20} more
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <Button onClick={onClose} color="indigo" size="md">

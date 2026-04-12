@@ -13,16 +13,22 @@ export function AutoTaggerProgress({
   onCancel,
   onLeave,
 }: AutoTaggerProgressProps) {
+  // `current` is the number of images completed so far (0 at start, total at end).
+  // The "currently on" label is one ahead, clamped to total so it doesn't overshoot.
+  const completed = progress?.current ?? 0;
+  const total = progress?.total ?? 0;
+  const currentlyOn = total > 0 ? Math.min(completed + 1, total) : 0;
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-slate-600 dark:text-slate-400">
-        Tagging image {progress?.current || 0} of {progress?.total || 0}...
+        Tagging image {currentlyOn} of {total}...
       </p>
 
       <div className="flex flex-col gap-2">
         <ProgressBar
-          value={progress?.current ?? 0}
-          max={progress?.total ?? 1}
+          value={completed}
+          max={total || 1}
           color="indigo"
           indeterminate={!progress}
         />

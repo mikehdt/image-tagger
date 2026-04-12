@@ -102,6 +102,8 @@ export async function startModelDownload({
               bytesDownloaded: data.bytesDownloaded,
               totalBytes: data.totalBytes,
               currentFile: data.currentFile,
+              fileIndex: data.fileIndex,
+              totalFiles: data.totalFiles,
             },
           }),
         );

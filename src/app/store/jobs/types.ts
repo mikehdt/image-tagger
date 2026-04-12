@@ -58,6 +58,10 @@ export type DownloadJob = JobBase & {
     bytesDownloaded: number;
     totalBytes: number;
     currentFile?: string;
+    /** 1-based index of the file currently being processed. */
+    fileIndex?: number;
+    /** Total number of files in this download. */
+    totalFiles?: number;
   } | null;
 };
 

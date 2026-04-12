@@ -19,7 +19,10 @@ import {
   getProviderTypeForModel,
 } from '@/app/services/auto-tagger';
 import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
-import { captionBatchViaSidecar } from '@/app/services/auto-tagger/providers/vlm/client';
+import {
+  cancelCaptionBatch,
+  captionBatchViaSidecar,
+} from '@/app/services/auto-tagger/providers/vlm/client';
 import { tagImageInWorker } from '@/app/services/auto-tagger/providers/wd14/worker-manager';
 
 // Server-side config reading function
@@ -189,6 +192,12 @@ export async function POST(request: NextRequest) {
     });
 
     // --- ONNX (WD14 worker) batch runner ---
+    //
+    // Semantics for `progress.current`: number of images COMPLETED so far.
+    // - At the start, current=0 (from the hook's initial job state).
+    // - After each image finishes, current increments.
+    // - Final emit guarantees current=total so the progress bar reaches 100%.
+    // The display converts `current` to a 1-based label via `min(current+1, total)`.
     async function runOnnxBatch(
       sendEvent: (event: BatchProgressEvent) => void,
     ) {
@@ -198,13 +207,6 @@ export async function POST(request: NextRequest) {
           projectPath,
           `${asset.fileId}.${asset.fileExtension}`,
         );
-
-        sendEvent({
-          type: 'progress',
-          current: i + 1,
-          total,
-          fileId: asset.fileId,
-        });
 
         try {
           const output = await tagImageInWorker(
@@ -241,23 +243,48 @@ export async function POST(request: NextRequest) {
             error: err instanceof Error ? err.message : 'Unknown error',
           });
         }
+
+        // Emit completion of this image. `current` = images completed so far.
+        // The UI derives the "currently processing" label as min(current+1, total).
+        const completed = i + 1;
+        const nextFileId = assets[i + 1]?.fileId ?? asset.fileId;
+        sendEvent({
+          type: 'progress',
+          current: completed,
+          total,
+          fileId: nextFileId,
+        });
       }
     }
 
     // --- VLM (sidecar) batch runner ---
     async function runVlmBatch(sendEvent: (event: BatchProgressEvent) => void) {
-      // Build ordered list of image paths and a lookup back to fileId
+      // Build ordered list of image paths. The sidecar processes them in order
+      // and yields one event per image, so we match results back to assets by
+      // their sequence index rather than by path string — this avoids subtle
+      // path-normalisation mismatches between Node and Python.
       const imagePaths = assets.map((a) =>
         path.join(projectPath, `${a.fileId}.${a.fileExtension}`),
       );
-      const pathToFileId = new Map<string, string>();
-      assets.forEach((a, i) => {
-        pathToFileId.set(imagePaths[i], a.fileId);
-      });
 
       const batchId = `batch-${Date.now()}`;
 
-      let processed = 0;
+      // When the client aborts the fetch (user hit Cancel), forward the cancel
+      // to the sidecar so it stops mid-inference instead of grinding through
+      // the rest of the batch. The sidecar's cancel_check closure flips inside
+      // the running generate loop, aborts the current image, and marks the
+      // batch as cancelled. Fire-and-forget — the sidecar endpoint is idempotent.
+      const onAbort = () => {
+        cancelCaptionBatch(batchId).catch(() => {
+          /* best-effort */
+        });
+      };
+      request.signal.addEventListener('abort', onAbort, { once: true });
+
+      // Same semantics as runOnnxBatch: `current` = images completed so far.
+      // Starts at 0 (set by the hook's initial job state), hits `total` at the end.
+      let completed = 0;
+
       const generator = captionBatchViaSidecar(
         resolvedModel,
         imagePaths,
@@ -265,35 +292,36 @@ export async function POST(request: NextRequest) {
         batchId,
       );
 
-      for await (const event of generator) {
-        if ('error' in event) {
-          const fileId = event.imagePath
-            ? pathToFileId.get(event.imagePath)
-            : undefined;
+      try {
+        for await (const event of generator) {
+          const asset = assets[completed];
+          if ('error' in event) {
+            sendEvent({
+              type: 'error',
+              fileId: asset?.fileId,
+              error: event.error,
+            });
+          } else if (asset) {
+            sendEvent({
+              type: 'result',
+              fileId: asset.fileId,
+              caption: event.caption,
+            });
+          }
+
+          // Advance completion count after each event (success or error).
+          completed++;
+          const nextFileId =
+            assets[completed]?.fileId ?? assets[completed - 1]?.fileId;
           sendEvent({
-            type: 'error',
-            fileId,
-            error: event.error,
+            type: 'progress',
+            current: completed,
+            total,
+            fileId: nextFileId,
           });
-          continue;
         }
-
-        const fileId = pathToFileId.get(event.imagePath);
-        if (!fileId) continue;
-
-        processed++;
-        sendEvent({
-          type: 'progress',
-          current: processed,
-          total,
-          fileId,
-        });
-
-        sendEvent({
-          type: 'result',
-          fileId,
-          caption: event.caption,
-        });
+      } finally {
+        request.signal.removeEventListener('abort', onAbort);
       }
     }
 
