@@ -312,6 +312,22 @@ export const selectActiveDownloads = createSelector(
     ),
 );
 
+/**
+ * Find the most recent download job (active or otherwise) for a given model.
+ * Used by in-modal rows to surface progress, interrupted state, and errors.
+ */
+export const selectDownloadJobByModelId = (modelId: string) =>
+  createSelector(selectAllJobs, (jobs): DownloadJob | null => {
+    const matches = jobs.filter(
+      (j): j is DownloadJob => j.type === 'download' && j.modelId === modelId,
+    );
+    if (matches.length === 0) return null;
+    // Most recent wins
+    return matches.reduce((latest, j) =>
+      j.createdAt > latest.createdAt ? j : latest,
+    );
+  });
+
 /** Whether any training job is currently running (blocks GPU). */
 export const selectIsTraining = createSelector(
   selectActiveTrainingJob,

@@ -1,16 +1,18 @@
 'use client';
 
-import { DownloadIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import type {
   DownloadableModel,
   ModelVariant,
 } from '@/app/services/model-manager/types';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectDownloadJobByModelId } from '@/app/store/jobs';
 import type { ModelEntry } from '@/app/store/model-manager/types';
 
-import { Button } from '../button';
+import { useDownloadActions } from '../activity-panel/use-download-actions';
 import { Dropdown, type DropdownItem } from '../dropdown';
+import { DownloadRowButton, DownloadRowStatus } from './download-row-status';
 import { getModelStatus } from './use-model-manager';
 
 // ---------------------------------------------------------------------------
@@ -171,9 +173,11 @@ function DownloadableModelRow({
     [model.variants],
   );
 
+  const job = useAppSelector(selectDownloadJobByModelId(model.id));
+  const { retry, cancel, remove } = useDownloadActions();
+  const hasLiveJob = job && job.status !== 'completed';
+
   const isReady = status === 'ready';
-  const isDownloading = status === 'downloading';
-  const isError = status === 'error';
   const isPartial = status === 'partial';
 
   const activeFiles =
@@ -212,24 +216,14 @@ function DownloadableModelRow({
                 Installed
               </span>
             )}
-            {isDownloading && (
-              <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">
-                Downloading
-              </span>
-            )}
-            {isPartial && (
+            {isPartial && !hasLiveJob && (
               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300">
                 Incomplete
               </span>
             )}
-            {isError && (
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700">
-                Error
-              </span>
-            )}
           </div>
           {model.description && (
-            <p className="mt-1 text-xs text-slate-500">{model.description}</p>
+            <p className="mt-1 text-sm text-slate-500">{model.description}</p>
           )}
           {dependencies && dependencies.length > 0 && (
             <p className="mt-1 text-xs text-slate-400">
@@ -243,35 +237,44 @@ function DownloadableModelRow({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 tabular-nums">
-            {formatBytes(totalSize)}
-          </span>
-
-          {/* Variant selector */}
-          {model.variants && model.variants.length > 1 && !isReady && (
-            <Dropdown
-              items={variantItems}
-              selectedValue={selectedVariantId}
-              onChange={setSelectedVariantId}
-              selectedValueRenderer={(item) => (
-                <span className="text-sm">{item.value.toUpperCase()}</span>
-              )}
-              aria-label={`${model.name} precision`}
-              size="sm"
-            />
+        <div className="flex items-start gap-2">
+          {!hasLiveJob && (
+            <span className="text-xs text-slate-400 tabular-nums">
+              {formatBytes(totalSize)}
+            </span>
           )}
 
-          {!isReady && !isDownloading && (
-            <Button
-              onClick={handleDownload}
-              color="indigo"
-              size="sm"
-              width="sm"
-            >
-              <DownloadIcon />
-              {isPartial ? 'Resume' : 'Download'}
-            </Button>
+          {/* Variant selector — only when no job is in flight */}
+          {!hasLiveJob &&
+            model.variants &&
+            model.variants.length > 1 &&
+            !isReady && (
+              <Dropdown
+                items={variantItems}
+                selectedValue={selectedVariantId}
+                onChange={setSelectedVariantId}
+                selectedValueRenderer={(item) => (
+                  <span className="text-sm">{item.value.toUpperCase()}</span>
+                )}
+                aria-label={`${model.name} precision`}
+                size="sm"
+              />
+            )}
+
+          {hasLiveJob ? (
+            <DownloadRowStatus
+              job={job}
+              onRetry={retry}
+              onCancel={cancel}
+              onDelete={remove}
+            />
+          ) : (
+            !isReady && (
+              <DownloadRowButton
+                onClick={handleDownload}
+                label={isPartial ? 'Resume' : 'Download'}
+              />
+            )
           )}
         </div>
       </div>

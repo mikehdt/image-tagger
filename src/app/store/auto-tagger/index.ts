@@ -166,6 +166,7 @@ export const {
   updateDownloadProgress,
   downloadComplete,
   downloadFailed,
+  updateModelStatus,
 } = autoTaggerSlice.actions;
 
 // Export basic selectors from slice

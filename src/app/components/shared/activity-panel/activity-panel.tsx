@@ -6,16 +6,12 @@ import { memo, useCallback, useEffect, useRef } from 'react';
 
 import { useIsAnyModalOpen } from '@/app/components/shared/modal';
 import { abortTagging } from '@/app/services/auto-tagger/tagging-controllers';
-import { abortDownload } from '@/app/services/model-manager/download-controllers';
-import { startModelDownload } from '@/app/services/model-manager/start-download';
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
 import {
   cancelTagging,
   clearCompletedJobs,
   closePanel,
-  type DownloadJob,
   openPanel,
-  removeJob,
   restoreJobs,
   selectActiveJobs,
   selectCompletedJobs,
@@ -23,15 +19,14 @@ import {
   selectPanelOpen,
   selectPendingJobs,
   type TaggingJob,
-  updateJobStatus,
 } from '@/app/store/jobs';
 import { loadPersistedDownloads } from '@/app/store/jobs/persistence';
-import { setModelStatus } from '@/app/store/model-manager';
 
 import { DownloadJobCard } from './download-job-card';
 import { PendingJobsList } from './pending-jobs-list';
 import { TaggingJobCard } from './tagging-job-card';
 import { TrainingJobCard } from './training-job-card';
+import { useDownloadActions } from './use-download-actions';
 
 const ActivityPanelComponent = () => {
   const dispatch = useAppDispatch();
@@ -71,53 +66,11 @@ const ActivityPanelComponent = () => {
     dispatch(closePanel());
   }, [dispatch]);
 
-  const handleRetryDownload = useCallback(
-    async (job: DownloadJob) => {
-      dispatch(removeJob(job.id));
-      await startModelDownload({
-        modelId: job.modelId,
-        modelName: job.modelName,
-        dispatch,
-      });
-    },
-    [dispatch],
-  );
-
-  const handleCancelDownload = useCallback(
-    (job: DownloadJob) => {
-      abortDownload(job.id);
-      dispatch(
-        updateJobStatus({
-          id: job.id,
-          status: 'cancelled',
-          error: 'Download cancelled',
-        }),
-      );
-      dispatch(
-        setModelStatus({ modelId: job.modelId, status: 'not_installed' }),
-      );
-    },
-    [dispatch],
-  );
-
-  const handleDeleteDownload = useCallback(
-    async (job: DownloadJob) => {
-      try {
-        await fetch('/api/model-manager/download', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ modelId: job.modelId }),
-        });
-      } catch {
-        // Best-effort cleanup
-      }
-      dispatch(removeJob(job.id));
-      dispatch(
-        setModelStatus({ modelId: job.modelId, status: 'not_installed' }),
-      );
-    },
-    [dispatch],
-  );
+  const {
+    retry: handleRetryDownload,
+    cancel: handleCancelDownload,
+    remove: handleDeleteDownload,
+  } = useDownloadActions();
 
   const handleCancelTagging = useCallback(
     (job: TaggingJob) => {

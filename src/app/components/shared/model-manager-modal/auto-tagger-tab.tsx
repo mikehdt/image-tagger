@@ -1,21 +1,21 @@
 'use client';
 
-import { DownloadIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { startModelDownload } from '@/app/services/model-manager/start-download';
 import type { AppDispatch } from '@/app/store';
 import {
-  downloadComplete,
-  downloadFailed,
   selectModels,
   selectProviders,
   setModelsAndProviders,
-  startDownload as startAutoTaggerDownload,
-  updateDownloadProgress as updateAutoTaggerProgress,
 } from '@/app/store/auto-tagger';
+import type { ModelInfo } from '@/app/store/auto-tagger/types';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectDownloadJobByModelId } from '@/app/store/jobs';
 
-import { Button } from '../button';
+import { useDownloadActions } from '../activity-panel/use-download-actions';
+import { DownloadRowButton, DownloadRowStatus } from './download-row-status';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -58,54 +58,16 @@ export function AutoTaggerTab() {
   }, [models.length, fetchModels]);
 
   const handleDownload = useCallback(
-    async (modelId: string) => {
+    async (model: ModelInfo) => {
       setError(null);
-      dispatch(startAutoTaggerDownload(modelId));
-
       try {
-        const response = await fetch('/api/auto-tagger/download', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ modelId }),
+        await startModelDownload({
+          modelId: model.id,
+          modelName: model.name,
+          dispatch,
         });
-
-        if (!response.ok || !response.body) {
-          throw new Error('Failed to start download');
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const text = decoder.decode(value);
-          const lines = text.split('\n');
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = JSON.parse(line.slice(6));
-
-            if (data.status === 'error') {
-              dispatch(downloadFailed({ modelId, error: data.error }));
-              setError(data.error);
-              return;
-            }
-
-            if (data.status === 'ready') {
-              dispatch(downloadComplete(modelId));
-              return;
-            }
-
-            dispatch(updateAutoTaggerProgress(data));
-          }
-        }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Download failed';
-        dispatch(downloadFailed({ modelId, error: errorMessage }));
-        setError(errorMessage);
+        setError(err instanceof Error ? err.message : 'Download failed');
       }
     },
     [dispatch],
@@ -131,78 +93,13 @@ export function AutoTaggerTab() {
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              {providerModels.map((model) => {
-                const isReady = model.status === 'ready';
-                const isDownloading = model.status === 'downloading';
-                const isPartialAT = model.status === 'partial';
-
-                return (
-                  <div
-                    key={model.id}
-                    className={`rounded-md border p-3 transition-colors ${
-                      isReady
-                        ? 'border-teal-200 bg-teal-50/50 dark:border-teal-800 dark:bg-teal-950/30'
-                        : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-800 dark:text-slate-200">
-                            {model.name}
-                          </span>
-                          {model.isDefault && (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                              Recommended
-                            </span>
-                          )}
-                          {isReady && (
-                            <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700 dark:bg-teal-900 dark:text-teal-300">
-                              Installed
-                            </span>
-                          )}
-                          {isDownloading && (
-                            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700">
-                              Downloading
-                            </span>
-                          )}
-                          {isPartialAT && (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300">
-                              Incomplete
-                            </span>
-                          )}
-                        </div>
-                        {model.description && (
-                          <p className="mt-1 text-xs text-slate-500">
-                            {model.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="ml-2 flex shrink-0 items-center gap-2">
-                        <span className="text-xs text-slate-400 tabular-nums">
-                          {formatBytes(model.totalSize)}
-                          {model.vramEstimate && (
-                            <span className="block text-slate-400/70">
-                              ~{model.vramEstimate}GB VRAM
-                            </span>
-                          )}
-                        </span>
-                        {!isReady && !isDownloading && (
-                          <Button
-                            onClick={() => handleDownload(model.id)}
-                            color="indigo"
-                            size="sm"
-                            width="sm"
-                          >
-                            <DownloadIcon />
-                            {isPartialAT ? 'Resume' : 'Download'}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {providerModels.map((model) => (
+                <AutoTaggerModelRow
+                  key={model.id}
+                  model={model}
+                  onDownload={handleDownload}
+                />
+              ))}
             </div>
           </div>
         );
@@ -213,6 +110,95 @@ export function AutoTaggerTab() {
           {error}
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Per-model row (extracted so each row can subscribe to its own job state)
+// ---------------------------------------------------------------------------
+
+function AutoTaggerModelRow({
+  model,
+  onDownload,
+}: {
+  model: ModelInfo;
+  onDownload: (model: ModelInfo) => void;
+}) {
+  const job = useAppSelector(selectDownloadJobByModelId(model.id));
+  const { retry, cancel, remove } = useDownloadActions();
+
+  const isReady = model.status === 'ready';
+  const isPartial = model.status === 'partial';
+
+  // A job is "live" if it's currently running, interrupted, failed, or cancelled —
+  // i.e. anything except completed (which means the model is now installed).
+  const hasLiveJob = job && job.status !== 'completed';
+
+  return (
+    <div
+      className={`rounded-md border p-3 transition-colors ${
+        isReady
+          ? 'border-teal-200 bg-teal-50/50 dark:border-teal-800 dark:bg-teal-950/30'
+          : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'
+      }`}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-slate-800 dark:text-slate-200">
+              {model.name}
+            </span>
+            {model.isDefault && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+                Recommended
+              </span>
+            )}
+            {isReady && (
+              <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700 dark:bg-teal-900 dark:text-teal-300">
+                Installed
+              </span>
+            )}
+            {isPartial && !hasLiveJob && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                Incomplete
+              </span>
+            )}
+          </div>
+          {model.description && (
+            <p className="mt-1 text-sm text-slate-500">{model.description}</p>
+          )}
+        </div>
+
+        <div className="ml-2 flex shrink-0 items-start gap-2">
+          {!hasLiveJob && (
+            <span className="text-xs text-slate-400 tabular-nums">
+              {formatBytes(model.totalSize)}
+              {model.vramEstimate && (
+                <span className="block text-slate-400/70">
+                  ~{model.vramEstimate}GB VRAM
+                </span>
+              )}
+            </span>
+          )}
+
+          {hasLiveJob ? (
+            <DownloadRowStatus
+              job={job}
+              onRetry={retry}
+              onCancel={cancel}
+              onDelete={remove}
+            />
+          ) : (
+            !isReady && (
+              <DownloadRowButton
+                onClick={() => onDownload(model)}
+                label={isPartial ? 'Resume' : 'Download'}
+              />
+            )
+          )}
+        </div>
+      </div>
     </div>
   );
 }

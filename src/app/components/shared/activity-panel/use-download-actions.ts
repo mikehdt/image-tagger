@@ -1,0 +1,75 @@
+/**
+ * Shared retry/cancel/delete handlers for download jobs.
+ *
+ * Used by the activity panel cards and by the in-modal rows in the
+ * Model Manager so both surfaces share the same logic and side effects.
+ *
+ * Auto-tagger slice mirroring is handled by middleware on setModelStatus,
+ * so callers here only need to dispatch model-manager updates.
+ */
+
+import { useCallback } from 'react';
+
+import { abortDownload } from '@/app/services/model-manager/download-controllers';
+import { startModelDownload } from '@/app/services/model-manager/start-download';
+import { useAppDispatch } from '@/app/store/hooks';
+import {
+  type DownloadJob,
+  removeJob,
+  updateJobStatus,
+} from '@/app/store/jobs';
+import { setModelStatus } from '@/app/store/model-manager';
+
+export function useDownloadActions() {
+  const dispatch = useAppDispatch();
+
+  const retry = useCallback(
+    async (job: DownloadJob) => {
+      dispatch(removeJob(job.id));
+      await startModelDownload({
+        modelId: job.modelId,
+        modelName: job.modelName,
+        dispatch,
+      });
+    },
+    [dispatch],
+  );
+
+  const cancel = useCallback(
+    (job: DownloadJob) => {
+      abortDownload(job.id);
+      dispatch(
+        updateJobStatus({
+          id: job.id,
+          status: 'cancelled',
+          error: 'Download cancelled',
+        }),
+      );
+      dispatch(
+        setModelStatus({ modelId: job.modelId, status: 'not_installed' }),
+      );
+    },
+    [dispatch],
+  );
+
+  const remove = useCallback(
+    async (job: DownloadJob) => {
+      try {
+        await fetch('/api/model-manager/download', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ modelId: job.modelId }),
+        });
+      } catch {
+        // Best-effort cleanup
+      }
+      dispatch(removeJob(job.id));
+      dispatch(
+        setModelStatus({ modelId: job.modelId, status: 'not_installed' }),
+      );
+    },
+    [dispatch],
+  );
+
+  return { retry, cancel, remove };
+}
