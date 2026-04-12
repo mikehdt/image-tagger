@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { TaggerOptions } from '@/app/services/auto-tagger';
 import { DEFAULT_TAGGER_OPTIONS, getModel } from '@/app/services/auto-tagger';
 import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
-import { tagImage } from '@/app/services/auto-tagger/providers/wd14/inference';
+import { tagImageInWorker } from '@/app/services/auto-tagger/providers/wd14/worker-manager';
 
 type TagRequest = {
   modelId: string;
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     for (const imagePath of imagePaths) {
       try {
-        const output = await tagImage(model, imagePath, options);
+        const output = await tagImageInWorker(model, imagePath, options);
 
         // Extract just the tag names (sorted by confidence already)
         const generalTags = output.general.map((t) => t.tag);

@@ -10,7 +10,7 @@ import path from 'path';
 import type { TaggerOptions, TagResult } from '@/app/services/auto-tagger';
 import { DEFAULT_TAGGER_OPTIONS, getModel } from '@/app/services/auto-tagger';
 import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
-import { tagImage } from '@/app/services/auto-tagger/providers/wd14/inference';
+import { tagImageInWorker } from '@/app/services/auto-tagger/providers/wd14/worker-manager';
 
 // Server-side config reading function
 const getServerConfig = () => {
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
             });
 
             try {
-              const output = await tagImage(model, imagePath, options);
+              const output = await tagImageInWorker(model, imagePath, options);
 
               // Combine tags based on options
               const allTags: TagResult[] = [];

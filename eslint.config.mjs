@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Plain Node.js worker scripts (not bundled, use require())
+    'workers/**',
   ]),
   {
     ignores: ['node_modules/**', 'dist/**'],
