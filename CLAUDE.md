@@ -12,6 +12,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Package manager: pnpm (specified in packageManager field)
 
+## First-time setup
+
+1. `pnpm install` — JS/TS dependencies
+2. Install [`uv`](https://docs.astral.sh/uv/) — used to manage the Python sidecar environment
+3. That's it. The Python sidecar auto-provisions its venv via `uv run` on first invocation, reading dependencies from `training-sidecar/pyproject.toml`.
+
+### Python sidecar
+
+The sidecar handles LoRA training and VLM captioning. It's a FastAPI server
+that Node.js spawns on demand via `sidecar-manager.ts`.
+
+- Lives in `training-sidecar/`, managed as a uv project (`pyproject.toml` + `uv.lock`)
+- Python 3.12 (pinned via `requires-python`)
+- Node spawns it with `uv run python -u main.py --app-root ...` — uv handles venv creation and dependency install automatically
+- Falls back to invoking `.venv/Scripts/python.exe` directly if `uv` isn't on PATH
+- Optional VLM deps (`llama-cpp-python`) install with `uv sync --extra vlm` — deferred until the mock captioning provider is replaced
+
+Manual sync (rarely needed): `cd training-sidecar && uv sync`
+
 ## Architecture Overview
 
 This is a Next.js 16 application for managing and tagging image collections with the following architecture:

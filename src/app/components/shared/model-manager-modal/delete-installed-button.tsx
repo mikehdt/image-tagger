@@ -5,14 +5,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../button';
 
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-}
-
 /**
  * Inline-confirm Delete button for an installed model.
  *
@@ -23,7 +15,6 @@ function formatBytes(bytes: number): string {
  * Used in the Model Manager rows to uninstall a fully-downloaded model.
  */
 export function DeleteInstalledButton({
-  sizeBytes,
   onConfirm,
 }: {
   sizeBytes: number;

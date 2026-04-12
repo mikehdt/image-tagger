@@ -8,7 +8,7 @@
 import { ensureSidecar } from '@/app/services/training/sidecar-manager';
 
 import { getModelFilePath } from '../../model-manager';
-import type { TaggerModel } from '../../types';
+import type { TaggerModel, VlmOptions } from '../../types';
 
 type CaptionResult = {
   imagePath: string;
@@ -43,7 +43,7 @@ export function getVlmModelPath(model: TaggerModel): string {
 export async function captionImageViaSidecar(
   model: TaggerModel,
   imagePath: string,
-  prompt: string,
+  options: VlmOptions,
 ): Promise<string> {
   const sidecar = await ensureSidecar();
   if (sidecar.status !== 'ready') {
@@ -58,7 +58,9 @@ export async function captionImageViaSidecar(
     body: JSON.stringify({
       image_path: imagePath,
       model_path: modelPath,
-      prompt,
+      prompt: options.prompt,
+      max_tokens: options.maxTokens,
+      temperature: options.temperature,
     }),
   });
 
@@ -82,7 +84,7 @@ export async function captionImageViaSidecar(
 export async function* captionBatchViaSidecar(
   model: TaggerModel,
   imagePaths: string[],
-  prompt: string,
+  options: VlmOptions,
   batchId: string,
 ): AsyncGenerator<CaptionResult | { error: string; imagePath?: string }> {
   const sidecar = await ensureSidecar();
@@ -171,7 +173,9 @@ export async function* captionBatchViaSidecar(
         batch_id: batchId,
         image_paths: imagePaths,
         model_path: modelPath,
-        prompt,
+        prompt: options.prompt,
+        max_tokens: options.maxTokens,
+        temperature: options.temperature,
       }),
     },
   );

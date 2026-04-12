@@ -4,7 +4,7 @@
  * This module is server-only (uses child_process, fs). Do not import from client code.
  */
 
-import { type ChildProcess, spawn } from 'child_process';
+import { type ChildProcess, execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -44,8 +44,25 @@ function getSidecarDir(): string {
 }
 
 /**
+ * Check whether `uv` is available on PATH.
+ * Cached since PATH won't change mid-session.
+ */
+let uvAvailable: boolean | null = null;
+function hasUv(): boolean {
+  if (uvAvailable !== null) return uvAvailable;
+  try {
+    execSync('uv --version', { stdio: 'ignore' });
+    uvAvailable = true;
+  } catch {
+    uvAvailable = false;
+  }
+  return uvAvailable;
+}
+
+/**
  * Read the Python executable path from config.json.
  * Falls back to the venv inside training-sidecar/ if not configured.
+ * Only used when uv is not available.
  */
 function getPythonPath(): string {
   try {
@@ -69,6 +86,31 @@ function getPythonPath(): string {
 
   // Last resort
   return 'python';
+}
+
+/**
+ * Resolve the command to spawn the sidecar.
+ * Prefers `uv run` (which auto-manages the venv from pyproject.toml),
+ * falls back to invoking the venv's python directly.
+ */
+function getSpawnCommand(): { command: string; args: string[] } {
+  const appRoot = getAppRoot();
+  const mainArgs = ['main.py', '--app-root', appRoot];
+
+  if (hasUv()) {
+    // uv run auto-creates the venv and installs dependencies from pyproject.toml
+    // on first invocation — no manual setup required.
+    return {
+      command: 'uv',
+      args: ['run', 'python', '-u', ...mainArgs],
+    };
+  }
+
+  // Fall back to direct python invocation (requires manual venv setup)
+  return {
+    command: getPythonPath(),
+    args: ['-u', ...mainArgs],
+  };
 }
 
 /**
@@ -137,9 +179,8 @@ async function spawnSidecar(): Promise<void> {
   state.status = 'starting';
   state.error = null;
 
-  const pythonPath = getPythonPath();
   const sidecarDir = getSidecarDir();
-  const appRoot = getAppRoot();
+  const { command, args } = getSpawnCommand();
 
   // Ensure .training directory exists
   const trainingDir = getTrainingDir();
@@ -147,12 +188,16 @@ async function spawnSidecar(): Promise<void> {
     fs.mkdirSync(trainingDir, { recursive: true });
   }
 
-  const proc = spawn(pythonPath, ['-u', 'main.py', '--app-root', appRoot], {
+  console.log(`[sidecar] Spawning: ${command} ${args.join(' ')}`);
+
+  const proc = spawn(command, args, {
     cwd: sidecarDir,
     env: { ...process.env, PYTHONUNBUFFERED: '1' },
     stdio: ['pipe', 'pipe', 'pipe'],
     // On Windows, detach so the process survives Node.js HMR restarts
     detached: process.platform !== 'win32',
+    // Use shell on Windows so `uv` resolves via PATH (uv is a .exe/.cmd shim)
+    shell: process.platform === 'win32' && command === 'uv',
   });
 
   state.process = proc;

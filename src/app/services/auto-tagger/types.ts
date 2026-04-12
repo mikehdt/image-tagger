@@ -83,8 +83,27 @@ export const DEFAULT_TAGGER_OPTIONS: TaggerOptions = {
 };
 
 /**
- * Settings saved to project config
+ * VLM (natural-language captioner) options.
+ * Used when the selected model's provider is 'vlm'.
+ */
+export type VlmOptions = {
+  prompt: string;
+  maxTokens: number;
+  temperature: number;
+};
+
+export const DEFAULT_VLM_OPTIONS: VlmOptions = {
+  prompt: 'Describe this image in detail for AI training purposes.',
+  maxTokens: 512,
+  temperature: 0.7,
+};
+
+/**
+ * Settings saved to project config.
+ * Both ONNX and VLM fields are optional — a project tracks defaults for
+ * whichever providers it's been used with.
  */
 export type AutoTaggerSettings = {
   defaultModelId?: string;
-} & Partial<Omit<TaggerOptions, 'includeTags'>>; // includeTags not saved (session only)
+} & Partial<Omit<TaggerOptions, 'includeTags'>> & // includeTags not saved (session only)
+  Partial<VlmOptions>;

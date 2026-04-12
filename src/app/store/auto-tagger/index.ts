@@ -97,11 +97,8 @@ const autoTaggerSlice = createSlice({
 export const { reducer: autoTaggerReducer } = autoTaggerSlice;
 
 // Export actions
-export const {
-  setModelsAndProviders,
-  setSelectedModel,
-  updateModelStatus,
-} = autoTaggerSlice.actions;
+export const { setModelsAndProviders, setSelectedModel, updateModelStatus } =
+  autoTaggerSlice.actions;
 
 // Export basic selectors from slice
 export const {

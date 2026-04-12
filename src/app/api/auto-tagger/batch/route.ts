@@ -7,9 +7,14 @@ import fs from 'fs';
 import { NextRequest } from 'next/server';
 import path from 'path';
 
-import type { TaggerOptions, TagResult } from '@/app/services/auto-tagger';
+import type {
+  TaggerOptions,
+  TagResult,
+  VlmOptions,
+} from '@/app/services/auto-tagger';
 import {
   DEFAULT_TAGGER_OPTIONS,
+  DEFAULT_VLM_OPTIONS,
   getModel,
   getProviderTypeForModel,
 } from '@/app/services/auto-tagger';
@@ -40,7 +45,10 @@ type BatchTagRequest = {
   modelId: string;
   projectPath: string;
   assets: { fileId: string; fileExtension: string }[];
+  /** ONNX (WD14) options — threshold, includeCharacterTags, etc. */
   options?: Partial<TaggerOptions>;
+  /** VLM (NL captioner) options — prompt, temperature, max tokens */
+  vlmOptions?: Partial<VlmOptions>;
 };
 
 type BatchProgressEvent = {
@@ -63,6 +71,7 @@ export async function POST(request: NextRequest) {
       projectPath: rawProjectPath,
       assets,
       options: userOptions,
+      vlmOptions: userVlmOptions,
     } = body;
 
     // Resolve to absolute path
@@ -139,6 +148,11 @@ export async function POST(request: NextRequest) {
       ...userOptions,
     };
 
+    const vlmOptions: VlmOptions = {
+      ...DEFAULT_VLM_OPTIONS,
+      ...userVlmOptions,
+    };
+
     // Create SSE stream
     const encoder = new TextEncoder();
     const total = assets.length;
@@ -175,7 +189,9 @@ export async function POST(request: NextRequest) {
     });
 
     // --- ONNX (WD14 worker) batch runner ---
-    async function runOnnxBatch(sendEvent: (event: BatchProgressEvent) => void) {
+    async function runOnnxBatch(
+      sendEvent: (event: BatchProgressEvent) => void,
+    ) {
       for (let i = 0; i < assets.length; i++) {
         const asset = assets[i];
         const imagePath = path.join(
@@ -240,14 +256,12 @@ export async function POST(request: NextRequest) {
       });
 
       const batchId = `batch-${Date.now()}`;
-      const prompt =
-        'Describe this image in detail for AI training purposes.';
 
       let processed = 0;
       const generator = captionBatchViaSidecar(
         resolvedModel,
         imagePaths,
-        prompt,
+        vlmOptions,
         batchId,
       );
 

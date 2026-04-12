@@ -8,6 +8,7 @@ import { Modal } from '@/app/components/shared/modal';
 import { AutoTaggerProgress } from './auto-tagger-progress';
 import { AutoTaggerSettings } from './auto-tagger-settings';
 import { AutoTaggerSummary } from './auto-tagger-summary';
+import { AutoTaggerVlmSettings } from './auto-tagger-vlm-settings';
 import { useAutoTagger } from './use-auto-tagger';
 
 type AutoTaggerModalProps = {
@@ -25,6 +26,7 @@ export function AutoTaggerModal({
 
   const {
     options,
+    vlmOptions,
     unselectOnComplete,
     isTagging,
     progress,
@@ -34,9 +36,11 @@ export function AutoTaggerModal({
     hasReadyModel,
     modelItems,
     selectedModelId,
+    selectedProviderType,
     insertModeOptions,
     handleModelChange,
     handleOptionChange,
+    handleVlmOptionChange,
     setUnselectOnComplete,
     handleClose,
     handleCancel,
@@ -48,6 +52,9 @@ export function AutoTaggerModal({
     router.push('/');
   }, [onClose, router]);
 
+  const isVlm = selectedProviderType === 'vlm';
+  const title = isVlm ? 'Caption Images' : 'Auto-Tag Images';
+
   return (
     <Modal
       isOpen={isOpen}
@@ -57,7 +64,7 @@ export function AutoTaggerModal({
     >
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-300">
-          Auto-Tag Images
+          {title}
         </h2>
 
         {!hasReadyModel ? (
@@ -79,6 +86,22 @@ export function AutoTaggerModal({
             summary={summary}
             wasCancelled={wasCancelled}
             onClose={handleClose}
+          />
+        ) : isVlm ? (
+          <AutoTaggerVlmSettings
+            vlmOptions={vlmOptions}
+            unselectOnComplete={unselectOnComplete}
+            selectedModelId={selectedModelId}
+            modelItems={modelItems}
+            selectedAssetsCount={selectedAssets.length}
+            error={error}
+            onModelChange={handleModelChange}
+            onVlmOptionChange={handleVlmOptionChange}
+            onUnselectOnCompleteChange={() =>
+              setUnselectOnComplete((prev) => !prev)
+            }
+            onClose={handleClose}
+            onStartTagging={handleStartTagging}
           />
         ) : (
           <AutoTaggerSettings

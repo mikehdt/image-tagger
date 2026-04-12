@@ -61,11 +61,7 @@ export async function* downloadModelFiles(
     }
 
     // Already complete — skip and credit toward overall progress.
-    if (
-      existingSize > 0 &&
-      file.size > 0 &&
-      existingSize === file.size
-    ) {
+    if (existingSize > 0 && file.size > 0 && existingSize === file.size) {
       bytesDownloaded += existingSize;
       yield {
         downloadId,
@@ -253,6 +249,30 @@ export async function* downloadModelFiles(
       };
       return;
     }
+  }
+
+  // Write a manifest recording actual on-disk sizes. This is the source of
+  // truth for the status checker — the declared sizes in the model registry
+  // are often estimates (especially for GGUF models from HuggingFace) and
+  // won't match byte-for-byte.
+  try {
+    const manifest: { files: { name: string; size: number }[] } = { files: [] };
+    for (const file of files) {
+      const filePath = path.join(targetDir, file.name);
+      if (fs.existsSync(filePath)) {
+        manifest.files.push({
+          name: file.name,
+          size: fs.statSync(filePath).size,
+        });
+      }
+    }
+    fs.writeFileSync(
+      path.join(targetDir, 'manifest.json'),
+      JSON.stringify(manifest, null, 2),
+      'utf-8',
+    );
+  } catch {
+    // Manifest write is best-effort; status check falls back to declared sizes
   }
 
   yield {

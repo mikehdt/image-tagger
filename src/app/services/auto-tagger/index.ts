@@ -13,8 +13,9 @@ export type {
   TaggerOptions,
   TagInsertMode,
   TagResult,
+  VlmOptions,
 } from './types';
-export { DEFAULT_TAGGER_OPTIONS } from './types';
+export { DEFAULT_TAGGER_OPTIONS, DEFAULT_VLM_OPTIONS } from './types';
 
 // Model Registry (client-safe utilities - no fs operations)
 export {

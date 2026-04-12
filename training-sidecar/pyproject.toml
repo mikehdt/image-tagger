@@ -1,0 +1,26 @@
+[project]
+name = "img-tagger-sidecar"
+version = "0.1.0"
+description = "Python sidecar for img-tagger — handles LoRA training orchestration and VLM captioning"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+    "websockets>=14,<15",
+    "pydantic>=2.10,<3",
+    "pyyaml>=6,<7",
+    # VLM captioning backend — install on demand via the "vlm" extra once
+    # we're ready to swap the mock provider. Keeping it optional means the
+    # sidecar can run without a CUDA toolchain.
+]
+
+[project.optional-dependencies]
+vlm = [
+    # Install with: uv sync --extra vlm
+    # Windows/CUDA wheel: set UV_EXTRA_INDEX_URL=https://abetlen.github.io/llama-cpp-python/whl/cu124
+    "llama-cpp-python>=0.3.0,<1",
+]
+
+[tool.uv]
+# Pin to CPython so `uv run` always uses the same interpreter
+package = false

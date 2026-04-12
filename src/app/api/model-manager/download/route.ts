@@ -157,8 +157,7 @@ export async function POST(request: NextRequest) {
                 downloadId,
                 modelId,
                 status: 'error',
-                error:
-                  error instanceof Error ? error.message : 'Unknown error',
+                error: error instanceof Error ? error.message : 'Unknown error',
                 bytesDownloaded: 0,
                 totalBytes: 0,
               });

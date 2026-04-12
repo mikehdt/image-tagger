@@ -88,7 +88,8 @@ export function summarisePendingResults(projectFolderName: string): {
   return {
     imagesProcessed: results.length,
     imagesWithNewTags: results.filter(
-      (r) => (r.tags && r.tags.length > 0) || (r.caption && r.caption.length > 0),
+      (r) =>
+        (r.tags && r.tags.length > 0) || (r.caption && r.caption.length > 0),
     ).length,
     totalTagsFound: results.reduce(
       (sum, r) => sum + (r.tags?.length ?? 0) + (r.caption ? 1 : 0),

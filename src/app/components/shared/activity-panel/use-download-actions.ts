@@ -18,11 +18,7 @@ import type {
   ModelVariant,
 } from '@/app/services/model-manager/types';
 import { useAppDispatch } from '@/app/store/hooks';
-import {
-  type DownloadJob,
-  removeJob,
-  updateJobStatus,
-} from '@/app/store/jobs';
+import { type DownloadJob, removeJob, updateJobStatus } from '@/app/store/jobs';
 import { setModelStatus } from '@/app/store/model-manager';
 
 export function useDownloadActions() {

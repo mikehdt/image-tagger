@@ -6,8 +6,13 @@ import type {
   AutoTaggerSettings,
   TaggerOptions,
   TagInsertMode,
+  VlmOptions,
 } from '@/app/services/auto-tagger';
-import { DEFAULT_TAGGER_OPTIONS } from '@/app/services/auto-tagger';
+import {
+  DEFAULT_TAGGER_OPTIONS,
+  DEFAULT_VLM_OPTIONS,
+  getProviderTypeForModel,
+} from '@/app/services/auto-tagger';
 import {
   appendPendingTagResult,
   clearPendingTagResults,
@@ -83,8 +88,16 @@ export function useAutoTagger({
   const [options, setOptions] = useState<TaggerOptions>({
     ...DEFAULT_TAGGER_OPTIONS,
   });
+  const [vlmOptions, setVlmOptions] = useState<VlmOptions>({
+    ...DEFAULT_VLM_OPTIONS,
+  });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [unselectOnComplete, setUnselectOnComplete] = useState(true);
+
+  // Derive the provider type of the currently-selected model
+  const selectedProviderType = selectedModelId
+    ? getProviderTypeForModel(selectedModelId)
+    : undefined;
 
   // Summary and error are set locally after the job completes,
   // since they drive the modal's summary view
@@ -149,6 +162,13 @@ export function useAutoTagger({
                   : prev.tagInsertMode,
             }));
 
+            setVlmOptions((prev) => ({
+              ...prev,
+              prompt: savedSettings.prompt ?? prev.prompt,
+              maxTokens: savedSettings.maxTokens ?? prev.maxTokens,
+              temperature: savedSettings.temperature ?? prev.temperature,
+            }));
+
             if (
               savedSettings.defaultModelId &&
               readyModels.some((m) => m.id === savedSettings.defaultModelId)
@@ -189,6 +209,13 @@ export function useAutoTagger({
   const handleOptionChange = useCallback(
     <K extends keyof TaggerOptions>(key: K, value: TaggerOptions[K]) => {
       setOptions((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+
+  const handleVlmOptionChange = useCallback(
+    <K extends keyof VlmOptions>(key: K, value: VlmOptions[K]) => {
+      setVlmOptions((prev) => ({ ...prev, [key]: value }));
     },
     [],
   );
@@ -306,12 +333,21 @@ export function useAutoTagger({
           projectPath: projectInfo.projectPath,
           assets: selectedAssets,
           options,
+          vlmOptions,
         }),
         signal: abortController.signal,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start tagging');
+        // Try to surface the server-side error message (e.g. "Model is not installed")
+        let message = `Failed to start tagging (${response.status})`;
+        try {
+          const body = await response.json();
+          if (body?.error) message = body.error;
+        } catch {
+          // Non-JSON response — fall back to generic message
+        }
+        throw new Error(message);
       }
 
       if (!response.body) {
@@ -375,6 +411,9 @@ export function useAutoTagger({
                   includeRatingTags: options.includeRatingTags,
                   excludeTags: options.excludeTags,
                   tagInsertMode: options.tagInsertMode,
+                  prompt: vlmOptions.prompt,
+                  maxTokens: vlmOptions.maxTokens,
+                  temperature: vlmOptions.temperature,
                 };
                 saveAutoTaggerSettings(projectFolderName, settingsToSave).catch(
                   console.error,
@@ -439,6 +478,7 @@ export function useAutoTagger({
     selectedAssets,
     readyModels,
     options,
+    vlmOptions,
     flushAndFinalise,
     dispatch,
   ]);
@@ -446,6 +486,7 @@ export function useAutoTagger({
   return {
     // State
     options,
+    vlmOptions,
     unselectOnComplete,
     isTagging,
     progress,
@@ -455,10 +496,12 @@ export function useAutoTagger({
     hasReadyModel,
     modelItems,
     selectedModelId,
+    selectedProviderType,
     insertModeOptions: INSERT_MODE_OPTIONS,
     // Actions
     handleModelChange,
     handleOptionChange,
+    handleVlmOptionChange,
     setUnselectOnComplete,
     handleClose,
     handleCancel,
