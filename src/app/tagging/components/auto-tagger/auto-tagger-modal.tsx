@@ -35,10 +35,12 @@ export function AutoTaggerModal({
     imageErrors,
     wasCancelled,
     hasReadyModel,
+    hasModelForMode,
     modelItems,
     selectedModelId,
     selectedProviderType,
     insertModeOptions,
+    triggerPhrases,
     handleModelChange,
     handleOptionChange,
     handleVlmOptionChange,
@@ -53,6 +55,11 @@ export function AutoTaggerModal({
     router.push('/');
   }, [onClose, router]);
 
+  // The project's caption mode determines which settings panel and title
+  // we show. Selection gating already ensures `selectedProviderType`
+  // matches, but we prefer deriving from the filtered model list so the
+  // title is correct even during the brief moment between mode flips
+  // and the auto-select effect firing.
   const isVlm = selectedProviderType === 'vlm';
   const title = isVlm ? 'Caption Images' : 'Auto-Tag Images';
 
@@ -76,9 +83,23 @@ export function AutoTaggerModal({
               option.
             </p>
           </div>
+        ) : !hasModelForMode ? (
+          <div className="rounded-md border border-amber-600 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            <p className="font-medium">
+              {title === 'Caption Images'
+                ? 'No caption models installed'
+                : 'No tag models installed'}
+            </p>
+            <p className="mt-1">
+              {title === 'Caption Images'
+                ? 'Install a VLM (vision-language) model in the Model Manager to caption images in this mode. Or switch the project to tag mode to use a booru-style tagger.'
+                : 'Install an ONNX tagger (e.g. WD14) in the Model Manager to tag images in this mode. Or switch the project to caption mode to use a VLM.'}
+            </p>
+          </div>
         ) : isTagging ? (
           <AutoTaggerProgress
             progress={progress}
+            providerType={selectedProviderType}
             onCancel={handleCancel}
             onLeave={handleLeave}
           />
@@ -86,6 +107,7 @@ export function AutoTaggerModal({
           <AutoTaggerSummary
             summary={summary}
             wasCancelled={wasCancelled}
+            providerType={selectedProviderType}
             imageErrors={imageErrors}
             onClose={handleClose}
           />
@@ -97,6 +119,7 @@ export function AutoTaggerModal({
             modelItems={modelItems}
             selectedAssetsCount={selectedAssets.length}
             error={error}
+            triggerPhrases={triggerPhrases}
             onModelChange={handleModelChange}
             onVlmOptionChange={handleVlmOptionChange}
             onUnselectOnCompleteChange={() =>

@@ -104,12 +104,20 @@ export type VlmOptions = {
   prompt: string;
   maxTokens: number;
   temperature: number;
+  /**
+   * If true, the project's trigger phrases are appended to the prompt as a
+   * must-include instruction. The backend handles the actual injection at
+   * request time so the prompt the user edits stays clean.
+   */
+  injectTriggerPhrases: boolean;
 };
 
 export const DEFAULT_VLM_OPTIONS: VlmOptions = {
-  prompt: 'Describe this image in detail for AI training purposes.',
+  prompt:
+    'Describe this image as a caption for AI training. Use plain prose only — no markdown, headings, bullet points, or lists. Keep it tight and factual: subject, pose and clothing, art style or medium, composition, lighting. Avoid narrative interpretation and flowery language. Stay within 2–3 short paragraphs total.',
   maxTokens: 512,
   temperature: 0.7,
+  injectTriggerPhrases: true,
 };
 
 /**

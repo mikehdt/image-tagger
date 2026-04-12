@@ -103,6 +103,31 @@ class CaptionBatchManager:
             )
 
         try:
+            # Pre-load the model so the UI can surface loading progress
+            # separately from inference progress. Without this, the first
+            # caption_image call blocks through load AND inference and the
+            # UI sits on the last loading tick for the whole duration.
+            try:
+                await provider.prepare(
+                    model_path=request.model_path,
+                    on_load_progress=on_load_progress,
+                )
+            except CaptionCancelled:
+                await broadcast_cancelled()
+                return
+
+            # Model is ready — broadcast a "running" transition so the UI
+            # clears its loading overlay before the first image starts.
+            if not state.cancel_requested:
+                await self._broadcast(
+                    CaptionBatchProgress(
+                        batch_id=state.batch_id,
+                        current=0,
+                        total=state.total,
+                        status="running",
+                    )
+                )
+
             for i, image_path in enumerate(request.image_paths):
                 if state.cancel_requested:
                     await broadcast_cancelled()

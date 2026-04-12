@@ -42,6 +42,24 @@ class CaptionCancelled(Exception):
 class CaptioningProvider(ABC):
     """Abstract base for captioning backends."""
 
+    async def prepare(
+        self,
+        model_path: str,
+        on_load_progress: Optional[LoadProgressCallback] = None,
+    ) -> None:
+        """
+        Optionally pre-load the model so subsequent `caption_image` calls run
+        without blocking on a load. Called by the batch manager before the
+        first image so we can broadcast load progress separately from
+        inference progress — otherwise the UI sits on "Loading..." through
+        the entire first image, which feels broken.
+
+        Default is a no-op; providers that cache a loaded model should
+        override to do the actual load. The load must be idempotent so that
+        the provider's own lazy-load path in `caption_image` is still safe.
+        """
+        del model_path, on_load_progress
+
     @abstractmethod
     async def caption_image(
         self,

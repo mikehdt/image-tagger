@@ -1,9 +1,16 @@
 'use client';
 
-import { CheckIcon, ExternalLinkIcon, TrashIcon } from 'lucide-react';
+import { CheckIcon, CpuIcon, ExternalLinkIcon, TrashIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import {
+  selectKeepTaggerModelInMemory,
+  setKeepTaggerModelInMemory,
+} from '@/app/store/preferences';
 
 import { Button } from '../button';
+import { Checkbox } from '../checkbox';
 import { Input } from '../input/input';
 
 type ConfigResponse = {
@@ -12,6 +19,9 @@ type ConfigResponse = {
 };
 
 export function SettingsTab() {
+  const dispatch = useDispatch();
+  const keepInMemory = useSelector(selectKeepTaggerModelInMemory);
+
   const [hasToken, setHasToken] = useState(false);
   const [maskedToken, setMaskedToken] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -19,6 +29,33 @@ export function SettingsTab() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  // GPU memory release
+  const [unloading, setUnloading] = useState(false);
+  const [unloadedAt, setUnloadedAt] = useState<number | null>(null);
+  const [unloadError, setUnloadError] = useState<string | null>(null);
+
+  const handleUnload = useCallback(async () => {
+    setUnloading(true);
+    setUnloadError(null);
+    try {
+      const res = await fetch('/api/auto-tagger/unload', { method: 'POST' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to release GPU memory');
+      }
+      setUnloadedAt(Date.now());
+    } catch (err) {
+      setUnloadError(
+        err instanceof Error ? err.message : 'Failed to release GPU memory',
+      );
+    } finally {
+      setUnloading(false);
+    }
+  }, []);
+
+  const showUnloadedPing =
+    unloadedAt !== null && Date.now() - unloadedAt < 2500;
 
   const loadConfig = useCallback(async () => {
     setLoading(true);
@@ -165,6 +202,50 @@ export function SettingsTab() {
         {error && (
           <div className="rounded-md bg-rose-50 p-3 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
             {error}
+          </div>
+        )}
+      </section>
+
+      {/* Tagger model memory */}
+      <section className="flex flex-col gap-3">
+        <div className="text-sm text-slate-500">
+          <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200">
+            Tagger Model Memory
+          </h3>
+          <p className="mt-1">
+            Captioning models can sit in GPU/CPU memory between runs for fast
+            iteration, or release themselves after each batch to free memory for
+            training and other apps.
+          </p>
+        </div>
+
+        <Checkbox
+          isSelected={keepInMemory}
+          onChange={() => dispatch(setKeepTaggerModelInMemory(!keepInMemory))}
+          label="Keep tagger models in memory after tagging"
+        />
+
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleUnload}
+            color="slate"
+            size="md"
+            width="md"
+            disabled={unloading}
+          >
+            <CpuIcon />
+            {unloading ? 'Releasing…' : 'Release now'}
+          </Button>
+          {showUnloadedPing && (
+            <span className="text-teal-600 dark:text-teal-400">
+              Model released.
+            </span>
+          )}
+        </div>
+
+        {unloadError && (
+          <div className="rounded-md bg-rose-50 p-3 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+            {unloadError}
           </div>
         )}
       </section>

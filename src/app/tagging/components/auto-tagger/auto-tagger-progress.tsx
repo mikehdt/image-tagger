@@ -1,15 +1,18 @@
 import { Button } from '@/app/components/shared/button';
 import { ProgressBar } from '@/app/components/shared/progress-bar/progress-bar';
+import type { ProviderType } from '@/app/services/auto-tagger';
 import type { TaggingProgress } from '@/app/store/jobs';
 
 type AutoTaggerProgressProps = {
   progress: TaggingProgress | null;
+  providerType?: ProviderType;
   onCancel: () => void;
   onLeave?: () => void;
 };
 
 export function AutoTaggerProgress({
   progress,
+  providerType,
   onCancel,
   onLeave,
 }: AutoTaggerProgressProps) {
@@ -21,6 +24,11 @@ export function AutoTaggerProgress({
 
   const loading = progress?.loading;
   const isLoading = loading !== undefined;
+  const isCaptioning = providerType === 'vlm';
+  const verbPresent = isCaptioning ? 'Captioning' : 'Tagging';
+  const finishedNote = isCaptioning
+    ? 'Captions from completed images will still be applied.'
+    : 'Tags from completed images will still be applied.';
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,15 +46,14 @@ export function AutoTaggerProgress({
             />
             <p className="truncate text-xs text-slate-500">
               {loading.message}
-              {loading.total > 0 &&
-                ` (${loading.current}/${loading.total})`}
+              {loading.total > 0 && ` (${loading.current}/${loading.total})`}
             </p>
           </div>
         </>
       ) : (
         <>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Tagging image {currentlyOn} of {total}...
+            {verbPresent} image {currentlyOn} of {total}...
           </p>
           <div className="flex flex-col gap-2">
             <ProgressBar
@@ -63,9 +70,7 @@ export function AutoTaggerProgress({
       )}
 
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-500">
-          Tags from completed images will still be applied.
-        </p>
+        <p className="text-xs text-slate-500">{finishedNote}</p>
         <div className="flex gap-2">
           {onLeave && (
             <Button onClick={onLeave} color="slate" size="md">

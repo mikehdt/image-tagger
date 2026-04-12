@@ -33,6 +33,12 @@ export function TaggingJobCard({
   const progress = job.progress;
   const summary = job.summary;
 
+  // A completed batch may still have per-image errors — treat it as partial
+  // success so the card colour and status text reflect what actually happened.
+  const errorCount = summary?.errorCount ?? 0;
+  const hasPartialErrors = isCompleted && errorCount > 0;
+  const isCaptioning = summary?.providerType === 'vlm';
+
   const pct =
     progress && progress.total > 0
       ? Math.round((progress.current / progress.total) * 100)
@@ -40,11 +46,22 @@ export function TaggingJobCard({
 
   const iconColour = isRunning
     ? 'text-indigo-500'
-    : isCompleted
-      ? 'text-green-500'
-      : isFailed
-        ? 'text-red-500'
-        : 'text-slate-400';
+    : hasPartialErrors
+      ? 'text-amber-500'
+      : isCompleted
+        ? 'text-green-500'
+        : isFailed
+          ? 'text-red-500'
+          : 'text-slate-400';
+
+  // Build the completion line. For VLM captioning there's no "tag count", so
+  // we say "Captioned N images"; for tagging we keep the historic wording.
+  const successBody =
+    isCompleted && summary
+      ? isCaptioning
+        ? `Captioned ${summary.imagesWithNewTags} image${summary.imagesWithNewTags !== 1 ? 's' : ''}`
+        : `${summary.totalTagsFound} tag${summary.totalTagsFound !== 1 ? 's' : ''} across ${summary.imagesWithNewTags} image${summary.imagesWithNewTags !== 1 ? 's' : ''}`
+      : 'Done';
 
   const statusLabel = isRunning
     ? progress?.currentFileId || 'Processing...'
@@ -52,9 +69,11 @@ export function TaggingJobCard({
       ? 'Cancelled'
       : isFailed
         ? 'Failed'
-        : isCompleted && summary
-          ? `${summary.totalTagsFound} tag${summary.totalTagsFound !== 1 ? 's' : ''} across ${summary.imagesWithNewTags} image${summary.imagesWithNewTags !== 1 ? 's' : ''}`
-          : 'Done';
+        : hasPartialErrors
+          ? `${successBody} (${errorCount} failed)`
+          : isCompleted
+            ? successBody
+            : 'Done';
 
   return (
     <div className="border-b border-(--border-subtle) px-3 py-2.5 last:border-b-0">
@@ -89,7 +108,13 @@ export function TaggingJobCard({
           max={isCompleted ? 1 : (progress?.total ?? 1)}
           size="xs"
           color={
-            isCompleted ? 'green' : isFailed || isCancelled ? 'amber' : 'indigo'
+            hasPartialErrors
+              ? 'amber'
+              : isCompleted
+                ? 'green'
+                : isFailed || isCancelled
+                  ? 'amber'
+                  : 'indigo'
           }
           indeterminate={isRunning && !progress}
           className="mb-1"

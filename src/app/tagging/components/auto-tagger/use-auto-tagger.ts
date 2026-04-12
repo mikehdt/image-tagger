@@ -41,7 +41,12 @@ import {
   selectActiveTaggingJob,
   updateTaggingProgress,
 } from '@/app/store/jobs';
-import { selectProjectInfo } from '@/app/store/project';
+import { selectKeepTaggerModelInMemory } from '@/app/store/preferences';
+import {
+  selectCaptionMode,
+  selectProjectInfo,
+  selectTriggerPhrases,
+} from '@/app/store/project';
 import { setAssetsSelectionState } from '@/app/store/selection';
 import {
   getAutoTaggerSettings,
@@ -71,9 +76,25 @@ export function useAutoTagger({
   const readyModels = useSelector(selectReadyModels);
   const hasReadyModel = useSelector(selectHasReadyModel);
   const selectedModelId = useSelector(selectSelectedModelId);
+  const captionMode = useSelector(selectCaptionMode);
+  const triggerPhrases = useSelector(selectTriggerPhrases);
+  const keepModelInMemory = useSelector(selectKeepTaggerModelInMemory);
   const projectInfo = useSelector((state: RootState) =>
     selectProjectInfo(state),
   );
+
+  // Only show models compatible with the project's current mode:
+  // - caption mode → VLM models (natural-language captioners)
+  // - tag mode → ONNX models (booru-style taggers)
+  // Mixing the two creates a footgun where captions land on invisible
+  // fields or tags overwrite captions on save, so we gate at selection.
+  const modeFilteredReadyModels = useMemo(() => {
+    const targetProviderType: 'onnx' | 'vlm' =
+      captionMode === 'caption' ? 'vlm' : 'onnx';
+    return readyModels.filter(
+      (m) => getProviderTypeForModel(m.id) === targetProviderType,
+    );
+  }, [readyModels, captionMode]);
 
   // Active tagging job for this project (from the jobs slice)
   const activeTaggingJob = useSelector(
@@ -173,6 +194,8 @@ export function useAutoTagger({
               prompt: savedSettings.prompt ?? prev.prompt,
               maxTokens: savedSettings.maxTokens ?? prev.maxTokens,
               temperature: savedSettings.temperature ?? prev.temperature,
+              injectTriggerPhrases:
+                savedSettings.injectTriggerPhrases ?? prev.injectTriggerPhrases,
             }));
 
             if (
@@ -195,15 +218,32 @@ export function useAutoTagger({
     dispatch,
   ]);
 
-  // Model dropdown items
+  // Model dropdown items — mode-restricted so only compatible models appear.
   const modelItems: DropdownItem<string>[] = useMemo(
     () =>
-      readyModels.map((model) => ({
+      modeFilteredReadyModels.map((model) => ({
         value: model.id,
         label: model.name,
       })),
-    [readyModels],
+    [modeFilteredReadyModels],
   );
+
+  // Whether there's *any* ready model that fits the current project mode.
+  // Drives the "No models installed" warning in the modal.
+  const hasModelForMode = modeFilteredReadyModels.length > 0;
+
+  // If the persisted default model doesn't match the current mode (e.g. user
+  // was in tag mode and picked Qwen3-VL, then switched to caption mode), fall
+  // back to the first compatible model so the dropdown isn't empty-selected.
+  useEffect(() => {
+    if (!isOpen || modeFilteredReadyModels.length === 0) return;
+    const current = selectedModelId
+      ? modeFilteredReadyModels.find((m) => m.id === selectedModelId)
+      : undefined;
+    if (!current) {
+      dispatch(setSelectedModel(modeFilteredReadyModels[0].id));
+    }
+  }, [isOpen, modeFilteredReadyModels, selectedModelId, dispatch]);
 
   const handleModelChange = useCallback(
     (modelId: string) => {
@@ -253,8 +293,16 @@ export function useAutoTagger({
    */
   const flushAndFinalise = useCallback(
     (projectFolderName: string, jobId: string, cancelled: boolean) => {
-      // Compute summary from localStorage before flushing clears it
-      const summaryData = summarisePendingResults(projectFolderName);
+      // Compute summary from localStorage before flushing clears it.
+      // Enrich with errorCount + providerType so the activity-panel card can
+      // distinguish "partial success" from "fully successful" and choose
+      // captioning vs tagging wording.
+      const baseSummary = summarisePendingResults(projectFolderName);
+      const summaryData = {
+        ...baseSummary,
+        errorCount: imageErrorsRef.current.length,
+        providerType: selectedProviderType,
+      };
       setSummary(summaryData);
       // Publish the errors we've accumulated for the summary view
       setImageErrors([...imageErrorsRef.current]);
@@ -283,7 +331,7 @@ export function useAutoTagger({
         );
       }
     },
-    [dispatch, unselectOnComplete, selectedAssets],
+    [dispatch, unselectOnComplete, selectedAssets, selectedProviderType],
   );
 
   const handleStartTagging = useCallback(async () => {
@@ -348,6 +396,7 @@ export function useAutoTagger({
           assets: selectedAssets,
           options,
           vlmOptions,
+          triggerPhrases,
         }),
         signal: abortController.signal,
       });
@@ -452,6 +501,7 @@ export function useAutoTagger({
                   prompt: vlmOptions.prompt,
                   maxTokens: vlmOptions.maxTokens,
                   temperature: vlmOptions.temperature,
+                  injectTriggerPhrases: vlmOptions.injectTriggerPhrases,
                 };
                 saveAutoTaggerSettings(projectFolderName, settingsToSave).catch(
                   console.error,
@@ -507,6 +557,15 @@ export function useAutoTagger({
     } finally {
       removeTaggingController(jobId);
       currentJobIdRef.current = null;
+
+      // Auto-release the model from GPU/CPU memory if the preference says to.
+      // Best-effort fire-and-forget — an unload failure shouldn't surface as
+      // a user-visible error, and the next batch reloads automatically.
+      if (!keepModelInMemory) {
+        fetch('/api/auto-tagger/unload', { method: 'POST' }).catch(() => {
+          /* best-effort */
+        });
+      }
     }
   }, [
     selectedModelId,
@@ -517,7 +576,9 @@ export function useAutoTagger({
     readyModels,
     options,
     vlmOptions,
+    triggerPhrases,
     flushAndFinalise,
+    keepModelInMemory,
     dispatch,
   ]);
 
@@ -532,11 +593,16 @@ export function useAutoTagger({
     error,
     imageErrors,
     wasCancelled,
+    // True when any model at all is installed — kept for the outer modal gate.
     hasReadyModel,
+    // True when at least one *compatible* model exists for the current project
+    // mode. Drives the "No models installed" warning inside the modal.
+    hasModelForMode,
     modelItems,
     selectedModelId,
     selectedProviderType,
     insertModeOptions: INSERT_MODE_OPTIONS,
+    triggerPhrases,
     // Actions
     handleModelChange,
     handleOptionChange,

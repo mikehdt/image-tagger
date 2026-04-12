@@ -16,6 +16,7 @@ const defaults: PreferencesState = {
   theme: 'auto',
   tagEditMode: TagEditMode.BUTTON,
   trainingViewMode: 'intermediate',
+  keepTaggerModelInMemory: true,
 };
 
 /** Read preferences from localStorage, migrating the legacy theme key if present. */
@@ -37,6 +38,10 @@ export const loadPreferences = (): PreferencesState => {
         trainingViewMode: VALID_VIEW_MODES.includes(parsed.trainingViewMode)
           ? (parsed.trainingViewMode as TrainingViewMode)
           : defaults.trainingViewMode,
+        keepTaggerModelInMemory:
+          typeof parsed.keepTaggerModelInMemory === 'boolean'
+            ? parsed.keepTaggerModelInMemory
+            : defaults.keepTaggerModelInMemory,
       };
     }
 

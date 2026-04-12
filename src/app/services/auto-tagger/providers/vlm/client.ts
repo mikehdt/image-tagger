@@ -23,12 +23,17 @@ type LoadingStatus = {
   total: number;
 };
 
-type BatchStatus =
-  | 'loading'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+/**
+ * Emitted once when the sidecar transitions from "loading" to "running"
+ * after a successful model load. The route translates this into a
+ * progress event with current=0 so the UI clears its loading overlay
+ * before the first image finishes captioning.
+ */
+type LoadingCompleteStatus = {
+  loadingComplete: true;
+};
+
+type BatchStatus = 'loading' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 /** Shape as sent by the Python sidecar (snake_case fields from Pydantic). */
 type RawBatchProgressEvent = {
@@ -145,7 +150,10 @@ export async function* captionBatchViaSidecar(
   options: VlmOptions,
   batchId: string,
 ): AsyncGenerator<
-  CaptionResult | { error: string; imagePath?: string } | LoadingStatus
+  | CaptionResult
+  | { error: string; imagePath?: string }
+  | LoadingStatus
+  | LoadingCompleteStatus
 > {
   const sidecar = await ensureSidecar();
   if (sidecar.status !== 'ready') {
@@ -288,6 +296,19 @@ export async function* captionBatchViaSidecar(
           current: event.current,
           total: event.total,
         };
+        continue;
+      }
+
+      // "Running" transition with no image payload: sent by the sidecar
+      // immediately after model load completes, before the first image is
+      // captioned. Signals the UI to drop its loading overlay.
+      if (
+        event.status === 'running' &&
+        !event.imagePath &&
+        !event.caption &&
+        !event.error
+      ) {
+        yield { loadingComplete: true };
         continue;
       }
 

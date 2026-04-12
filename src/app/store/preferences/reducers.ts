@@ -28,4 +28,11 @@ export const coreReducers = {
   ) => {
     state.trainingViewMode = payload;
   },
+
+  setKeepTaggerModelInMemory: (
+    state: PreferencesState,
+    { payload }: PayloadAction<boolean>,
+  ) => {
+    state.keepTaggerModelInMemory = payload;
+  },
 };

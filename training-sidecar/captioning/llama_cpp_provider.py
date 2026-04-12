@@ -175,6 +175,31 @@ class LlamaCppCaptioningProvider(CaptioningProvider):
 
         return "".join(pieces).strip()
 
+    async def _ensure_loaded(
+        self,
+        model_path: str,
+        on_load_progress: Optional[LoadProgressCallback],
+    ) -> None:
+        """Blocking load, idempotent. Emits a single status message around it."""
+        if self._llm is not None and self._loaded_model_path == model_path:
+            return
+        if on_load_progress is not None:
+            on_load_progress("Loading GGUF into RAM", 0, 0)
+        await asyncio.get_event_loop().run_in_executor(
+            None, self._load_model, model_path
+        )
+        if on_load_progress is not None:
+            on_load_progress("Model loaded", 1, 1)
+
+    async def prepare(
+        self,
+        model_path: str,
+        on_load_progress: Optional[LoadProgressCallback] = None,
+    ) -> None:
+        """Pre-load the GGUF so the first caption isn't gated on a cold load."""
+        async with self._lock:
+            await self._ensure_loaded(model_path, on_load_progress)
+
     async def caption_image(
         self,
         image_path: str,
@@ -186,17 +211,9 @@ class LlamaCppCaptioningProvider(CaptioningProvider):
         on_load_progress: Optional[LoadProgressCallback] = None,
     ) -> str:
         async with self._lock:
-            # Load on first call or when model changes. llama-cpp doesn't
-            # expose per-step loading progress, so we just emit one rough
-            # status update around the blocking call.
-            if self._llm is None or self._loaded_model_path != model_path:
-                if on_load_progress is not None:
-                    on_load_progress("Loading GGUF into RAM", 0, 0)
-                await asyncio.get_event_loop().run_in_executor(
-                    None, self._load_model, model_path
-                )
-                if on_load_progress is not None:
-                    on_load_progress("Model loaded", 1, 1)
+            # Normally the batch manager calls `prepare` first, but we also
+            # keep a lazy-load path so single-image callers still work.
+            await self._ensure_loaded(model_path, on_load_progress)
 
             # Run inference in a thread so we don't block the event loop.
             # This lets WebSocket progress broadcasts flow during generation.

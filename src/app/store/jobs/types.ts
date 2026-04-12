@@ -86,6 +86,13 @@ export type TaggingSummary = {
   imagesProcessed: number;
   imagesWithNewTags: number;
   totalTagsFound: number;
+  /** Number of per-image errors hit during the batch (skipped images). */
+  errorCount?: number;
+  /**
+   * Which kind of tagger ran — determines whether the activity-panel card
+   * says "captioned" or "tagged" and whether the summary counts tags.
+   */
+  providerType?: 'onnx' | 'vlm';
 };
 
 export type TaggingJob = JobBase & {

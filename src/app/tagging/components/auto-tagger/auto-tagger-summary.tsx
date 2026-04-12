@@ -1,4 +1,5 @@
 import { Button } from '@/app/components/shared/button';
+import type { ProviderType } from '@/app/services/auto-tagger';
 import type { TaggingSummary } from '@/app/store/jobs';
 
 type ImageError = { fileId: string; error: string };
@@ -6,6 +7,7 @@ type ImageError = { fileId: string; error: string };
 type AutoTaggerSummaryProps = {
   summary: TaggingSummary;
   wasCancelled: boolean;
+  providerType?: ProviderType;
   imageErrors?: ImageError[];
   onClose: () => void;
 };
@@ -13,10 +15,17 @@ type AutoTaggerSummaryProps = {
 export function AutoTaggerSummary({
   summary,
   wasCancelled,
+  providerType,
   imageErrors = [],
   onClose,
 }: AutoTaggerSummaryProps) {
   const hasErrors = imageErrors.length > 0;
+  const isCaptioning = providerType === 'vlm';
+
+  const verbPast = isCaptioning ? 'Captioning' : 'Tagging';
+  const noneSuffix = isCaptioning
+    ? 'had no caption'
+    : 'had no new tags (threshold not met or already tagged)';
 
   return (
     <div className="flex flex-col gap-4">
@@ -31,22 +40,29 @@ export function AutoTaggerSummary({
       >
         <p className="font-medium">
           {wasCancelled
-            ? 'Tagging cancelled'
+            ? `${verbPast} cancelled`
             : hasErrors && summary.imagesWithNewTags === 0
-              ? 'Tagging failed'
-              : 'Tagging complete!'}
+              ? `${verbPast} failed`
+              : `${verbPast} complete!`}
         </p>
         <ul className="mt-2 space-y-1">
           <li>
             Processed {summary.imagesProcessed} image
             {summary.imagesProcessed !== 1 ? 's' : ''}
           </li>
-          <li>
-            Found {summary.totalTagsFound} tag
-            {summary.totalTagsFound !== 1 ? 's' : ''} across{' '}
-            {summary.imagesWithNewTags} image
-            {summary.imagesWithNewTags !== 1 ? 's' : ''}
-          </li>
+          {isCaptioning ? (
+            <li>
+              Captioned {summary.imagesWithNewTags} image
+              {summary.imagesWithNewTags !== 1 ? 's' : ''}
+            </li>
+          ) : (
+            <li>
+              Found {summary.totalTagsFound} tag
+              {summary.totalTagsFound !== 1 ? 's' : ''} across{' '}
+              {summary.imagesWithNewTags} image
+              {summary.imagesWithNewTags !== 1 ? 's' : ''}
+            </li>
+          )}
           {summary.imagesProcessed > summary.imagesWithNewTags &&
             imageErrors.length === 0 && (
               <li className={wasCancelled ? 'text-amber-600' : 'text-teal-600'}>
@@ -54,7 +70,7 @@ export function AutoTaggerSummary({
                 {summary.imagesProcessed - summary.imagesWithNewTags !== 1
                   ? 's'
                   : ''}{' '}
-                had no new tags (threshold not met or already tagged)
+                {noneSuffix}
               </li>
             )}
         </ul>

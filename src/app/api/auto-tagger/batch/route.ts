@@ -52,6 +52,11 @@ type BatchTagRequest = {
   options?: Partial<TaggerOptions>;
   /** VLM (NL captioner) options — prompt, temperature, max tokens */
   vlmOptions?: Partial<VlmOptions>;
+  /**
+   * Project trigger phrases — injected into the VLM prompt when
+   * `vlmOptions.injectTriggerPhrases` is true. Ignored by ONNX batches.
+   */
+  triggerPhrases?: string[];
 };
 
 type BatchProgressEvent = {
@@ -77,6 +82,7 @@ export async function POST(request: NextRequest) {
       assets,
       options: userOptions,
       vlmOptions: userVlmOptions,
+      triggerPhrases = [],
     } = body;
 
     // Resolve to absolute path
@@ -157,6 +163,30 @@ export async function POST(request: NextRequest) {
       ...DEFAULT_VLM_OPTIONS,
       ...userVlmOptions,
     };
+
+    // If the user wants trigger phrases injected, append a must-include
+    // instruction to the end of the prompt. Done here rather than in the
+    // sidecar so the sidecar stays agnostic about project-level concepts.
+    // Trailing position matters: VLMs weight the last line of the prompt
+    // more heavily than earlier context when deciding what to produce.
+    //
+    // We use ` | ` as a separator (with surrounding spaces) rather than
+    // commas, because trigger phrases can be multi-word or even full
+    // sentences with punctuation inside — commas would be ambiguous, and
+    // the pipe is rare enough in natural prose to act as a clean delimiter.
+    if (
+      vlmOptions.injectTriggerPhrases &&
+      triggerPhrases.length > 0 &&
+      getProviderTypeForModel(modelId) === 'vlm'
+    ) {
+      const phraseList = triggerPhrases
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
+        .join(' | ');
+      if (phraseList.length > 0) {
+        vlmOptions.prompt = `${vlmOptions.prompt.trimEnd()}\n\nYou must reproduce each of the following phrases verbatim — word for word, including any punctuation — at least once in the caption. Phrases are separated by a pipe character (|):\n${phraseList}`;
+      }
+    }
 
     // Create SSE stream
     const encoder = new TextEncoder();
@@ -305,6 +335,21 @@ export async function POST(request: NextRequest) {
               message: event.message,
               current: event.current,
               total: event.total,
+            });
+            continue;
+          }
+
+          // Load complete — emit a progress event at 0/total (with no
+          // `loading` sub-state) so the client clears the loading overlay
+          // and switches to the "Captioning 1 of N" view before the first
+          // image finishes. Without this, the UI would sit on the last
+          // loading tick for the full duration of the first inference.
+          if ('loadingComplete' in event) {
+            sendEvent({
+              type: 'progress',
+              current: 0,
+              total,
+              fileId: assets[0]?.fileId,
             });
             continue;
           }

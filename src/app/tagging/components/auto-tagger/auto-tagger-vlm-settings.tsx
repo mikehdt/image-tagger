@@ -14,6 +14,7 @@ type AutoTaggerVlmSettingsProps = {
   modelItems: DropdownItem<string>[];
   selectedAssetsCount: number;
   error: string | null;
+  triggerPhrases: string[];
   onModelChange: (modelId: string) => void;
   onVlmOptionChange: <K extends keyof VlmOptions>(
     key: K,
@@ -31,12 +32,14 @@ export function AutoTaggerVlmSettings({
   modelItems,
   selectedAssetsCount,
   error,
+  triggerPhrases,
   onModelChange,
   onVlmOptionChange,
   onUnselectOnCompleteChange,
   onClose,
   onStartTagging,
 }: AutoTaggerVlmSettingsProps) {
+  const hasTriggerPhrases = triggerPhrases.length > 0;
   return (
     <>
       <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -118,6 +121,28 @@ export function AutoTaggerVlmSettings({
           />
         </div>
       </div>
+
+      {/* Trigger phrase injection — only offered when the project actually
+          defines trigger phrases, otherwise the toggle does nothing. */}
+      {hasTriggerPhrases && (
+        <div className="flex flex-col gap-1">
+          <Checkbox
+            isSelected={vlmOptions.injectTriggerPhrases}
+            onChange={() =>
+              onVlmOptionChange(
+                'injectTriggerPhrases',
+                !vlmOptions.injectTriggerPhrases,
+              )
+            }
+            label={`Require project trigger phrases (${triggerPhrases.length})`}
+          />
+          <p className="ml-7 text-xs text-slate-500">
+            Appends an instruction telling the model to reproduce each trigger
+            phrase verbatim in the caption. Useful for LoRA training where every
+            caption needs the activation token.
+          </p>
+        </div>
+      )}
 
       {/* Post-captioning options */}
       <div className="mt-2">

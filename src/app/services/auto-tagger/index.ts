@@ -10,6 +10,7 @@
 // Types (safe for both client and server)
 export type {
   AutoTaggerSettings,
+  ProviderType,
   TaggerOptions,
   TagInsertMode,
   TagResult,

@@ -31,7 +31,10 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import re
+import sys
 import threading
+import time
 from pathlib import Path
 from typing import Any, Iterator, Optional
 
@@ -43,81 +46,111 @@ from captioning.provider import (
 )
 
 
+# Match tqdm's rendered progress line, e.g.
+#   "Loading checkpoint shards:  50%|#####     | 1/2 [00:01<00:01,  1.76s/it]"
+# Captures: description, current, total. We don't parse the percent because
+# tqdm writes partial redraws with \r and we'd rather key on the step counter.
+_TQDM_LINE_RE = re.compile(
+    r"(?P<desc>[^\r\n:]+?):\s*\d+%\|[^|]*\|\s*(?P<cur>\d+)/(?P<tot>\d+)"
+)
+
+
+class _TqdmStderrHook:
+    """
+    Wraps sys.stderr so tqdm progress lines flow through a progress callback.
+
+    tqdm writes its bars to stderr with \\r carriage returns for in-place
+    updates. We pass writes through to the real stderr unchanged (so the
+    terminal still shows the live bar) and additionally scan each write for
+    a tqdm-formatted progress line — when we find one we fire our callback.
+
+    This is version-independent: it works with whichever tqdm transformers
+    happens to use, as long as the output format matches the regex. If the
+    regex ever stops matching we just stop sending per-shard updates — the
+    load itself still succeeds, and the pre/post messages around it still
+    fire to keep the UI alive.
+    """
+
+    def __init__(
+        self,
+        original: Any,
+        on_load_progress: LoadProgressCallback,
+    ) -> None:
+        self._original = original
+        self._callback = on_load_progress
+        self._last_key: Optional[tuple[str, int, int]] = None
+        self._last_time = 0.0
+
+    def write(self, data: Any) -> int:
+        try:
+            written = self._original.write(data)
+        except Exception:
+            written = 0
+
+        if not isinstance(data, str):
+            return written
+
+        # tqdm flushes the same line multiple times with \r. Split on both
+        # \r and \n so we see the latest state rather than the accumulated one.
+        for chunk in re.split(r"[\r\n]", data):
+            if not chunk:
+                continue
+            match = _TQDM_LINE_RE.search(chunk)
+            if not match:
+                continue
+            desc = match.group("desc").strip() or "Loading model"
+            current = int(match.group("cur"))
+            total = int(match.group("tot"))
+            key = (desc, current, total)
+            if key == self._last_key:
+                continue
+            # Rate-limit broadcasts so rapid tqdm updates don't flood the
+            # WebSocket. One update per 100ms is plenty for a ~2s shard load.
+            now = time.monotonic()
+            if now - self._last_time < 0.1 and current != total:
+                continue
+            self._last_key = key
+            self._last_time = now
+            try:
+                self._callback(desc, current, total)
+            except Exception:
+                # Never let a broken callback break the load.
+                pass
+
+        return written
+
+    def flush(self) -> None:
+        try:
+            self._original.flush()
+        except Exception:
+            pass
+
+    def __getattr__(self, name: str) -> Any:
+        # Forward anything else (isatty, fileno, encoding, ...) to the
+        # underlying stream so libraries that probe stderr still work.
+        return getattr(self._original, name)
+
+
 @contextlib.contextmanager
 def _broadcast_tqdm(
     on_load_progress: Optional[LoadProgressCallback],
 ) -> Iterator[None]:
     """
-    Replace the tqdm class that transformers uses during model loading so
-    each progress step fires our callback. The underlying tqdm is only
-    ever called from a handful of places inside `from_pretrained`; the
-    one we care about is the `Loading checkpoint shards` bar in
-    `modeling_utils._load_state_dict_into_meta_model`.
-
-    We patch two modules:
-    - `transformers.utils.logging`: re-exports tqdm as `tqdm_lib.tqdm`
-    - `huggingface_hub.utils.tqdm`: where transformers imports its tqdm from
-
-    If transformers changes where it sources tqdm in a future release, the
-    bar silently stops updating but loading still works — acceptable
-    degradation.
+    During the blocking `from_pretrained` call, wrap sys.stderr so tqdm
+    progress lines get forwarded to `on_load_progress`. No monkey-patching
+    of transformers or huggingface_hub internals — we just observe the
+    bytes tqdm writes.
     """
     if on_load_progress is None:
         yield
         return
 
-    # Import lazily so the patching logic only touches transformers at
-    # load time — avoids importing half the library when captioning is mocked.
-    try:
-        import huggingface_hub.utils.tqdm as hf_tqdm_mod
-        import transformers.utils.logging as tlog
-    except ImportError:
-        yield
-        return
-
-    original_tqdm = hf_tqdm_mod.tqdm
-
-    class BroadcastTqdm(original_tqdm):  # type: ignore[misc,valid-type]
-        """Subclass that forwards each update() tick to our callback."""
-
-        def update(self, n: int = 1) -> bool | None:  # type: ignore[override]
-            result = super().update(n)
-            try:
-                desc = str(self.desc) if self.desc else "Loading model"
-                current = int(self.n or 0)
-                total = int(self.total or 0)
-                on_load_progress(desc, current, total)
-            except Exception:
-                # Never let a broken callback blow up the model load.
-                pass
-            return result
-
-        def close(self) -> None:  # type: ignore[override]
-            # Flush a final 100% tick so the UI doesn't stick at the
-            # last intermediate value when total is known.
-            try:
-                if self.total:
-                    desc = str(self.desc) if self.desc else "Loading model"
-                    on_load_progress(desc, int(self.total), int(self.total))
-            except Exception:
-                pass
-            super().close()
-
-    hf_tqdm_mod.tqdm = BroadcastTqdm  # type: ignore[assignment]
-    # transformers.utils.logging re-exports the hub tqdm as `tqdm_lib.tqdm`
-    # at import time — we also need to swap it there.
-    original_tlog_tqdm = getattr(tlog, "tqdm_lib", None)
-    if original_tlog_tqdm is not None:
-        original_inner = getattr(original_tlog_tqdm, "tqdm", None)
-        if original_inner is not None:
-            original_tlog_tqdm.tqdm = BroadcastTqdm  # type: ignore[attr-defined]
-
+    original_stderr = sys.stderr
+    sys.stderr = _TqdmStderrHook(original_stderr, on_load_progress)  # type: ignore[assignment]
     try:
         yield
     finally:
-        hf_tqdm_mod.tqdm = original_tqdm  # type: ignore[assignment]
-        if original_tlog_tqdm is not None and original_inner is not None:
-            original_tlog_tqdm.tqdm = original_inner  # type: ignore[attr-defined]
+        sys.stderr = original_stderr
 
 
 class TransformersCaptioningProvider(CaptioningProvider):
@@ -294,6 +327,18 @@ class TransformersCaptioningProvider(CaptioningProvider):
 
         return "".join(pieces).strip()
 
+    async def prepare(
+        self,
+        model_path: str,
+        on_load_progress: Optional[LoadProgressCallback] = None,
+    ) -> None:
+        """Pre-load the model so the first caption isn't gated on a cold load."""
+        async with self._lock:
+            if self._model is None or self._loaded_model_path != model_path:
+                await asyncio.get_event_loop().run_in_executor(
+                    None, self._load_model, model_path, on_load_progress
+                )
+
     async def caption_image(
         self,
         image_path: str,
@@ -305,7 +350,8 @@ class TransformersCaptioningProvider(CaptioningProvider):
         on_load_progress: Optional[LoadProgressCallback] = None,
     ) -> str:
         async with self._lock:
-            # Load on first call or when model changes
+            # Normally the batch manager calls `prepare` first, but we also
+            # keep a lazy-load path so single-image callers still work.
             if self._model is None or self._loaded_model_path != model_path:
                 await asyncio.get_event_loop().run_in_executor(
                     None, self._load_model, model_path, on_load_progress
