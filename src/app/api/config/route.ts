@@ -8,6 +8,7 @@ interface AppConfig {
   projectsFolder?: string;
   infoFolder?: string;
   modelsFolder?: string;
+  hfToken?: string;
 }
 
 function getConfigPath() {
@@ -20,17 +21,29 @@ function readConfig(): Record<string, unknown> {
   return JSON.parse(fs.readFileSync(configPath, 'utf8'));
 }
 
+/** Mask a token for client display — keep first 4 / last 4, redact the middle. */
+function maskToken(token: string): string {
+  if (token.length <= 10) return '••••••••';
+  return `${token.slice(0, 4)}…${token.slice(-4)}`;
+}
+
 export async function GET() {
   try {
     const config = readConfig() as AppConfig;
-    return NextResponse.json(config);
+    // Never send the raw HF token to the client — only a masked preview.
+    const { hfToken, ...rest } = config;
+    return NextResponse.json({
+      ...rest,
+      hfTokenMasked: hfToken ? maskToken(hfToken) : null,
+      hasHfToken: !!hfToken,
+    });
   } catch (error) {
     console.warn('Failed to load config.json:', error);
     return NextResponse.json({}, { status: 500 });
   }
 }
 
-/** POST — update top-level config fields (currently only projectsFolder). */
+/** POST — update top-level config fields. */
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<AppConfig>;
@@ -57,8 +70,25 @@ export async function POST(request: Request) {
       config.projectsFolder = folder;
     }
 
+    if (body.hfToken !== undefined) {
+      const trimmed = body.hfToken.trim();
+      // Empty string clears the token
+      if (trimmed === '') {
+        delete config.hfToken;
+      } else {
+        config.hfToken = trimmed;
+      }
+    }
+
     fs.writeFileSync(getConfigPath(), JSON.stringify(config, null, 2), 'utf8');
-    return NextResponse.json(config);
+
+    // Mirror the GET response shape so the client can update its view
+    const { hfToken, ...rest } = config as AppConfig;
+    return NextResponse.json({
+      ...rest,
+      hfTokenMasked: hfToken ? maskToken(hfToken) : null,
+      hasHfToken: !!hfToken,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: message }, { status: 500 });

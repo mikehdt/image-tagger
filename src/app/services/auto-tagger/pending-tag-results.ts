@@ -11,8 +11,11 @@ const STORAGE_PREFIX = 'img-tagger:pending-tags:';
 
 export type PendingTagResult = {
   fileId: string;
-  tags: string[];
   position: 'start' | 'end';
+  /** ONNX tagger result — tag names to append/prepend */
+  tags?: string[];
+  /** VLM captioner result — natural-language caption text */
+  caption?: string;
 };
 
 /** Append a single result for a project. Called per-image during the SSE stream. */
@@ -74,6 +77,7 @@ export function hasPendingTagResults(projectFolderName: string): boolean {
 /**
  * Compute a summary from the pending results (before flushing).
  * Used to populate the job's summary when tagging completes.
+ * Counts both ONNX tag results and VLM caption results.
  */
 export function summarisePendingResults(projectFolderName: string): {
   imagesProcessed: number;
@@ -83,7 +87,12 @@ export function summarisePendingResults(projectFolderName: string): {
   const results = getPendingTagResults(projectFolderName);
   return {
     imagesProcessed: results.length,
-    imagesWithNewTags: results.filter((r) => r.tags.length > 0).length,
-    totalTagsFound: results.reduce((sum, r) => sum + r.tags.length, 0),
+    imagesWithNewTags: results.filter(
+      (r) => (r.tags && r.tags.length > 0) || (r.caption && r.caption.length > 0),
+    ).length,
+    totalTagsFound: results.reduce(
+      (sum, r) => sum + (r.tags?.length ?? 0) + (r.caption ? 1 : 0),
+      0,
+    ),
   };
 }

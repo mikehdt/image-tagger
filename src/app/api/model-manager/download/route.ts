@@ -10,6 +10,7 @@ import { NextRequest } from 'next/server';
 import path from 'path';
 
 import { getModel } from '@/app/services/auto-tagger';
+import { getHfToken } from '@/app/services/config/server-config';
 import { downloadModelFiles } from '@/app/services/model-manager/download-engine';
 import { taggerModelToDownloadable } from '@/app/services/model-manager/registries/auto-tagger-models';
 import { getTrainingDownloadable } from '@/app/services/model-manager/registries/training-models';
@@ -107,6 +108,7 @@ export async function POST(request: NextRequest) {
             repoId: downloadable.repoId,
             files: downloadable.files,
             targetDir: resolvedTargetDir,
+            hfToken: getHfToken(),
           })) {
             const data = JSON.stringify(progress);
             controller.enqueue(encoder.encode(`data: ${data}\n\n`));

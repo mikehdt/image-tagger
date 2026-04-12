@@ -75,3 +75,56 @@ class StartJobResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: str
+
+
+# ---------------------------------------------------------------------------
+# Captioning (VLM) models
+# ---------------------------------------------------------------------------
+
+
+class CaptionRequest(BaseModel):
+    """Single image caption request."""
+
+    image_path: str
+    model_path: str
+    prompt: str = "Describe this image in detail for AI training purposes."
+    max_tokens: int = 512
+    temperature: float = 0.7
+
+
+class CaptionResponse(BaseModel):
+    """Single image caption response."""
+
+    image_path: str
+    caption: str
+
+
+class CaptionBatchRequest(BaseModel):
+    """Batch captioning request — streams progress via WebSocket."""
+
+    batch_id: str
+    image_paths: list[str]
+    model_path: str
+    prompt: str = "Describe this image in detail for AI training purposes."
+    max_tokens: int = 512
+    temperature: float = 0.7
+
+
+class CaptionBatchProgress(BaseModel):
+    """Progress update for a batch caption run. Broadcast via /ws/caption."""
+
+    batch_id: str
+    current: int
+    total: int
+    image_path: Optional[str] = None
+    caption: Optional[str] = None
+    status: str = "running"  # running, completed, failed, cancelled
+    error: Optional[str] = None
+
+
+class CaptionBatchResponse(BaseModel):
+    """Response for starting a batch caption run."""
+
+    batch_id: str
+    status: str = "started"
+    total: int

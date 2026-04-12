@@ -69,11 +69,11 @@ export function TrainingJobCard({ job }: { job: TrainingJob }) {
       {schedulerCurve && isRunning && (
         <div className="border-t border-dashed border-(--border-subtle) px-3 py-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-400 uppercase">
+            <span className="text-xs text-slate-400 uppercase">
               LR Schedule
             </span>
             {progress?.learningRate != null && (
-              <span className="text-[10px] text-slate-400 tabular-nums">
+              <span className="text-xs text-slate-400 tabular-nums">
                 LR {progress.learningRate}
               </span>
             )}

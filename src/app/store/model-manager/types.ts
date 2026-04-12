@@ -27,5 +27,5 @@ export type ModelManagerState = {
   isModalOpen: boolean;
 
   /** Which tab to show when the modal opens */
-  modalInitialTab?: 'auto-tagger' | 'training';
+  modalInitialTab?: 'auto-tagger' | 'training' | 'settings';
 };

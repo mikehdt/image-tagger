@@ -8,9 +8,8 @@ import { VLM_MODELS } from './models';
 
 export const vlmProvider: TaggerProvider = {
   id: 'vlm',
-  name: 'NL Captioner',
-  description:
-    'Vision-language models for natural-language captions. Runs via the Python sidecar using GGUF quants.',
+  name: 'Natural Language Captioning',
+  description: 'Vision-language models for natural-language captions.',
   providerType: 'vlm',
   models: VLM_MODELS,
 };

@@ -8,9 +8,9 @@ import { WD14_MODELS } from './models';
 
 export const wd14Provider: TaggerProvider = {
   id: 'wd14',
-  name: 'Booru Tagger',
+  name: 'Concept Tagging',
   description:
-    'Booru-style tag classification models (WD v3). Produces structured tags for anime/illustration training.',
+    'Imageboard-style tag classification. Produces structured tags for anime/illustration training.',
   providerType: 'onnx',
   models: WD14_MODELS,
 };

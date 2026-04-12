@@ -27,10 +27,15 @@ export async function* downloadModelFiles(
     repoId: string;
     files: ModelFile[];
     targetDir: string;
+    /** Optional HuggingFace API token for gated repos. */
+    hfToken?: string | null;
   },
   signal?: AbortSignal,
 ): AsyncGenerator<DownloadProgress> {
-  const { modelId, downloadId, repoId, files, targetDir } = opts;
+  const { modelId, downloadId, repoId, files, targetDir, hfToken } = opts;
+  const authHeaders: Record<string, string> = hfToken
+    ? { Authorization: `Bearer ${hfToken}` }
+    : {};
 
   fs.mkdirSync(targetDir, { recursive: true });
 
@@ -74,9 +79,15 @@ export async function* downloadModelFiles(
     };
 
     try {
-      const response = await fetch(url, { signal });
+      const response = await fetch(url, { signal, headers: authHeaders });
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          const hint = hfToken
+            ? `Access denied (${response.status}). This repo is gated — accept the license at https://huggingface.co/${repoId}`
+            : `Access denied (${response.status}). This repo may be gated. Set a HuggingFace token in Model Manager → Settings, and accept the license at https://huggingface.co/${repoId}`;
+          throw new Error(hint);
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 

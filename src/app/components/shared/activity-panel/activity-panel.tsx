@@ -150,7 +150,7 @@ const ActivityPanelComponent = () => {
           className={`h-4.5 w-4.5 ${hasActive ? 'text-sky-500' : 'text-(--foreground)/50'}`}
         />
         {hasActive && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-bold text-white">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-xs font-bold text-white">
             {activeCount}
           </span>
         )}
@@ -168,7 +168,7 @@ const ActivityPanelComponent = () => {
         <span className="text-sm text-(--foreground)">
           Activity
           {hasActive && (
-            <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-bold text-white">
+            <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-xs font-bold text-white">
               {activeCount}
             </span>
           )}
@@ -233,7 +233,7 @@ const ActivityPanelComponent = () => {
           <button
             type="button"
             onClick={handleClearAll}
-            className="cursor-pointer text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="cursor-pointer text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
           >
             Clear all
           </button>

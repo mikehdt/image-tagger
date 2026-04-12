@@ -1,4 +1,6 @@
-import { ScanSearchIcon, XIcon } from 'lucide-react';
+import { ExternalLinkIcon, ScanSearchIcon, XIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import { useAppDispatch } from '@/app/store/hooks';
 import { removeJob, type TaggingJob } from '@/app/store/jobs';
@@ -14,6 +16,13 @@ export function TaggingJobCard({
   onCancel?: (job: TaggingJob) => void;
 }) {
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
+
+  // Only show the link when the user isn't already viewing this project's tagging page
+  const projectHref = `/tagging/${encodeURIComponent(job.projectFolderName)}/1`;
+  const isOnProjectPage = pathname.startsWith(
+    `/tagging/${encodeURIComponent(job.projectFolderName)}`,
+  );
 
   const isRunning = job.status === 'running' || job.status === 'preparing';
   const isCompleted = job.status === 'completed';
@@ -52,12 +61,25 @@ export function TaggingJobCard({
       {/* Header */}
       <div className="flex items-center gap-2">
         <ScanSearchIcon className={`h-3.5 w-3.5 shrink-0 ${iconColour}`} />
-        <span className="text-xs font-medium text-(--foreground)">
-          {job.modelName}
-        </span>
-        <span className="text-[10px] text-slate-400">
-          {job.projectFolderName}
-        </span>
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          {isOnProjectPage ? (
+            <span className="truncate text-xs font-medium text-(--foreground)">
+              {job.projectName}
+            </span>
+          ) : (
+            <Link
+              href={projectHref}
+              className="group flex min-w-0 items-center gap-1 truncate text-xs font-medium text-(--foreground) hover:text-sky-500"
+              title={`Open project: ${job.projectName}`}
+            >
+              <span className="truncate">{job.projectName}</span>
+              <ExternalLinkIcon className="h-2.5 w-2.5 shrink-0 text-slate-400 group-hover:text-sky-500" />
+            </Link>
+          )}
+          <span className="shrink-0 text-xs text-slate-400">
+            · {job.modelName}
+          </span>
+        </div>
       </div>
 
       {/* Progress */}
@@ -72,7 +94,7 @@ export function TaggingJobCard({
           indeterminate={isRunning && !progress}
           className="mb-1"
         />
-        <div className="flex justify-between text-[10px] text-slate-500 tabular-nums">
+        <div className="flex justify-between text-xs text-slate-500 tabular-nums">
           <span className="truncate">{statusLabel}</span>
           {isRunning && progress && (
             <span className="shrink-0 pl-2">
@@ -83,7 +105,7 @@ export function TaggingJobCard({
       </div>
 
       {isFailed && job.error && (
-        <p className="mt-1 text-[10px] text-red-500">{job.error}</p>
+        <p className="mt-1 text-xs text-red-500">{job.error}</p>
       )}
 
       {/* Actions */}

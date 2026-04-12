@@ -5,10 +5,31 @@
 
 import { vlmProvider } from './providers/vlm';
 import { wd14Provider } from './providers/wd14';
-import type { TaggerModel, TaggerProvider } from './types';
+import type { ProviderType, TaggerModel, TaggerProvider } from './types';
 
 // Register all providers here
 const providers: TaggerProvider[] = [wd14Provider, vlmProvider];
+
+/**
+ * Get the provider definition that owns a given model.
+ */
+export function getProviderForModel(
+  modelId: string,
+): TaggerProvider | undefined {
+  for (const provider of providers) {
+    if (provider.models.some((m) => m.id === modelId)) return provider;
+  }
+  return undefined;
+}
+
+/**
+ * Get the provider type (onnx | vlm) for a model.
+ */
+export function getProviderTypeForModel(
+  modelId: string,
+): ProviderType | undefined {
+  return getProviderForModel(modelId)?.providerType;
+}
 
 /**
  * Get all registered providers

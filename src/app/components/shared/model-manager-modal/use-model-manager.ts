@@ -36,9 +36,9 @@ export function useModelManager() {
   const initialTab = useAppSelector(selectModelManagerInitialTab);
   const statuses = useAppSelector(selectAllModelStatuses);
 
-  const [activeTab, setActiveTab] = useState<'auto-tagger' | 'training'>(
-    initialTab ?? 'auto-tagger',
-  );
+  const [activeTab, setActiveTab] = useState<
+    'auto-tagger' | 'training' | 'settings'
+  >(initialTab ?? 'auto-tagger');
   const [loading, setLoading] = useState(false);
 
   // Sync tab when modal opens with a specific tab

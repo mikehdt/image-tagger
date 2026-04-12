@@ -3,6 +3,7 @@
 import { Modal } from '../modal';
 import { SegmentedControl } from '../segmented-control/segmented-control';
 import { AutoTaggerTab } from './auto-tagger-tab';
+import { SettingsTab } from './settings-tab';
 import { TrainingTab } from './training-tab';
 import { useModelManager } from './use-model-manager';
 
@@ -29,8 +30,9 @@ export function ModelManagerModal() {
         {/* Tabs */}
         <SegmentedControl
           options={[
-            { value: 'auto-tagger' as const, label: 'Auto-Tagger' },
+            { value: 'auto-tagger' as const, label: 'Image Tagging' },
             { value: 'training' as const, label: 'Training' },
+            { value: 'settings' as const, label: 'Settings' },
           ]}
           value={activeTab}
           onChange={setActiveTab}
@@ -39,9 +41,8 @@ export function ModelManagerModal() {
 
         {/* Tab content */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {activeTab === 'auto-tagger' ? (
-            <AutoTaggerTab />
-          ) : (
+          {activeTab === 'auto-tagger' && <AutoTaggerTab />}
+          {activeTab === 'training' && (
             <TrainingTab
               groups={trainingModelGroups}
               sharedComponents={sharedComponents}
@@ -50,6 +51,7 @@ export function ModelManagerModal() {
               onDownload={startDownload}
             />
           )}
+          {activeTab === 'settings' && <SettingsTab />}
         </div>
       </div>
     </Modal>

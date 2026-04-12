@@ -42,7 +42,7 @@ export function checkModelStatus(model: TaggerModel): ModelStatus {
  */
 export async function* downloadModel(
   model: TaggerModel,
-  signal?: AbortSignal,
+  opts?: { hfToken?: string | null; signal?: AbortSignal },
 ): AsyncGenerator<DownloadProgress> {
   yield* downloadModelFiles(
     {
@@ -51,7 +51,8 @@ export async function* downloadModel(
       repoId: model.repoId,
       files: model.files,
       targetDir: getModelDir(model),
+      hfToken: opts?.hfToken,
     },
-    signal,
+    opts?.signal,
   );
 }

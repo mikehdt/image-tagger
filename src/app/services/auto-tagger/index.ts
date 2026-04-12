@@ -22,6 +22,8 @@ export {
   getAllProviders,
   getModel,
   getModelTotalSize,
+  getProviderForModel,
+  getProviderTypeForModel,
 } from './model-registry';
 
 // NOTE: model-manager and providers use Node.js fs module and should only

@@ -8,8 +8,13 @@ import { NextRequest } from 'next/server';
 import path from 'path';
 
 import type { TaggerOptions, TagResult } from '@/app/services/auto-tagger';
-import { DEFAULT_TAGGER_OPTIONS, getModel } from '@/app/services/auto-tagger';
+import {
+  DEFAULT_TAGGER_OPTIONS,
+  getModel,
+  getProviderTypeForModel,
+} from '@/app/services/auto-tagger';
 import { checkModelStatus } from '@/app/services/auto-tagger/model-manager';
+import { captionBatchViaSidecar } from '@/app/services/auto-tagger/providers/vlm/client';
 import { tagImageInWorker } from '@/app/services/auto-tagger/providers/wd14/worker-manager';
 
 // Server-side config reading function
@@ -43,7 +48,10 @@ type BatchProgressEvent = {
   current?: number;
   total?: number;
   fileId?: string;
+  /** ONNX tagger result — comma-separated tags for the image */
   tags?: string[];
+  /** VLM captioner result — natural-language caption for the image */
+  caption?: string;
   error?: string;
 };
 
@@ -134,6 +142,9 @@ export async function POST(request: NextRequest) {
     // Create SSE stream
     const encoder = new TextEncoder();
     const total = assets.length;
+    const providerType = getProviderTypeForModel(modelId);
+    // Capture narrowed model so nested helpers don't lose the non-null type
+    const resolvedModel = model;
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -144,70 +155,12 @@ export async function POST(request: NextRequest) {
         };
 
         try {
-          for (let i = 0; i < assets.length; i++) {
-            const asset = assets[i];
-            const imagePath = path.join(
-              projectPath,
-              `${asset.fileId}.${asset.fileExtension}`,
-            );
-
-            // Send progress update
-            sendEvent({
-              type: 'progress',
-              current: i + 1,
-              total,
-              fileId: asset.fileId,
-            });
-
-            try {
-              const output = await tagImageInWorker(model, imagePath, options);
-
-              // Combine tags based on options
-              const allTags: TagResult[] = [];
-
-              // Always include general tags
-              allTags.push(...output.general);
-
-              // Include character tags if enabled
-              if (options.includeCharacterTags) {
-                allTags.push(...output.character);
-              }
-
-              // Include rating tags if enabled
-              if (options.includeRatingTags && output.rating.length > 0) {
-                // Just include the top rating
-                allTags.push(output.rating[0]);
-              }
-
-              // Add includeTags (always-add tags) with high confidence
-              const includedTags = (options.includeTags || []).map((tag) => ({
-                tag,
-                confidence: 1.0,
-              }));
-              allTags.push(...includedTags);
-
-              // Sort by confidence descending and extract tag names
-              allTags.sort((a, b) => b.confidence - a.confidence);
-              let tagNames = allTags.map((t) => t.tag);
-
-              // Remove duplicates while preserving order
-              tagNames = [...new Set(tagNames)];
-
-              sendEvent({
-                type: 'result',
-                fileId: asset.fileId,
-                tags: tagNames,
-              });
-            } catch (err) {
-              sendEvent({
-                type: 'error',
-                fileId: asset.fileId,
-                error: err instanceof Error ? err.message : 'Unknown error',
-              });
-            }
+          if (providerType === 'vlm') {
+            await runVlmBatch(sendEvent);
+          } else {
+            await runOnnxBatch(sendEvent);
           }
 
-          // Send completion event
           sendEvent({ type: 'complete', total });
           controller.close();
         } catch (err) {
@@ -220,6 +173,115 @@ export async function POST(request: NextRequest) {
         }
       },
     });
+
+    // --- ONNX (WD14 worker) batch runner ---
+    async function runOnnxBatch(sendEvent: (event: BatchProgressEvent) => void) {
+      for (let i = 0; i < assets.length; i++) {
+        const asset = assets[i];
+        const imagePath = path.join(
+          projectPath,
+          `${asset.fileId}.${asset.fileExtension}`,
+        );
+
+        sendEvent({
+          type: 'progress',
+          current: i + 1,
+          total,
+          fileId: asset.fileId,
+        });
+
+        try {
+          const output = await tagImageInWorker(
+            resolvedModel,
+            imagePath,
+            options,
+          );
+
+          const allTags: TagResult[] = [];
+          allTags.push(...output.general);
+          if (options.includeCharacterTags) allTags.push(...output.character);
+          if (options.includeRatingTags && output.rating.length > 0) {
+            allTags.push(output.rating[0]);
+          }
+          const includedTags = (options.includeTags || []).map((tag) => ({
+            tag,
+            confidence: 1.0,
+          }));
+          allTags.push(...includedTags);
+
+          allTags.sort((a, b) => b.confidence - a.confidence);
+          let tagNames = allTags.map((t) => t.tag);
+          tagNames = [...new Set(tagNames)];
+
+          sendEvent({
+            type: 'result',
+            fileId: asset.fileId,
+            tags: tagNames,
+          });
+        } catch (err) {
+          sendEvent({
+            type: 'error',
+            fileId: asset.fileId,
+            error: err instanceof Error ? err.message : 'Unknown error',
+          });
+        }
+      }
+    }
+
+    // --- VLM (sidecar) batch runner ---
+    async function runVlmBatch(sendEvent: (event: BatchProgressEvent) => void) {
+      // Build ordered list of image paths and a lookup back to fileId
+      const imagePaths = assets.map((a) =>
+        path.join(projectPath, `${a.fileId}.${a.fileExtension}`),
+      );
+      const pathToFileId = new Map<string, string>();
+      assets.forEach((a, i) => {
+        pathToFileId.set(imagePaths[i], a.fileId);
+      });
+
+      const batchId = `batch-${Date.now()}`;
+      const prompt =
+        'Describe this image in detail for AI training purposes.';
+
+      let processed = 0;
+      const generator = captionBatchViaSidecar(
+        resolvedModel,
+        imagePaths,
+        prompt,
+        batchId,
+      );
+
+      for await (const event of generator) {
+        if ('error' in event) {
+          const fileId = event.imagePath
+            ? pathToFileId.get(event.imagePath)
+            : undefined;
+          sendEvent({
+            type: 'error',
+            fileId,
+            error: event.error,
+          });
+          continue;
+        }
+
+        const fileId = pathToFileId.get(event.imagePath);
+        if (!fileId) continue;
+
+        processed++;
+        sendEvent({
+          type: 'progress',
+          current: processed,
+          total,
+          fileId,
+        });
+
+        sendEvent({
+          type: 'result',
+          fileId,
+          caption: event.caption,
+        });
+      }
+    }
 
     return new Response(stream, {
       headers: {

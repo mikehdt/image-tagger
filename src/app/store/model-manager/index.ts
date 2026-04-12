@@ -66,7 +66,7 @@ const modelManagerSlice = createSlice({
 
     openModelManagerModal: (
       state,
-      action: PayloadAction<'auto-tagger' | 'training' | undefined>,
+      action: PayloadAction<'auto-tagger' | 'training' | 'settings' | undefined>,
     ) => {
       state.isModalOpen = true;
       state.modalInitialTab = action.payload;

@@ -75,8 +75,10 @@ export type TaggingSummary = {
 
 export type TaggingJob = JobBase & {
   type: 'tagging';
-  /** Project folder name (slug from URL) */
+  /** Project folder name (slug from URL) — used for navigation */
   projectFolderName: string;
+  /** Project display name — may differ from folder name */
+  projectName: string;
   modelName: string;
   progress: TaggingProgress | null;
   summary: TaggingSummary | null;

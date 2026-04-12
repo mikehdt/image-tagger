@@ -7,6 +7,8 @@
 
 import { NextRequest } from 'next/server';
 
+import { getHfToken } from '@/app/services/config/server-config';
+
 type HfFile = {
   rfilename: string;
   size: number;
@@ -26,10 +28,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Query HuggingFace API for repository file listing
+    const hfToken = getHfToken();
     const response = await fetch(
       `https://huggingface.co/api/models/${encodeURIComponent(repoId)}`,
       {
-        headers: { Accept: 'application/json' },
+        headers: {
+          Accept: 'application/json',
+          ...(hfToken ? { Authorization: `Bearer ${hfToken}` } : {}),
+        },
       },
     );
 

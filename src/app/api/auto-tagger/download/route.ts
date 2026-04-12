@@ -9,6 +9,7 @@ import { NextRequest } from 'next/server';
 
 import { getModel } from '@/app/services/auto-tagger';
 import { downloadModel } from '@/app/services/auto-tagger/model-manager';
+import { getHfToken } from '@/app/services/config/server-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +37,9 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const progress of downloadModel(model)) {
+          for await (const progress of downloadModel(model, {
+            hfToken: getHfToken(),
+          })) {
             const data = JSON.stringify(progress);
             controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 

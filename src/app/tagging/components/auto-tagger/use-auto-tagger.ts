@@ -283,6 +283,7 @@ export function useAutoTagger({
         completedAt: null,
         error: null,
         projectFolderName,
+        projectName: projectInfo.projectName || projectFolderName,
         modelName,
         progress: { current: 0, total: selectedAssets.length },
         summary: null,
@@ -348,10 +349,12 @@ export function useAutoTagger({
                   }),
                 );
               } else if (event.type === 'result') {
-                // Persist to localStorage — the single source of truth
+                // Persist to localStorage — the single source of truth.
+                // Event may carry either tags (ONNX) or caption (VLM).
                 appendPendingTagResult(projectFolderName, {
                   fileId: event.fileId,
-                  tags: event.tags || [],
+                  tags: event.tags,
+                  caption: event.caption,
                   position,
                 });
               } else if (event.type === 'error' && event.fileId) {
@@ -391,7 +394,8 @@ export function useAutoTagger({
           if (event.type === 'result') {
             appendPendingTagResult(projectFolderName, {
               fileId: event.fileId,
-              tags: event.tags || [],
+              tags: event.tags,
+              caption: event.caption,
               position,
             });
           } else if (event.type === 'complete') {
@@ -431,6 +435,7 @@ export function useAutoTagger({
     selectedModelId,
     projectInfo.projectPath,
     projectInfo.projectFolderName,
+    projectInfo.projectName,
     selectedAssets,
     readyModels,
     options,

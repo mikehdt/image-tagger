@@ -10,15 +10,27 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from captioning.batch_manager import CaptionBatchManager
+from captioning.provider import get_provider as get_caption_provider
+from captioning.provider import unload_provider as unload_caption_provider
 from config import SidecarConfig, load_config
 from job_manager import JobManager
-from models import HealthResponse, StartJobRequest
+from models import (
+    CaptionBatchRequest,
+    CaptionBatchResponse,
+    CaptionRequest,
+    CaptionResponse,
+    HealthResponse,
+    StartJobRequest,
+)
 from providers.ai_toolkit import AiToolkitProvider
 from ws_manager import WebSocketManager
 
 # --- Globals initialised at startup ---
 ws_manager = WebSocketManager()
+caption_ws_manager = WebSocketManager()
 job_manager: JobManager
+caption_manager: CaptionBatchManager
 sidecar_config: SidecarConfig
 
 
@@ -50,13 +62,14 @@ def _register_providers(jm: JobManager, config: SidecarConfig):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle for the FastAPI app."""
-    global job_manager, sidecar_config
+    global job_manager, caption_manager, sidecar_config
 
     sidecar_config = load_config()
     job_manager = JobManager(
         jobs_dir=sidecar_config.training_dir / "jobs",
         ws_manager=ws_manager,
     )
+    caption_manager = CaptionBatchManager(ws_manager=caption_ws_manager)
     _register_providers(job_manager, sidecar_config)
 
     # Write PID file so Node.js can find us after a restart
@@ -174,6 +187,90 @@ async def ws_progress(websocket: WebSocket):
         pass
     finally:
         ws_manager.disconnect(websocket)
+
+
+# --- Captioning (VLM) ---
+
+
+@app.post("/caption", response_model=CaptionResponse)
+async def caption_single(request: CaptionRequest):
+    """Caption a single image synchronously. Used for testing or small jobs."""
+    # GPU guard — don't run captioning while training is active
+    if job_manager.active_job_id is not None:
+        return JSONResponse(
+            {"error": "Cannot caption while training is active"},
+            status_code=409,
+        )
+
+    try:
+        provider = get_caption_provider()
+        caption = await provider.caption_image(
+            image_path=request.image_path,
+            model_path=request.model_path,
+            prompt=request.prompt,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+        )
+        return CaptionResponse(image_path=request.image_path, caption=caption)
+    except Exception as err:
+        return JSONResponse({"error": str(err)}, status_code=500)
+
+
+@app.post("/caption/batch", response_model=CaptionBatchResponse)
+async def caption_batch(request: CaptionBatchRequest):
+    """Start a batch caption run — progress streams via /ws/caption."""
+    if job_manager.active_job_id is not None:
+        return JSONResponse(
+            {"error": "Cannot caption while training is active"},
+            status_code=409,
+        )
+
+    if caption_manager.has_active:
+        return JSONResponse(
+            {"error": "Another caption batch is already running"},
+            status_code=409,
+        )
+
+    try:
+        await caption_manager.start_batch(request)
+        return CaptionBatchResponse(
+            batch_id=request.batch_id,
+            status="started",
+            total=len(request.image_paths),
+        )
+    except RuntimeError as err:
+        return JSONResponse({"error": str(err)}, status_code=409)
+
+
+@app.post("/caption/batch/{batch_id}/cancel")
+async def cancel_caption_batch(batch_id: str):
+    """Cancel an in-progress caption batch."""
+    success = caption_manager.cancel_batch(batch_id)
+    if not success:
+        return JSONResponse(
+            {"error": f"Batch {batch_id} not running"}, status_code=404
+        )
+    return {"status": "cancelling"}
+
+
+@app.post("/caption/unload")
+async def unload_caption_model():
+    """Release the cached VLM from memory/GPU."""
+    await unload_caption_provider()
+    return {"status": "unloaded"}
+
+
+@app.websocket("/ws/caption")
+async def ws_caption(websocket: WebSocket):
+    """WebSocket for streaming caption batch progress."""
+    await caption_ws_manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        caption_ws_manager.disconnect(websocket)
 
 
 # --- Entry point ---

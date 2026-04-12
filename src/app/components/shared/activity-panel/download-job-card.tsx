@@ -67,7 +67,7 @@ export function DownloadJobCard({
             indeterminate={isRunning && !job.progress}
             className="mb-1"
           />
-          <div className="flex justify-between text-[10px] text-slate-500 tabular-nums">
+          <div className="flex justify-between text-xs text-slate-500 tabular-nums">
             <span>{statusLabel}</span>
             <span>
               {job.progress
@@ -79,7 +79,7 @@ export function DownloadJobCard({
       )}
 
       {isFailed && job.error && (
-        <p className="mt-1 text-[10px] text-red-500">{job.error}</p>
+        <p className="mt-1 text-xs text-red-500">{job.error}</p>
       )}
 
       {/* Actions */}

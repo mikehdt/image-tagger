@@ -18,7 +18,7 @@ export function ActionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex cursor-pointer items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium ${colour}`}
+      className={`flex cursor-pointer items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium ${colour}`}
       title={title}
     >
       {children}
