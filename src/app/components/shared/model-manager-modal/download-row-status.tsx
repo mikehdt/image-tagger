@@ -49,7 +49,7 @@ export function DownloadRowStatus({
       <ProgressBar
         value={bytes}
         max={total || 1}
-        size="xs"
+        size="sm"
         color={canResume ? 'amber' : 'indigo'}
         indeterminate={isRunning && (!progress || total === 0)}
       />
@@ -84,7 +84,7 @@ export function DownloadRowStatus({
             size="xs"
             width="sm"
           >
-            <XIcon className="mr-1" />
+            <XIcon />
             Cancel
           </Button>
         )}
@@ -97,7 +97,7 @@ export function DownloadRowStatus({
               size="sm"
               width="sm"
             >
-              <Trash2Icon className="mr-1" />
+              <Trash2Icon />
               Delete
             </Button>
 
@@ -107,7 +107,7 @@ export function DownloadRowStatus({
               size="sm"
               width="sm"
             >
-              <RefreshCwIcon className="mr-1" />
+              <RefreshCwIcon />
               Resume
             </Button>
           </>

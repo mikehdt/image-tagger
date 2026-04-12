@@ -102,14 +102,17 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const progress of downloadModelFiles({
-            modelId: downloadable.id,
-            downloadId,
-            repoId: downloadable.repoId,
-            files: downloadable.files,
-            targetDir: resolvedTargetDir,
-            hfToken: getHfToken(),
-          })) {
+          for await (const progress of downloadModelFiles(
+            {
+              modelId: downloadable.id,
+              downloadId,
+              repoId: downloadable.repoId,
+              files: downloadable.files,
+              targetDir: resolvedTargetDir,
+              hfToken: getHfToken(),
+            },
+            request.signal,
+          )) {
             const data = JSON.stringify(progress);
             controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
@@ -143,16 +146,32 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (error) {
-          const errorData = JSON.stringify({
-            downloadId,
-            modelId,
-            status: 'error',
-            error: error instanceof Error ? error.message : 'Unknown error',
-            bytesDownloaded: 0,
-            totalBytes: 0,
-          });
-          controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
-          controller.close();
+          // If the client disconnected (abort), the controller may already
+          // be torn down — enqueue/close will throw. Swallow those.
+          const isAbort =
+            error instanceof Error &&
+            (error.name === 'AbortError' || request.signal.aborted);
+          if (!isAbort) {
+            try {
+              const errorData = JSON.stringify({
+                downloadId,
+                modelId,
+                status: 'error',
+                error:
+                  error instanceof Error ? error.message : 'Unknown error',
+                bytesDownloaded: 0,
+                totalBytes: 0,
+              });
+              controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
+            } catch {
+              // controller already closed
+            }
+          }
+          try {
+            controller.close();
+          } catch {
+            // already closed
+          }
         }
       },
     });

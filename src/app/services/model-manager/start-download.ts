@@ -12,6 +12,7 @@ import {
   completeDownload,
   failDownload,
   updateDownloadProgress,
+  updateJobStatus,
 } from '@/app/store/jobs';
 import { setModelStatus } from '@/app/store/model-manager';
 
@@ -108,7 +109,13 @@ export async function startModelDownload({
     }
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
-      dispatch(failDownload({ id: jobId, error: 'Download cancelled' }));
+      dispatch(
+        updateJobStatus({
+          id: jobId,
+          status: 'cancelled',
+          error: 'Download cancelled',
+        }),
+      );
       dispatch(setModelStatus({ modelId, status: 'not_installed' }));
     } else {
       const msg = err instanceof Error ? err.message : 'Download failed';

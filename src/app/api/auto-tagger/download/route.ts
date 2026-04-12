@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
         try {
           for await (const progress of downloadModel(model, {
             hfToken: getHfToken(),
+            signal: request.signal,
           })) {
             const data = JSON.stringify(progress);
             controller.enqueue(encoder.encode(`data: ${data}\n\n`));
@@ -50,15 +51,29 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (error) {
-          const errorData = JSON.stringify({
-            modelId,
-            status: 'error',
-            error: error instanceof Error ? error.message : 'Unknown error',
-            bytesDownloaded: 0,
-            totalBytes: 0,
-          });
-          controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
-          controller.close();
+          const isAbort =
+            error instanceof Error &&
+            (error.name === 'AbortError' || request.signal.aborted);
+          if (!isAbort) {
+            try {
+              const errorData = JSON.stringify({
+                modelId,
+                status: 'error',
+                error:
+                  error instanceof Error ? error.message : 'Unknown error',
+                bytesDownloaded: 0,
+                totalBytes: 0,
+              });
+              controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
+            } catch {
+              // controller already closed
+            }
+          }
+          try {
+            controller.close();
+          } catch {
+            // already closed
+          }
         }
       },
     });
