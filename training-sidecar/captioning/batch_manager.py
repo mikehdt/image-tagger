@@ -62,7 +62,7 @@ class CaptionBatchManager:
         self, request: CaptionBatchRequest, state: BatchState
     ) -> None:
         """Run the batch — one image at a time, broadcasting progress."""
-        provider = get_provider()
+        provider = get_provider(request.runtime)
 
         # Closure read by the provider during inference so we can abort
         # mid-image instead of waiting for the next loop iteration.

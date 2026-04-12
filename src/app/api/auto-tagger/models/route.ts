@@ -28,7 +28,11 @@ export async function GET() {
       description: model.description,
       isDefault: model.isDefault,
       totalSize: getModelTotalSize(model),
-      vramEstimate: model.vramEstimate,
+      // Field renamed from vramEstimate → memoryEstimate to reflect that
+      // llama-cpp models on CPU builds load into RAM, not VRAM. The UI
+      // picks the label via `runtime`.
+      memoryEstimate: model.vramEstimate,
+      runtime: model.runtime,
       status: checkModelStatus(model),
     }));
 

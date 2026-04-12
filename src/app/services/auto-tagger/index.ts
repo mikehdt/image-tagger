@@ -14,6 +14,7 @@ export type {
   TagInsertMode,
   TagResult,
   VlmOptions,
+  VlmRuntime,
 } from './types';
 export { DEFAULT_TAGGER_OPTIONS, DEFAULT_VLM_OPTIONS } from './types';
 

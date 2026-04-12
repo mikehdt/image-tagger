@@ -3,11 +3,16 @@ Captioning provider — runs VLM inference on images.
 
 Backends:
 - MockCaptioningProvider: fake captions with simulated latency, for pipeline testing
-- LlamaCppCaptioningProvider: real inference via llama-cpp-python (CPU or Linux CUDA)
+- LlamaCppCaptioningProvider: GGUF inference via llama-cpp-python (CPU, Linux CUDA)
+- TransformersCaptioningProvider: safetensors fp16 via PyTorch CUDA (Windows GPU path)
 
-The active provider is chosen by get_provider() based on whether llama-cpp-python
-is importable. If it is, we use it; otherwise we fall back to the mock so the
-sidecar stays functional without the vlm extra installed.
+The active provider is chosen by get_provider(runtime). Each runtime has its
+own lazy-loaded singleton, so loading one doesn't touch the other. This lets
+a user keep a GGUF model loaded for CPU captioning while also having the GPU
+transformers model swappable in without fighting over the cache.
+
+When a requested runtime isn't installed, the mock provider is returned so
+the pipeline stays testable — errors surface the missing extra.
 """
 
 from __future__ import annotations
@@ -16,7 +21,9 @@ import asyncio
 import os
 import sys
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional
+
+VlmRuntime = Literal["llama-cpp", "transformers"]
 
 # Type alias for the cooperative cancellation callback. The batch manager
 # passes a closure that reads its own `cancel_requested` flag; the provider
@@ -90,39 +97,69 @@ class MockCaptioningProvider(CaptioningProvider):
         self._loaded_model = None
 
 
-# Module-level singleton — one provider instance per sidecar process
-_provider: CaptioningProvider | None = None
+# One lazily-instantiated singleton per runtime. Loading the transformers
+# provider does not touch the llama-cpp one, and vice versa.
+_providers: dict[str, CaptioningProvider] = {}
 
 
-def get_provider() -> CaptioningProvider:
+def _instantiate(runtime: VlmRuntime) -> CaptioningProvider:
+    """Build a provider for the requested runtime, falling back to mock."""
+    if runtime == "transformers":
+        try:
+            from captioning.transformers_provider import (
+                TransformersCaptioningProvider,
+            )
+
+            print("[sidecar] Captioning: using TransformersCaptioningProvider")
+            return TransformersCaptioningProvider()
+        except ImportError as err:
+            print(
+                f"[sidecar] Captioning: transformers unavailable ({err}), "
+                "falling back to mock. Install with: uv sync --extra gpu",
+                file=sys.stderr,
+            )
+            return MockCaptioningProvider()
+
+    if runtime == "llama-cpp":
+        try:
+            from captioning.llama_cpp_provider import LlamaCppCaptioningProvider
+
+            print("[sidecar] Captioning: using LlamaCppCaptioningProvider")
+            return LlamaCppCaptioningProvider()
+        except ImportError as err:
+            print(
+                f"[sidecar] Captioning: llama-cpp-python unavailable ({err}), "
+                "falling back to mock. Install with: uv sync --extra vlm",
+                file=sys.stderr,
+            )
+            return MockCaptioningProvider()
+
+    raise ValueError(f"Unknown VLM runtime: {runtime}")
+
+
+def get_provider(runtime: VlmRuntime = "llama-cpp") -> CaptioningProvider:
     """
-    Get the current captioning provider (lazily instantiated).
+    Get the captioning provider for the requested runtime.
 
-    Uses llama-cpp-python if available, otherwise falls back to the mock
-    provider. This keeps the sidecar functional even without the vlm extra.
+    Providers are cached per-runtime so repeat calls don't reload the model.
+    The default is 'llama-cpp' for backwards compatibility with callers that
+    predate the runtime dispatch change.
     """
-    global _provider
-    if _provider is not None:
-        return _provider
-
-    try:
-        from captioning.llama_cpp_provider import LlamaCppCaptioningProvider
-
-        _provider = LlamaCppCaptioningProvider()
-        print("[sidecar] Captioning: using LlamaCppCaptioningProvider")
-    except ImportError as err:
-        print(
-            f"[sidecar] Captioning: llama-cpp-python unavailable ({err}), "
-            "falling back to mock provider",
-            file=sys.stderr,
-        )
-        _provider = MockCaptioningProvider()
-
-    return _provider
+    existing = _providers.get(runtime)
+    if existing is not None:
+        return existing
+    provider = _instantiate(runtime)
+    _providers[runtime] = provider
+    return provider
 
 
-async def unload_provider() -> None:
-    """Release the current provider's model resources."""
-    global _provider
-    if _provider is not None:
-        await _provider.unload()
+async def unload_provider(runtime: Optional[VlmRuntime] = None) -> None:
+    """
+    Release model resources. If `runtime` is given, unload that runtime only.
+    Otherwise unload all cached providers.
+    """
+    targets = [runtime] if runtime is not None else list(_providers.keys())
+    for key in targets:
+        provider = _providers.get(key)
+        if provider is not None:
+            await provider.unload()

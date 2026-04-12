@@ -9,7 +9,14 @@ export type ModelInfo = {
   description?: string;
   isDefault?: boolean;
   totalSize: number;
-  vramEstimate?: number;
+  /**
+   * Rough memory estimate in GB. For `runtime: 'transformers'` this is
+   * VRAM; for `runtime: 'llama-cpp'` on a CPU build it's system RAM.
+   * The UI picks the correct label based on runtime.
+   */
+  memoryEstimate?: number;
+  /** VLM runtime; undefined for ONNX providers. */
+  runtime?: 'llama-cpp' | 'transformers';
   status:
     | 'not_installed'
     | 'downloading'

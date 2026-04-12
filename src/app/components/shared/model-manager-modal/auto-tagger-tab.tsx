@@ -156,9 +156,10 @@ function AutoTaggerModelRow({ model }: { model: ModelInfo }) {
           {!hasLiveJob && (
             <span className="text-right text-xs text-slate-400 tabular-nums">
               {formatBytes(model.totalSize)}
-              {model.vramEstimate && (
+              {model.memoryEstimate && (
                 <span className="block text-slate-400/70">
-                  ~{model.vramEstimate}GB VRAM
+                  ~{model.memoryEstimate}GB{' '}
+                  {model.runtime === 'transformers' ? 'VRAM' : 'RAM'}
                 </span>
               )}
             </span>

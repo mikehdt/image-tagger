@@ -6,6 +6,15 @@
 /** How the provider runs inference */
 export type ProviderType = 'onnx' | 'vlm';
 
+/**
+ * Which Python runtime handles a VLM model.
+ * - 'llama-cpp': GGUF quants via llama-cpp-python (CPU / Linux CUDA)
+ * - 'transformers': HuggingFace transformers + PyTorch (Windows CUDA path)
+ *
+ * Ignored for 'onnx' provider models.
+ */
+export type VlmRuntime = 'llama-cpp' | 'transformers';
+
 export type TaggerProvider = {
   id: string;
   name: string;
@@ -24,6 +33,11 @@ export type TaggerModel = {
   isDefault?: boolean;
   /** VRAM estimate in GB for VLM models (helps users pick the right quant) */
   vramEstimate?: number;
+  /**
+   * Which Python runtime loads this model. Only meaningful for VLM models.
+   * Defaults to 'llama-cpp' for backwards compatibility with existing GGUF entries.
+   */
+  runtime?: VlmRuntime;
 };
 
 export type ModelFile = {

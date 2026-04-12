@@ -1,9 +1,12 @@
 """Pydantic models for the training sidecar API."""
 
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
+
+# Which Python runtime loads a VLM model.
+VlmRuntime = Literal["llama-cpp", "transformers"]
 
 
 class ProviderType(str, Enum):
@@ -87,6 +90,7 @@ class CaptionRequest(BaseModel):
 
     image_path: str
     model_path: str
+    runtime: VlmRuntime = "llama-cpp"
     prompt: str = "Describe this image in detail for AI training purposes."
     max_tokens: int = 512
     temperature: float = 0.7
@@ -105,6 +109,7 @@ class CaptionBatchRequest(BaseModel):
     batch_id: str
     image_paths: list[str]
     model_path: str
+    runtime: VlmRuntime = "llama-cpp"
     prompt: str = "Describe this image in detail for AI training purposes."
     max_tokens: int = 512
     temperature: float = 0.7

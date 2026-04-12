@@ -16,9 +16,11 @@ import type { TaggerModel } from './types';
 const MODELS_DIR = path.join(process.cwd(), '.auto-tagger', 'models');
 
 /**
- * Get the local directory path for a model
+ * Get the local directory path for a model.
+ * For multi-file models (e.g. transformers safetensors releases) this is
+ * also the path passed to `from_pretrained` in the sidecar.
  */
-function getModelDir(model: TaggerModel): string {
+export function getModelDir(model: TaggerModel): string {
   return path.join(MODELS_DIR, model.provider, model.id);
 }
 

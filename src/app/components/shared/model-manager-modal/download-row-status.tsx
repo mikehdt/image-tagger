@@ -54,7 +54,7 @@ export function DownloadRowStatus({
         indeterminate={isRunning && (!progress || total === 0)}
       />
 
-      <div className="flex justify-between text-xs text-slate-500 tabular-nums">
+      <div className="flex flex-wrap justify-between text-xs text-slate-500 tabular-nums">
         <span className="truncate">
           {isRunning &&
             (progress?.currentFile ? progress.currentFile : 'Preparing…')}
@@ -63,7 +63,7 @@ export function DownloadRowStatus({
           {isCancelled && 'Cancelled'}
         </span>
         {progress && total > 0 && (
-          <span className="shrink-0 pl-2 text-right">
+          <span className="ml-auto shrink-0 pl-2 text-right">
             {formatBytes(bytes)} / {formatBytes(total)} · {pct}%
           </span>
         )}

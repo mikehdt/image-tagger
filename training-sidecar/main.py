@@ -203,7 +203,7 @@ async def caption_single(request: CaptionRequest):
         )
 
     try:
-        provider = get_caption_provider()
+        provider = get_caption_provider(request.runtime)
         caption = await provider.caption_image(
             image_path=request.image_path,
             model_path=request.model_path,
@@ -255,7 +255,7 @@ async def cancel_caption_batch(batch_id: str):
 
 @app.post("/caption/unload")
 async def unload_caption_model():
-    """Release the cached VLM from memory/GPU."""
+    """Release all cached VLMs from memory/GPU."""
     await unload_caption_provider()
     return {"status": "unloaded"}
 

@@ -7,8 +7,8 @@
 
 import { ensureSidecar } from '@/app/services/training/sidecar-manager';
 
-import { getModelFilePath } from '../../model-manager';
-import type { TaggerModel, VlmOptions } from '../../types';
+import { getModelDir, getModelFilePath } from '../../model-manager';
+import type { TaggerModel, VlmOptions, VlmRuntime } from '../../types';
 
 type CaptionResult = {
   imagePath: string;
@@ -51,14 +51,27 @@ function normalizeEvent(raw: RawBatchProgressEvent): BatchProgressEvent {
 }
 
 /**
- * Get the absolute path to the GGUF/ONNX model file on disk.
- * VLM models have a single primary file — return the first one.
+ * Resolve the path the sidecar should load.
+ *
+ * - llama-cpp runtime: GGUF models have a single primary weights file; we
+ *   return its absolute path. The sidecar opens that file directly.
+ * - transformers runtime: safetensors releases are a *directory* of files
+ *   (config.json, tokenizer, weight shards). We return the model directory
+ *   so `from_pretrained(dir)` picks up everything.
  */
 export function getVlmModelPath(model: TaggerModel): string {
   if (model.files.length === 0) {
     throw new Error(`VLM model ${model.id} has no files defined`);
   }
+  if (model.runtime === 'transformers') {
+    return getModelDir(model);
+  }
   return getModelFilePath(model, model.files[0].name);
+}
+
+/** The runtime the sidecar should use to load this model. */
+function getRuntime(model: TaggerModel): VlmRuntime {
+  return model.runtime ?? 'llama-cpp';
 }
 
 /**
@@ -76,6 +89,7 @@ export async function captionImageViaSidecar(
   }
 
   const modelPath = getVlmModelPath(model);
+  const runtime = getRuntime(model);
 
   const res = await fetch(`http://127.0.0.1:${sidecar.port}/caption`, {
     method: 'POST',
@@ -83,6 +97,7 @@ export async function captionImageViaSidecar(
     body: JSON.stringify({
       image_path: imagePath,
       model_path: modelPath,
+      runtime,
       prompt: options.prompt,
       max_tokens: options.maxTokens,
       temperature: options.temperature,
@@ -118,6 +133,7 @@ export async function* captionBatchViaSidecar(
   }
 
   const modelPath = getVlmModelPath(model);
+  const runtime = getRuntime(model);
 
   // Open the WebSocket first so we don't miss early progress events
   const ws = new WebSocket(`ws://127.0.0.1:${sidecar.port}/ws/caption`);
@@ -202,6 +218,7 @@ export async function* captionBatchViaSidecar(
         batch_id: batchId,
         image_paths: imagePaths,
         model_path: modelPath,
+        runtime,
         prompt: options.prompt,
         max_tokens: options.maxTokens,
         temperature: options.temperature,

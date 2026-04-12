@@ -27,7 +27,14 @@ that Node.js spawns on demand via `sidecar-manager.ts`.
 - Python 3.12 (pinned via `requires-python`)
 - Node spawns it with `uv run python -u main.py --app-root ...` — uv handles venv creation and dependency install automatically
 - Falls back to invoking `.venv/Scripts/python.exe` directly if `uv` isn't on PATH
-- Optional VLM deps (`llama-cpp-python`) install with `uv sync --extra vlm` — deferred until the mock captioning provider is replaced
+
+VLM captioning has two optional runtimes. Pick the one(s) you want, or both:
+
+- **CPU (GGUF via llama-cpp-python)**: `uv sync --extra vlm`
+- **GPU (safetensors via PyTorch + HuggingFace transformers, Windows CUDA 12.8)**: `uv sync --extra gpu`
+- **Both**: `uv sync --extra vlm --extra gpu`
+
+Running `uv sync` with only one extra will uninstall the other, so be deliberate. The sidecar autodetects which is available at runtime and only offers matching model entries via the model manager.
 
 Manual sync (rarely needed): `cd training-sidecar && uv sync`
 
