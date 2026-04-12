@@ -126,7 +126,7 @@ export function SettingsTab() {
                   width="sm"
                   disabled={saving}
                 >
-                  <TrashIcon className="mr-1" />
+                  <TrashIcon />
                   Clear
                 </Button>
               </div>

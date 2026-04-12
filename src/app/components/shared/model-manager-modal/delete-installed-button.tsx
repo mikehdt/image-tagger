@@ -81,12 +81,13 @@ export function DeleteInstalledButton({
         onClick={handleConfirm}
         color="rose"
         size="sm"
-        width="md"
+        width="sm"
         title="Confirm delete"
       >
-        <Trash2Icon className="mr-1" />
-        Free {formatBytes(sizeBytes)}
+        <Trash2Icon />
+        Confirm
       </Button>
+
       <Button
         onClick={disarm}
         color="slate"
