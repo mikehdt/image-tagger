@@ -3,16 +3,26 @@
 import { ExternalLinkIcon, InfoIcon } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
-import type {
-  DownloadableModel,
-  ModelVariant,
-} from '@/app/services/model-manager/types';
+import {
+  getDownloadablesForArchitecture,
+  SHARED_COMPONENTS,
+} from '@/app/services/model-manager/registries/training-models';
+import type { DownloadableModel } from '@/app/services/model-manager/types';
+import {
+  ARCHITECTURE_LABELS,
+  type ModelArchitecture,
+} from '@/app/services/training/models';
 import { useAppSelector } from '@/app/store/hooks';
 import { selectDownloadJobByModelId } from '@/app/store/jobs';
+import {
+  selectAllModelStatuses,
+  selectIsScanningModels,
+} from '@/app/store/model-manager';
 import type { ModelEntry } from '@/app/store/model-manager/types';
 
 import { useDownloadActions } from '../activity-panel/use-download-actions';
 import { Dropdown, type DropdownItem } from '../dropdown';
+import { DeleteInstalledButton } from './delete-installed-button';
 import { DownloadRowButton, DownloadRowStatus } from './download-row-status';
 import { getModelStatus } from './use-model-manager';
 
@@ -28,55 +38,69 @@ function formatBytes(bytes: number): string {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type TrainingModelGroup = {
-  architecture: string;
+type TrainingModelGroup = {
+  architecture: ModelArchitecture;
   label: string;
   checkpoints: DownloadableModel[];
   dependencies: DownloadableModel[];
 };
 
+function getTrainingModelGroups(): TrainingModelGroup[] {
+  const archOrder: ModelArchitecture[] = [
+    'flux',
+    'sdxl',
+    'zimage',
+    'wan',
+    'ltx',
+  ];
+
+  return archOrder
+    .map((arch) => {
+      const { checkpoints, dependencies } =
+        getDownloadablesForArchitecture(arch);
+      if (checkpoints.length === 0) return null;
+      return {
+        architecture: arch,
+        label: ARCHITECTURE_LABELS[arch],
+        checkpoints,
+        dependencies,
+      };
+    })
+    .filter((g): g is TrainingModelGroup => g !== null);
+}
+
 // ---------------------------------------------------------------------------
 // Training tab
 // ---------------------------------------------------------------------------
 
-export function TrainingTab({
-  groups,
-  sharedComponents,
-  statuses,
-  loading,
-  onDownload,
-}: {
-  groups: TrainingModelGroup[];
-  sharedComponents: DownloadableModel[];
-  statuses: Record<string, ModelEntry>;
-  loading: boolean;
-  onDownload: (model: DownloadableModel, variant?: ModelVariant) => void;
-}) {
-  if (loading) {
+export function TrainingTab() {
+  const statuses = useAppSelector(selectAllModelStatuses);
+  const loading = useAppSelector(selectIsScanningModels);
+
+  const groups = useMemo(() => getTrainingModelGroups(), []);
+
+  // Find which shared components are used by any model
+  const usedSharedComponents = useMemo(() => {
+    const usedSharedIds = new Set<string>();
+    for (const group of groups) {
+      for (const cp of group.checkpoints) {
+        for (const dep of cp.dependencies ?? []) {
+          usedSharedIds.add(dep);
+        }
+      }
+    }
+    return SHARED_COMPONENTS.filter(
+      (c) => c.sharedId && usedSharedIds.has(c.sharedId),
+    );
+  }, [groups]);
+
+  if (loading && Object.keys(statuses).length === 0) {
     return (
       <div className="flex items-center justify-center py-8 text-sm text-slate-400">
         Checking model status...
       </div>
     );
   }
-
-  // Find which shared components are used by any model
-  const usedSharedIds = new Set<string>();
-  for (const group of groups) {
-    for (const cp of group.checkpoints) {
-      for (const dep of cp.dependencies ?? []) {
-        usedSharedIds.add(dep);
-      }
-    }
-  }
-
-  const usedSharedComponents = sharedComponents.filter(
-    (c) => c.sharedId && usedSharedIds.has(c.sharedId),
-  );
 
   return (
     <div className="flex flex-col gap-4 p-1">
@@ -98,7 +122,6 @@ export function TrainingTab({
                 key={cp.id}
                 model={cp}
                 status={getModelStatus(statuses, cp.id)}
-                onDownload={(variant) => onDownload(cp, variant)}
                 dependencies={cp.dependencies}
                 sharedStatuses={statuses}
               />
@@ -134,7 +157,6 @@ export function TrainingTab({
                   key={comp.id}
                   model={comp}
                   status={getModelStatus(statuses, comp.id)}
-                  onDownload={(variant) => onDownload(comp, variant)}
                   faded={!hasInstalledDependent}
                 />
               );
@@ -153,14 +175,12 @@ export function TrainingTab({
 function DownloadableModelRow({
   model,
   status,
-  onDownload,
   dependencies,
   sharedStatuses,
   faded,
 }: {
   model: DownloadableModel;
   status: string;
-  onDownload: (variant?: ModelVariant) => void;
   dependencies?: string[];
   sharedStatuses?: Record<string, ModelEntry>;
   /** Fade the row when no dependent model needs this component */
@@ -176,7 +196,7 @@ function DownloadableModelRow({
   );
 
   const job = useAppSelector(selectDownloadJobByModelId(model.id));
-  const { retry, cancel, remove } = useDownloadActions();
+  const { start, retry, cancel, remove, uninstall } = useDownloadActions();
   const hasLiveJob = job && job.status !== 'completed';
 
   const isReady = status === 'ready';
@@ -196,8 +216,12 @@ function DownloadableModelRow({
 
   const handleDownload = useCallback(() => {
     const variant = model.variants?.find((v) => v.id === selectedVariantId);
-    onDownload(variant);
-  }, [onDownload, model.variants, selectedVariantId]);
+    start(model, variant);
+  }, [start, model, selectedVariantId]);
+
+  const handleUninstall = useCallback(() => {
+    uninstall(model.id);
+  }, [uninstall, model.id]);
 
   return (
     <div
@@ -265,7 +289,7 @@ function DownloadableModelRow({
         </div>
         <div className="flex items-start gap-2">
           {!hasLiveJob && (
-            <span className="text-xs text-slate-400 tabular-nums">
+            <span className="text-right text-xs text-slate-400 tabular-nums">
               {formatBytes(totalSize)}
             </span>
           )}
@@ -294,13 +318,16 @@ function DownloadableModelRow({
               onCancel={cancel}
               onDelete={remove}
             />
+          ) : isReady ? (
+            <DeleteInstalledButton
+              sizeBytes={totalSize}
+              onConfirm={handleUninstall}
+            />
           ) : (
-            !isReady && (
-              <DownloadRowButton
-                onClick={handleDownload}
-                label={isPartial ? 'Resume' : 'Download'}
-              />
-            )
+            <DownloadRowButton
+              onClick={handleDownload}
+              label={isPartial ? 'Resume' : 'Download'}
+            />
           )}
         </div>
       </div>

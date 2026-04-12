@@ -63,7 +63,7 @@ export function DownloadRowStatus({
           {isCancelled && 'Cancelled'}
         </span>
         {progress && total > 0 && (
-          <span className="shrink-0 pl-2">
+          <span className="shrink-0 pl-2 text-right">
             {formatBytes(bytes)} / {formatBytes(total)} · {pct}%
           </span>
         )}

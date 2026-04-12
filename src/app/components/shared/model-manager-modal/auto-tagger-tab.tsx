@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { startModelDownload } from '@/app/services/model-manager/start-download';
 import type { AppDispatch } from '@/app/store';
 import {
   selectModels,
@@ -15,6 +14,7 @@ import { useAppSelector } from '@/app/store/hooks';
 import { selectDownloadJobByModelId } from '@/app/store/jobs';
 
 import { useDownloadActions } from '../activity-panel/use-download-actions';
+import { DeleteInstalledButton } from './delete-installed-button';
 import { DownloadRowButton, DownloadRowStatus } from './download-row-status';
 
 // ---------------------------------------------------------------------------
@@ -57,22 +57,6 @@ export function AutoTaggerTab() {
     }
   }, [models.length, fetchModels]);
 
-  const handleDownload = useCallback(
-    async (model: ModelInfo) => {
-      setError(null);
-      try {
-        await startModelDownload({
-          modelId: model.id,
-          modelName: model.name,
-          dispatch,
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Download failed');
-      }
-    },
-    [dispatch],
-  );
-
   return (
     <div className="flex flex-col gap-4 p-1">
       <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -94,11 +78,7 @@ export function AutoTaggerTab() {
             </div>
             <div className="flex flex-col gap-2">
               {providerModels.map((model) => (
-                <AutoTaggerModelRow
-                  key={model.id}
-                  model={model}
-                  onDownload={handleDownload}
-                />
+                <AutoTaggerModelRow key={model.id} model={model} />
               ))}
             </div>
           </div>
@@ -118,15 +98,9 @@ export function AutoTaggerTab() {
 // Per-model row (extracted so each row can subscribe to its own job state)
 // ---------------------------------------------------------------------------
 
-function AutoTaggerModelRow({
-  model,
-  onDownload,
-}: {
-  model: ModelInfo;
-  onDownload: (model: ModelInfo) => void;
-}) {
+function AutoTaggerModelRow({ model }: { model: ModelInfo }) {
   const job = useAppSelector(selectDownloadJobByModelId(model.id));
-  const { retry, cancel, remove } = useDownloadActions();
+  const { start, retry, cancel, remove, uninstall } = useDownloadActions();
 
   const isReady = model.status === 'ready';
   const isPartial = model.status === 'partial';
@@ -134,6 +108,14 @@ function AutoTaggerModelRow({
   // A job is "live" if it's currently running, interrupted, failed, or cancelled —
   // i.e. anything except completed (which means the model is now installed).
   const hasLiveJob = job && job.status !== 'completed';
+
+  const handleDownload = () => {
+    start({ id: model.id, name: model.name });
+  };
+
+  const handleUninstall = () => {
+    uninstall(model.id);
+  };
 
   return (
     <div
@@ -172,7 +154,7 @@ function AutoTaggerModelRow({
 
         <div className="ml-2 flex shrink-0 items-start gap-2">
           {!hasLiveJob && (
-            <span className="text-xs text-slate-400 tabular-nums">
+            <span className="text-right text-xs text-slate-400 tabular-nums">
               {formatBytes(model.totalSize)}
               {model.vramEstimate && (
                 <span className="block text-slate-400/70">
@@ -189,13 +171,16 @@ function AutoTaggerModelRow({
               onCancel={cancel}
               onDelete={remove}
             />
+          ) : isReady ? (
+            <DeleteInstalledButton
+              sizeBytes={model.totalSize}
+              onConfirm={handleUninstall}
+            />
           ) : (
-            !isReady && (
-              <DownloadRowButton
-                onClick={() => onDownload(model)}
-                label={isPartial ? 'Resume' : 'Download'}
-              />
-            )
+            <DownloadRowButton
+              onClick={handleDownload}
+              label={isPartial ? 'Resume' : 'Download'}
+            />
           )}
         </div>
       </div>

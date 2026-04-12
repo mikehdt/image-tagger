@@ -1,16 +1,14 @@
 /**
  * Auto-tagger Redux slice
- * Manages model availability, download state, and tagging configuration
+ *
+ * Tracks model inventory and selection for the tagging UI. Download
+ * state lives in the unified jobs slice — see `startModelDownload`
+ * and `useDownloadActions` for the lifecycle.
  */
 
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import type {
-  AutoTaggerState,
-  DownloadProgress,
-  ModelInfo,
-  ProviderInfo,
-} from './types';
+import type { AutoTaggerState, ModelInfo, ProviderInfo } from './types';
 
 const initialState: AutoTaggerState = {
   isInitialised: false,
@@ -18,7 +16,6 @@ const initialState: AutoTaggerState = {
   providers: [],
   models: [],
   selectedModelId: null,
-  downloadProgress: null,
   error: null,
 };
 
@@ -56,7 +53,8 @@ const autoTaggerSlice = createSlice({
       }
     },
 
-    // Update a single model's status
+    // Update a single model's status (called by middleware when the
+    // model-manager slice's setModelStatus fires).
     updateModelStatus: (
       state,
       action: PayloadAction<{
@@ -75,64 +73,6 @@ const autoTaggerSlice = createSlice({
       state.selectedModelId = action.payload;
     },
 
-    // Start download
-    startDownload: (state, action: PayloadAction<string>) => {
-      state.downloadProgress = {
-        modelId: action.payload,
-        bytesDownloaded: 0,
-        totalBytes: 0,
-      };
-      const model = state.models.find((m) => m.id === action.payload);
-      if (model) {
-        model.status = 'downloading';
-      }
-    },
-
-    // Update download progress
-    updateDownloadProgress: (
-      state,
-      action: PayloadAction<DownloadProgress>,
-    ) => {
-      state.downloadProgress = action.payload;
-    },
-
-    // Download completed successfully
-    downloadComplete: (state, action: PayloadAction<string>) => {
-      state.downloadProgress = null;
-      const model = state.models.find((m) => m.id === action.payload);
-      if (model) {
-        model.status = 'ready';
-      }
-      // Auto-select the newly downloaded model
-      state.selectedModelId = action.payload;
-    },
-
-    // Download failed
-    downloadFailed: (
-      state,
-      action: PayloadAction<{ modelId: string; error: string }>,
-    ) => {
-      state.downloadProgress = null;
-      const model = state.models.find((m) => m.id === action.payload.modelId);
-      if (model) {
-        model.status = 'error';
-      }
-      state.error = action.payload.error;
-    },
-
-    // Clear download state (e.g., after cancel)
-    clearDownload: (state) => {
-      if (state.downloadProgress) {
-        const model = state.models.find(
-          (m) => m.id === state.downloadProgress?.modelId,
-        );
-        if (model) {
-          model.status = 'not_installed';
-        }
-      }
-      state.downloadProgress = null;
-    },
-
     // Set error
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
@@ -149,9 +89,7 @@ const autoTaggerSlice = createSlice({
     selectProviders: (state) => state.providers,
     selectModels: (state) => state.models,
     selectSelectedModelId: (state) => state.selectedModelId,
-    selectDownloadProgress: (state) => state.downloadProgress,
     selectError: (state) => state.error,
-    selectIsDownloading: (state) => state.downloadProgress !== null,
   },
 });
 
@@ -162,10 +100,6 @@ export const { reducer: autoTaggerReducer } = autoTaggerSlice;
 export const {
   setModelsAndProviders,
   setSelectedModel,
-  startDownload,
-  updateDownloadProgress,
-  downloadComplete,
-  downloadFailed,
   updateModelStatus,
 } = autoTaggerSlice.actions;
 
@@ -175,8 +109,6 @@ export const {
   selectProviders,
   selectModels,
   selectSelectedModelId,
-  selectDownloadProgress,
-  selectIsDownloading,
 } = autoTaggerSlice.selectors;
 
 // Memoized derived selectors (to avoid creating new arrays/objects on each call)

@@ -69,7 +69,7 @@ export function DownloadJobCard({
           />
           <div className="flex justify-between text-xs text-slate-500 tabular-nums">
             <span>{statusLabel}</span>
-            <span>
+            <span className="text-right">
               {job.progress
                 ? `${formatBytes(job.progress.bytesDownloaded)} / ${formatBytes(job.progress.totalBytes)}`
                 : ''}

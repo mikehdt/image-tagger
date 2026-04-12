@@ -26,14 +26,6 @@ export type ProviderInfo = {
   providerType: 'onnx' | 'vlm';
 };
 
-export type DownloadProgress = {
-  modelId: string;
-  currentFile?: string;
-  bytesDownloaded: number;
-  totalBytes: number;
-  error?: string;
-};
-
 export type AutoTaggerState = {
   // Whether the models list has been loaded from the API
   isInitialised: boolean;
@@ -49,9 +41,6 @@ export type AutoTaggerState = {
 
   // Currently selected model ID (for tagging)
   selectedModelId: string | null;
-
-  // Download state (null if not downloading)
-  downloadProgress: DownloadProgress | null;
 
   // Error message if something went wrong
   error: string | null;

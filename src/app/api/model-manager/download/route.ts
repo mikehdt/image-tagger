@@ -235,10 +235,18 @@ export async function DELETE(request: NextRequest) {
       return Response.json({ error: 'Model not found' }, { status: 404 });
     }
 
-    // Delete the model files
+    // Collect all known file names across the default + every variant.
+    // This way deleting "Flux.1 Dev" wipes whichever quantisation the user
+    // actually downloaded, not just the default fp16/bf16 layout.
+    const allFileNames = new Set<string>();
+    for (const f of downloadable.files) allFileNames.add(f.name);
+    for (const v of downloadable.variants ?? []) {
+      for (const f of v.files) allFileNames.add(f.name);
+    }
+
     let deletedCount = 0;
-    for (const file of downloadable.files) {
-      const filePath = path.join(targetDir, file.name);
+    for (const fileName of allFileNames) {
+      const filePath = path.join(targetDir, fileName);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         deletedCount++;

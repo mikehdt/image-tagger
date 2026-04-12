@@ -97,7 +97,7 @@ export function TaggingJobCard({
         <div className="flex justify-between text-xs text-slate-500 tabular-nums">
           <span className="truncate">{statusLabel}</span>
           {isRunning && progress && (
-            <span className="shrink-0 pl-2">
+            <span className="shrink-0 pl-2 text-right">
               {progress.current} / {progress.total} · {pct}%
             </span>
           )}

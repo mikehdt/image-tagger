@@ -1,5 +1,6 @@
 /**
- * Shared retry/cancel/delete handlers for download jobs.
+ * Shared download lifecycle handlers — start, retry, cancel, delete partial,
+ * and uninstall a fully-downloaded model.
  *
  * Used by the activity panel cards and by the in-modal rows in the
  * Model Manager so both surfaces share the same logic and side effects.
@@ -12,6 +13,10 @@ import { useCallback } from 'react';
 
 import { abortDownload } from '@/app/services/model-manager/download-controllers';
 import { startModelDownload } from '@/app/services/model-manager/start-download';
+import type {
+  DownloadableModel,
+  ModelVariant,
+} from '@/app/services/model-manager/types';
 import { useAppDispatch } from '@/app/store/hooks';
 import {
   type DownloadJob,
@@ -22,6 +27,26 @@ import { setModelStatus } from '@/app/store/model-manager';
 
 export function useDownloadActions() {
   const dispatch = useAppDispatch();
+
+  /**
+   * Kick off a download. Accepts either a `DownloadableModel` (with optional
+   * variant) or a plain `{ id, name }` pair for callers that don't have a
+   * full registry entry handy (e.g. the auto-tagger tab's `ModelInfo`).
+   */
+  const start = useCallback(
+    async (
+      model: DownloadableModel | { id: string; name: string },
+      variant?: ModelVariant,
+    ) => {
+      await startModelDownload({
+        modelId: model.id,
+        modelName: model.name,
+        variantId: variant?.id,
+        dispatch,
+      });
+    },
+    [dispatch],
+  );
 
   const retry = useCallback(
     async (job: DownloadJob) => {
@@ -52,6 +77,7 @@ export function useDownloadActions() {
     [dispatch],
   );
 
+  /** Remove a download job + delete any partial files associated with it. */
   const remove = useCallback(
     async (job: DownloadJob) => {
       try {
@@ -71,5 +97,22 @@ export function useDownloadActions() {
     [dispatch],
   );
 
-  return { retry, cancel, remove };
+  /** Uninstall a fully-downloaded model — wipes the files on disk. */
+  const uninstall = useCallback(
+    async (modelId: string) => {
+      try {
+        await fetch('/api/model-manager/download', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ modelId }),
+        });
+      } catch {
+        // Best-effort cleanup
+      }
+      dispatch(setModelStatus({ modelId, status: 'not_installed' }));
+    },
+    [dispatch],
+  );
+
+  return { start, retry, cancel, remove, uninstall };
 }

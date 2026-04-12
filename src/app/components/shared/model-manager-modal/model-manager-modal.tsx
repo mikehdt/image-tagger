@@ -8,17 +8,7 @@ import { TrainingTab } from './training-tab';
 import { useModelManager } from './use-model-manager';
 
 export function ModelManagerModal() {
-  const {
-    isOpen,
-    activeTab,
-    setActiveTab,
-    statuses,
-    loading,
-    handleClose,
-    startDownload,
-    trainingModelGroups,
-    sharedComponents,
-  } = useModelManager();
+  const { isOpen, activeTab, setActiveTab, handleClose } = useModelManager();
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} className="max-w-2xl">
@@ -42,15 +32,7 @@ export function ModelManagerModal() {
         {/* Tab content */}
         <div className="max-h-[60vh] overflow-y-auto">
           {activeTab === 'auto-tagger' && <AutoTaggerTab />}
-          {activeTab === 'training' && (
-            <TrainingTab
-              groups={trainingModelGroups}
-              sharedComponents={sharedComponents}
-              statuses={statuses}
-              loading={loading}
-              onDownload={startDownload}
-            />
-          )}
+          {activeTab === 'training' && <TrainingTab />}
           {activeTab === 'settings' && <SettingsTab />}
         </div>
       </div>

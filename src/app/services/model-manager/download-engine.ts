@@ -167,12 +167,23 @@ export async function* downloadModelFiles(
 
         if (done) break;
 
-        fileStream.write(Buffer.from(value));
-        fileBytes += value.length;
+        // Wait for the chunk to be accepted by the writer before
+        // counting it. This keeps `fileBytes` tightly aligned with
+        // bytes actually flushed to the kernel — so the progress UI
+        // matches what's on disk if the user cancels mid-download.
+        const chunk = Buffer.from(value);
+        const writer = fileStream;
+        await new Promise<void>((resolve, reject) => {
+          writer.write(chunk, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+        fileBytes += chunk.length;
         bytesDownloaded = startBytes + fileBytes;
 
         // Yield progress every ~1MB
-        if (fileBytes % (1024 * 1024) < value.length) {
+        if (fileBytes % (1024 * 1024) < chunk.length) {
           yield {
             downloadId,
             modelId,
@@ -184,22 +195,37 @@ export async function* downloadModelFiles(
         }
       }
 
-      fileStream.end();
-
-      // Wait for file to finish writing
-      await new Promise<void>((resolve, reject) => {
-        fileStream!.on('finish', resolve);
-        fileStream!.on('error', reject);
-      });
+      // Wait for the writer to flush, the fd to close, and the file to
+      // be visible at its final size before we either continue to the
+      // next file or yield 'ready'. Using 'close' (rather than 'finish')
+      // guarantees the fd has been released, so a subsequent stat sees
+      // the final on-disk size.
+      const completedStream = fileStream;
       fileStream = null;
+      await new Promise<void>((resolve, reject) => {
+        completedStream.once('close', () => resolve());
+        completedStream.once('error', reject);
+        completedStream.end();
+      });
     } catch (error) {
-      // Always close any open write stream so flushed bytes hit disk
-      // and the OS handle is released. Partials remain on disk for resume.
+      // Drain any open write stream and *await* its close before returning.
+      // This is critical: if we returned while writes were still queued,
+      // a fast Resume click could open a second writer on the same file
+      // before the dying one finished flushing, and the two writers would
+      // interleave their bytes — corrupting the partial.
       if (fileStream) {
+        const dyingStream = fileStream;
+        fileStream = null;
         try {
-          fileStream.end();
+          await new Promise<void>((resolve) => {
+            // 'close' fires after the fd is released, which is what we
+            // need before any subsequent attempt opens the same path.
+            dyingStream.once('close', () => resolve());
+            dyingStream.once('error', () => resolve());
+            dyingStream.end();
+          });
         } catch {
-          // ignore
+          // ignore — best-effort
         }
       }
 

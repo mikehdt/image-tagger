@@ -19,6 +19,7 @@ import type { ModelEntry, ModelManagerState } from './types';
 const initialState: ModelManagerState = {
   models: {},
   modelsFolder: null,
+  isScanning: false,
   isModalOpen: false,
   modalInitialTab: undefined,
 };
@@ -62,6 +63,10 @@ const modelManagerSlice = createSlice({
       state.modelsFolder = action.payload;
     },
 
+    setIsScanning: (state, action: PayloadAction<boolean>) => {
+      state.isScanning = action.payload;
+    },
+
     // --- Modal UI ---
 
     openModelManagerModal: (
@@ -88,6 +93,7 @@ export const {
   setModelStatus,
   setModelStatuses,
   setModelsFolder,
+  setIsScanning,
   openModelManagerModal,
   closeModelManagerModal,
 } = modelManagerSlice.actions;
@@ -111,6 +117,11 @@ export const selectIsModelManagerModalOpen = createSelector(
 export const selectModelManagerInitialTab = createSelector(
   selectModelManager,
   (s) => s.modalInitialTab,
+);
+
+export const selectIsScanningModels = createSelector(
+  selectModelManager,
+  (s) => s.isScanning,
 );
 
 /** All model entries as a status map (modelId → { status, localPath }). */

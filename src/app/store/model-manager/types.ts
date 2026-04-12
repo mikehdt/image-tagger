@@ -23,6 +23,9 @@ export type ModelManagerState = {
   /** Resolved models folder path (from config.json or default) */
   modelsFolder: string | null;
 
+  /** True while we're scanning disk for installed models */
+  isScanning: boolean;
+
   /** Whether the model manager modal is open */
   isModalOpen: boolean;
 

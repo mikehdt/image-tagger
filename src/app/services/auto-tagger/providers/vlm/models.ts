@@ -52,13 +52,4 @@ export const VLM_MODELS: TaggerModel[] = [
       },
     ],
   },
-  {
-    id: 'florence-2-large',
-    name: 'Florence-2 Large',
-    provider: PROVIDER_ID,
-    repoId: 'microsoft/Florence-2-large',
-    description: 'Fast and lightweight, less detailed descriptions',
-    vramEstimate: 1,
-    files: [{ name: 'model.onnx', size: 800_000_000 }],
-  },
 ];
