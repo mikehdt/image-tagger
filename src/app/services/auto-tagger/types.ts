@@ -113,10 +113,31 @@ export type VlmOptions = {
 };
 
 export const DEFAULT_VLM_OPTIONS: VlmOptions = {
-  prompt:
-    'Describe this image as a caption for AI training. Use plain prose only — no markdown, headings, bullet points, or lists. Keep it tight and factual: subject, pose and clothing, art style or medium, composition, lighting. Avoid narrative interpretation and flowery language. Stay within 2–3 short paragraphs total.',
-  maxTokens: 512,
-  temperature: 0.7,
+  // Prompt notes:
+  // - Example-based priming works better than negative instructions alone;
+  //   VLMs are trained on markdown-heavy data and "please don't" loses.
+  // - Strict rules go LAST because VLMs weight the end of the prompt more.
+  // - Explicit word target + multiple "stop after N paragraphs" instructions
+  //   are how we push back against the model's verbosity bias. The example
+  //   is deliberately short (~80 words) to anchor the expected length.
+  prompt: [
+    'Write a training caption for this image. Describe the main subject, notable clothing or gear, pose or action, setting, art style, and overall composition. Include visible details that matter, but skip minor background filler and avoid repeating yourself.',
+    '',
+    'Keep it to 2–3 short paragraphs, around 100–160 words total. Format as plain prose like this example:',
+    '',
+    'A close-up portrait of a young man with spiked dark brown hair and bright green eyes, facing slightly left with a determined expression. He wears a brown sleeveless vest over a grey shirt, with a golden chest plate featuring a glowing cyan emblem, and an orange scarf wrapped loosely around his neck. A leather strap crosses his shoulder.',
+    '',
+    'Behind him, stylised blue-purple mountains rise under a clear sky streaked with thin clouds. Soft rim lighting catches the edge of his hair and armour. The illustration is in anime style with clean lines, bold saturated colours, and dramatic lighting that emphasises the subject.',
+    '',
+    'STRICT RULES — your response MUST follow these:',
+    '- Maximum 3 short paragraphs. Do not add a fourth. Stop writing after the third paragraph.',
+    '- Target 100–160 words total. Stay focused, do not pad.',
+    '- No markdown, no **bold**, no *italics*, no bullet points, no lists, no # headings, no *, no -, no paragraph titles.',
+    '- No speculation about mood, narrative, or backstory beyond what the pose and expression directly show.',
+    '- Only plain prose describing what is visible. Then stop.',
+  ].join('\n'),
+  maxTokens: 550,
+  temperature: 0.6,
   injectTriggerPhrases: true,
 };
 

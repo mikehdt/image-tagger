@@ -1,4 +1,4 @@
-import { OctagonAlertIcon } from 'lucide-react';
+import { OctagonAlertIcon, RotateCcwIcon } from 'lucide-react';
 
 import { Button } from '@/app/components/shared/button';
 import { Checkbox } from '@/app/components/shared/checkbox';
@@ -6,6 +6,7 @@ import { Dropdown, DropdownItem } from '@/app/components/shared/dropdown';
 import { FormTitle } from '@/app/components/shared/form-title/form-title';
 import { Input } from '@/app/components/shared/input/input';
 import type { VlmOptions } from '@/app/services/auto-tagger';
+import { DEFAULT_VLM_OPTIONS } from '@/app/services/auto-tagger';
 
 type AutoTaggerVlmSettingsProps = {
   vlmOptions: VlmOptions;
@@ -66,17 +67,34 @@ export function AutoTaggerVlmSettings({
 
       {/* Prompt */}
       <div className="flex flex-col gap-2">
-        <FormTitle as="span">Prompt</FormTitle>
+        <div className="flex items-center justify-between">
+          <FormTitle as="span">Prompt</FormTitle>
+          {vlmOptions.prompt !== DEFAULT_VLM_OPTIONS.prompt && (
+            <Button
+              onClick={() =>
+                onVlmOptionChange('prompt', DEFAULT_VLM_OPTIONS.prompt)
+              }
+              color="slate"
+              variant="ghost"
+              size="xs"
+              width="sm"
+            >
+              <RotateCcwIcon />
+              Reset
+            </Button>
+          )}
+        </div>
         <textarea
           value={vlmOptions.prompt}
           onChange={(e) => onVlmOptionChange('prompt', e.target.value)}
-          rows={3}
+          rows={6}
           className="resize-y rounded border border-slate-300 bg-white px-3 py-1.5 text-sm text-(--foreground) placeholder:text-slate-400 focus:border-sky-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
           placeholder="Describe this image in detail for AI training purposes."
         />
         <p className="text-xs text-slate-500">
           This prompt is sent with each image to guide the model&apos;s
-          response.
+          response. Example-based priming tends to work better than
+          negative-only instructions with these models.
         </p>
       </div>
 
